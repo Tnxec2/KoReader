@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">KoReader</string>
+    <string name="okay_string">Okay</string>
+    <string name="no_string">no</string>
+    <string name="permissions_needed">Permissions are required to open an EBook.</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="give_permission_storage">Please give permission to read your storage.</string>
+    <string name="select_thisfolder">Select this folder</string>
+    <string name="cancel">Cancel</string>
+    <string name="no_storage_found">Not found any storage</string>
+</resources>
