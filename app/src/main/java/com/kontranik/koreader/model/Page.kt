@@ -1,8 +1,7 @@
-package com.kontranik.koreader.model;
+package com.kontranik.koreader.model
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*
 
-public class Page {
-    List<Line> lines = new ArrayList<>();
+class Page {
+    val lines: List<Line> = emptyList()
 }

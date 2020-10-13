@@ -42,7 +42,8 @@ public class ReaderActivity extends AppCompatActivity {
     private static final String TAG = "ReaderActivity";
     public static final String INTENT_PATH = "BookPath";
 
-    public static final String PATH = Environment.getExternalStorageDirectory().getAbsolutePath().concat("/Books/");
+    public static final String PATH =
+            Environment.getExternalStorageDirectory().getAbsolutePath().concat("/Books/");
 
     public static final int LEFT = -1;
     public static final int RIGHT = 1;

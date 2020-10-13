@@ -1,31 +1,19 @@
-package com.kontranik.koreader.pagesplitter;
+package com.kontranik.koreader.pagesplitter
 
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
+import com.kontranik.koreader.pagesplitter.PageFragment.Companion.newInstance
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.PagerAdapter;
+class TextPagerAdapter(
+        fm: FragmentManager?,
+        private val pageTexts: List<CharSequence>) : FragmentStatePagerAdapter(fm!!) {
 
-import java.util.List;
-
-public class TextPagerAdapter extends FragmentStatePagerAdapter {
-    private final List<CharSequence> pageTexts;
-
-    public TextPagerAdapter(FragmentManager fm, List<CharSequence> pageTexts) {
-        super(fm);
-        this.pageTexts = pageTexts;
+    override fun getItem(i: Int): Fragment {
+        return newInstance(pageTexts[i])
     }
 
-    @Override
-    public Fragment getItem(int i) {
-        return PageFragment.newInstance(pageTexts.get(i));
+    override fun getCount(): Int {
+        return pageTexts.size
     }
-
-    @Override
-    public int getCount() {
-        return pageTexts.size();
-    }
-
-
 }

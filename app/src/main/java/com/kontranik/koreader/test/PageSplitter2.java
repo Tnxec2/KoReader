@@ -3,12 +3,10 @@ package com.kontranik.koreader.test;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
 
 import androidx.annotation.RequiresApi;
 
@@ -33,18 +31,25 @@ public class PageSplitter2 {
     private int currentLineHeight;
     private int pageContentHeight;
     private int currentLineWidth;
-    private int textLineHeight;
+    private int lastTextLineHeight;
+
 
     TextPaint mTextPaint;
+    Typeface typeFace;
 
 
     public PageSplitter2(int pageWidth, int pageHeight, TextPaint paint) {
         this.pageWidth = pageWidth;
         this.pageHeight = pageHeight;
-        this.textLineHeight = 0;
 
-        mTextPaint = paint;
+        mTextPaint = new TextPaint(paint);
         textSize = paint.getTextSize();
+        typeFace = Typeface.create(paint.getTypeface(), Typeface.NORMAL);
+
+        currentLineHeight = 0;
+        currentLineWidth = 0;
+        pageContentHeight = 0;
+        lastTextLineHeight = 0;
     }
 
     public void append(String text, MyStyle style) {
@@ -52,7 +57,7 @@ public class PageSplitter2 {
         int i;
         for (i = 0; i < paragraphs.length - 1; i++) {
             appendText(paragraphs[i], style);
-            appendNewLine();
+            //appendNewLine();
         }
         appendText(paragraphs[i], style);
     }
@@ -67,31 +72,23 @@ public class PageSplitter2 {
     }
 
     public void appendWord(Word word) {
-
-        mTextPaint.setTextSize( textSize * word.getwRelativeTextSize()  );
+        mTextPaint.setTypeface( Typeface.create( typeFace, word.getWStyle()));
+        mTextPaint.setTextSize( textSize  * word.getwRelativeTextSize());
 
         Paint.FontMetrics fm = mTextPaint.getFontMetrics();
-
         float textHeight = fm.descent - fm.ascent;
         int _lineHeight = (int) Math.ceil(fm.bottom - fm.top + fm.leading);
-        // int _lineHeight = (int) Math.ceil(mTextPaint.getFontMetrics(null) * lineSpacingMultiplier + lineSpacingExtra);
+
+        //Log.d( TAG, "Textsize: " + textSize + ", relativeTextSize: " + textSize * word.getwRelativeTextSize() + ", lineHeight: "  + _lineHeight);
+
         int _wordWidth = (int) Math.ceil(mTextPaint.measureText(word.getData().toString()));
 
-/*        StaticLayout tempLayout = new StaticLayout(word.getData(), mTextPaint, 100000, android.text.Layout.Alignment.ALIGN_NORMAL, lineSpacingMultiplier, lineSpacingExtra, false);
-        int lineCount = tempLayout.getLineCount();
-        _wordWidth = 0;
-        for(int i=0 ; i < lineCount ; i++){
-            _wordWidth += tempLayout.getLineWidth(i);
-        }*/
-        //_lineHeight = tempLayout.getHeight();
+        //textLineHeight = Math.max(textLineHeight, _lineHeight);
 
-        textLineHeight = Math.max(textLineHeight, _lineHeight);
-
-        if ( currentLineWidth + _wordWidth >= pageWidth) {
-            appendLineToPage(textLineHeight);
-            appendNewLine();
+        if ( currentLineWidth + _wordWidth >= pageWidth && currentLineHeight > 0) {
+            appendLineToPage();
         }
-        appendTextToLine(word, _wordWidth);
+        appendTextToLine(word.getData(), _wordWidth, _lineHeight);
     }
 
     public void newLine() {
@@ -99,12 +96,13 @@ public class PageSplitter2 {
     }
 
     private void appendNewLine() {
+        if ( currentLineHeight == 0) currentLineHeight = lastTextLineHeight;
         currentLine.append("\n");
-        appendLineToPage(textLineHeight);
+        appendLineToPage();
     }
 
     private void checkForPageEnd() {
-        if (pageContentHeight + currentLineHeight > pageHeight) {
+        if (pageContentHeight + currentLineHeight >= pageHeight) {
             newPage();
         }
     }
@@ -117,24 +115,29 @@ public class PageSplitter2 {
         pageContentHeight = 0;
     }
 
-    private void appendLineToPage(int textLineHeight) {
+    private void appendLineToPage() {
 
         checkForPageEnd();
 
-        Log.d(TAG, currentLine.toString());
-        Log.d(TAG, "pageWidth: " + pageWidth + ", currentLineWidth: " + currentLineWidth);
+        if ( pageContentHeight > 0 ) {
+            currentLine.append("\n");
+        }
 
         currentPage.append(currentLine);
+        pageContentHeight += currentLineHeight;
+
+        Log.d(TAG, "curlineheith: " + currentLineHeight + ", pageContentHeight: " + pageContentHeight + " :: " + currentLine.toString());
+
 
         currentLine = new SpannableStringBuilder();
-        currentLineHeight = textLineHeight;
-        pageContentHeight += currentLineHeight;
         currentLineWidth = 0;
+        lastTextLineHeight = currentLineHeight;
+        currentLineHeight = 0;
     }
 
-    private void appendTextToLine(Word word, int wordWidth) {
-        currentLineHeight = Math.max(currentLineHeight, textLineHeight);
-        currentLine.append(word.getData());
+    private void appendTextToLine(SpannableString spannableString, int wordWidth, int wordHeight) {
+        currentLineHeight = Math.max(currentLineHeight, wordHeight);
+        currentLine.append(spannableString);
         currentLineWidth += wordWidth;
     }
 

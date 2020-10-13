@@ -1,8 +1,7 @@
-package com.kontranik.koreader.model;
+package com.kontranik.koreader.model
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*
 
-public class Line {
-    List<Word> words = new ArrayList<>();
+class Line {
+    var words: List<Word> = emptyList()
 }

@@ -1,130 +1,72 @@
-package com.kontranik.koreader.model;
+package com.kontranik.koreader.model
 
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.text.SpannableString;
+import android.graphics.Color
+import android.graphics.Typeface
+import android.os.Build
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
+import android.text.style.TypefaceSpan
+import androidx.annotation.RequiresApi
 
-import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
+class Word(var text: String, var style: MyStyle) {
+    var data: SpannableString
+    var wRelativeTextSize: Float
+    var wColor: Int
+    var wStyle: Int
+    fun getwRelativeTextSize(): Float {
+        return wRelativeTextSize
+    }
 
-public class Word {
-    SpannableString Data;
-    String text;
-    float wRelativeTextSize;
-    int wColor;
-    int wTypeFace;
-    MyStyle style;
-
-    public Word(String wordtext, MyStyle style) {
-        this.style = style;
-        text = wordtext;
-
-        SpannableString spannable = new SpannableString(wordtext);
-
-        wRelativeTextSize = 1.0f;
-        wTypeFace = Typeface.NORMAL;
-        wColor = Color.BLACK;
-
-        // TODO: style auswerten und entsprechend Spans setzen
-
-        /*
-
-        BackgroundColorSpan(Color.green)
-        ForegroundColorSpan(Color.PINK)
-
-        StyleSpan(Typeface.ITALIC)
-        StyleSpan(Typeface.BOLD)
-
-         */
-        switch (style) {
-            case Title:
-            case H1:
-                wRelativeTextSize = 2.6f;
-                wTypeFace = Typeface.BOLD;
-                wColor = Color.MAGENTA;
-                break;
-            case H2:
-                wRelativeTextSize = 1.95f;
-                wTypeFace = Typeface.BOLD;
-                wColor = Color.MAGENTA;
-                break;
-            case H3:
-                wRelativeTextSize = 1.521f;
-                wTypeFace = Typeface.BOLD;
-                wColor = Color.MAGENTA;
-                break;
-            case H4:
-                wRelativeTextSize = 1.2f;
-                wTypeFace = Typeface.BOLD;
-                wColor = Color.MAGENTA;
-                break;
-            case H5:
-                wRelativeTextSize = 1.079f;
-                wTypeFace = Typeface.BOLD;
-                wColor = Color.MAGENTA;
-                break;
-            case H6:
-                wRelativeTextSize = 0.871f;
-                wTypeFace = Typeface.BOLD;
-                //wColor = Color.MAGENTA;
-                break;
-            default:
+    init {
+        val spannable = SpannableString(text)
+        wRelativeTextSize = 1.0f
+        wStyle = Typeface.NORMAL
+        wColor = Color.BLACK
+        when (style) {
+            MyStyle.Title, MyStyle.H1 -> {
+                wRelativeTextSize = 2.6f
+                wStyle = Typeface.BOLD_ITALIC
+                wColor = Color.MAGENTA
+            }
+            MyStyle.H2 -> {
+                wRelativeTextSize = 1.95f
+                wStyle = Typeface.BOLD
+                wColor = Color.MAGENTA
+            }
+            MyStyle.H3 -> {
+                wRelativeTextSize = 1.521f
+                wStyle = Typeface.BOLD
+                wColor = Color.MAGENTA
+            }
+            MyStyle.H4 -> {
+                wRelativeTextSize = 1.2f
+                wStyle = Typeface.BOLD
+                wColor = Color.MAGENTA
+            }
+            MyStyle.H5 -> {
+                wRelativeTextSize = 1.079f
+                wStyle = Typeface.BOLD_ITALIC
+                wColor = Color.MAGENTA
+            }
+            MyStyle.H6 -> {
+                wRelativeTextSize = 0.871f
+                wStyle = Typeface.BOLD_ITALIC
+            }
+            MyStyle.Bold -> {
+                wStyle = Typeface.BOLD
+            }
+            else -> {
+            }
         }
-        spannable.setSpan( new RelativeSizeSpan(wRelativeTextSize), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE );
-        spannable.setSpan( new StyleSpan(wTypeFace), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan( new ForegroundColorSpan(wColor), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        Data = spannable;
-    }
-
-    public SpannableString getData() {
-        return Data;
-    }
-
-    public void setData(SpannableString data) {
-        Data = data;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public MyStyle getStyle() {
-        return style;
-    }
-
-    public void setStyle(MyStyle style) {
-        this.style = style;
-    }
-
-    public float getwRelativeTextSize() {
-        return wRelativeTextSize;
-    }
-
-    public void setwRelativeTextSize(float wRelativeTextSize) {
-        this.wRelativeTextSize = wRelativeTextSize;
-    }
-
-    public int getwColor() {
-        return wColor;
-    }
-
-    public void setwColor(int wColor) {
-        this.wColor = wColor;
-    }
-
-    public int getwTypeFace() {
-        return wTypeFace;
-    }
-
-    public void setwTypeFace(int wTypeFace) {
-        this.wTypeFace = wTypeFace;
+       // wRelativeTextSize = 1f
+       // wTypeFace = Typeface.NORMAL
+       // wColor = Color.BLACK
+        spannable.setSpan(RelativeSizeSpan(wRelativeTextSize), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(StyleSpan(wStyle), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(ForegroundColorSpan(wColor), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        data = spannable
     }
 }
-

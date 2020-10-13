@@ -101,7 +101,8 @@ public class MainActivity extends AppCompatActivity {
 
                 .onAccepted((result) -> {
                     //all permissions already granted or just granted
-                    openReader( "/storage/emulated/0/Books/test.epub");
+                    //openReader( "/storage/emulated/0/Books/test.epub");
+                    openReader("/mnt/sdcard/Download/test.epub");
                     getStorageList();
 
                 })
