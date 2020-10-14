@@ -16,9 +16,6 @@ class Word(var text: String, var style: MyStyle) {
     var wRelativeTextSize: Float
     var wColor: Int
     var wStyle: Int
-    fun getwRelativeTextSize(): Float {
-        return wRelativeTextSize
-    }
 
     init {
         val spannable = SpannableString(text)
@@ -57,6 +54,13 @@ class Word(var text: String, var style: MyStyle) {
             }
             MyStyle.Bold -> {
                 wStyle = Typeface.BOLD
+            }
+            MyStyle.Italic -> {
+                wStyle = Typeface.ITALIC
+            }
+            MyStyle.Other -> {
+                wStyle = Typeface.BOLD_ITALIC
+                wColor = Color.RED
             }
             else -> {
             }
