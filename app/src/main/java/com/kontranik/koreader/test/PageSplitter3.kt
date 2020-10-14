@@ -4,6 +4,7 @@ import android.text.Layout
 import android.text.SpannableStringBuilder
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.util.Log
 import com.kontranik.koreader.model.Word
 import java.util.*
 
@@ -14,6 +15,7 @@ class PageSplitter3(
         private val lineSpacingMultiplier: Float,
         private val lineSpacingExtra: Float) {
 
+    val TAG = "PageSplitter3"
     private val pages: MutableList<CharSequence> = ArrayList()
     private val mSpannableStringBuilder = SpannableStringBuilder()
 
@@ -37,7 +39,7 @@ class PageSplitter3(
                 Layout.Alignment.ALIGN_NORMAL,
                 lineSpacingMultiplier,
                 lineSpacingExtra,
-                false
+                true
         )
         var startLine = 0
         while (startLine < staticLayout.lineCount) {
@@ -48,6 +50,9 @@ class PageSplitter3(
             lastFullyVisibleLine = if (endLineBottom > startLineTop + pageHeight) endLine - 1 else endLine
             val startOffset = staticLayout.getLineStart(startLine)
             val endOffset = staticLayout.getLineEnd(lastFullyVisibleLine)
+
+            Log.d(TAG, mSpannableStringBuilder.subSequence(startOffset, endOffset).toString())
+            Log.d(TAG, "*** new Page ***")
             pages.add(mSpannableStringBuilder.subSequence(startOffset, endOffset))
             startLine = lastFullyVisibleLine + 1
         }

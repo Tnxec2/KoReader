@@ -2,8 +2,14 @@ package com.kontranik.koreader.model
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.util.Base64
+import android.util.Log
+import androidx.annotation.RequiresApi
+import com.kontranik.koreader.test.PageSplitterOne
 import nl.siegmann.epublib.epub.EpubReader
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -11,19 +17,17 @@ import java.io.IOException
 import nl.siegmann.epublib.domain.Book as EpubBook
 
 class Book(var fileLocation: String?) {
+
+    val TAG = "Book"
     var countPages: Int
-    var currentPageNumber: Int
-    var currentPageString: String? = null
-    var currentElement: Int
-    var position: Int
-    var eBook: EpubBook? = null
-    var mEpubReader: EpubReader? = EpubReader()
+
+    var pageSplitter: PageSplitterOne? = null
+
+    private var eBook: EpubBook? = null
+    private var mEpubReader: EpubReader? = EpubReader()
 
     init {
         countPages = 0
-        currentPageNumber = 0
-        currentElement = 0
-        position = 0
         loadBook()
     }
 
@@ -42,12 +46,12 @@ class Book(var fileLocation: String?) {
         }
     }
 
-    fun getPage(): String? {
-        if (currentPageNumber < 0 || currentPageNumber > countPages - 1) return null
-        var data: String? = null
+    private fun getEpubPage(page: Int): String? {
+        if (page < 0 || page > countPages - 1) return null
+        val data: String?
         try {
             if (eBook != null) {
-                if (currentPageNumber == 0) {
+                if (page == 0) {
                     val cover = eBook!!.coverImage
                     if (cover != null) {
                         val coverData = cover.data
@@ -66,11 +70,10 @@ class Book(var fileLocation: String?) {
                         return data
                         //txtPager.setText(currentPageNumber + " of " + maxPage);
                     } else {
-                        currentPageNumber = 1
-                        getPage()
+                        getEpubPage(1)
                     }
                 } else {
-                    data = String(eBook!!.contents[currentPageNumber].data)
+                    data = String(eBook!!.contents[page].data)
                     return data
                     //txtPager.setText(currentPageNumber + " of " + maxPage);
                 }
@@ -80,5 +83,97 @@ class Book(var fileLocation: String?) {
             return null
         }
         return null
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun loadPage(page: Page, pageSplitter: PageSplitterOne ): Page {
+
+        pageSplitter.clear()
+
+        var bookPage = page.startCursor.bookPage
+        var lastElement: Int = 0
+
+        Log.d(TAG, "startWordIndex: " + page.startCursor.word)
+
+        while (bookPage < countPages) {
+            val bookPageText = getEpubPage(bookPage)
+            val document = Jsoup.parse(bookPageText)
+            val elements = document.body().select("*")
+            lastElement = if ( bookPage == page.startCursor.bookPage) page.startCursor.pageElement else 0
+
+            while (lastElement < elements.size) {
+
+                val element = elements[lastElement]
+
+                val startParagraph = if ( bookPage == page.startCursor.bookPage) page.startCursor.paragraph else 0
+                val startWord = if ( bookPage == page.startCursor.bookPage && lastElement == page.startCursor.pageElement) page.startCursor.word else 0
+
+                pageSplitter!!.append(getLine(element), startParagraph, startWord)
+                if ( pageSplitter!!.page != null) break
+                lastElement++
+            }
+
+            if ( pageSplitter!!.page != null) break
+            bookPage++
+        }
+
+        Log.d(TAG, "*** pageEnde *** wordIndex: " + pageSplitter!!.wordIndex)
+
+        page.endCursor.bookPage = bookPage
+        page.endCursor.pageElement = lastElement
+        page.endCursor.paragraph = pageSplitter!!.paragraphIndex
+        page.endCursor.word = pageSplitter!!.wordIndex
+        page.content = pageSplitter!!.page
+        return page
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun loadPageRevers(page: Page, pageSplitter: PageSplitterOne): Page {
+        pageSplitter.clear()
+
+        var bookPage = page.startCursor.bookPage
+        var lastElement: Int = 0
+        Log.d(TAG, "startWordIndex: " + page.startCursor.word)
+
+        while (bookPage >= 0) {
+            val bookPageText = getEpubPage(bookPage)
+            val document = Jsoup.parse(bookPageText)
+            val elements = document.body().select("*")
+            lastElement = if (bookPage == page.startCursor.bookPage) page.startCursor.pageElement else 0
+            while (lastElement >= 0) {
+                val element = elements[lastElement]
+                val startParagraph = if (bookPage == page.startCursor.bookPage) page.startCursor.paragraph else 0
+                val startWord = if (bookPage == page.startCursor.bookPage && lastElement == page.startCursor.pageElement) page.startCursor.word else 0
+
+                pageSplitter!!.appendRevers(getLine(element), startParagraph, startWord)
+                if (pageSplitter!!.page != null) break
+                lastElement++
+            }
+
+            if (pageSplitter!!.page != null) break
+            bookPage++
+        }
+        Log.d(TAG, "*** pageEnde *** wordIndex: " + pageSplitter!!.wordIndex)
+        page.endCursor.bookPage = bookPage
+        page.endCursor.pageElement = lastElement
+        page.endCursor.paragraph = pageSplitter!!.paragraphIndex
+        page.endCursor.word = pageSplitter!!.wordIndex
+        page.content = pageSplitter!!.page
+        return page
+    }
+
+    private fun getLine(element: Element): Line {
+        val tag = element.normalName()
+        //Log.d(TAG, el);
+        Log.d(TAG, element.ownText());
+        val myStyle = MyStyle.getFromString(tag)
+        var text: String
+
+        if (myStyle == MyStyle.Other) {
+            text = "$tag::" + element.ownText()
+        } else {
+            text = element.ownText()
+        }
+        return Line( text, myStyle)
     }
 }

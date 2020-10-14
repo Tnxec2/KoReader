@@ -2,6 +2,10 @@ package com.kontranik.koreader.model
 
 import java.util.*
 
-class Page {
-    val lines: List<Line> = emptyList()
+class Page (
+        var content: CharSequence? = null,
+        var startCursor: Cursor = Cursor(),
+        var endCursor: Cursor = Cursor()
+) {
+
 }

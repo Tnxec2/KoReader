@@ -13,10 +13,9 @@ import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.kontranik.koreader.R
 import com.kontranik.koreader.model.Book
-import com.kontranik.koreader.model.MyStyle
-import com.kontranik.koreader.model.Word
-import com.kontranik.koreader.test.PageSplitter3
-import org.jsoup.Jsoup
+import com.kontranik.koreader.model.Cursor
+import com.kontranik.koreader.model.Page
+import com.kontranik.koreader.test.PageSplitterOne
 
 @RequiresApi(api = Build.VERSION_CODES.Q)
 class PageSplitterActivity : FragmentActivity() {
@@ -24,11 +23,19 @@ class PageSplitterActivity : FragmentActivity() {
     private var pagesView: ViewPager? = null
     private var book: Book? = null
 
-    var pageSplitter: PageSplitter3? = null
+    var curPage: Page? = null
+    var nextPage: Page? = null
+    var prevPage: Page? = null
+    var pages: MutableList<Page> = mutableListOf()
+    var oldPage: Int = 0
+
     var textPageAdapter: TextPagerAdapter? = null
     var lastPageReached = false
     var firstPageReached = false
     var testView: TextView? = null
+    var textViewInfo: TextView? = null
+
+    var pageSplitter: PageSplitterOne? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +45,8 @@ class PageSplitterActivity : FragmentActivity() {
         testView = findViewById<View>(R.id.textView_test) as TextView
         TextViewInitiator.initiateTextView(testView!!)
 
+        textViewInfo = findViewById(R.id.tv_infotext)
+
         // to get ViewPager width and height we have to wait global layout
         val vto = pagesView!!.viewTreeObserver
         vto.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
@@ -46,8 +55,10 @@ class PageSplitterActivity : FragmentActivity() {
                 pagesView!!.setCurrentItem(0, false)
                 pagesView!!.addOnPageChangeListener(object : OnPageChangeListener {
                     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+
                     override fun onPageSelected(position: Int) {
                         Log.d(TAG, "onPageSelected: $position")
+                        loadPages(position)
                     }
 
                     override fun onPageScrollStateChanged(state: Int) {
@@ -62,8 +73,6 @@ class PageSplitterActivity : FragmentActivity() {
                                     firstPageReached = true
                                 }
                             }
-                            Log.d(TAG, "lastpagereached: $lastPageReached")
-                            Log.d(TAG, "firstPageReached: $lastPageReached")
                         }
                     }
                 })
@@ -75,87 +84,75 @@ class PageSplitterActivity : FragmentActivity() {
                 book = Book(arguments!!.getString(INTENT_PATH))
                 if ( book?.fileLocation != null) {
                     Log.d(TAG, book?.fileLocation)
-                    book!!.currentPageNumber = 4
-                    val pageHtml = book!!.getPage()
-                    loadPage(pageHtml)
+
+                    val width = pagesView!!.measuredWidth - (pagesView!!.paddingLeft + pagesView!!.paddingRight)
+                    val height = pagesView!!.measuredHeight - (pagesView!!.paddingTop + pagesView!!.paddingBottom)
+
+
+                    pageSplitter = PageSplitterOne( width, height, testView!!.paint, testView!!.lineSpacingMultiplier, testView!!.lineSpacingExtra)
+
+                    curPage = book!!.loadPage(Page(null, Cursor(1, 0, 0, 0)), pageSplitter!!)
+                    nextPage = loadNextPage()
+
+                    updateViewpager()
+
                     pagesView!!.setCurrentItem(0, false)
                 }
             }
         })
     }
 
+    private fun loadPages(newPage: Int) {
+        if ( newPage > oldPage) doNext()
+        else if ( newPage < oldPage ) doPrev()
+        oldPage = newPage
+    }
+
+    private fun doNext() {
+        if ( nextPage != null) {
+            prevPage = curPage
+            curPage = nextPage
+            nextPage = loadNextPage()
+            updateViewpager()
+        }
+    }
+
+    private fun doPrev() {
+        if ( prevPage != null ) {
+            nextPage = curPage
+            curPage = prevPage
+            prevPage = loadPrevPage()
+            updateViewpager()
+        }
+    }
+
+    private fun loadNextPage(): Page? {
+        return book!!.loadPage(Page(null, Cursor(curPage!!.endCursor)), pageSplitter!!)
+    }
+
+    private fun loadPrevPage(): Page? {
+        return book!!.loadPageRevers(Page(null, Cursor(curPage!!.endCursor)), pageSplitter!!)
+    }
+
+    fun updateInfo() {
+        textViewInfo!!.setText("${curPage?.startCursor?.bookPage} / ${book!!.countPages}")
+    }
+
     fun updateViewpager() {
+        pages = mutableListOf( curPage!!)
+        if ( prevPage != null ) pages.add(0, prevPage!!)
+        if ( nextPage != null ) pages.add(nextPage!!)
+
         textPageAdapter = TextPagerAdapter(
                 supportFragmentManager,
-                pageSplitter!!.getPages()) // old items with new items
+                pages) // old items with new items
 
         pagesView!!.adapter = textPageAdapter
-        //pagesView.setCurrentItem(0, false);
+
+        if ( prevPage == null) pagesView!!.setCurrentItem(0, false)
+        else pagesView!!.setCurrentItem(1, false)
         //textPageAdapter.refreshAdapter();
-    }
-
-    fun loadPage(page: String?) {
-        val width = pagesView!!.measuredWidth - (pagesView!!.paddingLeft + pagesView!!.paddingRight)
-        val height = pagesView!!.measuredHeight - (pagesView!!.paddingTop + pagesView!!.paddingBottom)
-        pageSplitter = PageSplitter3(
-                width, height, 1.0f, 0f
-        )
-        appendPage(page)
-    }
-
-    fun appendPage(page: String?) {
-        val document = Jsoup.parse(page)
-        val elements = document.body().select("*")
-        for (element in elements) {
-            val el = element.normalName()
-
-            //Log.d(TAG, el);
-            //Log.d(TAG, element.ownText());
-            val myStyle = MyStyle.getFromString(el)
-            if (myStyle == MyStyle.None) {
-                continue
-            } else if (myStyle == MyStyle.Other) {
-                pageSplitter!!.append(Word("$el::", MyStyle.Title))
-                pageSplitter!!.append(Word(element.ownText(), MyStyle.Paragraph))
-            } else {
-                pageSplitter!!.append(Word(element.ownText(), myStyle))
-            }
-            pageSplitter!!.newLine();
-            //Log.d(TAG, "pageSplitter size: " + pageSplitter.getPages().size());
-        }
-        pageSplitter!!.split(testView!!.paint)
-        updateViewpager()
-    }
-
-    fun loadNextBookPage() {
-        if (book!!.currentPageNumber > book!!.countPages - 1) return
-        val oldPage = book!!.getPage()
-        loadPage(oldPage)
-        val lastPage = pageSplitter!!.getPages().size - 1
-        book!!.currentPageNumber++
-        val bookPage = book!!.getPage()
-        appendPage(bookPage)
-        pagesView!!.setCurrentItem(lastPage, false) // set pager to last page
-    }
-
-    fun nextBookPage() {
-        if (book!!.currentPageNumber > book!!.countPages - 1) return
-        book!!.currentPageNumber++
-        val bookPage = book!!.getPage()
-        loadPage(bookPage)
-        pagesView!!.setCurrentItem(0, true)
-        lastPageReached = false
-        firstPageReached = true
-    }
-
-    fun prevBookPage() {
-        if (book!!.currentPageNumber == 1) return
-        book!!.currentPageNumber--
-        val bookPage = book!!.getPage()
-        loadPage(bookPage)
-        pagesView!!.setCurrentItem(pagesView!!.adapter!!.count - 1, true)
-        firstPageReached = false
-        lastPageReached = true
+        updateInfo()
     }
 
     companion object {

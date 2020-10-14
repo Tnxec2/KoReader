@@ -7,27 +7,51 @@
 
     <TextView
         android:id="@+id/textView_test"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:text="TextView"
         android:visibility="invisible"
-        android:padding="@dimen/padding_textview"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:paddingTop="@dimen/padding_textview"
+        android:paddingRight="@dimen/padding_textview"
+        android:paddingBottom="@dimen/padding_textview_bottom"
+        android:paddingLeft="@dimen/padding_textview"
+        app:layout_constraintBottom_toBottomOf="@id/pages"
+        app:layout_constraintEnd_toEndOf="@id/pages"
+        app:layout_constraintStart_toStartOf="@id/pages"
+        app:layout_constraintTop_toTopOf="@id/pages" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/pages"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="@android:color/darker_gray"
         android:overScrollMode="never"
-        android:padding="@dimen/padding_textview"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:paddingTop="@dimen/padding_textview"
+        android:paddingRight="@dimen/padding_textview"
+        android:paddingBottom="@dimen/padding_textview_bottom"
+        android:paddingLeft="@dimen/padding_textview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
     </androidx.viewpager.widget.ViewPager>
+
+    <LinearLayout
+        android:id="@+id/ll_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/tv_infotext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="TextView"
+            android:gravity="center"
+            />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
