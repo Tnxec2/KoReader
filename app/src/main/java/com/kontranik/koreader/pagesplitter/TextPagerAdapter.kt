@@ -3,17 +3,18 @@ package com.kontranik.koreader.pagesplitter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
+import com.kontranik.koreader.model.Page
 import com.kontranik.koreader.pagesplitter.PageFragment.Companion.newInstance
 
 class TextPagerAdapter(
         fm: FragmentManager?,
-        private val pageTexts: List<CharSequence>) : FragmentStatePagerAdapter(fm!!) {
+        private val pages: List<Page>) : FragmentStatePagerAdapter(fm!!) {
 
     override fun getItem(i: Int): Fragment {
-        return newInstance(pageTexts[i])
+        return newInstance(pages[i].content)
     }
 
     override fun getCount(): Int {
-        return pageTexts.size
+        return pages.size
     }
 }
