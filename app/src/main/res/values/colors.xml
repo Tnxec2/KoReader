@@ -3,4 +3,8 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="background_sepia">#FBF0D9</color>
+    <color name="foreground_sepia">#5F4B32</color>
+    <color name="background_main">#DEDEDE</color>
 </resources>

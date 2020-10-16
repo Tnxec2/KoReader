@@ -1,119 +1,142 @@
 package com.kontranik.koreader.pagesplitter
 
+import android.annotation.SuppressLint
+import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.view.Window
+import android.view.WindowManager
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
-import androidx.viewpager.widget.ViewPager
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.kontranik.koreader.R
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.Cursor
 import com.kontranik.koreader.model.Page
+import com.kontranik.koreader.model.ScreenZone
+import com.kontranik.koreader.pagesplitter.LoadPageAsync.AsyncResponse
 import com.kontranik.koreader.test.PageSplitterOne
+
 
 @RequiresApi(api = Build.VERSION_CODES.Q)
 class PageSplitterActivity : FragmentActivity() {
 
-    private var pagesView: ViewPager? = null
     private var book: Book? = null
 
     var curPage: Page? = null
     var nextPage: Page? = null
     var prevPage: Page? = null
-    var pages: MutableList<Page> = mutableListOf()
-    var oldPage: Int = 0
 
-    var textPageAdapter: TextPagerAdapter? = null
-    var lastPageReached = false
-    var firstPageReached = false
-    var testView: TextView? = null
-    var textViewInfo: TextView? = null
+    var pageView: TextView? = null
+    var textViewInfoCenter: TextView? = null
+    var textViewInfoLeft: TextView? = null
+    var textViewInfoRight: TextView? = null
 
     var pageSplitter: PageSplitterOne? = null
+    var width: Int? = null
+    var height: Int? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.pagesplitter_main)
-        pagesView = findViewById<View>(R.id.pages) as ViewPager
 
-        testView = findViewById<View>(R.id.textView_test) as TextView
-        TextViewInitiator.initiateTextView(testView!!)
+        pageView = findViewById<View>(R.id.textView_pageview) as TextView
+        TextViewInitiator.initiateTextView(pageView!!)
 
-        textViewInfo = findViewById(R.id.tv_infotext)
+        textViewInfoCenter = findViewById(R.id.tv_infotext_center)
+        textViewInfoLeft = findViewById(R.id.tv_infotext_left)
+        textViewInfoRight = findViewById(R.id.tv_infotext_right)
 
-        // to get ViewPager width and height we have to wait global layout
-        val vto = pagesView!!.viewTreeObserver
-        vto.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                pagesView!!.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                pagesView!!.setCurrentItem(0, false)
-                pagesView!!.addOnPageChangeListener(object : OnPageChangeListener {
-                    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 
-                    override fun onPageSelected(position: Int) {
-                        Log.d(TAG, "onPageSelected: $position")
-                        loadPages(position)
-                    }
+        val arguments = intent.extras
+        if (arguments == null || !arguments.containsKey(INTENT_PATH)) {
+            finish()
+        }
+        book = Book(applicationContext, arguments!!.getString(INTENT_PATH))
+        if ( book?.fileLocation != null) {
+            Log.d(TAG, book?.fileLocation)
 
-                    override fun onPageScrollStateChanged(state: Int) {
-                        Log.d(TAG, "state: " + state + ", currentItem: " + pagesView!!.currentItem + ", last: " + (pagesView!!.adapter!!.count - 1))
-                        if (ViewPager.SCROLL_STATE_IDLE == state) {
-                            if (pagesView!!.currentItem == pagesView!!.adapter!!.count - 1) {
-                                //loadNextBookPage();
-                            } else if (pagesView!!.currentItem == 0) {
-                                if (firstPageReached) {
-                                    //prevBookPage();
-                                } else {
-                                    firstPageReached = true
-                                }
-                            }
-                        }
-                    }
-                })
 
-                val arguments = intent.extras
-                if (arguments == null || !arguments.containsKey(INTENT_PATH)) {
-                    finish()
+            val vto = pageView!!.viewTreeObserver
+            vto.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    pageView!!.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                    width = pageView!!.measuredWidth
+                    height = pageView!!.measuredHeight
+
+                    pageSplitter = PageSplitterOne(width!!, height!!, pageView!!.paint, pageView!!.lineSpacingMultiplier, pageView!!.lineSpacingExtra)
+
+                    curPage = book!!.loadPage(Page(null, Cursor(0, 0, 0, 0)), pageSplitter!!)
+                    loadNextPage()
+
+                    updateView()
+                    setOnClickListener()
                 }
-                book = Book(arguments!!.getString(INTENT_PATH))
-                if ( book?.fileLocation != null) {
-                    Log.d(TAG, book?.fileLocation)
+            })
 
-                    val width = pagesView!!.measuredWidth - (pagesView!!.paddingLeft + pagesView!!.paddingRight)
-                    val height = pagesView!!.measuredHeight - (pagesView!!.paddingTop + pagesView!!.paddingBottom)
+        }
+    }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setOnClickListener() {
+        pageView!!.setOnTouchListener(object : OnSwipeTouchListener(this@PageSplitterActivity) {
+            override fun onSwipeLeft() {
+                super.onSwipeLeft()
+                textViewInfoRight!!.setText(getString(R.string.swipe_left))
+                doNext()
+            }
 
-                    pageSplitter = PageSplitterOne( width, height, testView!!.paint, testView!!.lineSpacingMultiplier, testView!!.lineSpacingExtra)
+            override fun onSwipeRight() {
+                super.onSwipeRight()
+                textViewInfoRight!!.setText(getString(R.string.swipe_right))
+                doPrev()
+            }
 
-                    curPage = book!!.loadPage(Page(null, Cursor(1, 0, 0, 0)), pageSplitter!!)
-                    nextPage = loadNextPage()
+            override fun onSwipeUp() {
+                super.onSwipeUp()
+                textViewInfoRight!!.setText(getString(R.string.swipe_up))
+            }
 
-                    updateViewpager()
+            override fun onSwipeDown() {
+                super.onSwipeDown()
+                textViewInfoRight!!.setText(getString(R.string.swipe_down))
+            }
 
-                    pagesView!!.setCurrentItem(0, false)
+            override fun onClick(point: Point) {
+                super.onClick(point)
+                val zone = ScreenZone.zone(point, width!!, height!!)
+                textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, zone)
+                when (zone) {
+                    ScreenZone.BottomRight -> doNext()
+                    ScreenZone.BottomLeft -> doPrev()
+                    else -> {
+                    }
+                }
+            }
+
+            override fun onDoubleClick(point: Point) {
+                super.onDoubleClick(point)
+                val zone = ScreenZone.zone(point, width!!, height!!)
+                when (zone) {
+                    ScreenZone.MiddleCenter -> setFullScreen(!isFullScreen())
                 }
             }
         })
     }
 
-    private fun loadPages(newPage: Int) {
-        if ( newPage > oldPage) doNext()
-        else if ( newPage < oldPage ) doPrev()
-        oldPage = newPage
-    }
 
     private fun doNext() {
         if ( nextPage != null) {
             prevPage = curPage
             curPage = nextPage
-            nextPage = loadNextPage()
-            updateViewpager()
+            updateView()
+            loadNextPage()
         }
     }
 
@@ -121,37 +144,42 @@ class PageSplitterActivity : FragmentActivity() {
         if ( prevPage != null ) {
             nextPage = curPage
             curPage = prevPage
-            prevPage = loadPrevPage()
-            updateViewpager()
+            updateView()
+            loadPrevPage()
         }
     }
 
-    private fun loadNextPage(): Page? {
-        return book!!.loadPage(Page(null, Cursor(curPage!!.endCursor)), pageSplitter!!)
+    private fun loadNextPage() {
+        //nextPage = book!!.loadPage(Page(null, Cursor(curPage!!.endCursor))!!, pageSplitter!!)
+
+        LoadPageAsync(object : AsyncResponse {
+            override fun processFinish(output: Page?) {
+                Log.d(TAG, "next page finish")
+                nextPage = output
+            }
+        }).execute(
+                LoadPageParams(false, book, Page(null, Cursor(curPage!!.endCursor)), pageSplitter))
     }
 
-    private fun loadPrevPage(): Page? {
-        return book!!.loadPageRevers(Page(null, Cursor(curPage!!.endCursor)), pageSplitter!!)
+    private fun loadPrevPage(){
+        //prevPage = book!!.loadPageRevers(Page(null, Cursor(), Cursor(curPage!!.startCursor)), pageSplitter!!)
+         LoadPageAsync(object : AsyncResponse {
+             override fun processFinish(output: Page?) {
+                 Log.d(TAG, "prev page finish")
+                 prevPage = output
+             }
+         }).execute(
+                 LoadPageParams(true, book, Page(null, Cursor(), Cursor(curPage!!.startCursor)), pageSplitter))
     }
 
-    fun updateInfo() {
-        textViewInfo!!.setText("${curPage?.startCursor?.bookPage} / ${book!!.countPages}")
+    private fun updateInfo() {
+        textViewInfoCenter!!.text =
+                resources.getString(R.string.page_info_text, curPage?.startCursor?.bookPage, book!!.countPages)
     }
 
-    fun updateViewpager() {
-        pages = mutableListOf( curPage!!)
-        if ( prevPage != null ) pages.add(0, prevPage!!)
-        if ( nextPage != null ) pages.add(nextPage!!)
+    private fun updateView() {
+        pageView!!.text = curPage!!.content
 
-        textPageAdapter = TextPagerAdapter(
-                supportFragmentManager,
-                pages) // old items with new items
-
-        pagesView!!.adapter = textPageAdapter
-
-        if ( prevPage == null) pagesView!!.setCurrentItem(0, false)
-        else pagesView!!.setCurrentItem(1, false)
-        //textPageAdapter.refreshAdapter();
         updateInfo()
     }
 
@@ -159,5 +187,30 @@ class PageSplitterActivity : FragmentActivity() {
         private const val TAG = "PageSplitterActivity"
         const val INTENT_PATH = "BookPath"
         val PATH = Environment.getExternalStorageDirectory().absolutePath + "/Books/"
+    }
+
+    fun isFullScreen(): Boolean {
+        return window.attributes.flags and
+                WindowManager.LayoutParams.FLAG_FULLSCREEN != 0
+    }
+
+    @SuppressLint("NewApi")
+    fun setFullScreen(full: Boolean) {
+        if (full == isFullScreen()) {
+            return
+        }
+        val window: Window = window
+        if (full) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        }
+        if (Build.VERSION.SDK_INT >= 11) {
+            if (full) {
+                actionBar?.hide()
+            } else {
+                actionBar?.show()
+            }
+        }
     }
 }
