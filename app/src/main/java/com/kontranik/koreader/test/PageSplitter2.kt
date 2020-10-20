@@ -4,12 +4,10 @@ import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
 import android.text.*
-import android.text.style.StyleSpan
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.kontranik.koreader.model.Cursor
 import com.kontranik.koreader.model.MyStyle
-import com.kontranik.koreader.model.Word
+import com.kontranik.koreader.model.WordSequence
 import java.util.*
 
 @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -42,16 +40,16 @@ class PageSplitter2(private val pageWidth: Int, private val pageHeight: Int, pai
         var i: Int
         i = 0
         while (i < words.size - 1) {
-            appendWord(Word(words[i] + " ", style, c ))
+            appendWord(WordSequence(words[i] + " ", style, c ))
             i++
         }
-        appendWord(Word(words[i], style, c))
+        appendWord(WordSequence(words[i], style, c))
     }
 
-    fun appendWord(word: Word) {
+    fun appendWord(wordSequence: WordSequence) {
 
         val staticLayout = StaticLayout(
-                word.data,
+                wordSequence.data,
                 mTextPaint,
                 100000,
                 Layout.Alignment.ALIGN_NORMAL,
@@ -69,7 +67,7 @@ class PageSplitter2(private val pageWidth: Int, private val pageHeight: Int, pai
         if (currentLineWidth + _wordWidth >= pageWidth && currentLineHeight > 0) {
             appendLineToPage()
         }
-        appendTextToLine(word.data, _wordWidth, _lineHeight)
+        appendTextToLine(wordSequence.data, _wordWidth, _lineHeight)
     }
 
     fun newLine() {

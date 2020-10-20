@@ -85,7 +85,7 @@ class Book(private var c: Context, private var fileLocation: String?) {
                 val element = elements[lastElement]
 
                 val startParagraph = if ( bookPage == page.startCursor.page) page.startCursor.paragraph else 0
-                val startWord = if ( bookPage == page.startCursor.page && lastElement == page.startCursor.element) page.startCursor.word else 0
+                val startWord = if ( bookPage == page.startCursor.page && lastElement == page.startCursor.element) page.startCursor.symbol else 0
 
                 pageSplitter.append(getLine(element), startParagraph, startWord)
                 if ( pageSplitter.page != null) break
@@ -103,9 +103,9 @@ class Book(private var c: Context, private var fileLocation: String?) {
             bookPage = min(bookPage, countPages)
             val pageElement = lastElement
             val paragraph = pageSplitter.paragraphIndex
-            val word = pageSplitter.wordIndex
+            val symbol = pageSplitter.symbolIndex
             val content = pageSplitter.page
-            val endCursor = Cursor(bookPage, pageElement, paragraph, word, 0)
+            val endCursor = Cursor(bookPage, pageElement, paragraph, symbol)
             result = Page(content, Cursor(page.startCursor), endCursor )
         }
         return result
@@ -114,7 +114,7 @@ class Book(private var c: Context, private var fileLocation: String?) {
     fun loadPageRevers(page: Page, pageSplitter: PageSplitterOne): Page? {
         val result: Page
 
-        if ( page.endCursor.page == 0 && page.endCursor.element == 0 && page.endCursor.paragraph == 0 && page.endCursor.word == 0) return  null
+        if ( page.endCursor.page == 0 && page.endCursor.element == 0 && page.endCursor.paragraph == 0 && page.endCursor.symbol == 0) return  null
 
         pageSplitter.clear()
 
@@ -130,7 +130,7 @@ class Book(private var c: Context, private var fileLocation: String?) {
             while (lastElement > 0) {
                 val element = elements[lastElement]
                 val startParagraph = if (bookPage == page.endCursor.page) page.endCursor.paragraph else null
-                val startWord = if (bookPage == page.endCursor.page && lastElement == page.endCursor.element) max(page.endCursor.word - 1, 0)  else null
+                val startWord = if (bookPage == page.endCursor.page && lastElement == page.endCursor.element) max(page.endCursor.symbol - 1, 0)  else null
 
                 pageSplitter.appendRevers(getLine(element), startParagraph, startWord)
                 if (pageSplitter.page != null) break
@@ -147,9 +147,9 @@ class Book(private var c: Context, private var fileLocation: String?) {
             bookPage = max(bookPage, 0)
             val pageElement = max(lastElement, 0)
             val paragraph = max(pageSplitter.paragraphIndex, 0)
-            val word = max(pageSplitter.wordIndex, 0)
+            val symbol = max(pageSplitter.symbolIndex, 0)
             val content = pageSplitter.page
-            val startCursor = Cursor(bookPage, pageElement, paragraph, word, 0)
+            val startCursor = Cursor(bookPage, pageElement, paragraph, symbol)
             result = Page(content, startCursor, Cursor(page.endCursor) )
 
         }
@@ -158,8 +158,8 @@ class Book(private var c: Context, private var fileLocation: String?) {
 
     private fun coverPage(page: Page, width: Int, height: Int): Page {
         page.content = getCover(width, height)
-        val startCursor = Cursor(0, 0, 0, 0, 0)
-        val endCursor = Cursor(1, 0, 0, 0, 0)
+        val startCursor = Cursor(0, 0, 0, 0)
+        val endCursor = Cursor(1, 0, 0, 0)
         return Page(getCover(width, height),startCursor, endCursor)
     }
 
@@ -180,9 +180,9 @@ class Book(private var c: Context, private var fileLocation: String?) {
             val title = eBook!!.title
             val authors = eBook!!.metadata.authors
             val ssb = SpannableStringBuilder()
-            ssb.append(Word(title, MyStyle.Title, c).data)
+            ssb.append(WordSequence(title, MyStyle.Title, c).data)
             val author = authors.first()
-            ssb.append(Word(author.firstname + " " + author.lastname , MyStyle.Italic, c).data)
+            ssb.append(WordSequence(author.firstname + " " + author.lastname , MyStyle.Italic, c).data)
             return ssb
         }
     }

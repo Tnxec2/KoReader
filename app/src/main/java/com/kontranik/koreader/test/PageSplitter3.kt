@@ -5,7 +5,7 @@ import android.text.SpannableStringBuilder
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.util.Log
-import com.kontranik.koreader.model.Word
+import com.kontranik.koreader.model.WordSequence
 import java.util.*
 
 
@@ -23,8 +23,8 @@ class PageSplitter3(
         mSpannableStringBuilder.append("\n")
     }
 
-    fun append(word: Word) {
-        append(word.data);
+    fun append(wordSequence: WordSequence) {
+        append(wordSequence.data);
     }
 
     fun append(charSequence: CharSequence?) {

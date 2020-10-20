@@ -1,13 +1,12 @@
 package com.kontranik.koreader.reader
 
 import android.content.Context
-import android.os.Build
 import android.text.*
+import android.util.Log
 
-import androidx.annotation.RequiresApi
 import com.kontranik.koreader.model.Line
 import com.kontranik.koreader.model.MyStyle
-import com.kontranik.koreader.model.Word
+import com.kontranik.koreader.model.WordSequence
 
 
 class PageSplitterOne(
@@ -23,7 +22,7 @@ class PageSplitterOne(
     private var tempPage: SpannableStringBuilder = SpannableStringBuilder()
 
     var paragraphIndex: Int = 0
-    var wordIndex: Int = 0
+    var symbolIndex: Int = 0
 
     private var staticLayout: StaticLayout? = null
 
@@ -31,23 +30,19 @@ class PageSplitterOne(
         page = null
         currentPage = SpannableStringBuilder()
         paragraphIndex = 0
-        wordIndex = 0
+        symbolIndex = 0
         tempPage = SpannableStringBuilder()
-
     }
 
     fun append(line: Line, startParagraph: Int, startWord: Int): Boolean {
         if (line.style == MyStyle.None) return false
         val paragraphs = line.text.split("\n")
 
-        //Log.d(TAG, "startWord:$startWord")
-
         paragraphIndex = startParagraph
         while (paragraphIndex < paragraphs.size ) {
-            if ( ! appendText(paragraphs[paragraphIndex], line.style, startParagraph, startWord) ) return false
+            if ( ! appendParagraph(paragraphs[paragraphIndex], line.style, startParagraph, startWord) ) return false
             if (currentPage.isNotEmpty()) {
-                if (!appendWord(Word("\n", MyStyle.Paragraph, c), false)) return false
-                if (!appendWord(Word("\n", MyStyle.Paragraph, c), false)) return false
+                if (! appendNewLine(false)) return false
             }
             paragraphIndex++
         }
@@ -58,66 +53,99 @@ class PageSplitterOne(
         if (line.style == MyStyle.None) return false
         val paragraphs = line.text.split("\n")
 
-        //Log.d(TAG, "startWord:" + startWord)
-
         paragraphIndex = if ( startParagraph != null )  startParagraph else paragraphs.size-1
         while (paragraphIndex >= 0 ) {
-            if ( ! appendTextRevers(paragraphs[paragraphIndex], line.style, startParagraph, startWord) ) return false
+            if ( ! appendParagraphRevers(paragraphs[paragraphIndex], line.style, startParagraph, startWord) ) return false
             if (currentPage.isNotEmpty()) {
-                if (!appendWord(Word("\n", MyStyle.Paragraph, c), true)) return false
-                if (!appendWord(Word("\n", MyStyle.Paragraph, c), true)) return false
+                if ( ! appendNewLine(true)) return false
             }
             paragraphIndex--
         }
         return true
     }
 
-    private fun appendText(text: String, style: MyStyle, startParagraph: Int, startWord: Int): Boolean {
-        val words = text.split(" ")
-
-        wordIndex = if ( startParagraph == paragraphIndex ) startWord else 0
-
-        while (wordIndex < words.size) {
-            if (!appendWord(Word(words[wordIndex] + " ", style, c), false)) return false
-            wordIndex++
-        }
+    private fun appendNewLine(revers: Boolean): Boolean {
+        if ( ! appendWordSequence(WordSequence("\n\n", MyStyle.Paragraph, c), revers, moveCursor = false) ) return false
         return true
     }
 
-    private fun appendTextRevers(text: String, style: MyStyle, startParagraph: Int?, startWord: Int?): Boolean {
-        val words = text.split(" ")
-        wordIndex = if ( startParagraph == paragraphIndex && startWord != null ) startWord else words.size-1
-
-        while (wordIndex >= 0) {
-            if (!appendWord(Word(words[wordIndex] + " ", style, c), true) ) return false
-            wordIndex--
-        }
-        return true
+    private fun appendParagraph(paragraph: String, style: MyStyle, startParagraph: Int, startSymbol: Int): Boolean {
+        symbolIndex = if ( startParagraph == paragraphIndex ) startSymbol else 0
+        val wordSeq = paragraph.substring(symbolIndex)
+        return appendWordSequence(WordSequence(wordSeq, style, c), revers = false, moveCursor = true)
     }
 
-    private fun appendWord(word: Word, revers: Boolean): Boolean {
+    private fun appendParagraphRevers(paragraph: String, style: MyStyle, startParagraph: Int?, startSymbol: Int?): Boolean {
+        symbolIndex = if ( startParagraph == paragraphIndex && startSymbol != null ) startSymbol else paragraph.length
+        val wordSeq = paragraph.substring(0, symbolIndex)
+        return appendWordSequence(WordSequence(wordSeq, style, c), revers = true, moveCursor = true)
+    }
 
-        if ( revers) tempPage.insert(0, word.data)
-        else tempPage.append(word.data)
+    private fun appendWordSequence(wordSequence: WordSequence, revers: Boolean, moveCursor: Boolean): Boolean {
 
-        staticLayout = StaticLayout(tempPage, paint, pageWidth, Layout.Alignment.ALIGN_NORMAL, lineSpacingMultiplier, lineSpacingExtra, true)
+        Log.d(TAG, "appenWordSequence: wS: " + wordSequence.data )
+        Log.d(TAG, "appenWordSequence: r: " + revers + ", mC: " + moveCursor + ", sIx: " + symbolIndex)
 
-        val startLineTop = staticLayout!!.getLineTop(0)
-        val endLineBottom = staticLayout!!.getLineBottom(staticLayout!!.lineCount-1)
+        val initTextLength = currentPage.toString().length
 
+        if ( moveCursor ) {
+            Log.d(TAG, "davor: " + currentPage.toString())
+        }
+
+        if ( revers) currentPage.insert(0, wordSequence.data)
+        else currentPage.append(wordSequence.data)
+
+        staticLayout = StaticLayout(currentPage, paint, pageWidth, Layout.Alignment.ALIGN_NORMAL, lineSpacingMultiplier, lineSpacingExtra, true)
+
+
+    // komplette höhe berechnen
+        var startLineTop = staticLayout!!.getLineTop(0)
+        var endLineBottom = staticLayout!!.getLineBottom(staticLayout!!.lineCount-1)
+
+        // Page ist voll
         if ( endLineBottom - startLineTop > pageHeight) {
-            page = currentPage
+            // Page erstellen
+            if ( ! revers ) {
+                val startLine = 0
+                startLineTop = staticLayout!!.getLineTop(startLine)
+                val endLine = staticLayout!!.getLineForVertical(startLineTop + pageHeight)
+                endLineBottom = staticLayout!!.getLineBottom(endLine)
+                val lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageHeight ) endLine - 1 else endLine
+                val startOffset = staticLayout!!.getLineStart(startLine)
+                val endOffset = staticLayout!!.getLineEnd(lastFullyVisibleLine)
+                page = SpannableStringBuilder().append(currentPage.subSequence(startOffset, endOffset))
+            } else {
+                val endLine = staticLayout!!.lineCount-1
+                endLineBottom = staticLayout!!.getLineBottom(endLine)
+                val startLine = staticLayout!!.getLineForVertical( endLineBottom - pageHeight)
+                startLineTop = staticLayout!!.getLineTop(startLine)
+                val firstFullyVisibleLine = if (startLineTop <  endLineBottom - pageHeight ) startLine + 1 else startLine
+                val startOffset = staticLayout!!.getLineStart(firstFullyVisibleLine)
+                val endOffset = staticLayout!!.getLineEnd(endLine)
+                page = SpannableStringBuilder().append(currentPage.subSequence(startOffset, endOffset))
+            }
+
+            // neue Cursorposition berechnen
+            if (moveCursor) {
+                val endTextLenght = page.toString().length
+                val addedSymbols = endTextLenght - initTextLength
+                if ( revers ) symbolIndex -= addedSymbols
+                else symbolIndex += addedSymbols
+                Log.d(TAG, "danach: " + page.toString())
+                Log.d(TAG, "appenWordSequence: iTL: " + initTextLength + ", eTL: " + endTextLenght + ", sIx: " + symbolIndex)
+            }
+
             return false
         }
 
-        if ( revers) currentPage.insert(0, word.data)
-        else currentPage.append(word.data)
-
         return true
     }
 
+
+
     companion object {
-        const val TAG = "PageSplitter2"
+        const val TAG = "PageSplitterOne"
+        const val heightOffset = 5
     }
 
 }

@@ -15,7 +15,7 @@ import android.text.style.TypefaceSpan
 import androidx.annotation.RequiresApi
 import com.kontranik.koreader.R
 
-class Word(var text: String, var style: MyStyle, c: Context) : ContextWrapper(c){
+class WordSequence(var text: String, var style: MyStyle, c: Context) : ContextWrapper(c){
     var data: SpannableString
     var wRelativeTextSize: Float
     var wColor: Int
