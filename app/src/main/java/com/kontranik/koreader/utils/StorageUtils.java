@@ -1,4 +1,4 @@
-package com.kontranik.koreader;
+package com.kontranik.koreader.utils;
 
 import android.os.Environment;
 import android.util.Log;

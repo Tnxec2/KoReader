@@ -1,8 +1,7 @@
-package com.kontranik.koreader.pagesplitter
+package com.kontranik.koreader.reader
 
 import android.content.Context
 import android.graphics.Point
-import android.graphics.PointF
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent

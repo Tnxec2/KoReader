@@ -1,4 +1,4 @@
-package com.kontranik.koreader
+package com.kontranik.koreader.utils
 
 import nl.siegmann.epublib.epub.EpubReader
 import java.io.FileInputStream

@@ -1,12 +1,8 @@
-package com.kontranik.koreader.pagesplitter
+package com.kontranik.koreader.reader
 
 import android.graphics.Typeface
-import android.graphics.text.LineBreaker
-import android.os.Build
-import android.text.Layout
 import android.util.TypedValue
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import com.kontranik.koreader.R
 
 class TextViewInitiator {

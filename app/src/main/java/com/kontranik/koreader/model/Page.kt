@@ -9,4 +9,12 @@ class Page (
         var endCursor: Cursor = Cursor()
 ) {
 
+    constructor(other: Page) : this() {
+        if ( other != null) {
+            this.content = other.content
+            this.startCursor = Cursor(other.startCursor)
+            this.endCursor = Cursor(other.endCursor)
+        }
+    }
+
 }

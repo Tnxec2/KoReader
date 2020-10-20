@@ -1,16 +1,12 @@
 package com.kontranik.koreader.model
 
-import android.R.attr.maxHeight
-import android.R.attr.maxWidth
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.Build
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ImageSpan
-import androidx.annotation.RequiresApi
-import com.kontranik.koreader.test.PageSplitterOne
+import com.kontranik.koreader.reader.PageSplitterOne
 import nl.siegmann.epublib.epub.EpubReader
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -18,13 +14,13 @@ import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 import kotlin.math.max
+import kotlin.math.min
 import nl.siegmann.epublib.domain.Book as EpubBook
 
 
-class Book(private var context: Context, var fileLocation: String?) {
+class Book(private var c: Context, private var fileLocation: String?) {
 
     private val TAG = "Book"
-
 
     var countPages: Int
 
@@ -68,12 +64,12 @@ class Book(private var context: Context, var fileLocation: String?) {
         return null
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     fun loadPage(page: Page, pageSplitter: PageSplitterOne): Page {
+        val result: Page
 
         pageSplitter.clear()
 
-        var bookPage = page.startCursor.bookPage
+        var bookPage = page.startCursor.page
         var lastElement = 0
 
         // Log.d(TAG, "startWordIndex: " + page.startCursor.word)
@@ -82,14 +78,14 @@ class Book(private var context: Context, var fileLocation: String?) {
             val bookPageText = getEpubPage(bookPage)
             val document = Jsoup.parse(bookPageText)
             val elements = document.body().select("*")
-            lastElement = if ( bookPage == page.startCursor.bookPage) page.startCursor.pageElement else 0
+            lastElement = if ( bookPage == page.startCursor.page) page.startCursor.element else 0
 
             while (lastElement < elements.size) {
 
                 val element = elements[lastElement]
 
-                val startParagraph = if ( bookPage == page.startCursor.bookPage) page.startCursor.paragraph else 0
-                val startWord = if ( bookPage == page.startCursor.bookPage && lastElement == page.startCursor.pageElement) page.startCursor.word else 0
+                val startParagraph = if ( bookPage == page.startCursor.page) page.startCursor.paragraph else 0
+                val startWord = if ( bookPage == page.startCursor.page && lastElement == page.startCursor.element) page.startCursor.word else 0
 
                 pageSplitter.append(getLine(element), startParagraph, startWord)
                 if ( pageSplitter.page != null) break
@@ -102,25 +98,27 @@ class Book(private var context: Context, var fileLocation: String?) {
 
         // Log.d(TAG, "*** pageEnde *** wordIndex: " + pageSplitter.wordIndex)
         if ( bookPage == 0 ) {
-            coverPage(page, pageSplitter.pageWidth, pageSplitter.pageHeight)
+            result = coverPage(page, pageSplitter.pageWidth, pageSplitter.pageHeight)
         } else {
-            page.endCursor.bookPage = bookPage
-            page.endCursor.pageElement = lastElement
-            page.endCursor.paragraph = pageSplitter.paragraphIndex
-            page.endCursor.word = pageSplitter.wordIndex
-            page.content = pageSplitter.page
+            bookPage = min(bookPage, countPages)
+            val pageElement = lastElement
+            val paragraph = pageSplitter.paragraphIndex
+            val word = pageSplitter.wordIndex
+            val content = pageSplitter.page
+            val endCursor = Cursor(bookPage, pageElement, paragraph, word, 0)
+            result = Page(content, Cursor(page.startCursor), endCursor )
         }
-        return page
+        return result
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     fun loadPageRevers(page: Page, pageSplitter: PageSplitterOne): Page? {
+        val result: Page
 
-        if ( page.endCursor.bookPage == 0 && page.endCursor.pageElement == 0 && page.endCursor.paragraph == 0 && page.endCursor.word == 0) return  null
+        if ( page.endCursor.page == 0 && page.endCursor.element == 0 && page.endCursor.paragraph == 0 && page.endCursor.word == 0) return  null
 
         pageSplitter.clear()
 
-        var bookPage = page.endCursor.bookPage
+        var bookPage = page.endCursor.page
         var lastElement = 0
         // Log.d(TAG, "startWordIndex: " + ( page.endCursor.word - 1) )
 
@@ -128,11 +126,11 @@ class Book(private var context: Context, var fileLocation: String?) {
             val bookPageText = getEpubPage(bookPage)
             val document = Jsoup.parse(bookPageText)
             val elements = document.body().select("*")
-            lastElement = if (bookPage == page.endCursor.bookPage) page.endCursor.pageElement else elements.size-1
+            lastElement = if (bookPage == page.endCursor.page) page.endCursor.element else elements.size-1
             while (lastElement > 0) {
                 val element = elements[lastElement]
-                val startParagraph = if (bookPage == page.endCursor.bookPage) page.endCursor.paragraph else null
-                val startWord = if (bookPage == page.endCursor.bookPage && lastElement == page.endCursor.pageElement) max(page.endCursor.word - 1, 0)  else null
+                val startParagraph = if (bookPage == page.endCursor.page) page.endCursor.paragraph else null
+                val startWord = if (bookPage == page.endCursor.page && lastElement == page.endCursor.element) max(page.endCursor.word - 1, 0)  else null
 
                 pageSplitter.appendRevers(getLine(element), startParagraph, startWord)
                 if (pageSplitter.page != null) break
@@ -144,21 +142,25 @@ class Book(private var context: Context, var fileLocation: String?) {
         // Log.d(TAG, "*** pageEnde *** wordIndex: " + pageSplitter.wordIndex)
 
         if ( bookPage == 0 ) {
-            coverPage(page, pageSplitter.pageWidth, pageSplitter.pageHeight)
+            result = coverPage(page, pageSplitter.pageWidth, pageSplitter.pageHeight)
         } else {
-            page.startCursor.bookPage = max(bookPage, 0)
-            page.startCursor.pageElement = max(lastElement, 0)
-            page.startCursor.paragraph = max(pageSplitter.paragraphIndex, 0)
-            page.startCursor.word = max(pageSplitter.wordIndex, 0)
-            page.content = pageSplitter.page
+            bookPage = max(bookPage, 0)
+            val pageElement = max(lastElement, 0)
+            val paragraph = max(pageSplitter.paragraphIndex, 0)
+            val word = max(pageSplitter.wordIndex, 0)
+            val content = pageSplitter.page
+            val startCursor = Cursor(bookPage, pageElement, paragraph, word, 0)
+            result = Page(content, startCursor, Cursor(page.endCursor) )
+
         }
-        return page
+        return result
     }
 
-    private fun coverPage(page: Page, width: Int, height: Int) {
+    private fun coverPage(page: Page, width: Int, height: Int): Page {
         page.content = getCover(width, height)
-        page.startCursor = Cursor(0)
-        page.endCursor = Cursor(1)
+        val startCursor = Cursor(0, 0, 0, 0, 0)
+        val endCursor = Cursor(1, 0, 0, 0, 0)
+        return Page(getCover(width, height),startCursor, endCursor)
     }
 
     private fun getCover(pageWidth: Int, pageHeight: Int): SpannableStringBuilder {
@@ -169,7 +171,7 @@ class Book(private var context: Context, var fileLocation: String?) {
             var bitmap = BitmapFactory.decodeByteArray(coverData, 0, coverData.size)
             bitmap = scaleBitmap(bitmap, pageWidth, pageHeight)
 
-            val span = ImageSpan(context, bitmap, ImageSpan.ALIGN_BASELINE)
+            val span = ImageSpan(c, bitmap, ImageSpan.ALIGN_BASELINE)
             val text = " "
             val ssb = SpannableStringBuilder(text)
             ssb.setSpan(span, 0, text.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -178,9 +180,9 @@ class Book(private var context: Context, var fileLocation: String?) {
             val title = eBook!!.title
             val authors = eBook!!.metadata.authors
             val ssb = SpannableStringBuilder()
-            ssb.append(Word(title, MyStyle.Title).data)
+            ssb.append(Word(title, MyStyle.Title, c).data)
             val author = authors.first()
-            ssb.append(Word(author.firstname + " " + author.lastname , MyStyle.Italic).data)
+            ssb.append(Word(author.firstname + " " + author.lastname , MyStyle.Italic, c).data)
             return ssb
         }
     }

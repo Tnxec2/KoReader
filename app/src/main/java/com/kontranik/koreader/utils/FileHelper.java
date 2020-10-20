@@ -1,10 +1,7 @@
-package com.kontranik.koreader;
+package com.kontranik.koreader.utils;
 
 import android.os.Build;
 import android.os.Environment;
-import android.util.Log;
-
-import androidx.annotation.RequiresApi;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -50,7 +47,6 @@ public class FileHelper {
         return  result;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public static List<FileItem> getFileList(String path) {
         List<FileItem> result = new ArrayList<>();
         File dir = new File(path);
@@ -71,27 +67,14 @@ public class FileHelper {
                 } else if ( f.getName().toLowerCase().endsWith(".epub")){
                     result.add(new FileItem( ImageEnum.Epub, f.getName(), f.getPath(), f.isDirectory(), false));
                 } else {
-                    result.add(new FileItem( ImageEnum.Ebook, f.getName(), f.getPath(), f.isDirectory(), false));
+                   // result.add(new FileItem( ImageEnum.Ebook, f.getName(), f.getPath(), f.isDirectory(), false));
                 }
             }
         }
-        result.sort(new FileItemNameComparator());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            result.sort(new FileItemNameComparator());
+        }
         return result;
     }
 
-   /* void getStorageList() {
-        List<StorageUtils.StorageInfo> storageList = StorageUtils.getStorageList();
-
-        if ( !storageList.isEmpty() ) {
-            fileItemList.clear();
-            pathStorage = new File(storageList.get(0).path).getParent();
-            listView.setEnabled(true);
-            for (StorageUtils.StorageInfo storageInfo : storageList) {
-                fileItemList.add(new FileItem( getDrawable(R.drawable.ic_sd_card_black_24dp), storageInfo.getDisplayName(), storageInfo.path, true, true));
-            }
-            fileListAdapter.notifyDataSetInvalidated();
-        } else {
-            Snackbar.make(listView, getString(R.string.no_storage_found), Snackbar.LENGTH_LONG).show();
-        }
-    }*/
 }

@@ -4,12 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".reader.FileChooseActivity">
 
     <ListView
         android:id="@+id/listView_files"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+
+        android:padding="20dp"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

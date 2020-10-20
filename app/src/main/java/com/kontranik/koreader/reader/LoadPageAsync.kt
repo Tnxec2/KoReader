@@ -1,11 +1,10 @@
-package com.kontranik.koreader.pagesplitter
+package com.kontranik.koreader.reader
 
 import android.os.AsyncTask
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.Page
-import com.kontranik.koreader.test.PageSplitterOne
 
 
 class LoadPageAsync(private var asyncResponse: AsyncResponse?) : AsyncTask<LoadPageParams, Unit, Page?>() {
@@ -27,6 +26,10 @@ class LoadPageAsync(private var asyncResponse: AsyncResponse?) : AsyncTask<LoadP
     override fun onPreExecute() {
         super.onPreExecute()
         // ...
+    }
+
+    override fun onCancelled() {
+        super.onCancelled()
     }
 
     override fun onPostExecute(result: Page?) {

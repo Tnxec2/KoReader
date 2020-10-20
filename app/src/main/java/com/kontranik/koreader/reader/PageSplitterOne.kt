@@ -1,5 +1,6 @@
-package com.kontranik.koreader.test
+package com.kontranik.koreader.reader
 
+import android.content.Context
 import android.os.Build
 import android.text.*
 
@@ -9,13 +10,12 @@ import com.kontranik.koreader.model.MyStyle
 import com.kontranik.koreader.model.Word
 
 
-@RequiresApi(api = Build.VERSION_CODES.Q)
 class PageSplitterOne(
         val pageWidth: Int,
         val pageHeight: Int,
         private val paint: TextPaint,
         private val lineSpacingMultiplier: Float,
-        private val lineSpacingExtra: Float) {
+        private val lineSpacingExtra: Float, var c: Context) {
 
     var page: SpannableStringBuilder? = null
 
@@ -46,8 +46,8 @@ class PageSplitterOne(
         while (paragraphIndex < paragraphs.size ) {
             if ( ! appendText(paragraphs[paragraphIndex], line.style, startParagraph, startWord) ) return false
             if (currentPage.isNotEmpty()) {
-                if (!appendWord(Word("\n", MyStyle.Paragraph), false)) return false
-                if (!appendWord(Word("\n", MyStyle.Paragraph), false)) return false
+                if (!appendWord(Word("\n", MyStyle.Paragraph, c), false)) return false
+                if (!appendWord(Word("\n", MyStyle.Paragraph, c), false)) return false
             }
             paragraphIndex++
         }
@@ -64,8 +64,8 @@ class PageSplitterOne(
         while (paragraphIndex >= 0 ) {
             if ( ! appendTextRevers(paragraphs[paragraphIndex], line.style, startParagraph, startWord) ) return false
             if (currentPage.isNotEmpty()) {
-                if (!appendWord(Word("\n", MyStyle.Paragraph), true)) return false
-                if (!appendWord(Word("\n", MyStyle.Paragraph), true)) return false
+                if (!appendWord(Word("\n", MyStyle.Paragraph, c), true)) return false
+                if (!appendWord(Word("\n", MyStyle.Paragraph, c), true)) return false
             }
             paragraphIndex--
         }
@@ -78,7 +78,7 @@ class PageSplitterOne(
         wordIndex = if ( startParagraph == paragraphIndex ) startWord else 0
 
         while (wordIndex < words.size) {
-            if (!appendWord(Word(words[wordIndex] + " ", style), false)) return false
+            if (!appendWord(Word(words[wordIndex] + " ", style, c), false)) return false
             wordIndex++
         }
         return true
@@ -89,7 +89,7 @@ class PageSplitterOne(
         wordIndex = if ( startParagraph == paragraphIndex && startWord != null ) startWord else words.size-1
 
         while (wordIndex >= 0) {
-            if (!appendWord(Word(words[wordIndex] + " ", style), true) ) return false
+            if (!appendWord(Word(words[wordIndex] + " ", style, c), true) ) return false
             wordIndex--
         }
         return true

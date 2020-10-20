@@ -8,20 +8,21 @@
     android:background="#EEEEEE">
 
     <RelativeLayout
-        android:id="@+id/pageViewHolder"
+        android:id="@+id/pageViewHolderOuter"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/background_main"
         android:paddingLeft="@dimen/padding_textview"
         android:paddingTop="@dimen/padding_textview"
         android:paddingRight="@dimen/padding_textview"
-        android:paddingBottom="@dimen/padding_textview"
+        android:paddingBottom="@dimen/padding_textview_bottom"
         app:layout_constraintBottom_toTopOf="@+id/tv_infotext_left"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
      <RelativeLayout
+         android:id="@+id/pageViewHolderInner"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingLeft="@dimen/padding_textview_inner"
@@ -36,9 +37,6 @@
             android:id="@+id/textView_pageview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-
-
-
             android:text="PageView" />
      </RelativeLayout>
 

@@ -1,5 +1,6 @@
 package com.kontranik.koreader.test
 
+import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
 import android.text.*
@@ -12,7 +13,7 @@ import com.kontranik.koreader.model.Word
 import java.util.*
 
 @RequiresApi(api = Build.VERSION_CODES.Q)
-class PageSplitter2(private val pageWidth: Int, private val pageHeight: Int, paint: TextPaint, private val lineSpacingMultiplier: Float, private val lineSpacingExtra: Float,) {
+class PageSplitter2(private val pageWidth: Int, private val pageHeight: Int, paint: TextPaint, private val lineSpacingMultiplier: Float, private val lineSpacingExtra: Float, var c: Context) {
     var textSize: Float
     private val pages: MutableList<CharSequence> = ArrayList()
     private var currentLine = SpannableStringBuilder()
@@ -41,10 +42,10 @@ class PageSplitter2(private val pageWidth: Int, private val pageHeight: Int, pai
         var i: Int
         i = 0
         while (i < words.size - 1) {
-            appendWord(Word(words[i] + " ", style))
+            appendWord(Word(words[i] + " ", style, c ))
             i++
         }
-        appendWord(Word(words[i], style))
+        appendWord(Word(words[i], style, c))
     }
 
     fun appendWord(word: Word) {

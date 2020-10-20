@@ -1,4 +1,4 @@
-package com.kontranik.koreader;
+package com.kontranik.koreader.utils;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -8,6 +8,8 @@ import android.os.Environment;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
+
+import com.kontranik.koreader.R;
 
 import java.io.File;
 import java.io.FileInputStream;
