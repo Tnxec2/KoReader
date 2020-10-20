@@ -69,7 +69,7 @@ class Book(private var c: Context, private var fileLocation: String?) {
 
         pageSplitter.clear()
 
-        var bookPage = page.startCursor.page
+        var bookPage = page.startBookPosition.page
         var lastElement = 0
 
         // Log.d(TAG, "startWordIndex: " + page.startCursor.word)
@@ -78,14 +78,14 @@ class Book(private var c: Context, private var fileLocation: String?) {
             val bookPageText = getEpubPage(bookPage)
             val document = Jsoup.parse(bookPageText)
             val elements = document.body().select("*")
-            lastElement = if ( bookPage == page.startCursor.page) page.startCursor.element else 0
+            lastElement = if ( bookPage == page.startBookPosition.page) page.startBookPosition.element else 0
 
             while (lastElement < elements.size) {
 
                 val element = elements[lastElement]
 
-                val startParagraph = if ( bookPage == page.startCursor.page) page.startCursor.paragraph else 0
-                val startWord = if ( bookPage == page.startCursor.page && lastElement == page.startCursor.element) page.startCursor.symbol else 0
+                val startParagraph = if ( bookPage == page.startBookPosition.page) page.startBookPosition.paragraph else 0
+                val startWord = if ( bookPage == page.startBookPosition.page && lastElement == page.startBookPosition.element) page.startBookPosition.symbol else 0
 
                 pageSplitter.append(getLine(element), startParagraph, startWord)
                 if ( pageSplitter.page != null) break
@@ -105,8 +105,8 @@ class Book(private var c: Context, private var fileLocation: String?) {
             val paragraph = pageSplitter.paragraphIndex
             val symbol = pageSplitter.symbolIndex
             val content = pageSplitter.page
-            val endCursor = Cursor(bookPage, pageElement, paragraph, symbol)
-            result = Page(content, Cursor(page.startCursor), endCursor )
+            val endCursor = BookPosition(bookPage, pageElement, paragraph, symbol)
+            result = Page(content, BookPosition(page.startBookPosition), endCursor )
         }
         return result
     }
@@ -114,11 +114,11 @@ class Book(private var c: Context, private var fileLocation: String?) {
     fun loadPageRevers(page: Page, pageSplitter: PageSplitterOne): Page? {
         val result: Page
 
-        if ( page.endCursor.page == 0 && page.endCursor.element == 0 && page.endCursor.paragraph == 0 && page.endCursor.symbol == 0) return  null
+        if ( page.endBookPosition.page == 0 && page.endBookPosition.element == 0 && page.endBookPosition.paragraph == 0 && page.endBookPosition.symbol == 0) return  null
 
         pageSplitter.clear()
 
-        var bookPage = page.endCursor.page
+        var bookPage = page.endBookPosition.page
         var lastElement = 0
         // Log.d(TAG, "startWordIndex: " + ( page.endCursor.word - 1) )
 
@@ -126,11 +126,11 @@ class Book(private var c: Context, private var fileLocation: String?) {
             val bookPageText = getEpubPage(bookPage)
             val document = Jsoup.parse(bookPageText)
             val elements = document.body().select("*")
-            lastElement = if (bookPage == page.endCursor.page) page.endCursor.element else elements.size-1
+            lastElement = if (bookPage == page.endBookPosition.page) page.endBookPosition.element else elements.size-1
             while (lastElement > 0) {
                 val element = elements[lastElement]
-                val startParagraph = if (bookPage == page.endCursor.page) page.endCursor.paragraph else null
-                val startWord = if (bookPage == page.endCursor.page && lastElement == page.endCursor.element) max(page.endCursor.symbol - 1, 0)  else null
+                val startParagraph = if (bookPage == page.endBookPosition.page) page.endBookPosition.paragraph else null
+                val startWord = if (bookPage == page.endBookPosition.page && lastElement == page.endBookPosition.element) max(page.endBookPosition.symbol - 1, 0)  else null
 
                 pageSplitter.appendRevers(getLine(element), startParagraph, startWord)
                 if (pageSplitter.page != null) break
@@ -149,8 +149,8 @@ class Book(private var c: Context, private var fileLocation: String?) {
             val paragraph = max(pageSplitter.paragraphIndex, 0)
             val symbol = max(pageSplitter.symbolIndex, 0)
             val content = pageSplitter.page
-            val startCursor = Cursor(bookPage, pageElement, paragraph, symbol)
-            result = Page(content, startCursor, Cursor(page.endCursor) )
+            val startCursor = BookPosition(bookPage, pageElement, paragraph, symbol)
+            result = Page(content, startCursor, BookPosition(page.endBookPosition) )
 
         }
         return result
@@ -158,8 +158,8 @@ class Book(private var c: Context, private var fileLocation: String?) {
 
     private fun coverPage(page: Page, width: Int, height: Int): Page {
         page.content = getCover(width, height)
-        val startCursor = Cursor(0, 0, 0, 0)
-        val endCursor = Cursor(1, 0, 0, 0)
+        val startCursor = BookPosition(0, 0, 0, 0)
+        val endCursor = BookPosition(1, 0, 0, 0)
         return Page(getCover(width, height),startCursor, endCursor)
     }
 

@@ -19,7 +19,6 @@ class PageSplitterOne(
     var page: SpannableStringBuilder? = null
 
     private var currentPage: SpannableStringBuilder = SpannableStringBuilder()
-    private var tempPage: SpannableStringBuilder = SpannableStringBuilder()
 
     var paragraphIndex: Int = 0
     var symbolIndex: Int = 0
@@ -31,7 +30,6 @@ class PageSplitterOne(
         currentPage = SpannableStringBuilder()
         paragraphIndex = 0
         symbolIndex = 0
-        tempPage = SpannableStringBuilder()
     }
 
     fun append(line: Line, startParagraph: Int, startWord: Int): Boolean {
@@ -99,25 +97,26 @@ class PageSplitterOne(
 
 
     // komplette höhe berechnen
-        var startLineTop = staticLayout!!.getLineTop(0)
-        var endLineBottom = staticLayout!!.getLineBottom(staticLayout!!.lineCount-1)
+        var startLine = 0
+        var endLine = staticLayout!!.lineCount-1
+        var startLineTop = staticLayout!!.getLineTop(startLine)
+        var endLineBottom = staticLayout!!.getLineBottom(endLine)
 
         // Page ist voll
         if ( endLineBottom - startLineTop > pageHeight) {
             // Page erstellen
             if ( ! revers ) {
-                val startLine = 0
                 startLineTop = staticLayout!!.getLineTop(startLine)
-                val endLine = staticLayout!!.getLineForVertical(startLineTop + pageHeight)
+                endLine = staticLayout!!.getLineForVertical(startLineTop + pageHeight)
                 endLineBottom = staticLayout!!.getLineBottom(endLine)
                 val lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageHeight ) endLine - 1 else endLine
                 val startOffset = staticLayout!!.getLineStart(startLine)
                 val endOffset = staticLayout!!.getLineEnd(lastFullyVisibleLine)
                 page = SpannableStringBuilder().append(currentPage.subSequence(startOffset, endOffset))
             } else {
-                val endLine = staticLayout!!.lineCount-1
+                endLine = staticLayout!!.lineCount-1
                 endLineBottom = staticLayout!!.getLineBottom(endLine)
-                val startLine = staticLayout!!.getLineForVertical( endLineBottom - pageHeight)
+                startLine = staticLayout!!.getLineForVertical( endLineBottom - pageHeight)
                 startLineTop = staticLayout!!.getLineTop(startLine)
                 val firstFullyVisibleLine = if (startLineTop <  endLineBottom - pageHeight ) startLine + 1 else startLine
                 val startOffset = staticLayout!!.getLineStart(firstFullyVisibleLine)

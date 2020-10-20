@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -19,10 +20,9 @@ import com.github.florent37.runtimepermission.PermissionResult
 import com.github.florent37.runtimepermission.RuntimePermission
 import com.google.android.material.snackbar.Snackbar
 import com.kontranik.koreader.R
-import com.kontranik.koreader.model.Book
-import com.kontranik.koreader.model.Cursor
-import com.kontranik.koreader.model.Page
-import com.kontranik.koreader.model.ScreenZone
+import com.kontranik.koreader.database.BookStatusDatabaseAdapter
+import com.kontranik.koreader.database.BookStatusService
+import com.kontranik.koreader.model.*
 import com.kontranik.koreader.reader.LoadPageAsync.AsyncResponse
 
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -30,7 +30,7 @@ class ReaderActivity : AppCompatActivity() {
 
     private var book: Book? = null
 
-    var curPage: Page = Page(null, Cursor())
+    var curPage: Page = Page(null, BookPosition())
     var nextPage: Page? = null
     var prevPage: Page? = null
 
@@ -41,6 +41,8 @@ class ReaderActivity : AppCompatActivity() {
     var textViewInfoLeft: TextView? = null
     var textViewInfoRight: TextView? = null
 
+    var pageViewHolderOuter: RelativeLayout? = null
+
     var pageSplitter: PageSplitterOne? = null
     var width: Int? = null
     var height: Int? = null
@@ -50,16 +52,19 @@ class ReaderActivity : AppCompatActivity() {
 
     private var selectedPath: String? = null
     private var bookPath: String? = null
-    private var loadingPage = false
 
     private val REQUEST_ACCESS_TYPE = 1
 
     private var asyncLoadPageNext: AsyncTask<LoadPageParams, Unit, Page?>? = null
     private var asyncLoadPagePrev: AsyncTask<LoadPageParams, Unit, Page?>? = null
 
+    private var bookStatusService: BookStatusService? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.pagesplitter_main)
+        setContentView(R.layout.activity_reader_main)
+
+        bookStatusService = BookStatusService(BookStatusDatabaseAdapter(this))
 
         settings = getSharedPreferences(PREFS_FILE, MODE_PRIVATE)
         loadPrefs()
@@ -72,7 +77,12 @@ class ReaderActivity : AppCompatActivity() {
         textViewInfoLeft = findViewById(R.id.tv_infotext_left)
         textViewInfoRight = findViewById(R.id.tv_infotext_right)
 
+        pageViewHolderOuter = findViewById(R.id.pageViewHolderOuter)
+
         checkPermissions()
+
+        // bei jedem start - bereinigen
+        bookStatusService!!.cleanup()
     }
 
     private fun loadBook() {
@@ -93,7 +103,7 @@ class ReaderActivity : AppCompatActivity() {
                     selectedPath = data.getStringExtra(PREF_LAST_PATH)
                     bookPath = data.getStringExtra(PREF_BOOK_PATH)
                     savePrefs()
-                    loadCursorForBook(bookPath!!)
+                    loadPositionForBook()
                     loadBook()
                     loadPage()
                 };
@@ -105,13 +115,26 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadCursorForBook(bookPath: String) {
+    private fun loadPositionForBook() {
         asyncLoadPageNext?.cancel(true)
         asyncLoadPagePrev?.cancel(true)
-        // TODO: load position from DB
-        curPage = Page(null, Cursor(), Cursor())
+
+        val startPosition = bookStatusService!!.getPosition(bookPath!!) ?: BookPosition()
+
+        curPage = Page(null, startPosition, BookPosition())
         nextPage = null
         prevPage = null
+    }
+
+    private fun savePositionForBook() {
+        if ( bookPath != null) {
+            bookStatusService!!.savePosition(bookPath!!, curPage.startBookPosition)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        savePositionForBook()
     }
 
     private fun loadPrefs() {
@@ -171,7 +194,7 @@ class ReaderActivity : AppCompatActivity() {
                 super.onDoubleClick(point)
                 val zone = ScreenZone.zone(point, width!!, height!!)
                 when (zone) {
-                    ScreenZone.MiddleCenter -> setFullScreen(!isFullScreen())
+                   // ScreenZone.MiddleCenter -> setFullScreen(!isFullScreen())
                 }
                 textViewInfoRight!!.setText(resources.getString(R.string.doubleclick_in_zone, zone))
             }
@@ -205,35 +228,41 @@ class ReaderActivity : AppCompatActivity() {
         viewTreeObserver!!.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 pageView!!.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                width = pageView!!.measuredWidth - pageView!!.paddingLeft - pageView!!.paddingRight
+                height = pageView!!.measuredHeight - pageView!!.paddingTop - pageView!!.paddingBottom
 
-                width = pageView!!.measuredWidth
-                height = pageView!!.measuredHeight
-
-                pageSplitter = PageSplitterOne(width!!, height!!, pageView!!.paint, pageView!!.lineSpacingMultiplier, pageView!!.lineSpacingExtra, applicationContext)
+                pageSplitter = PageSplitterOne(
+                        width!!, height!!, pageView!!.paint,
+                        pageView!!.lineSpacingMultiplier, pageView!!.lineSpacingExtra, applicationContext)
                 loadPage()
             }
         })
     }
 
     private fun doNext() {
+        if ( book == null) return
         if ( nextPage != null) {
             prevPage = curPage
             curPage = Page(nextPage!!)
             updateView()
+            savePositionForBook()
             loadNextPage()
         }
     }
 
     private fun doPrev() {
+        if ( book == null) return
         if ( prevPage != null ) {
             nextPage = curPage
             curPage = Page(prevPage!!)
             updateView()
+            savePositionForBook()
             loadPrevPage()
         }
     }
 
     private fun loadPage() {
+        if ( book == null) return
         loadCurPage()
         updateView()
         loadNextPage()
@@ -241,7 +270,7 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun loadCurPage() {
-        curPage = book!!.loadPage(Page(null, curPage!!.startCursor), pageSplitter!!)
+        curPage = book!!.loadPage(Page(null, curPage!!.startBookPosition), pageSplitter!!)
     }
 
     private fun loadNextPage() {
@@ -253,7 +282,7 @@ class ReaderActivity : AppCompatActivity() {
                 nextPage = output
             }
         }).execute(
-                LoadPageParams(false, book, Page(null, Cursor(curPage!!.endCursor)), pageSplitter))
+                LoadPageParams(false, book, Page(null, BookPosition(curPage!!.endBookPosition)), pageSplitter))
     }
 
     private fun loadPrevPage(){
@@ -265,12 +294,12 @@ class ReaderActivity : AppCompatActivity() {
                 prevPage = output
             }
         }).execute(
-                LoadPageParams(true, book, Page(null, Cursor(), Cursor(curPage!!.startCursor)), pageSplitter))
+                LoadPageParams(true, book, Page(null, BookPosition(), BookPosition(curPage!!.startBookPosition)), pageSplitter))
     }
 
     private fun updateInfo() {
         textViewInfoCenter!!.text =
-                resources.getString(R.string.page_info_text, curPage?.startCursor?.page, book!!.countPages)
+                resources.getString(R.string.page_info_text, curPage?.startBookPosition?.page, book!!.countPages)
     }
 
     private fun updateView() {
@@ -296,8 +325,18 @@ class ReaderActivity : AppCompatActivity() {
         }
         if (full) {
             actionBar?.hide()
+            pageViewHolderOuter!!.setPadding(
+                    resources.getDimension(R.dimen.padding_textview_left_fullscreen).toInt(),
+                    resources.getDimension(R.dimen.padding_textview_top_fullscreen).toInt(),
+                    resources.getDimension(R.dimen.padding_textview_right_fullscreen).toInt(),
+                    resources.getDimension(R.dimen.padding_textview_bottom_fullscreen).toInt())
         } else {
             actionBar?.show()
+            pageViewHolderOuter!!.setPadding(
+                    resources.getDimension(R.dimen.padding_textview_left).toInt(),
+                    resources.getDimension(R.dimen.padding_textview_top).toInt(),
+                    resources.getDimension(R.dimen.padding_textview_right).toInt(),
+                    resources.getDimension(R.dimen.padding_textview_bottom).toInt())
         }
         updateSizeInfo()
     }
@@ -312,7 +351,7 @@ class ReaderActivity : AppCompatActivity() {
                     //openReader( "/storage/emulated/0/Books/test.epub");
                     //openReader("/mnt/sdcard/Download/test.epub")
                     //
-                    if ( bookPath != null) { loadBook() ; updateSizeInfo() }
+                    if ( bookPath != null) { loadBook(); loadPositionForBook() ; updateSizeInfo() }
                     else openFileChooser()
                 }
                 .onDenied { result: PermissionResult ->
