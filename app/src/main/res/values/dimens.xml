@@ -15,9 +15,11 @@
 
     <dimen name="text_size">13dp</dimen>
 
-    <dimen name="text_size_file_path">8dp</dimen>
-    <dimen name="text_size_file_desc">8dp</dimen>
-    <dimen name="text_size_file_name">12dp</dimen>
+    <dimen name="text_size_file_path">10dp</dimen>
+    <dimen name="text_size_file_desc">10dp</dimen>
+    <dimen name="text_size_file_name">13dp</dimen>
+
+    <dimen name="text_size_dialog_title">16dp</dimen>
 
     <dimen name="h1">26dp</dimen>
     <dimen name="h2">19.5dp</dimen>

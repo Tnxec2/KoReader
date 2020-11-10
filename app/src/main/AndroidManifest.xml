@@ -12,11 +12,19 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
-        <activity android:name=".reader.FileChooseActivity" />
-        <activity android:name=".reader.ReaderActivity" >
+        android:theme="@style/AppTheme.Fullscreen">
+
+        <activity
+            android:name=".reader.MainMenuActivity"
+            android:theme="@style/AppDialogTheme.NoActionBar" />
+
+        <activity
+            android:name=".reader.FileChooseActivity"
+            android:theme="@style/AppDialogTheme.NoActionBar"  />
+        <activity android:name=".ReaderActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

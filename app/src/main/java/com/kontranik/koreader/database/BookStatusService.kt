@@ -6,21 +6,28 @@ import java.io.File
 
 class BookStatusService(var adapter: BookStatusDatabaseAdapter) {
 
-    fun getByPath(path: String): BookStatus? {
-        adapter.open()
-        val result = adapter.getBookStatusByPath(path)
-        adapter.close()
-        return result
-    }
-
     fun savePosition(path: String, bookPosition: BookPosition) {
         adapter.open()
         val bookStatus = adapter.getBookStatusByPath(path)
         if ( bookStatus == null) {
-            adapter.insert(BookStatus(null, path, bookPosition.page, bookPosition.element, bookPosition.paragraph, bookPosition.symbol))
+            adapter.insert(
+                    BookStatus(null, path, bookPosition.page,
+                            bookPosition.element, bookPosition.paragraph, bookPosition.symbol))
         } else {
             bookStatus.updatePosition(bookPosition)
             adapter.update(bookStatus)
+        }
+        adapter.close()
+    }
+
+    fun updateLastOpenTime(path: String) {
+        adapter.open()
+        val bookStatus = adapter.getBookStatusByPath(path)
+        if ( bookStatus != null ) {
+            bookStatus.updateLastOpenTime()
+            adapter.update(bookStatus)
+        } else {
+            adapter.insert(BookStatus(path = path))
         }
         adapter.close()
     }
@@ -29,7 +36,11 @@ class BookStatusService(var adapter: BookStatusDatabaseAdapter) {
         adapter.open()
         val bookStatus = adapter.getBookStatusByPath(path)
         adapter.close()
-        return if ( bookStatus == null ) null else BookPosition(bookStatus.position_page, bookStatus.position_element, bookStatus.position_paragraph, bookStatus.position_symbol)
+        return if ( bookStatus == null )
+            null
+        else {
+            BookPosition(bookStatus.position_page, bookStatus.position_element, bookStatus.position_paragraph, bookStatus.position_symbol)
+        }
     }
 
     fun cleanup() {

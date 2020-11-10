@@ -16,4 +16,9 @@
     <string name="doubleclick_in_zone">Double Click in %1$s</string>
     <string name="longclick_in_zone">Long Click in %1$s</string>
     <string name="page_info_text">%1$d / %2$d</string>
+    <string name="openfile">Open File</string>
+    <string name="settings">Settings</string>
+    <string name="textSizeExampleText">ABCabc</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

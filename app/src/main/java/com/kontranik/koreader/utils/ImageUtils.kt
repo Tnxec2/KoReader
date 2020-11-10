@@ -5,7 +5,6 @@ import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import com.kontranik.koreader.R
-import com.kontranik.koreader.utils.EpubHelper.getCover
 import java.io.ByteArrayOutputStream
 
 object ImageUtils {
@@ -21,8 +20,8 @@ object ImageUtils {
     }
 
     @JvmStatic
-    fun getBitmap(c: Context, imageEnum: ImageEnum, path: String): Bitmap? {
-        val b = getBitmapData(c, imageEnum, path)
+    fun getBitmap(c: Context, imageEnum: ImageEnum): Bitmap? {
+        val b = getBitmapData(c, imageEnum)
         if (b != null) {
             val bmp = BitmapFactory.decodeByteArray(b, 0, b.size)
             val width = 100
@@ -45,14 +44,13 @@ object ImageUtils {
         return null
     }
 
-    private fun getBitmapData(c: Context, imageEnum: ImageEnum, path: String): ByteArray? {
+    private fun getBitmapData(c: Context, imageEnum: ImageEnum): ByteArray? {
         var d: Drawable? = null
         var cover: ByteArray? = null
         when (imageEnum) {
-            ImageEnum.Parent -> d = c.resources.getDrawable(R.drawable.ic_arrow_back_black_24dp)
-            ImageEnum.SD -> d = c.resources.getDrawable(R.drawable.ic_sd_card_black_24dp)
+            ImageEnum.Parent -> d = c.resources.getDrawable(R.drawable.ic_baseline_arrow_back_24)
+            ImageEnum.SD -> d = c.resources.getDrawable(R.drawable.ic_baseline_sd_card_24)
             ImageEnum.Dir -> d = c.resources.getDrawable(R.drawable.ic_folder_black_24dp)
-            ImageEnum.Epub -> cover = getCover(path)
             else -> d = c.resources.getDrawable(R.drawable.ic_book_black_24dp)
         }
         if (d == null && cover == null) {
@@ -67,5 +65,33 @@ object ImageUtils {
             }
         }
         return cover
+    }
+
+    fun byteArrayToScaledBitmap(byteArray: ByteArray, width: Int, height: Int): Bitmap {
+        var bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        return scaleBitmap(bitmap, width, height)
+    }
+
+    fun scaleBitmap(bm: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+        var bm = bm
+        var width = bm.width.toFloat()
+        var height = bm.height.toFloat()
+        if (width > height) {
+            // landscape
+            val ratio = width / maxWidth
+            width = maxWidth.toFloat()
+            height = height / ratio
+        } else if (height > width) {
+            // portrait
+            val ratio = height / maxHeight
+            height = maxHeight.toFloat()
+            width = width / ratio
+        } else {
+            // square
+            height = maxHeight.toFloat()
+            width = maxWidth.toFloat()
+        }
+        bm = Bitmap.createScaledBitmap(bm, width.toInt(), height.toInt(), true)
+        return bm
     }
 }

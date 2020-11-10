@@ -7,16 +7,19 @@ import android.util.Log
 import com.kontranik.koreader.model.Line
 import com.kontranik.koreader.model.MyStyle
 import com.kontranik.koreader.model.WordSequence
+import kotlin.math.min
 
 
-class PageSplitterOne(
-        val pageWidth: Int,
-        val pageHeight: Int,
-        private val paint: TextPaint,
-        private val lineSpacingMultiplier: Float,
-        private val lineSpacingExtra: Float, var c: Context) {
+open class PageSplitterOne(
+        var pageWidth: Int,
+        var pageHeight: Int,
+        val paint: TextPaint,
+        var lineSpacingMultiplier: Float,
+        val lineSpacingExtra: Float,
+        var c: Context) {
 
-    var page: SpannableStringBuilder? = null
+    var pageOne: SpannableStringBuilder? = null
+    var status: PageSplitterStatus = PageSplitterStatus.Clear
 
     private var currentPage: SpannableStringBuilder = SpannableStringBuilder()
 
@@ -24,17 +27,28 @@ class PageSplitterOne(
     var symbolIndex: Int = 0
 
     private var staticLayout: StaticLayout? = null
+    private var initTextLength: Int = 0
 
     fun clear() {
-        page = null
+        pageOne = null
         currentPage = SpannableStringBuilder()
         paragraphIndex = 0
         symbolIndex = 0
+        initTextLength = 0
+        status = PageSplitterStatus.Clear
     }
 
-    fun append(line: Line, startParagraph: Int, startWord: Int): Boolean {
+    fun append(line: Line, startParagraph: Int?, startWord: Int?, revers: Boolean) : Boolean {
+        initTextLength = currentPage.toString().length
+        return if ( revers ) appendRevers(line, startParagraph, startWord)
+                else append(line, startParagraph!!, startWord!!)
+    }
+
+    private fun append(line: Line, startParagraph: Int, startWord: Int): Boolean {
         if (line.style == MyStyle.None) return false
-        val paragraphs = line.text.split("\n")
+        if ( line.text == null) return false
+
+        val paragraphs = line.text!!.split("\n")
 
         paragraphIndex = startParagraph
         while (paragraphIndex < paragraphs.size ) {
@@ -47,11 +61,13 @@ class PageSplitterOne(
         return true
     }
 
-    fun appendRevers(line: Line, startParagraph: Int?, startWord: Int?): Boolean {
+    private fun appendRevers(line: Line, startParagraph: Int?, startWord: Int?): Boolean {
         if (line.style == MyStyle.None) return false
-        val paragraphs = line.text.split("\n")
+        if ( line.text == null) return false
 
-        paragraphIndex = if ( startParagraph != null )  startParagraph else paragraphs.size-1
+        val paragraphs = line.text!!.split("\n")
+
+        paragraphIndex = startParagraph ?: paragraphs.size-1
         while (paragraphIndex >= 0 ) {
             if ( ! appendParagraphRevers(paragraphs[paragraphIndex], line.style, startParagraph, startWord) ) return false
             if (currentPage.isNotEmpty()) {
@@ -63,44 +79,40 @@ class PageSplitterOne(
     }
 
     private fun appendNewLine(revers: Boolean): Boolean {
-        if ( ! appendWordSequence(WordSequence("\n\n", MyStyle.Paragraph, c), revers, moveCursor = false) ) return false
+        if ( ! appendWordSequence(WordSequence("\n\n", MyStyle.Paragraph, c), revers) ) return false
         return true
     }
 
     private fun appendParagraph(paragraph: String, style: MyStyle, startParagraph: Int, startSymbol: Int): Boolean {
+        if (paragraph.trim().isEmpty()) return  appendNewLine(revers = false)
         symbolIndex = if ( startParagraph == paragraphIndex ) startSymbol else 0
+        if ( symbolIndex >= paragraph.length ) return false
         val wordSeq = paragraph.substring(symbolIndex)
-        return appendWordSequence(WordSequence(wordSeq, style, c), revers = false, moveCursor = true)
+        return appendWordSequence(WordSequence(wordSeq, style, c), revers = false)
     }
 
     private fun appendParagraphRevers(paragraph: String, style: MyStyle, startParagraph: Int?, startSymbol: Int?): Boolean {
+        if (paragraph.trim().isEmpty()) return  appendNewLine(revers = false)
         symbolIndex = if ( startParagraph == paragraphIndex && startSymbol != null ) startSymbol else paragraph.length
+        symbolIndex = min(symbolIndex, paragraph.length)
         val wordSeq = paragraph.substring(0, symbolIndex)
-        return appendWordSequence(WordSequence(wordSeq, style, c), revers = true, moveCursor = true)
+        return appendWordSequence(WordSequence(wordSeq, style, c), revers = true)
     }
 
-    private fun appendWordSequence(wordSequence: WordSequence, revers: Boolean, moveCursor: Boolean): Boolean {
-
-        Log.d(TAG, "appenWordSequence: wS: " + wordSequence.data )
-        Log.d(TAG, "appenWordSequence: r: " + revers + ", mC: " + moveCursor + ", sIx: " + symbolIndex)
-
-        val initTextLength = currentPage.toString().length
-
-        if ( moveCursor ) {
-            Log.d(TAG, "davor: " + currentPage.toString())
-        }
+    private fun appendWordSequence(wordSequence: WordSequence, revers: Boolean): Boolean {
 
         if ( revers) currentPage.insert(0, wordSequence.data)
         else currentPage.append(wordSequence.data)
 
         staticLayout = StaticLayout(currentPage, paint, pageWidth, Layout.Alignment.ALIGN_NORMAL, lineSpacingMultiplier, lineSpacingExtra, true)
 
-
-    // komplette höhe berechnen
+        // komplette höhe berechnen
         var startLine = 0
         var endLine = staticLayout!!.lineCount-1
         var startLineTop = staticLayout!!.getLineTop(startLine)
         var endLineBottom = staticLayout!!.getLineBottom(endLine)
+
+        if ( status == PageSplitterStatus.Clear && currentPage.toString().trim().length > 0) status = PageSplitterStatus.PageStartet
 
         // Page ist voll
         if ( endLineBottom - startLineTop > pageHeight) {
@@ -112,7 +124,7 @@ class PageSplitterOne(
                 val lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageHeight ) endLine - 1 else endLine
                 val startOffset = staticLayout!!.getLineStart(startLine)
                 val endOffset = staticLayout!!.getLineEnd(lastFullyVisibleLine)
-                page = SpannableStringBuilder().append(currentPage.subSequence(startOffset, endOffset))
+                pageOne = SpannableStringBuilder().append(currentPage.subSequence(startOffset, endOffset))
             } else {
                 endLine = staticLayout!!.lineCount-1
                 endLineBottom = staticLayout!!.getLineBottom(endLine)
@@ -121,18 +133,22 @@ class PageSplitterOne(
                 val firstFullyVisibleLine = if (startLineTop <  endLineBottom - pageHeight ) startLine + 1 else startLine
                 val startOffset = staticLayout!!.getLineStart(firstFullyVisibleLine)
                 val endOffset = staticLayout!!.getLineEnd(endLine)
-                page = SpannableStringBuilder().append(currentPage.subSequence(startOffset, endOffset))
+                pageOne = SpannableStringBuilder().append(currentPage.subSequence(startOffset, endOffset))
             }
+            status = PageSplitterStatus.PageFull
 
-            // neue Cursorposition berechnen
-            if (moveCursor) {
-                val endTextLenght = page.toString().length
+            // neue BookPosition im letzten Paragraph ermitteln berechnen
+             // if (moveCursor) {
+                val endTextLenght = pageOne.toString().length
                 val addedSymbols = endTextLenght - initTextLength
                 if ( revers ) symbolIndex -= addedSymbols
                 else symbolIndex += addedSymbols
-                Log.d(TAG, "danach: " + page.toString())
-                Log.d(TAG, "appenWordSequence: iTL: " + initTextLength + ", eTL: " + endTextLenght + ", sIx: " + symbolIndex)
-            }
+//                Log.d(TAG, "danach: " + page.toString())
+//                Log.d(TAG, "appenWordSequence: iTL: " + initTextLength + ", eTL: " + endTextLenght + ", sIx: " + symbolIndex)
+             // }
+            Log.d(TAG, "*** start ***")
+            Log.d(TAG, pageOne.toString())
+            Log.d(TAG, "*** ende ***")
 
             return false
         }
@@ -140,12 +156,18 @@ class PageSplitterOne(
         return true
     }
 
-
+    internal fun getLastPage() {
+        pageOne = SpannableStringBuilder().append(currentPage)
+    }
 
     companion object {
         const val TAG = "PageSplitterOne"
-        const val heightOffset = 5
     }
+}
 
+enum class PageSplitterStatus {
+    Clear,
+    PageStartet,
+    PageFull
 }
 

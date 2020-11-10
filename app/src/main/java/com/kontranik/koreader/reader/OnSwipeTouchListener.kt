@@ -2,6 +2,7 @@ package com.kontranik.koreader.reader
 
 import android.content.Context
 import android.graphics.Point
+import android.util.Log
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
@@ -15,6 +16,7 @@ internal open class OnSwipeTouchListener(c: Context?) :
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         return gestureDetector.onTouchEvent(motionEvent)
     }
+
     private inner class GestureListener : SimpleOnGestureListener() {
         private val SWIPE_THRESHOLD: Int = 100
         private val SWIPE_VELOCITY_THRESHOLD: Int = 100
@@ -54,8 +56,7 @@ internal open class OnSwipeTouchListener(c: Context?) :
                             onSwipeLeft()
                         }
                     }
-                }
-                else {
+                } else {
                     if (abs(diffY) > SWIPE_THRESHOLD && abs(
                                     velocityY
                             ) > SWIPE_VELOCITY_THRESHOLD

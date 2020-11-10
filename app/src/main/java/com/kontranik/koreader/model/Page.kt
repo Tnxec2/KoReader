@@ -7,6 +7,7 @@ class Page (
         var startBookPosition: BookPosition = BookPosition(),
         var endBookPosition: BookPosition = BookPosition()
 ) {
+    var recalculate = false
 
     constructor(other: Page) : this() {
         if ( other != null) {

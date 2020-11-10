@@ -12,30 +12,31 @@ import com.kontranik.koreader.model.BookStatus
 
 class BookStatusDatabaseAdapter(val context: Context) {
 
-    private val dbHelperBookStatus: BookStatusDatabaseHelper = BookStatusDatabaseHelper(context.getApplicationContext())
+    private val dbHelper: DatabaseHelper = DatabaseHelper(context.getApplicationContext())
     private var database: SQLiteDatabase? = null
 
     fun open(): BookStatusDatabaseAdapter {
-        database = dbHelperBookStatus.writableDatabase
+        database = dbHelper.writableDatabase
         return this
     }
 
     fun close() {
-        dbHelperBookStatus.close()
+        dbHelper.close()
     }
 
     private val allEntries: Cursor
         get() {
             val columns = arrayOf(
-                    BookStatusDatabaseHelper.COLUMN_ID,
-                    BookStatusDatabaseHelper.COLUMN_PATH,
-                    BookStatusDatabaseHelper.COLUMN_POSITION_PAGE,
-                    BookStatusDatabaseHelper.COLUMN_POSITION_ELEMENT,
-                    BookStatusDatabaseHelper.COLUMN_POSITION_PARAGRAPH,
-                    BookStatusDatabaseHelper.COLUMN_POSITION_SYMBOL
+                    BookStatusHelper.COLUMN_ID,
+                    BookStatusHelper.COLUMN_PATH,
+                    BookStatusHelper.COLUMN_POSITION_PAGE,
+                    BookStatusHelper.COLUMN_POSITION_ELEMENT,
+                    BookStatusHelper.COLUMN_POSITION_PARAGRAPH,
+                    BookStatusHelper.COLUMN_POSITION_SYMBOL,
+                    BookStatusHelper.COLUMN_LAST_OPEN_TIME
             )
             return database!!.query(
-                    BookStatusDatabaseHelper.TABLE, columns, null, null, null, null, null)
+                    BookStatusHelper.TABLE, columns, null, null, null, null, null)
         }
 
     val allBookStatus: MutableList<BookStatus>
@@ -44,13 +45,14 @@ class BookStatusDatabaseAdapter(val context: Context) {
             val cursor: Cursor = allEntries
             if (cursor.moveToFirst()) {
                 do {
-                    val id: Long = cursor.getLong(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_ID))
-                    val path: String = cursor.getString(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_PATH))
-                    val page: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_PAGE))
-                    val element: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_ELEMENT))
-                    val paragraph: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_PARAGRAPH))
-                    val symbol: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_SYMBOL))
-                    books.add(BookStatus(id, path, page, element, paragraph, symbol))
+                    val id: Long = cursor.getLong(cursor.getColumnIndex(BookStatusHelper.COLUMN_ID))
+                    val path: String = cursor.getString(cursor.getColumnIndex(BookStatusHelper.COLUMN_PATH))
+                    val page: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_PAGE))
+                    val element: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_ELEMENT))
+                    val paragraph: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_PARAGRAPH))
+                    val symbol: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_SYMBOL))
+                    val lastOpenDate: Long = cursor.getLong(cursor.getColumnIndex(BookStatusHelper.COLUMN_LAST_OPEN_TIME))
+                    books.add(BookStatus(id, path, page, element, paragraph, symbol, lastOpenDate))
                 } while (cursor.moveToNext())
             }
             cursor.close()
@@ -58,19 +60,20 @@ class BookStatusDatabaseAdapter(val context: Context) {
         }
 
     val count: Long
-        get() = DatabaseUtils.queryNumEntries(database, BookStatusDatabaseHelper.TABLE)
+        get() = DatabaseUtils.queryNumEntries(database, BookStatusHelper.TABLE)
 
     fun getBookStatus(id: Long): BookStatus? {
         var bookStatus: BookStatus? = null
-        val query = String.format("SELECT * FROM %s WHERE %s=?", BookStatusDatabaseHelper.TABLE, BookStatusDatabaseHelper.COLUMN_ID)
+        val query = String.format("SELECT * FROM %s WHERE %s=?", BookStatusHelper.TABLE, BookStatusHelper.COLUMN_ID)
         val cursor: Cursor = database!!.rawQuery(query, arrayOf(id.toString()))
         if (cursor.moveToFirst()) {
-            val path: String = cursor.getString(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_PATH))
-            val page: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_PAGE))
-            val element: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_ELEMENT))
-            val paragraph: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_PARAGRAPH))
-            val symbol: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_SYMBOL))
-            bookStatus = BookStatus(id, path, page, element, paragraph, symbol)
+            val path: String = cursor.getString(cursor.getColumnIndex(BookStatusHelper.COLUMN_PATH))
+            val page: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_PAGE))
+            val element: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_ELEMENT))
+            val paragraph: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_PARAGRAPH))
+            val symbol: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_SYMBOL))
+            val lastOpenDate: Long = cursor.getLong(cursor.getColumnIndex(BookStatusHelper.COLUMN_LAST_OPEN_TIME))
+            bookStatus = BookStatus(id, path, page, element, paragraph, symbol, lastOpenDate)
         }
         cursor.close()
         return bookStatus
@@ -78,17 +81,18 @@ class BookStatusDatabaseAdapter(val context: Context) {
 
     fun getBookStatusByPath(inputPath: String): BookStatus? {
         var bookStatus: BookStatus? = null
-        val query = String.format("SELECT * FROM %s WHERE %s=?", BookStatusDatabaseHelper.TABLE,
-                BookStatusDatabaseHelper.COLUMN_PATH)
+        val query = String.format("SELECT * FROM %s WHERE %s=?", BookStatusHelper.TABLE,
+                BookStatusHelper.COLUMN_PATH)
         val cursor: Cursor = database!!.rawQuery(query, arrayOf(inputPath))
         if (cursor.moveToFirst()) {
-            val id: Long = cursor.getLong(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_ID))
-            val path: String = cursor.getString(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_PATH))
-            val page: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_PAGE))
-            val element: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_ELEMENT))
-            val paragraph: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_PARAGRAPH))
-            val symbol: Int = cursor.getInt(cursor.getColumnIndex(BookStatusDatabaseHelper.COLUMN_POSITION_SYMBOL))
-            bookStatus = BookStatus(id, path, page, element, paragraph, symbol)
+            val id: Long = cursor.getLong(cursor.getColumnIndex(BookStatusHelper.COLUMN_ID))
+            val path: String = cursor.getString(cursor.getColumnIndex(BookStatusHelper.COLUMN_PATH))
+            val page: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_PAGE))
+            val element: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_ELEMENT))
+            val paragraph: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_PARAGRAPH))
+            val symbol: Int = cursor.getInt(cursor.getColumnIndex(BookStatusHelper.COLUMN_POSITION_SYMBOL))
+            val lastOpenDate: Long = cursor.getLong(cursor.getColumnIndex(BookStatusHelper.COLUMN_LAST_OPEN_TIME))
+            bookStatus = BookStatus(id, path, page, element, paragraph, symbol, lastOpenDate)
         }
         cursor.close()
         return bookStatus
@@ -96,29 +100,31 @@ class BookStatusDatabaseAdapter(val context: Context) {
 
     fun insert(bookStatus: BookStatus): Long {
         val cv = ContentValues()
-        cv.put(BookStatusDatabaseHelper.COLUMN_PATH, bookStatus.path)
-        cv.put(BookStatusDatabaseHelper.COLUMN_POSITION_PAGE, bookStatus.position_page)
-        cv.put(BookStatusDatabaseHelper.COLUMN_POSITION_ELEMENT, bookStatus.position_element)
-        cv.put(BookStatusDatabaseHelper.COLUMN_POSITION_PARAGRAPH, bookStatus.position_paragraph)
-        cv.put(BookStatusDatabaseHelper.COLUMN_POSITION_SYMBOL, bookStatus.position_symbol)
-        return database!!.insert(BookStatusDatabaseHelper.TABLE, null, cv)
+        cv.put(BookStatusHelper.COLUMN_PATH, bookStatus.path)
+        cv.put(BookStatusHelper.COLUMN_POSITION_PAGE, bookStatus.position_page)
+        cv.put(BookStatusHelper.COLUMN_POSITION_ELEMENT, bookStatus.position_element)
+        cv.put(BookStatusHelper.COLUMN_POSITION_PARAGRAPH, bookStatus.position_paragraph)
+        cv.put(BookStatusHelper.COLUMN_POSITION_SYMBOL, bookStatus.position_symbol)
+        cv.put(BookStatusHelper.COLUMN_LAST_OPEN_TIME, bookStatus.lastOpenTime)
+        return database!!.insert(BookStatusHelper.TABLE, null, cv)
     }
 
     fun delete(userId: Long): Long {
         val whereClause = "_id = ?"
         val whereArgs = arrayOf(userId.toString())
-        return database!!.delete(BookStatusDatabaseHelper.TABLE, whereClause, whereArgs).toLong()
+        return database!!.delete(BookStatusHelper.TABLE, whereClause, whereArgs).toLong()
     }
 
     fun update(bookStatus: BookStatus): Long {
-        val whereClause = "${BookStatusDatabaseHelper.COLUMN_ID} = ${bookStatus.id}"
+        val whereClause = "${BookStatusHelper.COLUMN_ID} = ${bookStatus.id}"
         val cv = ContentValues()
-        cv.put(BookStatusDatabaseHelper.COLUMN_PATH, bookStatus.path)
-        cv.put(BookStatusDatabaseHelper.COLUMN_POSITION_PAGE, bookStatus.position_page)
-        cv.put(BookStatusDatabaseHelper.COLUMN_POSITION_ELEMENT, bookStatus.position_element)
-        cv.put(BookStatusDatabaseHelper.COLUMN_POSITION_PARAGRAPH, bookStatus.position_paragraph)
-        cv.put(BookStatusDatabaseHelper.COLUMN_POSITION_SYMBOL, bookStatus.position_symbol)
-        return database!!.update(BookStatusDatabaseHelper.TABLE, cv, whereClause, null).toLong()
+        cv.put(BookStatusHelper.COLUMN_PATH, bookStatus.path)
+        cv.put(BookStatusHelper.COLUMN_POSITION_PAGE, bookStatus.position_page)
+        cv.put(BookStatusHelper.COLUMN_POSITION_ELEMENT, bookStatus.position_element)
+        cv.put(BookStatusHelper.COLUMN_POSITION_PARAGRAPH, bookStatus.position_paragraph)
+        cv.put(BookStatusHelper.COLUMN_POSITION_SYMBOL, bookStatus.position_symbol)
+        cv.put(BookStatusHelper.COLUMN_LAST_OPEN_TIME, bookStatus.lastOpenTime)
+        return database!!.update(BookStatusHelper.TABLE, cv, whereClause, null).toLong()
     }
 
 }

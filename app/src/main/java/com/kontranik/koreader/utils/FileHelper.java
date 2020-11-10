@@ -10,6 +10,20 @@ import java.util.List;
 
 public class FileHelper {
 
+    public static String getNameNoExt(String name) {
+        int i = name.lastIndexOf('.');
+        if (i > 0)
+            name = name.substring(0, i);
+        return name;
+    }
+
+    public static String getExt(String name) { // FilenameUtils.getExtension(n)
+        int i = name.lastIndexOf('.');
+        if (i > 0)
+            return name.substring(i + 1);
+        return "";
+    }
+
     public static List<FileItem> getStorageList() {
         List<FileItem> result = new ArrayList<>();
 
@@ -56,7 +70,12 @@ public class FileHelper {
 
         File[] files = dir.listFiles(new FilenameFilter() {
             public boolean accept(File file, String name) {
-                return !file.isHidden() && !name.startsWith(".") && ( file.isDirectory() || name.toLowerCase().endsWith(".epub") );
+                return !file.isHidden() && !name.startsWith(".")
+                        && (
+                                file.isDirectory()
+                                || name.toLowerCase().endsWith(".epub")
+                                // || name.toLowerCase().endsWith(".fb2")
+                );
             }
         });
 
@@ -66,6 +85,8 @@ public class FileHelper {
                     result.add(new FileItem(ImageEnum.Dir, f.getName(), f.getPath(), f.isDirectory(), false));
                 } else if ( f.getName().toLowerCase().endsWith(".epub")){
                     result.add(new FileItem( ImageEnum.Epub, f.getName(), f.getPath(), f.isDirectory(), false));
+//                } else if ( f.getName().toLowerCase().endsWith(".fb2")){
+//                    result.add(new FileItem( ImageEnum.Fb2, f.getName(), f.getPath(), f.isDirectory(), false));
                 } else {
                    // result.add(new FileItem( ImageEnum.Ebook, f.getName(), f.getPath(), f.isDirectory(), false));
                 }

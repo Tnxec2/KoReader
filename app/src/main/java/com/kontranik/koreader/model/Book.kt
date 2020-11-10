@@ -1,225 +1,121 @@
 package com.kontranik.koreader.model
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.text.Spannable
+import android.os.Build
 import android.text.SpannableStringBuilder
-import android.text.style.ImageSpan
-import com.kontranik.koreader.reader.PageSplitterOne
-import nl.siegmann.epublib.epub.EpubReader
+import android.util.Log
+import android.widget.TextView
+import androidx.annotation.RequiresApi
+import com.kontranik.koreader.reader.PageLoader
+import com.kontranik.koreader.utils.EbookHelper
+import com.kontranik.koreader.utils.EpubHelper
+import nl.siegmann.epublib.domain.Book
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.IOException
-import kotlin.math.max
-import kotlin.math.min
-import nl.siegmann.epublib.domain.Book as EpubBook
+import org.jsoup.select.Elements
 
+class Book(private var c: Context, private var fileLocation: String) {
 
-class Book(private var c: Context, private var fileLocation: String?) {
+    var curPage: Page? = Page(null, BookPosition())
+    var nextPage: Page? = null
+    var prevPage: Page? = null
 
-    private val TAG = "Book"
+    var schema: BookSchema = BookSchema()
 
-    var countPages: Int
-
-    private var eBook: EpubBook? = null
-    private var mEpubReader: EpubReader? = EpubReader()
+    var epubHelper: EpubHelper? = null
+    var epubBook: Book? = null
 
     init {
-        countPages = 0
         loadBook()
     }
 
     private fun loadBook() {
-        try {
-            val fileInputStream = FileInputStream(fileLocation)
-            eBook = mEpubReader?.readEpub(fileInputStream)
-            val mSize = eBook?.contents?.size
-            if ( mSize != null) {
-                countPages = mSize
+        if (fileLocation.endsWith("epub")) {
+            epubHelper = EpubHelper(c, fileLocation)
+            epubBook = epubHelper!!.epubBook
+            calculateSchema()
+        }
+    }
+
+    private fun calculateSchema() {
+        if ( epubBook == null || epubBook!!.contents.size == 0   ) return
+        schema = BookSchema()
+        schema.pageCount = epubBook!!.contents.size
+        for( pageIndex in 0 until schema.pageCount) {
+            var elementCount: Int
+            var paragraphCount = 0
+            var symbolCount = 0
+            val elements = getElements(pageIndex)
+            elementCount = elements!!.size
+            for( elementIndex in 0 until elementCount) {
+                val paragraphs = elements[elementIndex].data()?.split("\n")
+                if ( paragraphs != null ) {
+                    paragraphCount += paragraphs.size
+                    for (paragraphIndex in 0 until paragraphs.size) {
+                        symbolCount += paragraphs[paragraphIndex].length
+                    }
+                }
             }
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
+            schema.schema[pageIndex] = BookSchemaCount(elementCount, paragraphCount, symbolCount)
+            schema.elementCount += elementCount
+            schema.paragraphCount += paragraphCount
+            schema.symbolCount += symbolCount
         }
     }
 
     private fun getEpubPage(page: Int): String? {
-        if (page < 0 || page > countPages - 1) return null
-        val data: String?
-        try {
-            if (eBook != null) {
-                if (page > 0)  {
-                    data = String(eBook!!.contents[page].data)
-                    return data
-                }
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return null
-        }
-        return null
+        if (page < 0 || page > epubBook!!.contents.size - 1) return null
+        var data: String? = null
+        if (epubBook != null)  data = epubHelper?.getPage(page)
+        return data
     }
 
-    fun loadPage(page: Page, pageSplitter: PageSplitterOne): Page {
-        val result: Page
-
-        pageSplitter.clear()
-
-        var bookPage = page.startBookPosition.page
-        var lastElement = 0
-
-        // Log.d(TAG, "startWordIndex: " + page.startCursor.word)
-
-        while (bookPage > 0 && bookPage < countPages) {
-            val bookPageText = getEpubPage(bookPage)
-            val document = Jsoup.parse(bookPageText)
-            val elements = document.body().select("*")
-            lastElement = if ( bookPage == page.startBookPosition.page) page.startBookPosition.element else 0
-
-            while (lastElement < elements.size) {
-
-                val element = elements[lastElement]
-
-                val startParagraph = if ( bookPage == page.startBookPosition.page) page.startBookPosition.paragraph else 0
-                val startWord = if ( bookPage == page.startBookPosition.page && lastElement == page.startBookPosition.element) page.startBookPosition.symbol else 0
-
-                pageSplitter.append(getLine(element), startParagraph, startWord)
-                if ( pageSplitter.page != null) break
-                lastElement++
-            }
-
-            if ( pageSplitter.page != null) break
-            bookPage++
-        }
-
-        // Log.d(TAG, "*** pageEnde *** wordIndex: " + pageSplitter.wordIndex)
-        if ( bookPage == 0 ) {
-            result = coverPage(page, pageSplitter.pageWidth, pageSplitter.pageHeight)
-        } else {
-            bookPage = min(bookPage, countPages)
-            val pageElement = lastElement
-            val paragraph = pageSplitter.paragraphIndex
-            val symbol = pageSplitter.symbolIndex
-            val content = pageSplitter.page
-            val endCursor = BookPosition(bookPage, pageElement, paragraph, symbol)
-            result = Page(content, BookPosition(page.startBookPosition), endCursor )
-        }
-        return result
+    fun getCover(width: Int, height: Int): SpannableStringBuilder? {
+        return epubHelper?.epubBook?.let { epubHelper!!.getCover(width, height) }
     }
 
-    fun loadPageRevers(page: Page, pageSplitter: PageSplitterOne): Page? {
-        val result: Page
-
-        if ( page.endBookPosition.page == 0 && page.endBookPosition.element == 0 && page.endBookPosition.paragraph == 0 && page.endBookPosition.symbol == 0) return  null
-
-        pageSplitter.clear()
-
-        var bookPage = page.endBookPosition.page
-        var lastElement = 0
-        // Log.d(TAG, "startWordIndex: " + ( page.endCursor.word - 1) )
-
-        while (bookPage > 0) {
-            val bookPageText = getEpubPage(bookPage)
-            val document = Jsoup.parse(bookPageText)
-            val elements = document.body().select("*")
-            lastElement = if (bookPage == page.endBookPosition.page) page.endBookPosition.element else elements.size-1
-            while (lastElement > 0) {
-                val element = elements[lastElement]
-                val startParagraph = if (bookPage == page.endBookPosition.page) page.endBookPosition.paragraph else null
-                val startWord = if (bookPage == page.endBookPosition.page && lastElement == page.endBookPosition.element) max(page.endBookPosition.symbol - 1, 0)  else null
-
-                pageSplitter.appendRevers(getLine(element), startParagraph, startWord)
-                if (pageSplitter.page != null) break
-                lastElement--
-            }
-            if (pageSplitter.page != null) break
-            bookPage--
-        }
-        // Log.d(TAG, "*** pageEnde *** wordIndex: " + pageSplitter.wordIndex)
-
-        if ( bookPage == 0 ) {
-            result = coverPage(page, pageSplitter.pageWidth, pageSplitter.pageHeight)
-        } else {
-            bookPage = max(bookPage, 0)
-            val pageElement = max(lastElement, 0)
-            val paragraph = max(pageSplitter.paragraphIndex, 0)
-            val symbol = max(pageSplitter.symbolIndex, 0)
-            val content = pageSplitter.page
-            val startCursor = BookPosition(bookPage, pageElement, paragraph, symbol)
-            result = Page(content, startCursor, BookPosition(page.endBookPosition) )
-
-        }
-        return result
+    fun getElements(page: Int): Elements {
+        val aSection = epubHelper?.getPage(page)
+        val document = Jsoup.parse(aSection)
+        return document.body().select("*")
     }
 
-    private fun coverPage(page: Page, width: Int, height: Int): Page {
-        page.content = getCover(width, height)
-        val startCursor = BookPosition(0, 0, 0, 0)
-        val endCursor = BookPosition(1, 0, 0, 0)
-        return Page(getCover(width, height),startCursor, endCursor)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    fun loadPage(page: Page, textView: TextView): Page? {
+
+        return PageLoader(textView, this).loadPage(page)
     }
 
-    private fun getCover(pageWidth: Int, pageHeight: Int): SpannableStringBuilder {
-        val cover = eBook!!.coverImage
-        if ( cover != null ) {
-            val coverData = eBook!!.coverImage.data
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    fun loadPageRevers(page: Page, textView: TextView): Page? {
+        return PageLoader(textView, this).loadPageRevers(page)
+    }
 
-            var bitmap = BitmapFactory.decodeByteArray(coverData, 0, coverData.size)
-            bitmap = scaleBitmap(bitmap, pageWidth, pageHeight)
-
-            val span = ImageSpan(c, bitmap, ImageSpan.ALIGN_BASELINE)
-            val text = " "
-            val ssb = SpannableStringBuilder(text)
-            ssb.setSpan(span, 0, text.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            return ssb
-        } else {
-            val title = eBook!!.title
-            val authors = eBook!!.metadata.authors
-            val ssb = SpannableStringBuilder()
-            ssb.append(WordSequence(title, MyStyle.Title, c).data)
-            val author = authors.first()
-            ssb.append(WordSequence(author.firstname + " " + author.lastname , MyStyle.Italic, c).data)
-            return ssb
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    fun loadPage(pageView: TextView) {
+        loadCurPage(pageView)
+        loadPrevPage(pageView)
+        if ( prevPage != null && prevPage!!.recalculate && curPage != null ) {
+            curPage!!.startBookPosition = BookPosition(prevPage!!.endBookPosition)
+            loadCurPage(pageView)
         }
+        loadNextPage(pageView)
     }
 
-    private fun getLine(element: Element): Line {
-        val tag = element.normalName()
-        // Log.d(TAG, el);
-        // Log.d(TAG, element.ownText())
-        val myStyle = MyStyle.getFromString(tag)
-        val text = if (myStyle == MyStyle.Other) {
-                        "$tag::" + element.ownText()
-                    } else {
-                        element.ownText()
-                    }
-        return Line(text, myStyle)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun loadCurPage(pageView: TextView) {
+        Log.d("Book", "loadCurPage...")
+        curPage = loadPage(Page(null, curPage!!.startBookPosition), pageView)
     }
 
-    private fun scaleBitmap(bm: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap? {
-        var bm = bm
-        var width = bm.width.toFloat()
-        var height = bm.height.toFloat()
-        if (width > height) {
-            // landscape
-            val ratio = width / maxWidth
-            width = maxWidth.toFloat()
-            height = height / ratio
-        } else if (height > width) {
-            // portrait
-            val ratio = height / maxHeight
-            height = maxHeight.toFloat()
-            width = width / ratio
-        } else {
-            // square
-            height = maxHeight.toFloat()
-            width = maxWidth.toFloat()
-        }
-        bm = Bitmap.createScaledBitmap(bm, width.toInt(), height.toInt(), true)
-        return bm
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    fun loadNextPage(pageView: TextView) {
+        Log.d("Book", "loadNextPage...")
+        nextPage = loadPage(Page(null, BookPosition(curPage!!.endBookPosition)), pageView)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    fun loadPrevPage(pageView: TextView){
+        Log.d("Book", "loadPrevPage...")
+        prevPage = loadPageRevers(Page(null, BookPosition(), BookPosition(curPage!!.startBookPosition)), pageView)
     }
 }

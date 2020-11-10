@@ -2,17 +2,12 @@ package com.kontranik.koreader.model
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.res.Resources
-import android.graphics.Color
 import android.graphics.Typeface
-import android.os.Build
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
-import android.text.style.TypefaceSpan
-import androidx.annotation.RequiresApi
 import com.kontranik.koreader.R
 
 class WordSequence(var text: String, var style: MyStyle, c: Context) : ContextWrapper(c){
@@ -62,6 +57,9 @@ class WordSequence(var text: String, var style: MyStyle, c: Context) : ContextWr
                 wStyle = Typeface.BOLD
             }
             MyStyle.Italic -> {
+                wStyle = Typeface.ITALIC
+            }
+            MyStyle.Epigraph -> {
                 wStyle = Typeface.ITALIC
             }
             MyStyle.Other -> {

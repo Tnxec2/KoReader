@@ -8,6 +8,7 @@
     <color name="foreground_sepia">#5F4B32</color>
     <color name="foreground_sepia_title">#915100</color>
     <color name="background_main">#DEDEDE</color>
+    <color name="background_main_dialog">#FFFFFF</color>
     <color name="error">#FF0000</color>
 
     <color name="textview_normal">@color/foreground_sepia</color>
