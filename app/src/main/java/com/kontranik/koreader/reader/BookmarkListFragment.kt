@@ -48,7 +48,6 @@ class BookmarkListFragment : DialogFragment() {
         setStyle(STYLE_NO_TITLE, R.style.DialogTheme);
     }
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_bookmarklist, container)

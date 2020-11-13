@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 
 class BookInfo(
         val title: String?,
-        val cover: ByteArray?,
+        var cover: Bitmap?,
         val authors: List<Author>?,
         val filename: String,
         val path: String

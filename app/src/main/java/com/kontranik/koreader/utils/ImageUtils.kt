@@ -1,18 +1,31 @@
 package com.kontranik.koreader.utils
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import com.kontranik.koreader.R
-import java.io.ByteArrayOutputStream
+
 
 object ImageUtils {
     fun drawableToBitmap(drawable: Drawable): Bitmap {
+        var bitmap: Bitmap? = null
+
         if (drawable is BitmapDrawable) {
-            return drawable.bitmap
+            val bitmapDrawable = drawable
+            if (bitmapDrawable.bitmap != null) {
+                return bitmapDrawable.bitmap
+            }
         }
-        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+
+        bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
+            Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888) // Single color bitmap will be created of 1x1 pixel
+        } else {
+            Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        }
+
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
@@ -21,55 +34,25 @@ object ImageUtils {
 
     @JvmStatic
     fun getBitmap(c: Context, imageEnum: ImageEnum): Bitmap? {
-        val b = getBitmapData(c, imageEnum)
-        if (b != null) {
-            val bmp = BitmapFactory.decodeByteArray(b, 0, b.size)
-            val width = 100
-            val height = 100
-            val background = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            val originalWidth = bmp.width.toFloat()
-            val originalHeight = bmp.height.toFloat()
-            val canvas = Canvas(background)
-            val scale = width / originalWidth
-            val xTranslation = 0.0f
-            val yTranslation = (height - originalHeight * scale) / 2.0f
-            val transformation = Matrix()
-            transformation.postTranslate(xTranslation, yTranslation)
-            transformation.preScale(scale, scale)
-            val paint = Paint()
-            paint.isFilterBitmap = true
-            canvas.drawBitmap(bmp, transformation, paint)
-            return background
-        }
-        return null
-    }
 
-    private fun getBitmapData(c: Context, imageEnum: ImageEnum): ByteArray? {
-        var d: Drawable? = null
-        var cover: ByteArray? = null
-        when (imageEnum) {
-            ImageEnum.Parent -> d = c.resources.getDrawable(R.drawable.ic_baseline_arrow_back_24)
-            ImageEnum.SD -> d = c.resources.getDrawable(R.drawable.ic_baseline_sd_card_24)
-            ImageEnum.Dir -> d = c.resources.getDrawable(R.drawable.ic_folder_black_24dp)
-            else -> d = c.resources.getDrawable(R.drawable.ic_book_black_24dp)
+        val d = when (imageEnum) {
+            ImageEnum.Parent -> c.resources.getDrawable(R.drawable.ic_baseline_arrow_back_24)
+            ImageEnum.SD -> c.resources.getDrawable(R.drawable.ic_baseline_sd_card_24)
+            ImageEnum.Dir -> c.resources.getDrawable(R.drawable.ic_folder_black_24dp)
+            else -> c.resources.getDrawable(R.drawable.ic_book_black_24dp)
         }
-        if (d == null && cover == null) {
-            d = c.resources.getDrawable(R.drawable.ic_book_black_24dp)
-        }
-        if (d != null) {
-            val icon = drawableToBitmap(d)
-            val stream = ByteArrayOutputStream()
-            if (icon != null) {
-                icon.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                cover = stream.toByteArray()
-            }
-        }
-        return cover
+
+        val bitmap = drawableToBitmap(d)
+        return bitmap
     }
 
     fun byteArrayToScaledBitmap(byteArray: ByteArray, width: Int, height: Int): Bitmap {
         var bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
         return scaleBitmap(bitmap, width, height)
+    }
+
+    fun byteArrayToBitmap(byteArray: ByteArray): Bitmap {
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 
     fun scaleBitmap(bm: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {

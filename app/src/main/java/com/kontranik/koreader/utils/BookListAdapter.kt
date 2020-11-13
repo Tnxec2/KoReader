@@ -33,7 +33,7 @@ class BookListAdapter(
         holder.titleView.text = bookInfo.title
         holder.authorView.text = bookInfo.authorsAsString()
         if (bookInfo.cover != null) {
-            holder.imageView.setImageBitmap(ImageUtils.byteArrayToScaledBitmap(bookInfo.cover, 50, 100 ))
+            holder.imageView.setImageBitmap(ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100 ))
         }
         holder.pathView.text = bookInfo.path
 

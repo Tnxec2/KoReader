@@ -49,15 +49,11 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-
         return inflater.inflate(R.layout.fragment_quick_menu, container)
     }
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setStyle(STYLE_NO_FRAME, R.style.AppTheme);
-
 
         Log.d("QuickMenuFragment", view.context.theme.toString())
 

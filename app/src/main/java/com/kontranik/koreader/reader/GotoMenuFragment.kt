@@ -33,14 +33,11 @@ class GotoMenuFragment : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-
         return inflater.inflate(R.layout.fragment_goto_menu, container)
     }
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setStyle(STYLE_NO_FRAME, R.style.AppTheme);
 
         listener = activity as GotoMenuDialogListener?
 

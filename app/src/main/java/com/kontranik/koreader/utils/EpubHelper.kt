@@ -1,6 +1,7 @@
 package com.kontranik.koreader.utils
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.text.Html
 import android.text.Spannable
@@ -79,13 +80,13 @@ class EpubHelper(
         if (epubBook != null) {
             val t = epubBook!!.title
             val coverImage = epubBook!!.coverImage
-            var coverData: ByteArray? = null
+            var coverBitmap: Bitmap? = null
             if (coverImage != null) {
-                coverData = coverImage.data
+                if ( coverImage.data != null)  coverBitmap = ImageUtils.byteArrayToBitmap(coverImage.data)
             }
             return BookInfo(
                     title =  t,
-                    cover = coverData,
+                    cover = coverBitmap,
                     authors = getAuthors(epubBook!!),
                     path = path,
                     filename = File(path).name)
