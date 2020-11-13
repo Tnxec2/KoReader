@@ -1,0 +1,43 @@
+<resources>
+
+    <string-array name="theme_entries">
+        <item>@string/ThemeLight</item>
+        <item>@string/ThemeDark</item>
+        <item>@string/ThemeAutoSystem</item>
+    </string-array>
+
+    <string-array name="theme_values">
+        <item>Light</item>
+        <item>Dark</item>
+        <item>Auto</item>
+    </string-array>
+
+    <string-array name="brightness_entries">
+        <item>@string/brightness_values_system</item>
+        <item>@string/brightness_values_manual</item>
+    </string-array>
+
+    <string-array name="brightness_values">
+        <item>System</item>
+        <item>Manual</item>
+    </string-array>
+
+    <string-array name="orientation_enties">
+        <item>@string/orientation_values_sensor</item>
+        <item>@string/orientation_values_portrait</item>
+        <item>@string/orientation_values_portrait_sensor</item>
+        <item>@string/orientation_values_landscape</item>
+        <item>@string/orientation_values_landscape_sensor</item>
+    </string-array>
+
+    <string-array name="orientation_values">
+        <item>Sensor</item>
+        <item>Portrait</item>
+        <item>PortraitSensor</item>
+        <item>Landscape</item>
+        <item>LandscapeSensor</item>
+    </string-array>
+
+
+
+</resources>

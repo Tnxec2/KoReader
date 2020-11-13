@@ -3,7 +3,6 @@ package com.kontranik.koreader
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Point
 import android.os.Build
@@ -11,13 +10,14 @@ import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.View.OnLayoutChangeListener
 import android.view.Window
 import android.view.WindowManager
-import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 import com.kontranik.koreader.database.BookStatusDatabaseAdapter
 import com.kontranik.koreader.database.BookStatusService
 import com.kontranik.koreader.database.BookmarkService
@@ -25,11 +25,11 @@ import com.kontranik.koreader.database.BookmarksDatabaseAdapter
 import com.kontranik.koreader.model.*
 import com.kontranik.koreader.reader.*
 import com.kontranik.koreader.utils.PermissionsHelper
+import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
 import java.util.*
-import kotlin.math.max
-import kotlin.math.min
+
 
 class ReaderActivity :
         AppCompatActivity(),
@@ -39,37 +39,23 @@ class ReaderActivity :
         GotoMenuFragment.GotoMenuDialogListener
 {
 
-    private var layoutpars: WindowManager.LayoutParams? = null
-    private var systemScreenBrightnessLevel: Float = 0.5f
-    private var screenBrightnessLevelMin: Float = 0.01F
-    private var screenBrightnessLevelMax: Float = 1F
-    private var screenBrightnessLevel: Float = 0F
-    private var screenBrightnessLevelStep: Float = 0.01F
-
-    private var screenOrientation: Int = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    private val prefsHelper = PrefsHelper()
 
     private var book: Book? = null
 
     private var pageView: TextView? = null
-    //private var viewTreeObserver: ViewTreeObserver? = null
 
     private var textViewInfoCenter: TextView? = null
     private var textViewInfoLeft: TextView? = null
     private var textViewInfoRight: TextView? = null
 
-    private var pageViewHolderOuter: RelativeLayout? = null
-
     var width: Int = 100
+    var fullwidth: Int = 100
     var height: Int = 100
-    private var textSize: Float = 0f
-    private val fontDefault: TypefaceRecord = TypefaceRecord.DEFAULT
-    private var font: TypefaceRecord = fontDefault
-    private var defaultTextSize: Float = 0f
+    var fullheight: Int = 100
 
     private var settings: SharedPreferences? = null
     private var prefEditor: SharedPreferences.Editor? = null
-
-    private var bookPath: String? = null
 
     private var bookStatusService: BookStatusService? = null
 
@@ -78,56 +64,24 @@ class ReaderActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        try {
-            if (Build.VERSION.SDK_INT >= 21) {
-                val window: Window = window
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
-
-                val nightModeFlags: Int = this.getResources().getConfiguration().uiMode and
-                        Configuration.UI_MODE_NIGHT_MASK
-                when (nightModeFlags) {
-                    Configuration.UI_MODE_NIGHT_YES -> {
-
-                    }
-                    Configuration.UI_MODE_NIGHT_NO -> {
-                        window.decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);//  set status text dark
-                    }
-                    Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        layoutpars = window.attributes
-        systemScreenBrightnessLevel = layoutpars!!.screenBrightness
-
-        layoutpars!!.screenOrientation = screenOrientation
-        window.attributes = layoutpars
+        loadSettings()
+        loadPrefs()
 
         setContentView(R.layout.activity_reader_main)
 
         bookStatusService = BookStatusService(BookStatusDatabaseAdapter(this))
 
         pageView = findViewById(R.id.textView_pageview)
-
-        defaultTextSize = resources.getDimension(R.dimen.text_size)
-        textSize = defaultTextSize
-
-        settings = getSharedPreferences(PREFS_FILE, MODE_PRIVATE)
-        loadPrefs()
-
         TextViewInitiator.initiateTextView(pageView!!, "")
-        pageView!!.textSize = textSize
-        pageView!!.typeface = font.getTypeface()
+        pageView!!.textSize = prefsHelper.textSize
+        pageView!!.typeface = prefsHelper.font.getTypeface()
+        pageView!!.addOnLayoutChangeListener(OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            updateSizeInfo()
+        })
 
         textViewInfoCenter = findViewById(R.id.tv_infotext_center)
         textViewInfoLeft = findViewById(R.id.tv_infotext_left)
         textViewInfoRight = findViewById(R.id.tv_infotext_right)
-
-        pageViewHolderOuter = findViewById(R.id.pageViewHolderOuter)
 
         setOnClickListener()
 
@@ -157,10 +111,10 @@ class ReaderActivity :
     }
 
     private fun loadBook() {
-        Log.d(TAG, "loadBook: $bookPath")
-        book =  Book(applicationContext, bookPath!!)
+        Log.d(TAG, "loadBook: ${prefsHelper.bookPath}")
+        book =  Book(applicationContext, prefsHelper.bookPath!!)
         if ( book != null ) {
-            bookStatusService!!.updateLastOpenTime(bookPath!!)
+            bookStatusService!!.updateLastOpenTime(prefsHelper.bookPath!!)
         }
     }
 
@@ -170,6 +124,7 @@ class ReaderActivity :
                 if (data != null && data.hasExtra(PREF_TYPE)) {
                     when (data.getIntExtra(PREF_TYPE, 0)) {
                         PREF_TYPE_OPEN_BOOK -> openBookFromIntent(data)
+                        PREF_TYPE_SETTINGS -> loadSettings()
                     }
                 }
             } else{
@@ -178,11 +133,10 @@ class ReaderActivity :
         } else if ( requestCode == REQUEST_ACCESS_QUICK_MENU) {
             if(resultCode==RESULT_OK){
                 if (data != null ) {
-
-                    if ( data.hasExtra(PREF_BOOK_TEXT_SIZE) ) {
-                        textSize = data.getFloatExtra(PREF_BOOK_TEXT_SIZE, defaultTextSize)
+                    if ( data.hasExtra(PrefsHelper.PREF_BOOK_TEXT_SIZE) ) {
+                        prefsHelper.textSize = data.getFloatExtra(PrefsHelper.PREF_BOOK_TEXT_SIZE, prefsHelper.defaultTextSize)
                         savePrefs()
-                        pageView!!.textSize = textSize
+                        pageView!!.textSize = prefsHelper.textSize
                         book!!.loadPage(pageView!!)
                         updateView()
                     }
@@ -196,8 +150,8 @@ class ReaderActivity :
     }
 
     private fun openBookFromIntent(data: Intent) {
-        if ( data.hasExtra(PREF_BOOK_PATH) ) {
-            bookPath = data.getStringExtra(PREF_BOOK_PATH)
+        if ( data.hasExtra(PrefsHelper.PREF_BOOK_PATH) ) {
+            prefsHelper.bookPath = data.getStringExtra(PrefsHelper.PREF_BOOK_PATH)
             savePrefs()
             loadPositionForBook()
             loadBook()
@@ -208,7 +162,7 @@ class ReaderActivity :
 
     private fun loadPositionForBook() {
         if ( book == null) return
-        val startPosition = bookStatusService!!.getPosition(bookPath!!) ?: BookPosition()
+        val startPosition = bookStatusService!!.getPosition(prefsHelper.bookPath!!) ?: BookPosition()
 
         book!!.curPage = Page(null, startPosition, BookPosition())
         book!!.nextPage = null
@@ -216,8 +170,8 @@ class ReaderActivity :
     }
 
     private fun savePositionForBook() {
-        if ( bookPath != null && book != null && book!!.curPage != null) {
-            bookStatusService!!.savePosition(bookPath!!, book!!.curPage!!.startBookPosition)
+        if ( prefsHelper.bookPath != null && book != null && book!!.curPage != null) {
+            bookStatusService!!.savePosition(prefsHelper.bookPath!!, book!!.curPage!!.startBookPosition)
         }
     }
 
@@ -232,39 +186,79 @@ class ReaderActivity :
     }
 
     private fun loadPrefs() {
-        if ( settings!!.contains(PREF_BOOK_PATH) ) {
-            bookPath = settings!!.getString(PREF_BOOK_PATH, null)
-        }
-        if ( settings!!.contains(PREF_BOOK_TEXT_SIZE) ) {
-            textSize = settings!!.getFloat(PREF_BOOK_TEXT_SIZE, defaultTextSize)
-        }
-        if ( settings!!.contains(PREF_SCREENBRIGHTNESS) ) {
-            screenBrightnessLevel = settings!!.getFloat(PREF_SCREENBRIGHTNESS, systemScreenBrightnessLevel)
-            setScreenBrightness(screenBrightnessLevel)
+        prefsHelper.defaultTextSize = resources.getDimension(R.dimen.text_size)
+        prefsHelper.textSize = prefsHelper.defaultTextSize
+
+        settings = getSharedPreferences(PREFS_FILE, MODE_PRIVATE)
+
+        if ( settings!!.contains(PrefsHelper.PREF_BOOK_PATH) ) {
+            prefsHelper.bookPath = settings!!.getString(PrefsHelper.PREF_BOOK_PATH, null)
         }
 
-        if ( settings!!.contains(PREF_BOOK_FONT_PATH) ) {
-            val fontpath = settings!!.getString(PREF_BOOK_FONT_PATH, null)
+        if ( settings!!.contains(PrefsHelper.PREF_BOOK_TEXT_SIZE) ) {
+            prefsHelper.textSize = settings!!.getFloat(PrefsHelper.PREF_BOOK_TEXT_SIZE, prefsHelper.defaultTextSize)
+        }
+
+        if ( settings!!.contains(PrefsHelper.PREF_SCREEN_BRIGHTNESS) ) {
+            prefsHelper.screenBrightnessLevel = settings!!.getFloat(PrefsHelper.PREF_SCREEN_BRIGHTNESS, prefsHelper.systemScreenBrightnessLevel)
+            prefsHelper.setScreenBrightness(this, prefsHelper.screenBrightnessLevel)
+        }
+
+        if ( settings!!.contains(PrefsHelper.PREF_BOOK_FONT_PATH) ) {
+            val fontpath = settings!!.getString(PrefsHelper.PREF_BOOK_FONT_PATH, null)
             if ( fontpath != null) {
                 val fontFile = File(fontpath)
                 if ( fontFile.isFile && fontFile.canRead() ) {
-                    font = TypefaceRecord(name = fontFile.name, file = fontFile)
+                    prefsHelper.font = TypefaceRecord(name = fontFile.name, file = fontFile)
                 }
             }
-        } else if ( settings!!.contains(PREF_BOOK_FONT_NAME)) {
-            font = TypefaceRecord(
-                    name = settings!!.getString(PREF_BOOK_FONT_NAME, TypefaceRecord.SANSSERIF)!!)
+        } else if ( settings!!.contains(PrefsHelper.PREF_BOOK_FONT_NAME)) {
+            prefsHelper.font = TypefaceRecord(
+                    name = settings!!.getString(PrefsHelper.PREF_BOOK_FONT_NAME, TypefaceRecord.SANSSERIF)!!)
         }
     }
 
     private fun savePrefs() {
         prefEditor = settings!!.edit()
-        prefEditor!!.putString(PREF_BOOK_PATH, bookPath)
-        prefEditor!!.putFloat(PREF_BOOK_TEXT_SIZE, textSize)
-        prefEditor!!.putFloat(PREF_SCREENBRIGHTNESS, screenBrightnessLevel)
-        if ( font.file != null) prefEditor!!.putString(PREF_BOOK_FONT_PATH, font.file!!.absolutePath)
-        else prefEditor!!.putString(PREF_BOOK_FONT_NAME, font.name)
+        prefEditor!!.putString(PrefsHelper.PREF_BOOK_PATH, prefsHelper.bookPath)
+        prefEditor!!.putFloat(PrefsHelper.PREF_BOOK_TEXT_SIZE, prefsHelper.textSize)
+        prefEditor!!.putFloat(PrefsHelper.PREF_SCREEN_BRIGHTNESS, prefsHelper.screenBrightnessLevel)
+        if ( prefsHelper.font.file != null) prefEditor!!.putString(PrefsHelper.PREF_BOOK_FONT_PATH, prefsHelper.font.file!!.absolutePath)
+        else prefEditor!!.putString(PrefsHelper.PREF_BOOK_FONT_NAME, prefsHelper.font.name)
         prefEditor!!.apply()
+    }
+
+    private fun loadSettings() {
+        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        prefsHelper.theme = prefs.getString(PrefsHelper.PREF_KEY_THEME, "Auto")
+        prefsHelper.screenOrientation = prefs.getString(PrefsHelper.PREF_KEY_ORIENTATION, "PortraitSensor")
+        prefsHelper.screenBrightness = prefs.getString(PrefsHelper.PREF_KEY_BRIGHTNESS, "Manual")
+
+        prefsHelper.setOrientation(this)
+        prefsHelper.setBrightness(this)
+        prefsHelper.setTheme()
+
+        try {
+            if (Build.VERSION.SDK_INT >= 21) {
+                val window: Window = window
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
+
+                when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+                    Configuration.UI_MODE_NIGHT_YES -> {
+                    }
+                    Configuration.UI_MODE_NIGHT_NO -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR // set status text dark
+                        }
+                    }
+                    Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -307,22 +301,12 @@ class ReaderActivity :
 
             override fun onSlideUp(point: Point) {
                 super.onSlideUp(point)
-                //if ( point.y < 32 || point.y > width-32) {
-                screenBrightnessLevel += screenBrightnessLevelStep
-                screenBrightnessLevel = min(screenBrightnessLevel, screenBrightnessLevelMax)
-                textViewInfoRight!!.text = (screenBrightnessLevel * 100).toString()
-                setScreenBrightness(screenBrightnessLevel)
-                //}
+                prefsHelper.increaseScreenBrghtness(this@ReaderActivity, point, fullwidth)
             }
 
             override fun onSlideDown(point: Point) {
                 super.onSlideDown(point)
-                //if ( point.y < 32 || point.y > width-32) {
-                screenBrightnessLevel -= screenBrightnessLevelStep
-                screenBrightnessLevel = max(screenBrightnessLevel, screenBrightnessLevelMin)
-                textViewInfoRight!!.text = (screenBrightnessLevel * 100).toString()
-                setScreenBrightness(screenBrightnessLevel)
-                //}
+                prefsHelper.decreaseScreenBrghtness(this@ReaderActivity, point, fullwidth)
             }
 
             override fun onClick(point: Point) {
@@ -344,6 +328,8 @@ class ReaderActivity :
                     ScreenZone.MiddleCenter -> {
                         openQuickMenu()
                     }
+                    else -> {
+                    }
                 }
                 textViewInfoRight!!.text = resources.getString(R.string.doubleclick_in_zone, zone)
             }
@@ -354,6 +340,8 @@ class ReaderActivity :
                 when (zone) {
                     ScreenZone.MiddleCenter -> {
                         openMainMenu()
+                    }
+                    else -> {
                     }
                 }
                 textViewInfoRight!!.text = resources.getString(R.string.longclick_in_zone, zone)
@@ -377,24 +365,17 @@ class ReaderActivity :
     }
 
     private fun updateSizeInfo() {
+        fullwidth = pageView!!.measuredWidth
+        fullheight = pageView!!.measuredHeight
         width = pageView!!.measuredWidth - pageView!!.paddingLeft - pageView!!.paddingRight
         height = pageView!!.measuredHeight - pageView!!.paddingTop - pageView!!.paddingBottom
 
-        book!!.loadPage(pageView!!)
-        updateView()
-        /*
-        viewTreeObserver = pageView!!.viewTreeObserver
-        viewTreeObserver!!.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                pageView!!.viewTreeObserver.removeGlobalOnLayoutListener(this)
-                width = pageView!!.measuredWidth - pageView!!.paddingLeft - pageView!!.paddingRight
-                height = pageView!!.measuredHeight - pageView!!.paddingTop - pageView!!.paddingBottom
+        Toast.makeText(this, fullwidth.toString() + " x " + fullheight.toString(), Toast.LENGTH_SHORT).show()
 
-                book!!.loadPage(pageView!!)
-                updateView()
-            }
-        })
-        */
+        if ( book != null) {
+            book!!.loadPage(pageView!!)
+            updateView()
+        }
     }
 
     private fun doPageNext() {
@@ -424,7 +405,7 @@ class ReaderActivity :
             var curSection = book!!.curPage!!.endBookPosition.section
             curSection++
 
-            var curPage = 0;
+            var curPage = 0
             for (i in 0 .. curSection-2) {
                 curPage += book!!.scheme.scheme[i]!!.textPages
             }
@@ -436,7 +417,7 @@ class ReaderActivity :
             textViewInfoCenter!!.text =
                     resources.getString(R.string.page_info_text, curSection, book!!.scheme.sectionCount)
         } else {
-            textViewInfoCenter!!.text = "no Book"
+            textViewInfoCenter!!.text = getString(R.string.no_book) 
         }
     }
 
@@ -452,7 +433,7 @@ class ReaderActivity :
     }
 
     private fun openQuickMenu() {
-        val quickMenuFragment: QuickMenuFragment = QuickMenuFragment.newInstance(textSize, font)
+        val quickMenuFragment: QuickMenuFragment = QuickMenuFragment.newInstance(prefsHelper.textSize, prefsHelper.font)
         quickMenuFragment.show(supportFragmentManager, "fragment_quick_menu")
     }
 
@@ -466,10 +447,10 @@ class ReaderActivity :
 
     override fun onFinishQuickMenuDialog(textSize: Float, font: TypefaceRecord?) {
         Log.d(TAG, "onFinishQuickMenuDialog. TextSize: $textSize")
-        this.textSize = textSize
+        prefsHelper.textSize = textSize
         pageView!!.textSize = textSize
         if ( font != null) {
-            this.font = font
+            prefsHelper.font = font
             pageView!!.typeface = font.getTypeface()
         }
         book!!.loadPage(pageView!!)
@@ -484,7 +465,7 @@ class ReaderActivity :
     }
 
     override fun onCancelQuickMenu() {
-        pageView!!.textSize = textSize
+        pageView!!.textSize = prefsHelper.textSize
         book!!.loadPage(pageView!!)
         updateView()
         // ... other resets
@@ -493,7 +474,7 @@ class ReaderActivity :
     override fun onAddBookmark(): Boolean {
         val bookmarkService = BookmarkService(BookmarksDatabaseAdapter(this))
         val bookmark = Bookmark(
-                path = bookPath!!,
+                path = prefsHelper.bookPath!!,
                 text = pageView!!.text.toString().substring(0, 100),
                 position_section = book!!.curPage!!.startBookPosition.section,
                 position_offset = book!!.curPage!!.startBookPosition.offSet,
@@ -508,15 +489,15 @@ class ReaderActivity :
     }
 
     override fun onShowBookmarklist() {
-        if ( bookPath == null ) return
-        val bookmarkListFragment: BookmarkListFragment = BookmarkListFragment.newInstance(bookPath!!)
+        if ( prefsHelper.bookPath == null ) return
+        val bookmarkListFragment: BookmarkListFragment = BookmarkListFragment.newInstance(prefsHelper.bookPath!!)
         bookmarkListFragment.show(supportFragmentManager, "fragment_bookmark_list")
     }
 
     override fun onAccessGrantedReadExternalStorage() {
-        if (bookPath != null) {
-            loadBook();
-            loadPositionForBook();
+        if (prefsHelper.bookPath != null) {
+            loadBook()
+            loadPositionForBook()
             updateSizeInfo()
         } else  {
             Toast.makeText(applicationContext, "Open a book", Toast.LENGTH_LONG).show()
@@ -541,11 +522,6 @@ class ReaderActivity :
         updateView()
     }
 
-    fun setScreenBrightness(level: Float) {
-        layoutpars!!.screenBrightness = level
-        window.attributes = layoutpars
-    }
-
     companion object {
         private const val TAG = "ReaderActivity"
         private const val PREFS_FILE = "MainActivitySettings"
@@ -553,11 +529,7 @@ class ReaderActivity :
         const val REQUEST_ACCESS_QUICK_MENU = 2
         const val PREF_TYPE = "ReturnType"
         const val PREF_TYPE_OPEN_BOOK = 121
-        const val PREF_BOOK_PATH = "BookPath"
-        const val PREF_BOOK_TEXT_SIZE = "TextSize"
-        const val PREF_BOOK_FONT_NAME = "FontName"
-        const val PREF_BOOK_FONT_PATH = "FontPath"
-        const val PREF_SCREENBRIGHTNESS = "screenbrightness"
+        const val PREF_TYPE_SETTINGS = 122
     }
 
 }

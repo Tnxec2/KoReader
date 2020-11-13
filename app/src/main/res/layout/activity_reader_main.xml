@@ -9,9 +9,10 @@
     android:textColor="@color/foreground_main"
     >
 
-    <RelativeLayout
-        android:id="@+id/pageViewHolderOuter"
-        android:layout_width="0dp"
+
+    <TextView
+        android:id="@+id/textView_pageview"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:paddingStart="@dimen/padding_textview_left"
         android:paddingLeft="@dimen/padding_textview_left"
@@ -19,19 +20,14 @@
         android:paddingEnd="@dimen/padding_textview_right"
         android:paddingRight="@dimen/padding_textview_right"
         android:paddingBottom="@dimen/padding_textview_bottom"
+        android:text=""
+        android:textIsSelectable="true"
+
         app:layout_constraintBottom_toTopOf="@+id/ll_infobereich"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        >
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/textView_pageview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textIsSelectable="true"
-            android:text="" />
-     </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/ll_infobereich"
@@ -49,7 +45,7 @@
         android:id="@+id/tv_infotext_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="left"
+        android:gravity=""
         android:text="@string/info" />
         <Space
             android:layout_width="0dp"
@@ -59,7 +55,7 @@
         android:id="@+id/tv_infotext_center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:gravity=""
         android:text="@string/info"
  />
         <Space
@@ -70,7 +66,7 @@
         android:id="@+id/tv_infotext_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="right"
+        android:gravity=""
         android:text="@string/info"
  />
 

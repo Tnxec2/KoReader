@@ -47,7 +47,8 @@ class MainMenuActivity : AppCompatActivity() {
     }
 
     private fun settings() {
-        Toast.makeText(applicationContext, "Settings", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivityForResult(intent, REQUEST_ACCESS_TYPE_SETTINGS)
     }
 
     private fun openLastOpened() {
@@ -56,7 +57,7 @@ class MainMenuActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if( requestCode==REQUEST_ACCESS_TYPE_OPENFILE ){
+        if( requestCode==REQUEST_ACCESS_TYPE_OPENFILE || requestCode==REQUEST_ACCESS_TYPE_SETTINGS ){
             if(resultCode==RESULT_OK){
                 if (data != null) {
                     setResult(RESULT_OK, data)

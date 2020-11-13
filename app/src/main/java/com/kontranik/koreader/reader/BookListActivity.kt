@@ -12,6 +12,7 @@ import com.kontranik.koreader.database.BookStatusService
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.utils.BookListAdapter
 import com.kontranik.koreader.utils.EpubHelper
+import com.kontranik.koreader.utils.PrefsHelper
 import java.io.File
 
 
@@ -44,7 +45,7 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
     private fun openBook(path: String) {
         val data = Intent()
         data.putExtra(ReaderActivity.PREF_TYPE, ReaderActivity.PREF_TYPE_OPEN_BOOK)
-        data.putExtra(ReaderActivity.PREF_BOOK_PATH, path)
+        data.putExtra(PrefsHelper.PREF_BOOK_PATH, path)
         setResult(RESULT_OK, data)
         finish()
     }
