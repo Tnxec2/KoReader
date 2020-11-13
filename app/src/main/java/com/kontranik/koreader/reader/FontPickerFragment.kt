@@ -23,7 +23,7 @@ class FontPickerFragment :
 
     var listener: FontPickerDialogListener? = null
 
-    private var fontList: MutableList<TypefaceRecord>? = null
+    private var fontList: MutableList<TypefaceRecord> = mutableListOf()
 
     private var selectedFont: TypefaceRecord? = null
     private var textSize: Float = 0F
@@ -65,13 +65,16 @@ class FontPickerFragment :
         try {
             fonts = FontManager.enumerateFonts(false)
             // val collectedFonts = ZLTTFInfoDetector().collectFonts(fonts!!.values)
+            val collectedFonts: MutableList<TypefaceRecord> = mutableListOf()
             if ( fonts != null) {
                 for (fontName in fonts.keys) {
-                    fontList!!.add(TypefaceRecord(
+                    collectedFonts.add(TypefaceRecord(
                             name = fontName,
                             file = fonts[fontName]!!))
                 }
             }
+            collectedFonts.sortBy { it.name }
+            fontList.addAll(collectedFonts)
         } catch (e: Exception) {
             if (e is RuntimeException) {
                 throw e
@@ -104,7 +107,7 @@ class FontPickerFragment :
         }
         fontListView.scrollToPosition(pos)
 
-        val itemListener = AdapterView.OnItemClickListener { parent, v, position, id ->
+        AdapterView.OnItemClickListener { parent, v, position, id ->
             selectedFont = fontList!![position]
         }
 
