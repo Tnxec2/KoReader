@@ -11,9 +11,7 @@ class DatabaseHelper(val context: Context?) : SQLiteOpenHelper(context, DATABASE
                 + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + BookStatusHelper.COLUMN_PATH + " TEXT, "
                 + BookStatusHelper.COLUMN_POSITION_PAGE + " NUMBER, "
-                + BookStatusHelper.COLUMN_POSITION_ELEMENT + " NUMBER, "
-                + BookStatusHelper.COLUMN_POSITION_PARAGRAPH + " NUMBER, "
-                + BookStatusHelper.COLUMN_POSITION_SYMBOL + " NUMBER, "
+                + BookStatusHelper.COLUMN_POSITION_OFFSET + " NUMBER, "
                 + BookStatusHelper.COLUMN_LAST_OPEN_TIME + " NUMBER "
 
                 + ");")
@@ -24,9 +22,7 @@ class DatabaseHelper(val context: Context?) : SQLiteOpenHelper(context, DATABASE
                 + BookmarksHelper.COLUMN_TEXT + " TEXT, "
                 + BookmarksHelper.COLUMN_SORT + " TEXT, "
                 + BookmarksHelper.COLUMN_POSITION_PAGE + " NUMBER, "
-                + BookmarksHelper.COLUMN_POSITION_ELEMENT + " NUMBER, "
-                + BookmarksHelper.COLUMN_POSITION_PARAGRAPH + " NUMBER, "
-                + BookmarksHelper.COLUMN_POSITION_SYMBOL + " NUMBER , "
+                + BookmarksHelper.COLUMN_POSITION_OFFSET + " NUMBER, "
                 + BookmarksHelper.COLUMN_CREATE_DATE + " NUMBER "
                 + ");")
     }
@@ -38,12 +34,17 @@ class DatabaseHelper(val context: Context?) : SQLiteOpenHelper(context, DATABASE
                     BookmarksHelper.COLUMN_CREATE_DATE + " NUMBER;")
             db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
                     BookStatusHelper.COLUMN_LAST_OPEN_TIME + " NUMBER;")
+        } else if ( oldVersion < 3) {
+            db.execSQL("ALTER TABLE " + BookmarksHelper.TABLE + " ADD COLUMN " +
+                    BookmarksHelper.COLUMN_POSITION_OFFSET + " NUMBER;")
+            db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
+                    BookStatusHelper.COLUMN_POSITION_OFFSET + " NUMBER;")
         }
     }
 
 
     companion object {
         private const val DATABASE_NAME = "books.db" // db name
-        private const val SCHEMA = 2 // db version
+        private const val SCHEMA = 3 // db version
     }
 }

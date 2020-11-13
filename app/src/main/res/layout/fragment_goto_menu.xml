@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/activity_padding"
+    android:layout_gravity="center_vertical"
+    tools:layout_editor_absoluteX="16dp"
+    android:background="@color/background_main_dialog"
+    android:textColor="@color/foreground_main_dialog"
+
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/go_to"
+            android:textSize="@dimen/text_size_dialog_title"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/section" />
+
+        <ImageButton
+            android:id="@+id/imageView_goto_menu_section_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:clickable="true"
+            app:srcCompat="@drawable/ic_baseline_arrow_left_24"
+            android:focusable="true"
+            android:contentDescription="@string/left" />
+
+        <TextView
+            android:id="@+id/textView_goto_menu_section"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:text="@string/section" />
+
+        <ImageButton
+            android:id="@+id/imageView_goto_menu_section_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:clickable="true"
+            app:srcCompat="@drawable/ic_baseline_arrow_right_24"
+            android:focusable="true"
+            android:contentDescription="@string/right" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        >
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/imageButton_quickmenu_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_baseline_check_24"
+            android:contentDescription="@string/save" />
+
+        <ImageButton
+            android:id="@+id/imageButton_quickmenu_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_baseline_close_24"
+            android:contentDescription="@string/back" />
+
+
+    </LinearLayout>
+
+</LinearLayout>

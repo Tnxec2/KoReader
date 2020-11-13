@@ -2,6 +2,7 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="activity_padding">16dp</dimen>
 
     <dimen name="padding_textview_left">16dp</dimen>
     <dimen name="padding_textview_top">16dp</dimen>
@@ -13,18 +14,18 @@
     <dimen name="padding_textview_right_fullscreen">6dp</dimen>
     <dimen name="padding_textview_bottom_fullscreen">6dp</dimen>
 
-    <dimen name="text_size">13dp</dimen>
+    <dimen name="text_size">13sp</dimen>
 
-    <dimen name="text_size_file_path">10dp</dimen>
-    <dimen name="text_size_file_desc">10dp</dimen>
-    <dimen name="text_size_file_name">13dp</dimen>
+    <dimen name="text_size_file_path">10sp</dimen>
+    <dimen name="text_size_file_desc">10sp</dimen>
+    <dimen name="text_size_file_name">13sp</dimen>
 
-    <dimen name="text_size_dialog_title">16dp</dimen>
+    <dimen name="text_size_dialog_title">16sp</dimen>
 
-    <dimen name="h1">26dp</dimen>
-    <dimen name="h2">19.5dp</dimen>
-    <dimen name="h3">15.21dp</dimen>
-    <dimen name="h4">13dp</dimen>
-    <dimen name="h5">10.79dp</dimen>
-    <dimen name="h6">8.71dp</dimen>
+    <dimen name="h1">26sp</dimen>
+    <dimen name="h2">19.5sp</dimen>
+    <dimen name="h3">15.21sp</dimen>
+    <dimen name="h4">13sp</dimen>
+    <dimen name="h5">10.79sp</dimen>
+    <dimen name="h6">8.71sp</dimen>
 </resources>

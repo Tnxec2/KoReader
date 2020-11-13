@@ -11,8 +11,8 @@ class BookStatusService(var adapter: BookStatusDatabaseAdapter) {
         val bookStatus = adapter.getBookStatusByPath(path)
         if ( bookStatus == null) {
             adapter.insert(
-                    BookStatus(null, path, bookPosition.page,
-                            bookPosition.element, bookPosition.paragraph, bookPosition.symbol))
+                    BookStatus(null, path, bookPosition.section,
+                            bookPosition.offSet))
         } else {
             bookStatus.updatePosition(bookPosition)
             adapter.update(bookStatus)
@@ -39,8 +39,21 @@ class BookStatusService(var adapter: BookStatusDatabaseAdapter) {
         return if ( bookStatus == null )
             null
         else {
-            BookPosition(bookStatus.position_page, bookStatus.position_element, bookStatus.position_paragraph, bookStatus.position_symbol)
+            BookPosition(bookStatus.position_page, bookStatus.position_offset)
         }
+    }
+
+    fun getLastOpened(count: Int): MutableList<BookStatus> {
+        adapter.open()
+        val result = adapter.getLastOpened(count)
+        adapter.close()
+        return result
+    }
+
+    fun delete(id: Long) {
+        adapter.open()
+        adapter.delete(id)
+        adapter.close()
     }
 
     fun cleanup() {

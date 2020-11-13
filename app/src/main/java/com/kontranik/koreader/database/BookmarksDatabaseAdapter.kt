@@ -32,9 +32,7 @@ class BookmarksDatabaseAdapter(val context: Context) {
                     BookmarksHelper.COLUMN_TEXT,
                     BookmarksHelper.COLUMN_SORT,
                     BookmarksHelper.COLUMN_POSITION_PAGE,
-                    BookmarksHelper.COLUMN_POSITION_ELEMENT,
-                    BookmarksHelper.COLUMN_POSITION_PARAGRAPH,
-                    BookmarksHelper.COLUMN_POSITION_SYMBOL,
+                    BookmarksHelper.COLUMN_POSITION_OFFSET,
                     BookmarksHelper.COLUMN_CREATE_DATE
             )
             return database!!.query(
@@ -52,11 +50,9 @@ class BookmarksDatabaseAdapter(val context: Context) {
                     val text: String = cursor.getString(cursor.getColumnIndex(BookmarksHelper.COLUMN_TEXT))
                     val sort: String = cursor.getString(cursor.getColumnIndex(BookmarksHelper.COLUMN_SORT))
                     val page: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_PAGE))
-                    val element: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_ELEMENT))
-                    val paragraph: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_PARAGRAPH))
-                    val symbol: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_SYMBOL))
+                    val offset: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_OFFSET))
                     val createDate: Long = cursor.getLong(cursor.getColumnIndex(BookmarksHelper.COLUMN_CREATE_DATE))
-                    bookmarks.add(Bookmark(id, path = path, text = text, sort = sort, page, element, paragraph, symbol, createDate))
+                    bookmarks.add(Bookmark(id, path = path, text = text, sort = sort, page, offset, createDate))
                 } while (cursor.moveToNext())
             }
             cursor.close()
@@ -75,23 +71,19 @@ class BookmarksDatabaseAdapter(val context: Context) {
             val text: String = cursor.getString(cursor.getColumnIndex(BookmarksHelper.COLUMN_TEXT))
             val sort: String = cursor.getString(cursor.getColumnIndex(BookmarksHelper.COLUMN_SORT))
             val page: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_PAGE))
-            val element: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_ELEMENT))
-            val paragraph: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_PARAGRAPH))
-            val symbol: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_SYMBOL))
+            val offset: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_OFFSET))
             val createDate: Long = cursor.getLong(cursor.getColumnIndex(BookmarksHelper.COLUMN_CREATE_DATE))
-            bookmark = Bookmark(id, path = path, text = text, sort = sort, page, element, paragraph, symbol, createDate)
+            bookmark = Bookmark(id, path = path, text = text, sort = sort, page, offset, createDate)
         }
         cursor.close()
         return bookmark
     }
 
     fun getBookmarskByPath(inputPath: String): List<Bookmark> {
-        val query = String.format("SELECT * FROM %s WHERE %s=? ORDER BY %s ASC, %s ASC, %s ASC, %s ASC, %s DESC ", BookmarksHelper.TABLE,
+        val query = String.format("SELECT * FROM %s WHERE %s=? ORDER BY %s ASC, %s ASC, %s DESC ", BookmarksHelper.TABLE,
                 BookmarksHelper.COLUMN_PATH,
                 BookmarksHelper.COLUMN_POSITION_PAGE,
-                BookmarksHelper.COLUMN_POSITION_ELEMENT,
-                BookmarksHelper.COLUMN_POSITION_PARAGRAPH,
-                BookmarksHelper.COLUMN_POSITION_SYMBOL,
+                BookmarksHelper.COLUMN_POSITION_OFFSET,
                 BookmarksHelper.COLUMN_CREATE_DATE
         )
         val bookmarks: MutableList<Bookmark> = mutableListOf()
@@ -103,11 +95,9 @@ class BookmarksDatabaseAdapter(val context: Context) {
                 val text: String = cursor.getString(cursor.getColumnIndex(BookmarksHelper.COLUMN_TEXT))
                 val sort: String = cursor.getString(cursor.getColumnIndex(BookmarksHelper.COLUMN_SORT))
                 val page: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_PAGE))
-                val element: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_ELEMENT))
-                val paragraph: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_PARAGRAPH))
-                val symbol: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_SYMBOL))
+                val offset: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_OFFSET))
                 val createDate: Long = cursor.getLong(cursor.getColumnIndex(BookmarksHelper.COLUMN_CREATE_DATE))
-                bookmarks.add(Bookmark(id, path = path, text = text, sort = sort, page, element, paragraph, symbol, createDate))
+                bookmarks.add(Bookmark(id, path = path, text = text, sort = sort, page, offset, createDate))
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -115,17 +105,15 @@ class BookmarksDatabaseAdapter(val context: Context) {
     }
 
     fun getBookmarskByPathAndPosition(inputPath: String, position: BookPosition): List<Bookmark> {
-        val query = String.format("SELECT * FROM %s WHERE %s=? AND %s=? AND %s=? AND %s=? AND %s=? ORDER BY %s",
+        val query = String.format("SELECT * FROM %s WHERE %s=? AND %s=? AND %s=? ORDER BY %s",
                 BookmarksHelper.TABLE,
                 BookmarksHelper.COLUMN_PATH,
                 BookStatusHelper.COLUMN_POSITION_PAGE,
-                BookStatusHelper.COLUMN_POSITION_ELEMENT,
-                BookStatusHelper.COLUMN_POSITION_PARAGRAPH,
-                BookStatusHelper.COLUMN_POSITION_SYMBOL,
+                BookStatusHelper.COLUMN_POSITION_OFFSET,
                 BookmarksHelper.COLUMN_SORT)
         val bookmarks: MutableList<Bookmark> = mutableListOf()
         val cursor: Cursor = database!!.rawQuery(query,
-                arrayOf(inputPath, position.page.toString(), position.element.toString(), position.paragraph.toString(), position.symbol.toString()))
+                arrayOf(inputPath, position.section.toString(), position.offSet.toString()))
         if (cursor.moveToFirst()) {
             do {
                 val id: Long = cursor.getLong(cursor.getColumnIndex(BookmarksHelper.COLUMN_ID))
@@ -133,11 +121,9 @@ class BookmarksDatabaseAdapter(val context: Context) {
                 val text: String = cursor.getString(cursor.getColumnIndex(BookmarksHelper.COLUMN_TEXT))
                 val sort: String = cursor.getString(cursor.getColumnIndex(BookmarksHelper.COLUMN_SORT))
                 val page: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_PAGE))
-                val element: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_ELEMENT))
-                val paragraph: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_PARAGRAPH))
-                val symbol: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_SYMBOL))
+                val offset: Int = cursor.getInt(cursor.getColumnIndex(BookmarksHelper.COLUMN_POSITION_OFFSET))
                 val createDate: Long = cursor.getLong(cursor.getColumnIndex(BookmarksHelper.COLUMN_CREATE_DATE))
-                bookmarks.add(Bookmark(id, path = path, text = text, sort = sort, page, element, paragraph, symbol, createDate))
+                bookmarks.add(Bookmark(id, path = path, text = text, sort = sort, page, offset, createDate))
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -149,10 +135,8 @@ class BookmarksDatabaseAdapter(val context: Context) {
         cv.put(BookmarksHelper.COLUMN_PATH, bookmark.path)
         cv.put(BookmarksHelper.COLUMN_TEXT, bookmark.text)
         cv.put(BookmarksHelper.COLUMN_SORT, bookmark.sort)
-        cv.put(BookmarksHelper.COLUMN_POSITION_PAGE, bookmark.position_page)
-        cv.put(BookmarksHelper.COLUMN_POSITION_ELEMENT, bookmark.position_element)
-        cv.put(BookmarksHelper.COLUMN_POSITION_PARAGRAPH, bookmark.position_paragraph)
-        cv.put(BookmarksHelper.COLUMN_POSITION_SYMBOL, bookmark.position_symbol)
+        cv.put(BookmarksHelper.COLUMN_POSITION_PAGE, bookmark.position_section)
+        cv.put(BookmarksHelper.COLUMN_POSITION_OFFSET, bookmark.position_offset)
         cv.put(BookmarksHelper.COLUMN_CREATE_DATE, bookmark.createDate)
         return database!!.insert(BookmarksHelper.TABLE, null, cv)
     }
@@ -169,10 +153,8 @@ class BookmarksDatabaseAdapter(val context: Context) {
         cv.put(BookmarksHelper.COLUMN_PATH, bookmark.path)
         cv.put(BookmarksHelper.COLUMN_TEXT, bookmark.text)
         cv.put(BookmarksHelper.COLUMN_SORT, bookmark.sort)
-        cv.put(BookmarksHelper.COLUMN_POSITION_PAGE, bookmark.position_page)
-        cv.put(BookmarksHelper.COLUMN_POSITION_ELEMENT, bookmark.position_element)
-        cv.put(BookmarksHelper.COLUMN_POSITION_PARAGRAPH, bookmark.position_paragraph)
-        cv.put(BookmarksHelper.COLUMN_POSITION_SYMBOL, bookmark.position_symbol)
+        cv.put(BookmarksHelper.COLUMN_POSITION_PAGE, bookmark.position_section)
+        cv.put(BookmarksHelper.COLUMN_POSITION_OFFSET, bookmark.position_offset)
         cv.put(BookmarksHelper.COLUMN_CREATE_DATE, bookmark.createDate)
         return database!!.update(BookmarksHelper.TABLE, cv, whereClause, null).toLong()
     }

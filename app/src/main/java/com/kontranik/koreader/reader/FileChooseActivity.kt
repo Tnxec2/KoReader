@@ -4,11 +4,13 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ImageButton
 import android.widget.ListView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
@@ -17,6 +19,7 @@ import com.kontranik.koreader.utils.FileItem
 import com.kontranik.koreader.utils.FileListAdapter
 import java.io.File
 import java.util.*
+import kotlin.collections.HashMap
 
 
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -32,13 +35,20 @@ class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterC
     private var settings: SharedPreferences? = null
     private var prefEditor: SharedPreferences.Editor? = null
 
+    private var pathsPosition: HashMap<String, Int> = hashMapOf()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_filechoose)
 
-        val close = findViewById<ImageButton>(R.id.imageButton_filechoose_back)
+        val close = findViewById<ImageButton>(R.id.imageButton_filechoose_close)
         close.setOnClickListener {
             finish()
+        }
+
+        val back = findViewById<ImageButton>(R.id.imageButton_filechoose_back)
+        back.setOnClickListener {
+            goBack()
         }
 
         val storage = findViewById<ImageButton>(R.id.imageButton_filechoose_goto_storage)
@@ -68,6 +78,12 @@ class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterC
         finish()
     }
 
+    private  fun goBack() {
+        if ( fileItemList[0].name == FileHelper.BACKDIR ) {
+            onFilelistItemClickListener(0)
+        }
+    }
+
     private fun loadPath() {
         if ( selectedPath == null ) storageList()
         else getFileList(selectedPath!!)
@@ -82,6 +98,10 @@ class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterC
         fileItemList.clear()
         fileItemList.addAll(FileHelper.getFileList(path))
         fileListAdapter!!.notifyDataSetChanged()
+
+        if ( pathsPosition.containsKey(path)) {
+            listView!!.scrollToPosition(pathsPosition[path]!!)
+        }
     }
 
     private fun loadPrefs() {
@@ -97,14 +117,15 @@ class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterC
     }
 
     private fun storageList() {
-            fileItemList.clear()
-            rootPaths.clear()
-            fileItemList.addAll(FileHelper.getStorageList())
-            for (fileItem in fileItemList) {
-                val parent = File(fileItem.path).parent
-                if (!rootPaths.contains(parent)) rootPaths.add(parent)
-            }
-            fileListAdapter!!.notifyDataSetChanged()
+        selectedPath = "storage"
+        fileItemList.clear()
+        rootPaths.clear()
+        fileItemList.addAll(FileHelper.getStorageList())
+        for (fileItem in fileItemList) {
+            val parent = File(fileItem.path).parent
+            if (!rootPaths.contains(parent)) rootPaths.add(parent)
+        }
+        fileListAdapter!!.notifyDataSetChanged()
     }
 
     companion object {
@@ -114,7 +135,10 @@ class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterC
 
     override fun onFilelistItemClickListener(position: Int) {
         val selectedFileItem = fileItemList[position]
+
         if (selectedFileItem.isDir) {
+            val lm = listView!!.layoutManager as LinearLayoutManager
+            pathsPosition[selectedPath!!] = lm.findFirstVisibleItemPosition()
             if (rootPaths.contains(selectedFileItem.path)) storageList() else getFileList(selectedFileItem)
         } else {
             openBook(selectedFileItem)

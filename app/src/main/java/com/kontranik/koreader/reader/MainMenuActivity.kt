@@ -29,6 +29,11 @@ class MainMenuActivity : AppCompatActivity() {
             openFile()
         }
 
+        val lastOpenedLayout = findViewById<LinearLayout>(R.id.ll_main_menu_last_opened)
+        lastOpenedLayout.setOnClickListener {
+            openLastOpened()
+        }
+
         val settings = findViewById<LinearLayout>(R.id.ll_main_menu_settings)
         settings.setOnClickListener {
             settings()
@@ -37,14 +42,17 @@ class MainMenuActivity : AppCompatActivity() {
 
 
     private fun openFile() {
-        Toast.makeText(applicationContext, "OpenFile", Toast.LENGTH_SHORT).show()
-
         val intent = Intent(this, FileChooseActivity::class.java)
         startActivityForResult(intent, REQUEST_ACCESS_TYPE_OPENFILE)
     }
 
     private fun settings() {
         Toast.makeText(applicationContext, "Settings", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun openLastOpened() {
+        val intent = Intent( this, BookListActivity::class.java)
+        startActivityForResult(intent, REQUEST_ACCESS_TYPE_OPENFILE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

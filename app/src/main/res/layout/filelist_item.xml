@@ -12,20 +12,20 @@
         android:layout_width="50dp"
         android:layout_height="match_parent"
         app:srcCompat ="@drawable/ic_book_black_24dp"
-        />
+        android:contentDescription="@string/icon" />
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        >
+        android:layout_marginLeft="@dimen/activity_padding"
+        android:layout_marginStart="@dimen/activity_padding">
 
         <TextView
             android:id="@+id/filename"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Title"
+            android:text="@string/title"
             android:textSize="@dimen/text_size_file_name"
             android:textStyle="bold" />
 
@@ -33,7 +33,7 @@
             android:id="@+id/filedesc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Description"
+            android:text="@string/description"
             android:textSize="@dimen/text_size_file_desc"
             android:textStyle="italic" />
 
@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/text_size_file_path"
-            android:text="Path" />
+            android:text="@string/path" />
 
     </LinearLayout>
 </LinearLayout>

@@ -7,16 +7,14 @@ class Bookmark(
         var path: String,
         var text: String? = null,
         var sort: String? = null,
-        var position_page: Int = 0,
-        var position_element: Int = 0,
-        var position_paragraph: Int = 0,
-        var position_symbol: Int = 0,
+        var position_section: Int = 0,
+        var position_offset: Int = 0,
         var createDate: Long? = null
 ) {
 
     init {
         if ( createDate == null) createDate = Date().time
-        if ( sort == null ) sort = "" + position_page + SORT_TRIM + position_element + SORT_TRIM + position_paragraph + SORT_TRIM + position_symbol + SORT_TRIM + createDate
+        if ( sort == null ) sort = "" + position_section + SORT_TRIM + position_offset + SORT_TRIM + createDate
     }
 
     companion object {

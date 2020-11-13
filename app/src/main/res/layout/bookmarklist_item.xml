@@ -2,8 +2,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingTop="16dp"
-    android:paddingBottom="16dp"
+    android:paddingTop="@dimen/activity_padding"
+    android:paddingBottom="@dimen/activity_padding"
     >
 
     <LinearLayout
@@ -16,7 +16,7 @@
             android:id="@+id/textView_bookmarklist_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Text"
+            android:text="@string/text"
             android:textSize="@dimen/text_size_file_name"
             android:textStyle="bold" />
 
@@ -24,7 +24,7 @@
             android:id="@+id/textView_bookmarklist_position"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Position"
+            android:text="@string/position"
             android:textSize="@dimen/text_size_file_desc" />
 
     </LinearLayout>

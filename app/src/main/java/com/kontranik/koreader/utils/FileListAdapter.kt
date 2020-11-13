@@ -30,12 +30,17 @@ class FileListAdapter(
         val fileItem: FileItem = fileitems[position]
 
         if ( fileItem.name.endsWith("epub", true)) {
-            val bookInfo = EpubHelper(context, fileItem.path).getBookInfo()
+            val bookInfo = EpubHelper(context, fileItem.path).getBookInfo(fileItem.path)
+            fileItem.bookInfo = bookInfo
+
             if ( bookInfo != null) {
                 holder.nameView.text = bookInfo.title ?: fileItem.name
-                holder.descView.text = bookInfo.authors?.joinToString(", ") ?: ""
+                holder.descView.text = bookInfo.authorsAsString()
                 if (bookInfo.cover != null) {
-                    holder.imageView.setImageBitmap(ImageUtils.byteArrayToScaledBitmap(bookInfo.cover, 50, 100 ))
+                    holder.imageView.setImageBitmap(
+                            ImageUtils.byteArrayToScaledBitmap(bookInfo.cover, 50, 100 ))
+                } else {
+                    holder.imageView.setImageBitmap(getBitmap(context, fileItem.image))
                 }
             } else {
                 holder.nameView.text = fileItem.name
@@ -43,9 +48,9 @@ class FileListAdapter(
                 holder.imageView.setImageBitmap(getBitmap(context, fileItem.image))
             }
         }  else {
-            holder.imageView.setImageBitmap(getBitmap(context, fileItem.image))
             holder.nameView.text = fileItem.name
             holder.descView.text = ""
+            holder.imageView.setImageBitmap(getBitmap(context, fileItem.image))
         }
         holder.pathView.text = fileItem.path
 

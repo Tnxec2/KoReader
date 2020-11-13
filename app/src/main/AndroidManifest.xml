@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.kontranik.koreader">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -12,6 +13,7 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:screenOrientation="portrait"
         android:theme="@style/AppTheme.Fullscreen">
 
         <activity
@@ -21,10 +23,13 @@
         <activity
             android:name=".reader.FileChooseActivity"
             android:theme="@style/AppDialogTheme.NoActionBar"  />
+        <activity
+            android:name=".reader.BookListActivity"
+            android:theme="@style/AppDialogTheme.NoActionBar"  />
+
         <activity android:name=".ReaderActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

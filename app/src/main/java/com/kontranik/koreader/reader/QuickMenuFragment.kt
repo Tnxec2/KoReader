@@ -1,5 +1,6 @@
 package com.kontranik.koreader.reader
 
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,24 +11,31 @@ import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
+
+import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
+import java.io.File
+
 import kotlin.math.max
 import kotlin.math.min
 
 
-class QuickMenuFragment : DialogFragment() {
+
+
+class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogListener {
 
     var listener: QuickMenuDialogListener? = null
 
     // textSize
     private var textViewTextSIze: TextView? = null
-    private val textSizeMin: Float = 6F
     private var textSize: Float = 0F
     private val textSizeStep: Float = 1F
-    private val textSizeMax: Float = 50F
+
+    private var selectedFont: TypefaceRecord = TypefaceRecord.DEFAULT
+
 
     // 1. Defines the listener interface with a method passing back data result.
     interface QuickMenuDialogListener {
-        fun onFinishQuickMenuDialog(textSize: Float)
+        fun onFinishQuickMenuDialog(textSize: Float, font: TypefaceRecord?)
         fun onChangeTextSize(textSize: Float)
         fun onCancelQuickMenu()
         fun onAddBookmark(): Boolean
@@ -53,10 +61,9 @@ class QuickMenuFragment : DialogFragment() {
 
         Log.d("QuickMenuFragment", view.context.theme.toString())
 
-        listener = activity as QuickMenuDialogListener?
+        listener = activity as QuickMenuDialogListener
 
         textSize = requireArguments().getFloat(TEXTSIZE, textSizeMin)
-
 
         val close = view.findViewById<ImageButton>(R.id.imageButton_quickmenu_back)
         close.setOnClickListener {
@@ -71,6 +78,7 @@ class QuickMenuFragment : DialogFragment() {
 
         initialTextSize(view)
         initialBookmarks(view)
+
     }
 
     private fun initialBookmarks(view: View) {
@@ -91,6 +99,24 @@ class QuickMenuFragment : DialogFragment() {
         TextViewInitiator.initiateTextView(textViewTextSIze!!, getString(R.string.textSizeExampleText))
         textViewTextSIze!!.textSize = textSize
 
+        val fontname = requireArguments().getString(FONTNAME, TypefaceRecord.SANSSERIF)
+        val fontpath = requireArguments().getString(FONTPATH, null)
+
+        selectedFont = if ( fontpath != null ) {
+            val f = File(fontpath)
+            if (f.exists() && f.isFile && f.canRead())
+                TypefaceRecord(fontname, f)
+            else
+                TypefaceRecord.DEFAULT
+        } else {
+            TypefaceRecord(fontname)
+        }
+        textViewTextSIze!!.typeface = selectedFont.getTypeface()
+
+        textViewTextSIze!!.setOnClickListener {
+            openFontPicker(view)
+        }
+
         val decrease = view.findViewById<ImageButton>(R.id.imageView_quick_menU_textSizeDecrease)
         decrease.setOnClickListener {
             decreaseTextSize()
@@ -101,36 +127,58 @@ class QuickMenuFragment : DialogFragment() {
         }
     }
 
+    private fun openFontPicker(view: View) {
+        val fontPickerFragment: FontPickerFragment = FontPickerFragment.newInstance(textSize, selectedFont)
+        fontPickerFragment.setCallBack(this)
+        fontPickerFragment.show(requireActivity().supportFragmentManager, "fragment_font_picker")
+    }
+
     private fun save() {
         // Return Data back to activity through the implemented listener
-        listener!!.onFinishQuickMenuDialog(textSize)
+        listener!!.onFinishQuickMenuDialog(textSize, selectedFont)
 
         // Close the dialog and return back to the parent activity
         dismiss()
     }
 
     private fun decreaseTextSize() {
-        textSize = max(textSizeMin, textSize - textSizeStep)
+        textSize = max(Companion.textSizeMin, textSize - textSizeStep)
         textViewTextSIze!!.textSize = textSize
         listener!!.onChangeTextSize(textSize)
     }
 
     private fun increaseTextSize() {
-        textSize = min(textSizeMax, textSize + textSizeStep)
+        textSize = min(Companion.textSizeMax, textSize + textSizeStep)
         textViewTextSIze!!.textSize = textSize
         listener!!.onChangeTextSize(textSize)
     }
 
+    override fun onSaveFontPickerDialog(font: TypefaceRecord?) {
+        if ( font != null ) {
+            selectedFont = font
+            textViewTextSIze!!.typeface = font.getTypeface()
+        }
+    }
+
     companion object {
         const val TEXTSIZE = "textSize"
+        const val FONTPATH = "fontpath"
+        const val FONTNAME = "fontname"
 
-        fun newInstance(textSize: Float): QuickMenuFragment {
+        fun newInstance(textSize: Float, font: TypefaceRecord): QuickMenuFragment {
             val frag = QuickMenuFragment()
             val args = Bundle()
             args.putFloat(TEXTSIZE, textSize)
-            frag.setArguments(args)
 
+            if ( font.file != null ) args.putString(FONTPATH, font.file.absolutePath)
+            else args.putString(FONTNAME, font.name)
+
+            frag.arguments = args
             return frag
         }
+
+        private const val textSizeMax: Float = 50F
+        private const val textSizeMin: Float = 6F
     }
+
 }

@@ -20,21 +20,59 @@ internal open class OnSwipeTouchListener(c: Context?) :
     private inner class GestureListener : SimpleOnGestureListener() {
         private val SWIPE_THRESHOLD: Int = 100
         private val SWIPE_VELOCITY_THRESHOLD: Int = 100
+
         override fun onDown(e: MotionEvent): Boolean {
             return true
         }
+
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             onClick(Point( e.x.toInt(), e.y.toInt()))
             return super.onSingleTapUp(e)
         }
+
         override fun onDoubleTap(e: MotionEvent): Boolean {
             onDoubleClick(Point( e.x.toInt(), e.y.toInt()))
             return super.onDoubleTap(e)
         }
+
         override fun onLongPress(e: MotionEvent) {
             onLongClick(Point( e.x.toInt(), e.y.toInt()))
             super.onLongPress(e)
         }
+
+        override fun onScroll(
+                e1: MotionEvent,
+                e2: MotionEvent,
+                distanceX: Float,
+                distanceY: Float): Boolean {
+            // return super.onScroll(e1, e2, distanceX, distanceY)
+            try {
+                val diffY = e2.y - e1.y
+                val diffX = e2.x - e1.x
+                if (abs(diffX) > abs(diffY)) {
+                    if (abs(diffX) > SWIPE_THRESHOLD) {
+                        if (diffX > 0) {
+                            onSlideRight(Point( e1.x.toInt(), e1.y.toInt()))
+                        } else {
+                            onSlideLeft(Point( e1.x.toInt(), e1.y.toInt()))
+                        }
+                    }
+                } else {
+                    if (abs(diffY) > SWIPE_THRESHOLD) {
+                        if (diffY < 0) {
+                            onSlideUp(Point( e1.x.toInt(), e1.y.toInt()))
+                        } else {
+                            onSlideDown(Point( e1.x.toInt(), e1.y.toInt()))
+                        }
+                    }
+
+                }
+            } catch (exception: Exception) {
+                exception.printStackTrace()
+            }
+            return false
+        }
+
         override fun onFling(
                 e1: MotionEvent,
                 e2: MotionEvent,
@@ -45,27 +83,24 @@ internal open class OnSwipeTouchListener(c: Context?) :
                 val diffY = e2.y - e1.y
                 val diffX = e2.x - e1.x
                 if (abs(diffX) > abs(diffY)) {
-                    if (abs(diffX) > SWIPE_THRESHOLD && abs(
-                                    velocityX
-                            ) > SWIPE_VELOCITY_THRESHOLD
-                    ) {
-                        if (diffX > 0) {
-                            onSwipeRight()
-                        }
-                        else {
-                            onSwipeLeft()
+                    if ( abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        // swipe
+                        if (abs(diffX) > SWIPE_THRESHOLD) {
+                            if (diffX > 0) {
+                                onSwipeRight()
+                            } else {
+                                onSwipeLeft()
+                            }
                         }
                     }
                 } else {
-                    if (abs(diffY) > SWIPE_THRESHOLD && abs(
-                                    velocityY
-                            ) > SWIPE_VELOCITY_THRESHOLD
-                    ) {
-                        if (diffY < 0) {
-                            onSwipeUp()
-                        }
-                        else {
-                            onSwipeDown()
+                    if (abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (abs(diffY) > SWIPE_THRESHOLD) {
+                            if (diffY < 0) {
+                                onSwipeUp()
+                            } else {
+                                onSwipeDown()
+                            }
                         }
                     }
                 }
@@ -79,6 +114,11 @@ internal open class OnSwipeTouchListener(c: Context?) :
     open fun onSwipeLeft() {}
     open fun onSwipeUp() {}
     open fun onSwipeDown() {}
+    open fun onSlideUp(point: Point){}
+    open fun onSlideDown(point: Point){}
+    open fun onSlideLeft(point: Point){}
+    open fun onSlideRight(point: Point){}
+
     open fun onClick(point: Point) {}
     open fun onDoubleClick(point: Point) {}
     open fun onLongClick(point: Point) {}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="colorPrimary">#000000</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#FC2271</color>
+
+    <color name="background_sepia">#000000</color>
+    <color name="foreground_sepia">#FBF0D9</color>
+    <color name="foreground_sepia_title">#C1963C</color>
+
+    <color name="foreground_main">@color/foreground_sepia</color>
+    <color name="background_main">@color/background_sepia</color>
+
+    <color name="foreground_main_dialog">#ffffff</color>
+    <color name="background_main_dialog">#000000</color>
+
+</resources>

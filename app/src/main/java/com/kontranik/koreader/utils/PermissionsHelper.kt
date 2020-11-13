@@ -10,6 +10,7 @@ import com.github.florent37.runtimepermission.RuntimePermission
 import com.google.android.material.snackbar.Snackbar
 import com.kontranik.koreader.R
 
+
 class PermissionsHelper(private val activity: AppCompatActivity) {
 
     private var listener: PermissionsHelperListener? = null
@@ -19,19 +20,19 @@ class PermissionsHelper(private val activity: AppCompatActivity) {
     }
 
     interface PermissionsHelperListener {
-        public fun onAccessGranted() {}
+        fun onAccessGrantedReadExternalStorage() {}
+        fun onAccessGrantedWriteSettings() {}
     }
 
-    fun checkPermissions(mainView: View) {
+    fun checkPermissionsExternalStorage(mainView: View) {
         RuntimePermission.askPermission(activity)
                 .request(Manifest.permission.READ_EXTERNAL_STORAGE)
                 .onAccepted { result: PermissionResult? ->
                     //all permissions already granted or just granted
-                    this.listener!!.onAccessGranted()
-
+                    listener!!.onAccessGrantedReadExternalStorage()
                 }
                 .onDenied { result: PermissionResult ->
-                    Snackbar.make(mainView, activity.getString(R.string.permissions_needed), Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(mainView, activity.getString(R.string.permissions_externalstorage_needed), Snackbar.LENGTH_SHORT).show()
                     //permission denied, but you can ask again, eg:
                     AlertDialog.Builder(activity.applicationContext)
                             .setMessage(activity.getString(R.string.give_permission_storage))
@@ -40,7 +41,7 @@ class PermissionsHelper(private val activity: AppCompatActivity) {
                             .show()
                 }
                 .onForeverDenied { result: PermissionResult ->
-                    Snackbar.make(mainView, activity.getString(R.string.permissions_needed), Snackbar.LENGTH_SHORT)
+                    Snackbar.make(mainView, activity.getString(R.string.permissions_externalstorage_needed), Snackbar.LENGTH_SHORT)
                             .setAction(activity.getString(R.string.go_to_settings)) { view: View? -> result.goToSettings() }.show()
                 }
                 .ask()

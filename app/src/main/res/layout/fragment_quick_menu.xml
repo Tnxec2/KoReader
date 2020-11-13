@@ -5,9 +5,11 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
+    android:padding="@dimen/activity_padding"
     android:layout_gravity="center_vertical"
     tools:layout_editor_absoluteX="16dp"
+    android:background="@color/background_main_dialog"
+    android:textColor="@color/foreground_main_dialog"
 
     >
 
@@ -21,7 +23,8 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="TextSize" />
+            android:text="@string/textsize"
+            />
 
         <ImageButton
             android:id="@+id/imageView_quick_menU_textSizeDecrease"
@@ -29,7 +32,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:clickable="true"
-            app:srcCompat="@drawable/ic_a_small" />
+            app:srcCompat="@drawable/ic_a_small"
+            android:focusable="true"
+            android:contentDescription="@string/decrease" />
 
         <TextView
             android:id="@+id/textView_quick_menU_textSizeExample"
@@ -38,14 +43,16 @@
             android:layout_gravity="bottom"
             android:layout_weight="1"
             android:gravity="center_horizontal|center_vertical"
-            android:text="ABCabc" />
+            android:text="@string/example_abcabc" />
 
         <ImageButton
             android:id="@+id/imageView_quick_menU_textSizeIncrease"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
-            app:srcCompat="@drawable/ic_aa" />
+            app:srcCompat="@drawable/ic_aa"
+            android:contentDescription="@string/increase"
+            android:focusable="true" />
     </LinearLayout>
 
     <LinearLayout
@@ -54,11 +61,11 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Bookmarks" />
+            android:text="@string/bookmarks" />
 
         <ImageButton
             android:id="@+id/imageView_quick_menu_addBookmark"
@@ -66,7 +73,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:clickable="true"
-            app:srcCompat="@drawable/ic_iconmonstr_bookmark_add" />
+            app:srcCompat="@drawable/ic_iconmonstr_bookmark_add"
+            android:contentDescription="@string/add_bookmark"
+            android:focusable="true" />
 
         <ImageButton
             android:id="@+id/imageView_quick_menu_listBookmark"
@@ -74,7 +83,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:clickable="true"
-            app:srcCompat="@drawable/ic_iconmonstr_bookmark_list2" />
+            app:srcCompat="@drawable/ic_iconmonstr_bookmark_list2"
+            android:contentDescription="@string/bookmarklist"
+            android:focusable="true" />
 
     </LinearLayout>
 
@@ -82,11 +93,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         >
 
         <Space
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
 
@@ -94,13 +105,15 @@
             android:id="@+id/imageButton_quickmenu_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_baseline_save_24" />
+            app:srcCompat="@drawable/ic_baseline_check_24"
+            android:contentDescription="@string/save" />
 
         <ImageButton
             android:id="@+id/imageButton_quickmenu_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_baseline_arrow_back_24" />
+            app:srcCompat="@drawable/ic_baseline_close_24"
+            android:contentDescription="@string/back" />
 
 
     </LinearLayout>

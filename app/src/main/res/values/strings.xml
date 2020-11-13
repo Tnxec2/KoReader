@@ -1,10 +1,12 @@
 <resources>
-    <string name="app_name">KoReader</string>
+    <string name="app_name">KoRe</string>
     <string name="okay_string">Okay</string>
     <string name="no_string">no</string>
-    <string name="permissions_needed">Permissions are required to open an EBook.</string>
+    <string name="permissions_externalstorage_needed">Permissions are required to open an EBook.</string>
+    <string name="permissions_settings_needed">Permissions are required to change brightness.</string>
     <string name="go_to_settings">Go to Settings</string>
     <string name="give_permission_storage">Please give permission to read your storage.</string>
+    <string name="give_permission_settings">Please give permission to change settings.</string>
     <string name="select_thisfolder">Select this folder</string>
     <string name="cancel">Cancel</string>
     <string name="no_storage_found">Not found any storage</string>
@@ -17,8 +19,31 @@
     <string name="longclick_in_zone">Long Click in %1$s</string>
     <string name="page_info_text">%1$d / %2$d</string>
     <string name="openfile">Open File</string>
-    <string name="settings">Settings</string>
     <string name="textSizeExampleText">ABCabc</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="settings">Settings</string>
+    <string name="choose_file">Choose file</string>
+    <string name="info">Info</string>
+    <string name="go_to_storage">Go to Storage</string>
+    <string name="back">Back</string>
+    <string name="text">Text</string>
+    <string name="position">Position</string>
+    <string name="icon">Icon</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="path">Path</string>
+    <string name="bookmarklist">Bookmarklist</string>
+    <string name="add_bookmark">add bookmark</string>
+    <string name="go_to">GoTo</string>
+    <string name="section">Section</string>
+    <string name="left">Left</string>
+    <string name="right">Right</string>
+    <string name="save">Save</string>
+    <string name="textsize">TextSize</string>
+    <string name="decrease">decrease</string>
+    <string name="example_abcabc">ABCabc</string>
+    <string name="increase">increase</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="last_opened">Last opened</string>
+    <string name="close">Close</string>
+    <string name="main_menu">Main menu</string>
 </resources>

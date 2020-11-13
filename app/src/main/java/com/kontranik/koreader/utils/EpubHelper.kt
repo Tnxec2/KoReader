@@ -2,6 +2,7 @@ package com.kontranik.koreader.utils
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.text.Html
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ImageSpan
@@ -15,7 +16,10 @@ import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 
-class EpubHelper(private val context: Context, private val fileLocation: String) : EbookHelper {
+class EpubHelper(
+        private val context: Context,
+        private val fileLocation: String) : EbookHelper {
+
     var epubReader = EpubReader()
     var epubBook: Book? = null
 
@@ -34,7 +38,7 @@ class EpubHelper(private val context: Context, private val fileLocation: String)
         val bookFile = File(fileLocation)
         var result: Book? = null
         try {
-            val fileInputStream = FileInputStream(fileLocation)
+            val fileInputStream = FileInputStream(bookFile)
             result = epubReader.readEpub(fileInputStream)
             fileInputStream.close()
         } catch (e: FileNotFoundException) {
@@ -71,7 +75,7 @@ class EpubHelper(private val context: Context, private val fileLocation: String)
         return result
     }
 
-    fun getBookInfo(): BookInfo? {
+    fun getBookInfo(path: String): BookInfo? {
         if (epubBook != null) {
             val t = epubBook!!.title
             val coverImage = epubBook!!.coverImage
@@ -79,7 +83,12 @@ class EpubHelper(private val context: Context, private val fileLocation: String)
             if (coverImage != null) {
                 coverData = coverImage.data
             }
-            return BookInfo(t, coverData, authors = getAuthors(epubBook!!))
+            return BookInfo(
+                    title =  t,
+                    cover = coverData,
+                    authors = getAuthors(epubBook!!),
+                    path = path,
+                    filename = File(path).name)
         } else {
             return null
         }
@@ -108,9 +117,10 @@ class EpubHelper(private val context: Context, private val fileLocation: String)
             val title = epubBook!!.title
             val authors = epubBook!!.metadata.authors
             val ssb = SpannableStringBuilder()
-            ssb.append(WordSequence(title!!, MyStyle.Title, context).data)
+            val html = "<html><body><h1>%s</h1><p>%s<p></body></html>"
             val author = authors.first()
-            ssb.append(WordSequence(author.firstname + " " + author.lastname , MyStyle.Italic, context).data)
+            val text = String.format(html, title!!, author.firstname + " " + author.lastname)
+            ssb.append(Html.fromHtml(text))
             return ssb
         }
     }

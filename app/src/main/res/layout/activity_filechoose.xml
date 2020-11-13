@@ -5,9 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="@dimen/activity_padding"
     tools:context=".reader.FileChooseActivity"
-
+    android:background="@color/background_main_dialog"
+    android:textColor="@color/foreground_main_dialog"
     >
 
     <LinearLayout
@@ -19,11 +20,13 @@
             android:id="@+id/textView_filechoose_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Choose file"
+            android:text="@string/choose_file"
+            android:gravity="center_vertical"
+            android:textSize="@dimen/text_size_dialog_title"
             />
 
         <Space
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
 
@@ -31,13 +34,22 @@
             android:id="@+id/imageButton_filechoose_goto_storage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_baseline_storage_24" />
+            app:srcCompat="@drawable/ic_baseline_storage_24"
+            android:contentDescription="@string/go_to_storage" />
 
         <ImageButton
             android:id="@+id/imageButton_filechoose_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_baseline_arrow_back_24" />
+            app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+            android:contentDescription="@string/back" />
+
+        <ImageButton
+            android:id="@+id/imageButton_filechoose_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_baseline_close_24"
+            android:contentDescription="@string/close" />
 
     </LinearLayout>
 

@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">@color/background_sepia</color>
+    <color name="colorPrimaryDark">@color/background_sepia</color>
+    <color name="colorAccent">@color/foreground_sepia_title</color>
 
     <color name="background_sepia">#FBF0D9</color>
     <color name="foreground_sepia">#5F4B32</color>
     <color name="foreground_sepia_title">#915100</color>
-    <color name="background_main">#DEDEDE</color>
-    <color name="background_main_dialog">#FFFFFF</color>
-    <color name="error">#FF0000</color>
 
-    <color name="textview_normal">@color/foreground_sepia</color>
-    <color name="textview_title">@color/foreground_sepia_title</color>
+    <color name="foreground_main">@color/foreground_sepia</color>
+    <color name="background_main">@color/background_sepia</color>
+
+    <color name="foreground_main_dialog">#000000</color>
+    <color name="background_main_dialog">#FFFFFF</color>
+
 </resources>

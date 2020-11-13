@@ -15,9 +15,7 @@ class BookStatusHelper() {
         //const val COLUMN_TITLE = "title"
         //const val COLUMN_AUTHOR = "author"
         const val COLUMN_POSITION_PAGE = "position_page"
-        const val COLUMN_POSITION_ELEMENT = "position_element"
-        const val COLUMN_POSITION_PARAGRAPH = "position_paragraph"
-        const val COLUMN_POSITION_SYMBOL = "position_symbol"
+        const val COLUMN_POSITION_OFFSET = "position_offset"
         const val COLUMN_LAST_OPEN_TIME = "last_open_time"
     }
 }

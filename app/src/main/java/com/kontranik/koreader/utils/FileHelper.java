@@ -6,9 +6,12 @@ import android.os.Environment;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class FileHelper {
+
+    public static final String BACKDIR = "..";
 
     public static String getNameNoExt(String name) {
         int i = name.lastIndexOf('.');
@@ -29,7 +32,12 @@ public class FileHelper {
 
         File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
-        result.add(new FileItem(ImageEnum.SD, externalStorageDirectory.getName(), externalStorageDirectory.getPath(), true, true ) );
+        result.add(new FileItem(
+                ImageEnum.SD,
+                externalStorageDirectory.getName(),
+                externalStorageDirectory.getPath(),
+                true,
+                true, null ) );
 
         if ( externalStorageDirectory.getParent() != null) {
             File[] files = new File(externalStorageDirectory.getParent()).listFiles();
@@ -40,7 +48,8 @@ public class FileHelper {
                     if (file.isDirectory() && file.canRead())
                         temp = file.listFiles();
                         if (temp != null && temp.length > 0)
-                            result.add(new FileItem(ImageEnum.SD, file.getName(), file.getPath(), true, true));
+                            result.add(new FileItem(
+                                    ImageEnum.SD, file.getName(), file.getPath(), true, true, null));
                 }
             } else {
                 String p = new File(externalStorageDirectory.getParent()).getParent();
@@ -51,7 +60,8 @@ public class FileHelper {
                             if (file.isDirectory() && file.canRead()) {
                                 temp = file.listFiles();
                                 if (temp != null && temp.length > 0)
-                                    result.add(new FileItem(ImageEnum.SD, file.getName(), file.getPath(), true, true));
+                                    result.add(
+                                            new FileItem(ImageEnum.SD, file.getName(), file.getPath(), true, true, null));
                             }
                         }
                     }
@@ -66,25 +76,42 @@ public class FileHelper {
         File dir = new File(path);
         if ( ! dir.isDirectory() ) return result;
 
-        result.add(new FileItem( ImageEnum.Parent, "..", dir.getParent(), true, false));
+        result.add(new FileItem( ImageEnum.Parent, BACKDIR, dir.getParent(), true, false, null));
+
+        File[] dirs = dir.listFiles(new FilenameFilter() {
+            public boolean accept(File current, String name) {
+                File f = new File(current, name);
+                return !f.isHidden() && !name.startsWith(".") && f.isDirectory();
+            }
+        });
 
         File[] files = dir.listFiles(new FilenameFilter() {
-            public boolean accept(File file, String name) {
-                return !file.isHidden() && !name.startsWith(".")
+            public boolean accept(File current, String name) {
+                File f = new File(current, name);
+                return !f.isHidden() && !name.startsWith(".")
                         && (
-                                file.isDirectory()
-                                || name.toLowerCase().endsWith(".epub")
+                                name.toLowerCase().endsWith(".epub")
                                 // || name.toLowerCase().endsWith(".fb2")
                 );
             }
         });
 
-        if ( files != null) {
-            for ( File f: files) {
+        if ( dirs != null && dirs.length > 0) {
+            Arrays.sort(dirs);
+
+            for ( File f: dirs) {
                 if ( f.isDirectory() ) {
-                    result.add(new FileItem(ImageEnum.Dir, f.getName(), f.getPath(), f.isDirectory(), false));
-                } else if ( f.getName().toLowerCase().endsWith(".epub")){
-                    result.add(new FileItem( ImageEnum.Epub, f.getName(), f.getPath(), f.isDirectory(), false));
+                    result.add(new FileItem(ImageEnum.Dir, f.getName(), f.getPath(), f.isDirectory(), false, null));
+                }
+            }
+        }
+
+        if ( files != null && files.length > 0) {
+            Arrays.sort(files);
+
+            for ( File f: files) {
+                if ( f.getName().toLowerCase().endsWith(".epub")){
+                    result.add(new FileItem( ImageEnum.Epub, f.getName(), f.getPath(), f.isDirectory(), false, null));
 //                } else if ( f.getName().toLowerCase().endsWith(".fb2")){
 //                    result.add(new FileItem( ImageEnum.Fb2, f.getName(), f.getPath(), f.isDirectory(), false));
                 } else {
@@ -92,10 +119,9 @@ public class FileHelper {
                 }
             }
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            result.sort(new FileItemNameComparator());
-        }
+
         return result;
     }
+
 
 }

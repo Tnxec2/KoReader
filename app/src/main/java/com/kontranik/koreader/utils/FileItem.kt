@@ -2,9 +2,17 @@ package com.kontranik.koreader.utils
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.kontranik.koreader.model.BookInfo
 import java.util.*
 
-class FileItem(var image: ImageEnum, var name: String, var path: String, var isDir: Boolean, var isRoot: Boolean) {
+class FileItem(
+        var image: ImageEnum,
+        var name: String,
+        var path: String,
+        var isDir: Boolean,
+        var isRoot: Boolean,
+        var bookInfo: BookInfo? = null
+        ) {
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
         if (o == null || javaClass != o.javaClass) return false
