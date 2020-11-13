@@ -1,5 +1,6 @@
 package com.kontranik.koreader.reader
 
+import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,9 +9,11 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kontranik.koreader.R
 import com.kontranik.koreader.utils.FontPickerListItemAdapter
+import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.typefacefactory.FontManager
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
@@ -27,6 +30,9 @@ class FontPickerFragment :
 
     private var selectedFont: TypefaceRecord? = null
     private var textSize: Float = 0F
+
+    private var useSystemFonts: Boolean = false
+    private var showNotoFonts: Boolean = false
 
     // 1. Defines the listener interface with a method passing back data result.
     interface FontPickerDialogListener {
@@ -51,10 +57,11 @@ class FontPickerFragment :
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setStyle(STYLE_NO_FRAME, R.style.AppTheme);
+        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(view.context)
+        useSystemFonts = prefs.getBoolean(PrefsHelper.PREF_KEY_USE_SYSTEM_FONTS, false)
+        showNotoFonts = prefs.getBoolean(PrefsHelper.PREF_KEY_SHOW_NOTO_FONTS, false)
 
         textSize = requireArguments().getFloat(TEXTSIZE, textSizeMin)
-
 
         val fonts: HashMap<String, File>?
 
@@ -63,7 +70,7 @@ class FontPickerFragment :
                 TypefaceRecord(name = TypefaceRecord.SERIF),
                 TypefaceRecord(name = TypefaceRecord.MONO))
         try {
-            fonts = FontManager.enumerateFonts(false)
+            fonts = FontManager.enumerateFonts(useSystemFonts, showNotoFonts)
             // val collectedFonts = ZLTTFInfoDetector().collectFonts(fonts!!.values)
             val collectedFonts: MutableList<TypefaceRecord> = mutableListOf()
             if ( fonts != null) {

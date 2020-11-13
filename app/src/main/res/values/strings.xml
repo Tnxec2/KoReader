@@ -51,12 +51,14 @@
 
     <!-- Preference Titles -->
     <string name="interface_header">Interface</string>
+    <string name="text_header">Text</string>
 
-    <!-- Messages Preferences -->
+    <!-- Interface Preferences -->
     <string name="theme_title">Theme</string>
     <string name="brightness_title">Brightness</string>
     <string name="orientation_title">Orientation</string>
 
+    <!-- Interface entries -->
     <string name="ThemeDark">Dark</string>
     <string name="ThemeLight">Light</string>
     <string name="ThemeAutoSystem">Auto System</string>
@@ -67,4 +69,9 @@
     <string name="orientation_values_portrait_sensor">Portrait Sensor</string>
     <string name="orientation_values_landscape">Landscape</string>
     <string name="orientation_values_landscape_sensor">Landscape Sensor</string>
+
+    <!-- Text Preferences -->
+    <string name="usesystemfonts_title">Use System Fonts</string>
+    <string name="show_noto_fonts_title">Show Noto Fonts</string>
+
 </resources>

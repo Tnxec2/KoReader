@@ -113,6 +113,8 @@ class PrefsHelper() {
         const val PREF_KEY_THEME = "theme"
         const val PREF_KEY_BRIGHTNESS = "brightness"
         const val PREF_KEY_ORIENTATION = "orientation"
+        const val PREF_KEY_USE_SYSTEM_FONTS = "useSystemFonts"
+        const val PREF_KEY_SHOW_NOTO_FONTS = "showNotoFonts"
 
         const val PREF_ORIENTATION_DEFAULT = "PortraitSensor"
         const val PREF_BRIGHTNESS_DEFAULT = "Manual"

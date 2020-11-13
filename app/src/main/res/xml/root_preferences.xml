@@ -24,4 +24,18 @@
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/text_header">
+        <SwitchPreference
+            app:key="useSystemFonts"
+            app:title="@string/usesystemfonts_title"
+            />
+
+        <SwitchPreference
+            app:key="showNotoFonts"
+            app:title="@string/show_noto_fonts_title"
+            app:dependency="useSystemFonts"
+            />
+    </PreferenceCategory>
+
+
 </PreferenceScreen>

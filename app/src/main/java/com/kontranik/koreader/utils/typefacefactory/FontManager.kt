@@ -10,7 +10,7 @@ import java.util.*
 object FontManager {
     // This function enumerates all fonts on Android system and returns the HashMap with the font
     // absolute file name as key, and the font literal name (embedded into the font) as value.
-    fun enumerateFonts(includeSystem: Boolean): HashMap<String, File>? {
+    fun enumerateFonts(includeSystem: Boolean, showNotoFonts: Boolean): HashMap<String, File>? {
         val fontdirs: MutableList<String> = mutableListOf()
         if ( Environment.getExternalStorageDirectory() != null) {
             fontdirs.add(Environment.getExternalStorageDirectory().absolutePath + "/fonts")
@@ -26,11 +26,9 @@ object FontManager {
             val files = dir.listFiles() ?: continue
             for (file in files) {
                 var fontname = analyzer.getTtfFontName(file.absolutePath)
-                if (fontname != null) fonts[fontname] = file
-                else {
-                    fontname = file.name.substringBeforeLast('.')
-                    fonts[fontname] = file
-                }
+                if (fontname == null) fontname = file.name.substringBeforeLast('.')
+                if ( includeSystem && !showNotoFonts  && fontname.substring(0,4).toLowerCase() == "noto") continue
+                fonts[fontname] = file
             }
         }
         return if (fonts.isEmpty()) null else fonts
