@@ -15,4 +15,6 @@
     <color name="foreground_main_dialog">#ffffff</color>
     <color name="background_main_dialog">#000000</color>
 
+    <color name="icon_fill">#CCCCCC</color>
+
 </resources>

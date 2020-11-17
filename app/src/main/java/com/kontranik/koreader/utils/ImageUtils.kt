@@ -1,9 +1,7 @@
 package com.kontranik.koreader.utils
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
+import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import com.kontranik.koreader.R
@@ -57,8 +55,14 @@ object ImageUtils {
 
     fun scaleBitmap(bm: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
         var bm = bm
-        var width = bm.width.toFloat()
-        var height = bm.height.toFloat()
+        val mSize = getScaledSize(bm.width, bm.height, maxWidth, maxHeight)
+        bm = Bitmap.createScaledBitmap(bm, mSize.width(), mSize.height(), true)
+        return bm
+    }
+
+    fun getScaledSize(originalWidth: Int, originalHeight: Int, maxWidth: Int, maxHeight: Int): Rect {
+        var width = originalWidth.toFloat()
+        var height = originalHeight.toFloat()
         if (width > height) {
             // landscape
             val ratio = width / maxWidth
@@ -74,7 +78,6 @@ object ImageUtils {
             height = maxHeight.toFloat()
             width = maxWidth.toFloat()
         }
-        bm = Bitmap.createScaledBitmap(bm, width.toInt(), height.toInt(), true)
-        return bm
+        return Rect(0, 0, width.toInt(), height.toInt())
     }
 }

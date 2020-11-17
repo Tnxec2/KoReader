@@ -1,4 +1,4 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.utils
 
 import android.content.Context
 import android.graphics.Point
@@ -10,7 +10,12 @@ import android.view.View
 import android.view.View.OnTouchListener
 import kotlin.math.abs
 
-internal open class OnSwipeTouchListener(c: Context?) :
+/*
+ *
+ * OnTouchListener without onClick-Event
+ *
+ */
+internal open class OnSwipeTouchListenerWithoutClick(c: Context?) :
         OnTouchListener {
     private val gestureDetector: GestureDetector
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
@@ -23,11 +28,6 @@ internal open class OnSwipeTouchListener(c: Context?) :
 
         override fun onDown(e: MotionEvent): Boolean {
             return true
-        }
-
-        override fun onSingleTapUp(e: MotionEvent): Boolean {
-            onClick(Point( e.x.toInt(), e.y.toInt()))
-            return super.onSingleTapUp(e)
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
@@ -119,9 +119,9 @@ internal open class OnSwipeTouchListener(c: Context?) :
     open fun onSlideLeft(point: Point){}
     open fun onSlideRight(point: Point){}
 
-    open fun onClick(point: Point) {}
     open fun onDoubleClick(point: Point) {}
     open fun onLongClick(point: Point) {}
+
     init {
         gestureDetector = GestureDetector(c, GestureListener())
     }

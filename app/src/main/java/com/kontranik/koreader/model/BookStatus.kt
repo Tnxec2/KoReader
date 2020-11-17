@@ -5,7 +5,7 @@ import java.util.*
 class BookStatus(
         var id: Long? = null,
         var path: String? = null,
-        var position_page: Int = 0,
+        var position_section: Int = 0,
         var position_offset: Int = 0,
         var lastOpenTime: Long? = null
 ) {
@@ -14,7 +14,7 @@ class BookStatus(
     }
 
     fun updatePosition(p: BookPosition) {
-        position_page = p.section
+        position_section = p.section
         position_offset = p.offSet
     }
 

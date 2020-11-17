@@ -114,7 +114,7 @@ class BookStatusDatabaseAdapter(val context: Context) {
     fun insert(bookStatus: BookStatus): Long {
         val cv = ContentValues()
         cv.put(BookStatusHelper.COLUMN_PATH, bookStatus.path)
-        cv.put(BookStatusHelper.COLUMN_POSITION_PAGE, bookStatus.position_page)
+        cv.put(BookStatusHelper.COLUMN_POSITION_PAGE, bookStatus.position_section)
         cv.put(BookStatusHelper.COLUMN_POSITION_OFFSET, bookStatus.position_offset)
         cv.put(BookStatusHelper.COLUMN_LAST_OPEN_TIME, bookStatus.lastOpenTime)
         return database!!.insert(BookStatusHelper.TABLE, null, cv)
@@ -130,7 +130,7 @@ class BookStatusDatabaseAdapter(val context: Context) {
         val whereClause = "${BookStatusHelper.COLUMN_ID} = ${bookStatus.id}"
         val cv = ContentValues()
         cv.put(BookStatusHelper.COLUMN_PATH, bookStatus.path)
-        cv.put(BookStatusHelper.COLUMN_POSITION_PAGE, bookStatus.position_page)
+        cv.put(BookStatusHelper.COLUMN_POSITION_PAGE, bookStatus.position_section)
         cv.put(BookStatusHelper.COLUMN_POSITION_OFFSET, bookStatus.position_offset)
         cv.put(BookStatusHelper.COLUMN_LAST_OPEN_TIME, bookStatus.lastOpenTime)
         return database!!.update(BookStatusHelper.TABLE, cv, whereClause, null).toLong()

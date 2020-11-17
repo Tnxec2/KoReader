@@ -26,8 +26,12 @@ open class PageSplitterOneHtml(
         endOffset = 0
     }
 
-    fun pageForHtml(html: String, offset: Int?, revers: Boolean) {
-        currentPage = SpannableStringBuilder(Html.fromHtml(html))
+     fun pageForHtml(html: String, offset: Int?, revers: Boolean) {
+        currentPage = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            SpannableStringBuilder(Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT))
+        } else {
+            SpannableStringBuilder(Html.fromHtml(html))
+        }
         staticLayout = StaticLayout(currentPage, paint, pageWidth, Layout.Alignment.ALIGN_NORMAL, lineSpacingMultiplier, lineSpacingExtra, true)
 
         val startLine: Int
@@ -44,7 +48,7 @@ open class PageSplitterOneHtml(
             startOffset = staticLayout!!.getLineStart(startLine)
             endOffset = staticLayout!!.getLineEnd(lastFullyVisibleLine)
         } else {
-            endLine = if (offset != null ) { staticLayout!!.getLineForOffset(offset) } else { staticLayout!!.lineCount - 1             }
+            endLine = if (offset != null ) { staticLayout!!.getLineForOffset(offset) } else { staticLayout!!.lineCount - 1 }
             endLineBottom = staticLayout!!.getLineBottom(endLine)
             startLine = staticLayout!!.getLineForVertical( endLineBottom - pageHeight)
             startLineTop = staticLayout!!.getLineTop(startLine)

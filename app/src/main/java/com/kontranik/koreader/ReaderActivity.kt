@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
+import android.text.SpannableStringBuilder
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -24,8 +25,9 @@ import com.kontranik.koreader.database.BookmarkService
 import com.kontranik.koreader.database.BookmarksDatabaseAdapter
 import com.kontranik.koreader.model.*
 import com.kontranik.koreader.reader.*
-import com.kontranik.koreader.utils.PermissionsHelper
-import com.kontranik.koreader.utils.PrefsHelper
+import com.kontranik.koreader.utils.*
+import com.kontranik.koreader.utils.OnSwipeTouchListener
+import com.kontranik.koreader.utils.OnSwipeTouchListenerWithoutClick
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
 import java.util.*
@@ -78,6 +80,27 @@ class ReaderActivity :
         pageView!!.addOnLayoutChangeListener(OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             updateSizeInfo()
         })
+        pageView!!.movementMethod = object: CustomLinkMovementMethod() {
+            override fun onLinkClicked(url: String) {
+                super.onLinkClicked(url)
+                Toast.makeText(applicationContext, url, Toast.LENGTH_SHORT).show()
+                showNote(book!!.getNote(url))
+            }
+
+            override fun onClick(point: Point) {
+                super.onClick(point)
+
+                val zone = ScreenZone.zone(point, width, height)
+                textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, zone)
+                when (zone) {
+                    ScreenZone.BottomRight -> doPageNext()
+                    ScreenZone.BottomLeft -> doPagePrev()
+                    else -> {
+                    }
+
+                }
+            }
+        };
 
         textViewInfoCenter = findViewById(R.id.tv_infotext_center)
         textViewInfoLeft = findViewById(R.id.tv_infotext_left)
@@ -112,7 +135,7 @@ class ReaderActivity :
 
     private fun loadBook() {
         Log.d(TAG, "loadBook: ${prefsHelper.bookPath}")
-        book =  Book(applicationContext, prefsHelper.bookPath!!)
+        book =  Book(applicationContext, prefsHelper.bookPath!!, pageView!!)
         if ( book != null ) {
             bookStatusService!!.updateLastOpenTime(prefsHelper.bookPath!!)
         }
@@ -137,8 +160,9 @@ class ReaderActivity :
                         prefsHelper.textSize = data.getFloatExtra(PrefsHelper.PREF_BOOK_TEXT_SIZE, prefsHelper.defaultTextSize)
                         savePrefs()
                         pageView!!.textSize = prefsHelper.textSize
-                        book!!.loadPage(pageView!!)
-                        updateView()
+                        //book!!.loadPage(pageView!!)
+                        //updateView( )
+                        updateView(book!!.getCur())
                     }
                 }
             } else{
@@ -155,8 +179,9 @@ class ReaderActivity :
             savePrefs()
             loadPositionForBook()
             loadBook()
-            book!!.loadPage(pageView!!)
-            updateView()
+           // book!!.loadPage(pageView!!)
+           // updateView()
+            updateView(book!!.getCur())
         }
     }
 
@@ -165,8 +190,8 @@ class ReaderActivity :
         val startPosition = bookStatusService!!.getPosition(prefsHelper.bookPath!!) ?: BookPosition()
 
         book!!.curPage = Page(null, startPosition, BookPosition())
-        book!!.nextPage = null
-        book!!.prevPage = null
+        // book!!.nextPage = null
+        // book!!.prevPage = null
     }
 
     private fun savePositionForBook() {
@@ -276,7 +301,7 @@ class ReaderActivity :
             }
         })
 
-        pageView!!.setOnTouchListener(object : OnSwipeTouchListener(this@ReaderActivity) {
+        pageView!!.setOnTouchListener(object : OnSwipeTouchListenerWithoutClick(this@ReaderActivity) {
             override fun onSwipeLeft() {
                 super.onSwipeLeft()
                 textViewInfoRight!!.text = getString(R.string.swipe_left)
@@ -307,18 +332,6 @@ class ReaderActivity :
             override fun onSlideDown(point: Point) {
                 super.onSlideDown(point)
                 prefsHelper.decreaseScreenBrghtness(this@ReaderActivity, point, fullwidth)
-            }
-
-            override fun onClick(point: Point) {
-                super.onClick(point)
-                val zone = ScreenZone.zone(point, width, height)
-                textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, zone)
-                when (zone) {
-                    ScreenZone.BottomRight -> doPageNext()
-                    ScreenZone.BottomLeft -> doPagePrev()
-                    else -> {
-                    }
-                }
             }
 
             override fun onDoubleClick(point: Point) {
@@ -373,13 +386,15 @@ class ReaderActivity :
         Toast.makeText(this, fullwidth.toString() + " x " + fullheight.toString(), Toast.LENGTH_SHORT).show()
 
         if ( book != null) {
-            book!!.loadPage(pageView!!)
-            updateView()
+            //book!!.loadPage(pageView!!)
+            //updateView()
+            updateView(book!!.getCur())
         }
     }
 
     private fun doPageNext() {
         if ( book == null) return
+        /*
         if ( book!!.nextPage != null) {
             book!!.prevPage = book!!.curPage
             book!!.curPage = Page(book!!.nextPage!!)
@@ -387,10 +402,14 @@ class ReaderActivity :
             savePositionForBook()
             book!!.loadNextPage(pageView!!)
         }
+        */
+        updateView(book!!.getNext())
+        savePositionForBook()
     }
 
     private fun doPagePrev() {
         if ( book == null) return
+        /*
         if ( book!!.prevPage != null ) {
             book!!.nextPage = book!!.curPage
             book!!.curPage = Page(book!!.prevPage!!)
@@ -398,6 +417,10 @@ class ReaderActivity :
             savePositionForBook()
             book!!.loadPrevPage(pageView!!)
         }
+
+         */
+        updateView(book!!.getPrev())
+        savePositionForBook()
     }
 
     private fun updateInfo() {
@@ -405,14 +428,14 @@ class ReaderActivity :
             var curSection = book!!.curPage!!.endBookPosition.section
             curSection++
 
-            var curPage = 0
+            var curTextPage = 0
             for (i in 0 .. curSection-2) {
-                curPage += book!!.scheme.scheme[i]!!.textPages
+                curTextPage += book!!.scheme.scheme[i]!!.textPages
             }
-            curPage += ( book!!.curPage!!.endBookPosition.offSet / BookScheme.CHAR_PER_PAGE )
+            curTextPage += ( book!!.curPage!!.endBookPosition.offSet / BookScheme.CHAR_PER_PAGE )
 
             textViewInfoLeft!!.text =
-                    resources.getString(R.string.page_info_text, curPage, book!!.scheme.textPages)
+                    resources.getString(R.string.page_info_text, curTextPage, book!!.scheme.textPages)
 
             textViewInfoCenter!!.text =
                     resources.getString(R.string.page_info_text, curSection, book!!.scheme.sectionCount)
@@ -421,11 +444,33 @@ class ReaderActivity :
         }
     }
 
+    /*
     private fun updateView() {
-        pageView!!.text = book!!.curPage?.content
+        if ( book != null && book!!.curPage != null ) {
+            pageView!!.text = book!!.curPage!!.content
+        }
+
+        updateInfo()
+    }
+    */
+
+    private fun updateView(page: Page?) {
+        if ( page != null ) {
+            book!!.curPage = Page(page)
+            pageView!!.text = page.content
+        } else {
+            pageView!!.text = "no page content"
+        }
+
         updateInfo()
     }
 
+    private fun showNote(html: String?) {
+        if ( html == null) return
+        val floatTextviewFragment: FloatTextviewFragment =
+                FloatTextviewFragment.newInstance(html)
+        floatTextviewFragment.show(supportFragmentManager, "fragment_floattextview")
+    }
 
     private fun openMainMenu() {
         val intent = Intent(this, MainMenuActivity::class.java)
@@ -447,27 +492,35 @@ class ReaderActivity :
 
     override fun onFinishQuickMenuDialog(textSize: Float, font: TypefaceRecord?) {
         Log.d(TAG, "onFinishQuickMenuDialog. TextSize: $textSize")
-        prefsHelper.textSize = textSize
-        pageView!!.textSize = textSize
-        if ( font != null) {
-            prefsHelper.font = font
-            pageView!!.typeface = font.getTypeface()
+        if ( textSize != pageView!!.textSize
+                || ( font != null && font.getTypeface() != pageView!!.typeface) ) {
+            prefsHelper.textSize = textSize
+            pageView!!.textSize = textSize
+            if ( font != null) {
+                prefsHelper.font = font
+                pageView!!.typeface = font.getTypeface()
+            }
+            //book!!.loadPage(pageView!!)
+            //updateView()
+            updateView(book!!.getCur())
+            savePrefs()
         }
-        book!!.loadPage(pageView!!)
-        updateView()
-        savePrefs()
     }
 
     override fun onChangeTextSize(textSize: Float) {
         pageView!!.textSize = textSize
-        book!!.loadPage(pageView!!)
-        updateView()
+        //book!!.loadPage(pageView!!)
+        //updateView()
+        updateView(book!!.getCur())
     }
 
     override fun onCancelQuickMenu() {
-        pageView!!.textSize = prefsHelper.textSize
-        book!!.loadPage(pageView!!)
-        updateView()
+        if ( pageView!!.textSize != prefsHelper.textSize ) {
+            pageView!!.textSize = prefsHelper.textSize
+            //book!!.loadPage(pageView!!)
+            //updateView()
+            updateView(book!!.getCur())
+        }
         // ... other resets
     }
 
@@ -508,18 +561,22 @@ class ReaderActivity :
     override fun onSelectBookmark(bookmark: Bookmark) {
         // go to selected bookmark
         book!!.curPage = Page(null, BookPosition(bookmark), BookPosition())
-        book!!.nextPage = null
-        book!!.prevPage = null
-        book!!.loadPage(pageView!!)
-        updateView()
+        //book!!.nextPage = null
+        //book!!.prevPage = null
+        //book!!.loadPage(pageView!!)
+        //updateView()
+        updateView(book!!.getCur())
+        savePositionForBook()
     }
 
     override fun onFinishGotoMenuDialog(section: Int) {
         book!!.curPage = Page(null, BookPosition(section = section), BookPosition())
-        book!!.nextPage = null
-        book!!.prevPage = null
-        book!!.loadPage(pageView!!)
-        updateView()
+//        book!!.nextPage = null
+//        book!!.prevPage = null
+//        book!!.loadPage(pageView!!)
+//        updateView()
+        updateView(book!!.getCur())
+        savePositionForBook()
     }
 
     companion object {

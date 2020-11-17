@@ -84,14 +84,14 @@
             android:layout_weight="1" />
 
         <ImageButton
-            android:id="@+id/imageButton_quickmenu_save"
+            android:id="@+id/imageButton_gotomenu_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/ic_baseline_check_24"
             android:contentDescription="@string/save" />
 
         <ImageButton
-            android:id="@+id/imageButton_quickmenu_close"
+            android:id="@+id/imageButton_gotomenu_close"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/ic_baseline_close_24"

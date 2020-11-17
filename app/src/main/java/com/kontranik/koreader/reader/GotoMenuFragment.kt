@@ -45,12 +45,12 @@ class GotoMenuFragment : DialogFragment() {
         maxsection = requireArguments().getInt(MAX_SECTION, maxsection)
 
 
-        val close = view.findViewById<ImageButton>(R.id.imageButton_quickmenu_back)
+        val close = view.findViewById<ImageButton>(R.id.imageButton_gotomenu_close)
         close.setOnClickListener {
             dismiss()
         }
 
-        val save = view.findViewById<ImageButton>(R.id.imageButton_quickmenu_save)
+        val save = view.findViewById<ImageButton>(R.id.imageButton_gotomenu_save)
         save.setOnClickListener {
             save()
         }

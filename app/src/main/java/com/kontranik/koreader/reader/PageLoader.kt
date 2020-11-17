@@ -1,86 +1,65 @@
 package com.kontranik.koreader.reader
 
 import android.os.Build
-import android.util.Log
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.kontranik.koreader.model.*
-import kotlin.math.max
-import kotlin.math.min
 
 class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
 
-    constructor(pageView: TextView, val book: Book) : PageSplitterOneHtml(
-        pageView.measuredWidth - pageView.paddingLeft - pageView.paddingRight,
-        pageView.measuredHeight - pageView.paddingTop - pageView.paddingBottom,
-        pageView.paint, pageView.lineSpacingMultiplier, pageView.lineSpacingExtra) {
+    constructor(private val pageView: TextView, private val book: Book) : PageSplitterHtml(pageView){
 
-    fun loadPage(page: Page): Page? {
-        val result: Page?
-
-        clear()
-
-        Log.d(TAG, "loadPage...")
-
-        if ( page.startBookPosition.section >= book.scheme.sectionCount ) return  null
-
-        var bookPage = page.startBookPosition.section
-
-        Log.d(TAG, "loadPage: bookPage = " + bookPage)
-        while (bookPage > 0 && bookPage < book.scheme.sectionCount) {
-            val html = book.getPageBody(bookPage)
-            if ( html != null) {
-                val offset = if (bookPage == page.startBookPosition.section) page.startBookPosition.offSet else 0
-                pageForHtml(html, offset, false)
-            }
-
-            if ( pageOne != null) break
-            bookPage++
+    fun getPage(bookPosition: BookPosition, revers: Boolean): Page? {
+        var result: Page?
+        if ( pages.isEmpty() || pages[0].startBookPosition.section != bookPosition.section ) {
+            loadPages(bookPosition.section)
         }
 
-        if ( bookPage == 0 ) {
-            result = coverPage(pageWidth, pageHeight)
-        } else {
-            bookPage = min(bookPage, book.scheme.sectionCount)
-            val endCursor = BookPosition(bookPage, offSet = endOffset)
-            result = Page(pageOne, BookPosition(page.startBookPosition), endCursor )
+         result = findPage(bookPosition.offSet)
+
+        var section = bookPosition.section
+        while ( result == null) {
+            if ( ! revers) section++
+            else section--
+            if ( section < 0 || section > book.scheme.sectionCount) break
+            loadPages(section)
+            result = if ( pages.isEmpty() ) null else { if ( ! revers) pages[0] else pages[pages.size-1] }
         }
+
         return result
     }
 
-    fun loadPageRevers(page: Page): Page? {
-        val result: Page?
+    private fun findPage(startOffset: Int): Page? {
+        if ( startOffset < 0) return null
+        if ( pages.isEmpty() ) return null
+        if ( startOffset > pages[pages.size-1].endBookPosition.offSet) return null
 
-        Log.d(TAG, "loadPageRevers...")
+        var start: Int
+        var end: Int
+        for (  i in 0 until pages.size) {
 
-        if ( page.endBookPosition.section == 0 && page.endBookPosition.offSet == 0 ) return  null
+            //start = if (i == 0) 0 else pages[i - 1].endBookPosition.offSet + 1
+            start = pages[i].startBookPosition.offSet
+            end = pages[i].endBookPosition.offSet
 
-        clear()
-
-        var bookPage = page.endBookPosition.section
-        if ( page.endBookPosition.offSet == 0 && bookPage > 0) {
-            bookPage--;
-        }
-
-        while (bookPage > 0) {
-            val html = book.getPageBody(bookPage)
-            if ( html != null) {
-                val offset = if (bookPage == page.endBookPosition.section) page.endBookPosition.offSet-1 else null
-                pageForHtml(html, offset, true)
+            if ( startOffset in start until  end) {
+                return pages[i]
             }
-
-            if ( pageOne != null) break
-            bookPage--
         }
+        return null
+    }
 
-        if ( bookPage == 0 ) {
-            result = coverPage(pageWidth, pageHeight)
-        } else {
-            bookPage = max(bookPage, 0)
-            val startCursor = BookPosition(bookPage, offSet = startOffset)
-            result = Page(pageOne, startCursor, BookPosition(page.endBookPosition) )
+    private fun loadPages(section: Int) {
+        if (section > 0 && section < book.scheme.sectionCount) {
+            val html = book.getPageBody(section)
+            if ( html != null) {
+                splitPages(book, section, html)
+            }
+        } else if ( section == 0 ) {
+            val pageWidth: Int = pageView.measuredWidth - pageView.paddingLeft - pageView.paddingRight
+            val pageHeight: Int = pageView.measuredHeight - pageView.paddingTop - pageView.paddingBottom
+            pages = mutableListOf(coverPage(pageWidth, pageHeight))
         }
-        return result
     }
 
     private fun coverPage(width: Int, height: Int): Page {

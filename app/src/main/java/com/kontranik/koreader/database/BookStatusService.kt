@@ -39,7 +39,7 @@ class BookStatusService(var adapter: BookStatusDatabaseAdapter) {
         return if ( bookStatus == null )
             null
         else {
-            BookPosition(bookStatus.position_page, bookStatus.position_offset)
+            BookPosition(bookStatus.position_section, bookStatus.position_offset)
         }
     }
 
