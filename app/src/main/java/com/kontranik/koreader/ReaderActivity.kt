@@ -331,10 +331,12 @@ class ReaderActivity :
                 val link = spannable.getSpans(off, off, URLSpan::class.java)
 
                 if ( link.isNotEmpty()) {
+                    // link clicked
                     val url = link[0].url
                     Toast.makeText(applicationContext, url, Toast.LENGTH_SHORT).show()
                     showNote(book!!.getNote(url))
                 } else {
+                    // not a link, normal click
                     val zone = ScreenZone.zone(point, width, height)
                     textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, zone)
                     when (zone) {
@@ -453,6 +455,9 @@ class ReaderActivity :
             book!!.loadNextPage(pageView!!)
         }
         */
+        if ( book!!.curPage!!.endBookPosition.section >= book!!.scheme.sectionCount-1 &&
+                book!!.curPage!!.endBookPosition.offSet >=
+                book!!.scheme.scheme[book!!.scheme.sectionCount-1]!!.textSize) return
         updateView(book!!.getNext())
         savePositionForBook()
     }
@@ -469,6 +474,8 @@ class ReaderActivity :
         }
 
          */
+        if ( book!!.curPage!!.startBookPosition.section <= 0 &&
+                book!!.curPage!!.startBookPosition.offSet <= 0) return
         updateView(book!!.getPrev())
         savePositionForBook()
     }
