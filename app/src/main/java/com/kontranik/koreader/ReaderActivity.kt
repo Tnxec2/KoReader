@@ -82,29 +82,7 @@ class ReaderActivity :
         pageView!!.addOnLayoutChangeListener(OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             updateSizeInfo()
         })
-        /*
-        pageView!!.movementMethod = object: CustomLinkMovementMethod() {
-            override fun onLinkClicked(url: String) {
-                super.onLinkClicked(url)
-                Toast.makeText(applicationContext, url, Toast.LENGTH_SHORT).show()
-                showNote(book!!.getNote(url))
-            }
 
-            override fun onClick(point: Point) {
-                super.onClick(point)
-
-                val zone = ScreenZone.zone(point, width, height)
-                textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, zone)
-                when (zone) {
-                    ScreenZone.BottomRight -> doPageNext()
-                    ScreenZone.BottomLeft -> doPagePrev()
-                    else -> {
-                    }
-
-                }
-            }
-        };
-*/
 
         textViewInfoCenter = findViewById(R.id.tv_infotext_center)
         textViewInfoLeft = findViewById(R.id.tv_infotext_left)
@@ -188,8 +166,6 @@ class ReaderActivity :
             savePrefs()
             loadPositionForBook()
             loadBook()
-           // book!!.loadPage(pageView!!)
-           // updateView()
             Log.d(TAG, "openBookFromIntent: getCurPage")
             updateView(book!!.getCur(recalc = true))
         }
@@ -200,8 +176,6 @@ class ReaderActivity :
         val startPosition = bookStatusService!!.getPosition(prefsHelper.bookPath!!) ?: BookPosition()
 
         book!!.curPage = Page(null, startPosition, BookPosition())
-        // book!!.nextPage = null
-        // book!!.prevPage = null
     }
 
     private fun savePositionForBook() {
@@ -330,9 +304,8 @@ class ReaderActivity :
                     when (zone) {
                         ScreenZone.BottomRight -> doPageNext()
                         ScreenZone.BottomLeft -> doPagePrev()
-                        else -> {
-                        }
-
+                        ScreenZone.MiddleCenter -> openMainMenu()
+                        else -> {}
                     }
                 }
             }
@@ -373,11 +346,8 @@ class ReaderActivity :
                 super.onDoubleClick(point)
                 val zone = ScreenZone.zone(point, width, height)
                 when (zone) {
-                    ScreenZone.MiddleCenter -> {
-                        openQuickMenu()
-                    }
-                    else -> {
-                    }
+                    ScreenZone.MiddleCenter -> openQuickMenu()
+                    else -> { }
                 }
                 textViewInfoRight!!.text = resources.getString(R.string.doubleclick_in_zone, zone)
             }
@@ -394,9 +364,7 @@ class ReaderActivity :
                 } else {
                     val zone = ScreenZone.zone(point, width, height)
                     when (zone) {
-                        ScreenZone.MiddleCenter -> {
-                            openMainMenu()
-                        }
+                        ScreenZone.MiddleCenter -> {}
                         else -> {
                         }
                     }
@@ -435,8 +403,6 @@ class ReaderActivity :
             width = w
             height = h
             if ( book != null) {
-                //book!!.loadPage(pageView!!)
-                //updateView()
                 Log.d(TAG, "updateSizeInfo: getCurPage")
                 updateView(book!!.getCur(recalc = true))
             }
@@ -445,15 +411,6 @@ class ReaderActivity :
 
     private fun doPageNext() {
         if ( book == null) return
-        /*
-        if ( book!!.nextPage != null) {
-            book!!.prevPage = book!!.curPage
-            book!!.curPage = Page(book!!.nextPage!!)
-            updateView()
-            savePositionForBook()
-            book!!.loadNextPage(pageView!!)
-        }
-        */
         if ( book!!.curPage!!.endBookPosition.section >= book!!.scheme.sectionCount-1 &&
                 book!!.curPage!!.endBookPosition.offSet >=
                 book!!.scheme.scheme[book!!.scheme.sectionCount - 1]!!.textSize) return
@@ -463,16 +420,6 @@ class ReaderActivity :
 
     private fun doPagePrev() {
         if ( book == null) return
-        /*
-        if ( book!!.prevPage != null ) {
-            book!!.nextPage = book!!.curPage
-            book!!.curPage = Page(book!!.prevPage!!)
-            updateView()
-            savePositionForBook()
-            book!!.loadPrevPage(pageView!!)
-        }
-
-         */
         if ( book!!.curPage!!.startBookPosition.section <= 0 &&
                 book!!.curPage!!.startBookPosition.offSet <= 0) return
         updateView(book!!.getPrev())
@@ -499,16 +446,6 @@ class ReaderActivity :
             textViewInfoCenter!!.text = getString(R.string.no_book) 
         }
     }
-
-    /*
-    private fun updateView() {
-        if ( book != null && book!!.curPage != null ) {
-            pageView!!.text = book!!.curPage!!.content
-        }
-
-        updateInfo()
-    }
-    */
 
     private fun updateView(page: Page?) {
         if ( page != null ) {
@@ -595,8 +532,6 @@ class ReaderActivity :
 
     override fun onChangeTextSize(textSize: Float) {
         pageView!!.textSize = textSize
-        //book!!.loadPage(pageView!!)
-        //updateView()
         Log.d(TAG, "onChangeTextSize: getCurPage")
         updateView(book!!.getCur(recalc = true))
     }
@@ -604,8 +539,6 @@ class ReaderActivity :
     override fun onCancelQuickMenu() {
         if ( pageView!!.textSize != prefsHelper.textSize ) {
             pageView!!.textSize = prefsHelper.textSize
-            //book!!.loadPage(pageView!!)
-            //updateView()
             Log.d(TAG, "onCancelQuickMenu: getCurPage")
             updateView(book!!.getCur(recalc = true))
         }
@@ -659,10 +592,6 @@ class ReaderActivity :
         ) return
         // go to selected bookmark
         book!!.curPage = Page(null, BookPosition(bookmark), BookPosition())
-        //book!!.nextPage = null
-        //book!!.prevPage = null
-        //book!!.loadPage(pageView!!)
-        //updateView()
         Log.d(TAG, "onSelectBookmark: getCurPage")
         updateView(book!!.getCur(recalc = true))
         savePositionForBook()
@@ -670,10 +599,6 @@ class ReaderActivity :
 
     override fun onFinishGotoMenuDialog(section: Int) {
         book!!.curPage = Page(null, BookPosition(section = section), BookPosition())
-//        book!!.nextPage = null
-//        book!!.prevPage = null
-//        book!!.loadPage(pageView!!)
-//        updateView()
         Log.d(TAG, "onFinishGotoMenuDialog: getCurPage")
         updateView(book!!.getCur(recalc = true))
         savePositionForBook()
