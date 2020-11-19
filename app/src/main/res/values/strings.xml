@@ -27,6 +27,7 @@
     <string name="back">Back</string>
     <string name="text">Text</string>
     <string name="position">Position</string>
+    <string name="no_bookmarks">No Bookmarks</string>
     <string name="icon">Icon</string>
     <string name="title">Title</string>
     <string name="description">Description</string>
@@ -48,6 +49,8 @@
     <string name="main_menu">Main menu</string>
     <string name="no_book">no book</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="open">Open</string>
+    <string name="delete">Delete</string>
 
     <!-- Preference Titles -->
     <string name="interface_header">Interface</string>
@@ -73,5 +76,6 @@
     <!-- Text Preferences -->
     <string name="usesystemfonts_title">Use System Fonts</string>
     <string name="show_noto_fonts_title">Show Noto Fonts</string>
+    <string name="note">Note</string>
 
 </resources>

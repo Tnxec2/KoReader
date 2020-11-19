@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
-import com.kontranik.koreader.utils.PrefsHelper
 
 class SettingsActivity : AppCompatActivity() {
 

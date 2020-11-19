@@ -4,10 +4,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
-import android.os.Parcelable
-import android.widget.AdapterView.OnItemClickListener
 import android.widget.ImageButton
-import android.widget.ListView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,7 +17,6 @@ import com.kontranik.koreader.utils.FileListAdapter
 import com.kontranik.koreader.utils.PrefsHelper
 import java.io.File
 import java.util.*
-import kotlin.collections.HashMap
 
 
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -121,7 +117,7 @@ class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterC
         selectedPath = "storage"
         fileItemList.clear()
         rootPaths.clear()
-        fileItemList.addAll(FileHelper.getStorageList())
+        fileItemList.addAll(FileHelper.storageList)
         for (fileItem in fileItemList) {
             val parent = File(fileItem.path).parent
             if (!rootPaths.contains(parent)) rootPaths.add(parent)

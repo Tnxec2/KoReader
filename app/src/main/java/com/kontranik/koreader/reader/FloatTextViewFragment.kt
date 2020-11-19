@@ -2,7 +2,6 @@ package com.kontranik.koreader.reader
 
 import android.os.Bundle
 import android.text.Html
-import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,17 +10,15 @@ import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
-import kotlin.math.max
-import kotlin.math.min
 
 
-class FloatTextviewFragment : DialogFragment() {
+class FloatTextViewFragment : DialogFragment() {
 
-    var textView: TextView? = null
+    private var textView: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme);
+        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -46,10 +43,10 @@ class FloatTextviewFragment : DialogFragment() {
     companion object {
         const val CONTENT = "content"
 
-        fun newInstance(html: String): FloatTextviewFragment {
-            val frag = FloatTextviewFragment()
+        fun newInstance(html: String): FloatTextViewFragment {
+            val frag = FloatTextViewFragment()
             val args = Bundle()
-            args.putString(CONTENT, html.toString())
+            args.putString(CONTENT, html)
             frag.arguments = args
 
             return frag

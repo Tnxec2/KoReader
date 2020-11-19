@@ -12,7 +12,7 @@ class CustomImageGetter(
 
     override fun getDrawable( source: String?): Drawable? {
         if ( source != null) {
-            val mImage = book.getImage(source)
+            val mImage = book.getImageBitmapDrawable(source)
             if ( mImage != null) {
                 val mSize = ImageUtils.getScaledSize(
                         mImage.intrinsicWidth, mImage.intrinsicHeight,

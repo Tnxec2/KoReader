@@ -21,7 +21,6 @@ class PermissionsHelper(private val activity: AppCompatActivity) {
 
     interface PermissionsHelperListener {
         fun onAccessGrantedReadExternalStorage() {}
-        fun onAccessGrantedWriteSettings() {}
     }
 
     fun checkPermissionsExternalStorage(mainView: View) {

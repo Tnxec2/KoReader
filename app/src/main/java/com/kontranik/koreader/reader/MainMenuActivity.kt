@@ -6,14 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.Toast
 import com.kontranik.koreader.R
 
 class MainMenuActivity : AppCompatActivity() {
-
-
-    private val REQUEST_ACCESS_TYPE_OPENFILE = 123
-    private val REQUEST_ACCESS_TYPE_SETTINGS = 124
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,5 +68,7 @@ class MainMenuActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "MainMenuActivity"
+        private const val REQUEST_ACCESS_TYPE_OPENFILE = 123
+        private const val REQUEST_ACCESS_TYPE_SETTINGS = 124
     }
 }

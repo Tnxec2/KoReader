@@ -23,7 +23,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Note"
+            android:text="@string/note"
             android:textSize="@dimen/text_size_dialog_title"
             />
 
@@ -45,7 +45,7 @@
     <TextView
         android:id="@+id/textView_floattextview_note"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center_vertical"
         android:text=""

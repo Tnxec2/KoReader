@@ -49,6 +49,8 @@ dependencies {
     }
     implementation 'org.slf4j:slf4j-android:1.7.25'
 
+    implementation 'it.sephiroth.android.library.imagezoom:imagezoom:2.3.0'
+
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
     implementation "androidx.core:core-ktx:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

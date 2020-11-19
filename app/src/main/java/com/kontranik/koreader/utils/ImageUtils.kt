@@ -12,9 +12,8 @@ object ImageUtils {
         var bitmap: Bitmap? = null
 
         if (drawable is BitmapDrawable) {
-            val bitmapDrawable = drawable
-            if (bitmapDrawable.bitmap != null) {
-                return bitmapDrawable.bitmap
+            if (drawable.bitmap != null) {
+                return drawable.bitmap
             }
         }
 
@@ -45,7 +44,7 @@ object ImageUtils {
     }
 
     fun byteArrayToScaledBitmap(byteArray: ByteArray, width: Int, height: Int): Bitmap {
-        var bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
         return scaleBitmap(bitmap, width, height)
     }
 

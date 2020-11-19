@@ -1,7 +1,6 @@
 package com.kontranik.koreader.reader
 
 import android.content.SharedPreferences
-import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,7 +23,7 @@ class FontPickerFragment :
         DialogFragment(),
         FontPickerListItemAdapter.FontPickerListAdapterClickListener {
 
-    var listener: FontPickerDialogListener? = null
+    private var listener: FontPickerDialogListener? = null
 
     private var fontList: MutableList<TypefaceRecord> = mutableListOf()
 
@@ -45,7 +44,7 @@ class FontPickerFragment :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme);
+        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -103,11 +102,11 @@ class FontPickerFragment :
         val fontpath = requireArguments().getString(FONTPATH, null)
         val fontname = requireArguments().getString(FONTNAME, TypefaceRecord.SANSSERIF)
         var pos = 0
-        for ( i in 0 .. fontList!!.size) {
-            if ( fontpath != null && fontList!![i].file != null && fontpath == fontList!![i].file!!.absolutePath ) {
+        for ( i in 0 .. fontList.size) {
+            if ( fontpath != null && fontList[i].file != null && fontpath == fontList[i].file!!.absolutePath ) {
                 pos = i
                 break
-            } else if ( fontname == fontList!![i].name) {
+            } else if ( fontname == fontList[i].name) {
                 pos = i
                 break
             }
@@ -115,7 +114,7 @@ class FontPickerFragment :
         fontListView.scrollToPosition(pos)
 
         AdapterView.OnItemClickListener { parent, v, position, id ->
-            selectedFont = fontList!![position]
+            selectedFont = fontList[position]
         }
 
     }
@@ -149,7 +148,7 @@ class FontPickerFragment :
     }
 
     override fun onFontlistItemClickListener(position: Int) {
-        selectedFont = fontList!![position]
+        selectedFont = fontList[position]
         save()
     }
 

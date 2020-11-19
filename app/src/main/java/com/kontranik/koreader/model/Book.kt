@@ -12,11 +12,9 @@ import org.jsoup.Jsoup
 import kotlin.math.ceil
 
 
-class Book(private var c: Context, private var fileLocation: String, private val pageView: TextView) {
+class Book(private var c: Context, private var fileLocation: String, pageView: TextView) {
 
     var curPage: Page? = Page(null, BookPosition())
-    var nextPage: Page? = null
-    var prevPage: Page? = null
 
     var scheme: BookScheme = BookScheme()
 
@@ -69,12 +67,22 @@ class Book(private var c: Context, private var fileLocation: String, private val
         return document.html()
     }
 
-    fun getImage(source: String): BitmapDrawable? {
+    fun getImageByteArray(source: String): ByteArray? {
+        if ( epubBook != null) {
+            val resource = epubBook!!.resources.getByHref(source)
+            if (resource != null) {
+                return resource.data
+            }
+        }
+        return  null
+    }
+
+    fun getImageBitmapDrawable(source: String): BitmapDrawable? {
         if ( epubBook != null) {
             val resource = epubBook!!.resources.getByHref(source)
             if (resource != null) {
                 val mImage =  resource.data
-                var bitmap = BitmapFactory.decodeByteArray(mImage, 0, mImage.size)
+                val bitmap = BitmapFactory.decodeByteArray(mImage, 0, mImage.size)
                 return BitmapDrawable(c.resources, bitmap)
             }
         }
@@ -94,41 +102,6 @@ class Book(private var c: Context, private var fileLocation: String, private val
         return null
     }
 
-        /*
-    private fun loadPage(page: Page, textView: TextView): Page? {
-        return PageLoaderOne(textView, this).loadPage(page)
-    }
-
-    private fun loadPageRevers(page: Page, textView: TextView): Page? {
-        return PageLoaderOne(textView, this).loadPageRevers(page)
-    }
-
-    fun loadPage(pageView: TextView) {
-        loadCurPage(pageView)
-        loadPrevPage(pageView)
-        if ( prevPage != null && prevPage!!.recalculate && curPage != null ) {
-            curPage!!.startBookPosition = BookPosition(prevPage!!.endBookPosition)
-            loadCurPage(pageView)
-        }
-        loadNextPage(pageView)
-    }
-
-    private fun loadCurPage(pageView: TextView) {
-        Log.d("Book", "loadCurPage...")
-        curPage = loadPage(Page(null, curPage!!.startBookPosition), pageView)
-    }
-
-    fun loadNextPage(pageView: TextView) {
-        Log.d("Book", "loadNextPage...")
-        nextPage = loadPage(Page(null, BookPosition(curPage!!.endBookPosition)), pageView)
-    }
-
-    fun loadPrevPage(pageView: TextView){
-        Log.d("Book", "loadPrevPage...")
-        prevPage = loadPageRevers(Page(null, BookPosition(), BookPosition(curPage!!.startBookPosition)), pageView)
-    }
-        */
-
     fun getCur(recalc: Boolean): Page? {
         return pageLoader.getPage(BookPosition(curPage!!.startBookPosition), false, recalc)
     }
@@ -136,12 +109,12 @@ class Book(private var c: Context, private var fileLocation: String, private val
     fun getNext(): Page? {
         val bookPosition =  BookPosition(curPage!!.endBookPosition)
         bookPosition.offSet = bookPosition.offSet + 1
-        return pageLoader.getPage(BookPosition(bookPosition), false, false)
+        return pageLoader.getPage(BookPosition(bookPosition), revers = false, recalc = false)
     }
 
     fun getPrev(): Page? {
         val bookPosition =  BookPosition(curPage!!.startBookPosition)
         bookPosition.offSet = bookPosition.offSet - 1
-        return pageLoader.getPage(BookPosition(bookPosition), true, false)
+        return pageLoader.getPage(BookPosition(bookPosition), revers = true, recalc = false)
     }
 }

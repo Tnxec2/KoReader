@@ -1,38 +1,35 @@
 package com.kontranik.koreader.reader
 
 import android.os.Bundle
-import android.util.Log
-import android.view.*
+import android.view.ContextMenu
 import android.view.ContextMenu.ContextMenuInfo
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.AdapterView.OnItemLongClickListener
 import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.TextView
 import androidx.annotation.Nullable
-import androidx.core.view.get
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.database.BookmarkService
 import com.kontranik.koreader.database.BookmarksDatabaseAdapter
 import com.kontranik.koreader.model.Bookmark
 import com.kontranik.koreader.utils.BookmarkListAdapter
-import java.util.*
 
 
 class BookmarkListFragment : DialogFragment() {
 
-    var listener: BookmarkListDialogListener? = null
+    private var listener: BookmarkListDialogListener? = null
     private var service: BookmarkService? = null
 
     private var listView: ListView? = null
     private var bookmarkListAdapter: BookmarkListAdapter? = null
     private var bookmarkList: MutableList<Bookmark> = mutableListOf()
 
-    private val OPEN = 0
-    private val DELETE = 1
-
-    var longClickedItemIndex: Int? = null
+    private var longClickedItemIndex: Int? = null
 
     var path: String? = null
     private var statusText: TextView? = null
@@ -45,7 +42,7 @@ class BookmarkListFragment : DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme);
+        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -55,7 +52,6 @@ class BookmarkListFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
 
         listener = activity as BookmarkListDialogListener?
         service = BookmarkService(BookmarksDatabaseAdapter(view.context))
@@ -102,14 +98,14 @@ class BookmarkListFragment : DialogFragment() {
     private fun refreshBookmarks() {
         loadBookmarks(path!!)
         // fire the event
-        bookmarkListAdapter!!.notifyDataSetChanged();
+        bookmarkListAdapter!!.notifyDataSetChanged()
     }
 
     private fun loadBookmarks(path: String) {
         bookmarkList.clear()
         bookmarkList.addAll(service!!.getByPath(path).toMutableList())
         if ( bookmarkList.isEmpty() ) {
-            statusText!!.text = "No Bookmarks"
+            statusText!!.text = getString(R.string.no_bookmarks)
             statusText!!.visibility = View.VISIBLE
         } else {
             statusText!!.visibility = View.INVISIBLE
@@ -117,8 +113,8 @@ class BookmarkListFragment : DialogFragment() {
     }
 
     override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenuInfo?) {
-        menu.add(0, OPEN, 0, "Open");
-        menu.add(0, DELETE, 0, "Delete");
+        menu.add(0, MENU_ITEM_ID_OPEN, 0, getString(R.string.open))
+        menu.add(0, MENU_ITEM_ID_DELETE, 0, getString(R.string.delete))
 
         menu.getItem(0).setOnMenuItemClickListener {
             open(longClickedItemIndex!!)
@@ -143,6 +139,8 @@ class BookmarkListFragment : DialogFragment() {
     }
 
     companion object {
+        private const val MENU_ITEM_ID_OPEN = 0
+        private const val MENU_ITEM_ID_DELETE = 1
         const val PATH = "path"
         fun newInstance(path: String): BookmarkListFragment {
             val frag = BookmarkListFragment()

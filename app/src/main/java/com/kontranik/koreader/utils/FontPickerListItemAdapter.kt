@@ -18,7 +18,7 @@ class FontPickerListItemAdapter(
 ) :
         RecyclerView.Adapter<FontPickerListItemAdapter.ViewHolder>() {
 
-    private val inflater: LayoutInflater
+    private val inflater: LayoutInflater = LayoutInflater.from(context)
 
     interface FontPickerListAdapterClickListener {
         fun onFontlistItemClickListener(position: Int)
@@ -49,7 +49,4 @@ class FontPickerListItemAdapter(
         val fontview: TextView = view.findViewById(R.id.textView_fontlist_text)
     }
 
-    init {
-        inflater = LayoutInflater.from(context)
-    }
 }

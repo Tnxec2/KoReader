@@ -22,10 +22,4 @@
 
     <dimen name="text_size_dialog_title">16sp</dimen>
 
-    <dimen name="h1">26sp</dimen>
-    <dimen name="h2">19.5sp</dimen>
-    <dimen name="h3">15.21sp</dimen>
-    <dimen name="h4">13sp</dimen>
-    <dimen name="h5">10.79sp</dimen>
-    <dimen name="h6">8.71sp</dimen>
 </resources>

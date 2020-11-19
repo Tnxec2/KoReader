@@ -86,10 +86,6 @@ class PrefsHelper() {
         }
     }
 
-    fun setBrightness(activity: Activity) {
-
-    }
-
     fun setScreenBrightness(activity: Activity, level: Float) {
         layoutpars = activity.window.attributes
         systemScreenBrightnessLevel = layoutpars!!.screenBrightness

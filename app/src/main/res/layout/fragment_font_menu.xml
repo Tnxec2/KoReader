@@ -13,16 +13,10 @@
 
     >
 
-
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/reciclerView_font_list"
             app:layoutManager="LinearLayoutManager"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-
-
-
 
 </LinearLayout>

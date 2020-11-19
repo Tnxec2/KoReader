@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
+import android.text.style.ImageSpan
 import android.text.style.URLSpan
 import android.util.Log
 import android.view.KeyEvent
@@ -27,8 +29,8 @@ import com.kontranik.koreader.database.BookmarksDatabaseAdapter
 import com.kontranik.koreader.model.*
 import com.kontranik.koreader.reader.*
 import com.kontranik.koreader.utils.*
-import com.kontranik.koreader.utils.OnSwipeTouchListener
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
 
@@ -51,10 +53,10 @@ class ReaderActivity :
     private var textViewInfoLeft: TextView? = null
     private var textViewInfoRight: TextView? = null
 
-    var width: Int = 100
-    var fullwidth: Int = 100
-    var height: Int = 100
-    var fullheight: Int = 100
+    private var width: Int = 100
+    private var fullwidth: Int = 100
+    private var height: Int = 100
+    private var fullheight: Int = 100
 
     private var settings: SharedPreferences? = null
     private var prefEditor: SharedPreferences.Editor? = null
@@ -268,7 +270,6 @@ class ReaderActivity :
         prefsHelper.screenBrightness = prefs.getString(PrefsHelper.PREF_KEY_BRIGHTNESS, "Manual")
 
         prefsHelper.setOrientation(this)
-        prefsHelper.setBrightness(this)
         prefsHelper.setTheme()
 
         try {
@@ -313,27 +314,14 @@ class ReaderActivity :
             override fun onClick(point: Point) {
                 super.onClick(point)
 
-                // check if Link clicked
-                var x = point.x.toInt()
-                var y = point.y.toInt()
-                x -= pageView!!.totalPaddingLeft
-                y -= pageView!!.totalPaddingTop
-                x += pageView!!.scrollX
-                y += pageView!!.scrollY
-
-                // Locate the URL text
-                val layout = pageView!!.layout
-                val line = layout.getLineForVertical(y)
-                val off = layout.getOffsetForHorizontal(line, x.toFloat())
-
                 // Find the URL that was pressed
+                val off = getClickedOffset(point)
                 val spannable = pageView!!.text as Spannable
                 val link = spannable.getSpans(off, off, URLSpan::class.java)
-
-                if ( link.isNotEmpty()) {
+                if (link.isNotEmpty()) {
                     // link clicked
                     val url = link[0].url
-                    Toast.makeText(applicationContext, url, Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(applicationContext, url, Toast.LENGTH_SHORT).show()
                     showNote(book!!.getNote(url))
                 } else {
                     // not a link, normal click
@@ -396,15 +384,24 @@ class ReaderActivity :
 
             override fun onLongClick(point: Point) {
                 super.onLongClick(point)
-                val zone = ScreenZone.zone(point, width, height)
-                when (zone) {
-                    ScreenZone.MiddleCenter -> {
-                        openMainMenu()
+
+                // Find the Image that was pressed
+                val off = getClickedOffset(point)
+                val spannable = pageView!!.text as Spannable
+                val image = spannable.getSpans(off, off, ImageSpan::class.java)
+                if (image.isNotEmpty()) {
+                    showImage(image[0])
+                } else {
+                    val zone = ScreenZone.zone(point, width, height)
+                    when (zone) {
+                        ScreenZone.MiddleCenter -> {
+                            openMainMenu()
+                        }
+                        else -> {
+                        }
                     }
-                    else -> {
-                    }
+                    textViewInfoRight!!.text = resources.getString(R.string.longclick_in_zone, zone)
                 }
-                textViewInfoRight!!.text = resources.getString(R.string.longclick_in_zone, zone)
             }
 
         })
@@ -459,7 +456,7 @@ class ReaderActivity :
         */
         if ( book!!.curPage!!.endBookPosition.section >= book!!.scheme.sectionCount-1 &&
                 book!!.curPage!!.endBookPosition.offSet >=
-                book!!.scheme.scheme[book!!.scheme.sectionCount-1]!!.textSize) return
+                book!!.scheme.scheme[book!!.scheme.sectionCount - 1]!!.textSize) return
         updateView(book!!.getNext())
         savePositionForBook()
     }
@@ -524,11 +521,40 @@ class ReaderActivity :
         updateInfo()
     }
 
+    private fun getClickedOffset(point: Point): Int {
+        // check if Link or image clicked
+        var x = point.x
+        var y = point.y
+        x -= pageView!!.totalPaddingLeft
+        y -= pageView!!.totalPaddingTop
+        x += pageView!!.scrollX
+        y += pageView!!.scrollY
+        // Locate the clicked span
+        val layout = pageView!!.layout
+        val line = layout.getLineForVertical(y)
+        return layout.getOffsetForHorizontal(line, x.toFloat())
+    }
+
     private fun showNote(html: String?) {
         if ( html == null) return
-        val floatTextviewFragment: FloatTextviewFragment =
-                FloatTextviewFragment.newInstance(html)
-        floatTextviewFragment.show(supportFragmentManager, "fragment_floattextview")
+        val floatTextViewFragment: FloatTextViewFragment =
+                FloatTextViewFragment.newInstance(html)
+        floatTextViewFragment.show(supportFragmentManager, "fragment_floattextview")
+    }
+
+    private fun showImage(imageSpan: ImageSpan) {
+        val b: ByteArray
+        b = if ( imageSpan.source != null) {
+            book!!.getImageByteArray(imageSpan.source!!) ?: return
+        } else {
+            val bitmap = ImageUtils.drawableToBitmap(imageSpan.drawable)
+            val byteArrayStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayStream)
+            byteArrayStream.toByteArray()
+        }
+        val imageViewerFragment: ImageViewerFragment =
+                ImageViewerFragment.newInstance(b)
+        imageViewerFragment.show(supportFragmentManager, "fragment_imageviewfragment")
     }
 
     private fun openMainMenu() {

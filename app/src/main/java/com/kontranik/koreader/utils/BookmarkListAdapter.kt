@@ -1,13 +1,10 @@
 package com.kontranik.koreader.utils
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.TextView
 import com.kontranik.koreader.R
 import com.kontranik.koreader.model.Bookmark

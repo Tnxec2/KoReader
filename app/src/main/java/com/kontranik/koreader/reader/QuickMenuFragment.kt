@@ -18,12 +18,9 @@ import java.io.File
 import kotlin.math.max
 import kotlin.math.min
 
-
-
-
 class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogListener {
 
-    var listener: QuickMenuDialogListener? = null
+    private var listener: QuickMenuDialogListener? = null
 
     // textSize
     private var textViewTextSIze: TextView? = null
@@ -44,7 +41,7 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme);
+        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

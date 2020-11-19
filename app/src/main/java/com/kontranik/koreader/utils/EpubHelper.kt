@@ -62,21 +62,6 @@ class EpubHelper(
         return data?.let { String(it) }
     }
 
-    fun pagesCount(): Int? {
-        return epubBook?.contents?.size
-    }
-
-    fun getElementsForPage(page: Int): MutableList<AbstractElement> {
-        val bookPageText = getPage(page) ?: return mutableListOf()
-        val document = Jsoup.parse(bookPageText)
-        val elements = document.body().select("*")
-        val result = mutableListOf<AbstractElement>()
-        for (e in elements) {
-            AbstractElement(normalname = e.normalName(), text = e.ownText())
-        }
-        return result
-    }
-
     fun getBookInfo(path: String): BookInfo? {
         if (epubBook != null) {
             val t = epubBook!!.title

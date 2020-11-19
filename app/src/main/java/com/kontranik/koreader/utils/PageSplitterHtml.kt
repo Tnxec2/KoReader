@@ -1,11 +1,15 @@
 package com.kontranik.koreader.utils
 
 import android.text.*
+import android.text.style.ClickableSpan
+import android.text.style.ImageSpan
 import android.text.style.QuoteSpan
+import android.view.View
 import android.widget.TextView
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookPosition
 import com.kontranik.koreader.model.Page
+import it.sephiroth.android.library.imagezoom.ImageViewTouch
 
 
 open class PageSplitterHtml(private val textView: TextView) {
@@ -30,27 +34,7 @@ open class PageSplitterHtml(private val textView: TextView) {
             SpannableStringBuilder(Html.fromHtml(html, CustomImageGetter(book, pageWidth, pageHeight), null))
         }
 
-        val quoteColor = textView.currentTextColor
-        val newQuoteSpan = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-            QuoteSpan(quoteColor, 5, 10)
-        } else {
-            QuoteSpan(quoteColor)
-        }
-        for ( quoteSpan in content.getSpans(0, content.length, QuoteSpan::class.java)) {
-            // get the span range
-
-            // get the span range
-            val start: Int = content.getSpanStart(quoteSpan)
-            val end: Int = content.getSpanEnd(quoteSpan)
-
-            // remove the bold span
-
-            // remove the bold span
-            content.removeSpan(quoteSpan)
-
-            // add an new QuoteSpan span in the same place
-            content.setSpan(newQuoteSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
+        postformatContent()
 
         staticLayout = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             StaticLayout.Builder.obtain(content, 0, content.length, paint, pageWidth)
@@ -85,6 +69,48 @@ open class PageSplitterHtml(private val textView: TextView) {
 
             if ( endLine >= staticLayout!!.lineCount-1 ) break
             startLine = lastFullyVisibleLine + 1
+        }
+    }
+
+    private fun postformatContent() {
+        formatQuotes()
+        //formatImages()
+    }
+
+/*    private fun formatImages() {
+        for ( imageSpan in content.getSpans(0, content.length, ImageSpan::class.java)) {
+            // get the span range
+            val start: Int = content.getSpanStart(imageSpan)
+            val end: Int = content.getSpanEnd(imageSpan)
+
+            val clickableSpan = object : ClickableSpan(){
+                override fun onClick(view: View) {
+
+                }
+            }
+
+            // add an additional clickable span in the same place
+            content.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }*/
+
+    private fun formatQuotes() {
+        val quoteColor = textView.currentTextColor
+        val newQuoteSpan = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            QuoteSpan(quoteColor, 5, 10)
+        } else {
+            QuoteSpan(quoteColor)
+        }
+        for ( quoteSpan in content.getSpans(0, content.length, QuoteSpan::class.java)) {
+            // get the span range
+            val start: Int = content.getSpanStart(quoteSpan)
+            val end: Int = content.getSpanEnd(quoteSpan)
+
+            // remove old span
+            content.removeSpan(quoteSpan)
+
+            // add an new QuoteSpan span in the same place
+            content.setSpan(newQuoteSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
     }
 

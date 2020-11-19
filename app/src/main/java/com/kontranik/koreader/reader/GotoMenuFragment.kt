@@ -15,11 +15,11 @@ import kotlin.math.min
 
 class GotoMenuFragment : DialogFragment() {
 
-    var listener: GotoMenuDialogListener? = null
+    private var listener: GotoMenuDialogListener? = null
 
-    var section: Int = 0
-    var maxsection: Int = 0
-    var textViewSection: TextView? = null
+    private var section: Int = 0
+    private var maxsection: Int = 0
+    private var textViewSection: TextView? = null
 
     // 1. Defines the listener interface with a method passing back data result.
     interface GotoMenuDialogListener {
@@ -28,7 +28,7 @@ class GotoMenuFragment : DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme);
+        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
