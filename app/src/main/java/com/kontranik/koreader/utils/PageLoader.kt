@@ -1,6 +1,7 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.utils
 
 import android.os.Build
+import android.util.Log
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.kontranik.koreader.model.*
@@ -9,9 +10,10 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
 
     constructor(private val pageView: TextView, private val book: Book) : PageSplitterHtml(pageView){
 
-    fun getPage(bookPosition: BookPosition, revers: Boolean): Page? {
+    fun getPage(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page? {
+        Log.d(TAG, "getPage:  $bookPosition , revers = $revers, recalc = $recalc")
         var result: Page?
-        if ( pages.isEmpty() || pages[0].startBookPosition.section != bookPosition.section ) {
+        if ( pages.isEmpty() || pages[0].startBookPosition.section != bookPosition.section || recalc) {
             loadPages(bookPosition.section)
         }
 
@@ -67,5 +69,9 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         val startCursor = BookPosition(0, 0)
         val endCursor = BookPosition(1, 0)
         return Page( content, startCursor, endCursor)
+    }
+
+    companion object {
+        const val TAG = "PageLoader"
     }
 }

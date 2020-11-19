@@ -1,4 +1,4 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.utils
 
 
 import android.content.ClipData
@@ -14,8 +14,8 @@ import androidx.core.content.ContextCompat.getSystemService
 import com.kontranik.koreader.R
 
 
-class CustomActionModeCallback(context: Context) : ActionMode.Callback {
-    private val context: Context
+class CustomActionModeCallback(private val context: Context) : ActionMode.Callback {
+
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         return true
     }
@@ -48,7 +48,4 @@ class CustomActionModeCallback(context: Context) : ActionMode.Callback {
 
     override fun onDestroyActionMode(mode: ActionMode?) {}
 
-    init {
-        this.context = context
-    }
 }

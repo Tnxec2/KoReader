@@ -7,7 +7,8 @@ import android.content.res.Configuration
 import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
-import android.text.SpannableStringBuilder
+import android.text.Spannable
+import android.text.style.URLSpan
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -27,7 +28,6 @@ import com.kontranik.koreader.model.*
 import com.kontranik.koreader.reader.*
 import com.kontranik.koreader.utils.*
 import com.kontranik.koreader.utils.OnSwipeTouchListener
-import com.kontranik.koreader.utils.OnSwipeTouchListenerWithoutClick
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
 import java.util.*
@@ -80,6 +80,7 @@ class ReaderActivity :
         pageView!!.addOnLayoutChangeListener(OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             updateSizeInfo()
         })
+        /*
         pageView!!.movementMethod = object: CustomLinkMovementMethod() {
             override fun onLinkClicked(url: String) {
                 super.onLinkClicked(url)
@@ -101,6 +102,7 @@ class ReaderActivity :
                 }
             }
         };
+*/
 
         textViewInfoCenter = findViewById(R.id.tv_infotext_center)
         textViewInfoLeft = findViewById(R.id.tv_infotext_left)
@@ -138,6 +140,9 @@ class ReaderActivity :
         book =  Book(applicationContext, prefsHelper.bookPath!!, pageView!!)
         if ( book != null ) {
             bookStatusService!!.updateLastOpenTime(prefsHelper.bookPath!!)
+            // updateView(book!!.getCur(recalc = true))
+        } else {
+            Toast.makeText(this, "Can't load book ${prefsHelper.bookPath}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -162,7 +167,8 @@ class ReaderActivity :
                         pageView!!.textSize = prefsHelper.textSize
                         //book!!.loadPage(pageView!!)
                         //updateView( )
-                        updateView(book!!.getCur())
+                        Log.d(TAG, "onActivityResult: getCurPage")
+                        updateView(book!!.getCur(recalc = true))
                     }
                 }
             } else{
@@ -174,6 +180,7 @@ class ReaderActivity :
     }
 
     private fun openBookFromIntent(data: Intent) {
+        Log.d(TAG, "openBookFromIntent")
         if ( data.hasExtra(PrefsHelper.PREF_BOOK_PATH) ) {
             prefsHelper.bookPath = data.getStringExtra(PrefsHelper.PREF_BOOK_PATH)
             savePrefs()
@@ -181,7 +188,8 @@ class ReaderActivity :
             loadBook()
            // book!!.loadPage(pageView!!)
            // updateView()
-            updateView(book!!.getCur())
+            Log.d(TAG, "openBookFromIntent: getCurPage")
+            updateView(book!!.getCur(recalc = true))
         }
     }
 
@@ -301,7 +309,44 @@ class ReaderActivity :
             }
         })
 
-        pageView!!.setOnTouchListener(object : OnSwipeTouchListenerWithoutClick(this@ReaderActivity) {
+        pageView!!.setOnTouchListener(object : OnSwipeTouchListener(this@ReaderActivity) {
+            override fun onClick(point: Point) {
+                super.onClick(point)
+
+                // check if Link clicked
+                var x = point.x.toInt()
+                var y = point.y.toInt()
+                x -= pageView!!.totalPaddingLeft
+                y -= pageView!!.totalPaddingTop
+                x += pageView!!.scrollX
+                y += pageView!!.scrollY
+
+                // Locate the URL text
+                val layout = pageView!!.layout
+                val line = layout.getLineForVertical(y)
+                val off = layout.getOffsetForHorizontal(line, x.toFloat())
+
+                // Find the URL that was pressed
+                val spannable = pageView!!.text as Spannable
+                val link = spannable.getSpans(off, off, URLSpan::class.java)
+
+                if ( link.isNotEmpty()) {
+                    val url = link[0].url
+                    Toast.makeText(applicationContext, url, Toast.LENGTH_SHORT).show()
+                    showNote(book!!.getNote(url))
+                } else {
+                    val zone = ScreenZone.zone(point, width, height)
+                    textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, zone)
+                    when (zone) {
+                        ScreenZone.BottomRight -> doPageNext()
+                        ScreenZone.BottomLeft -> doPagePrev()
+                        else -> {
+                        }
+
+                    }
+                }
+            }
+
             override fun onSwipeLeft() {
                 super.onSwipeLeft()
                 textViewInfoRight!!.text = getString(R.string.swipe_left)
@@ -378,17 +423,22 @@ class ReaderActivity :
     }
 
     private fun updateSizeInfo() {
-        fullwidth = pageView!!.measuredWidth
-        fullheight = pageView!!.measuredHeight
-        width = pageView!!.measuredWidth - pageView!!.paddingLeft - pageView!!.paddingRight
-        height = pageView!!.measuredHeight - pageView!!.paddingTop - pageView!!.paddingBottom
+        val fw = pageView!!.measuredWidth
+        val fh = pageView!!.measuredHeight
+        val w = pageView!!.measuredWidth - pageView!!.paddingLeft - pageView!!.paddingRight
+        val h = pageView!!.measuredHeight - pageView!!.paddingTop - pageView!!.paddingBottom
 
-        Toast.makeText(this, fullwidth.toString() + " x " + fullheight.toString(), Toast.LENGTH_SHORT).show()
-
-        if ( book != null) {
-            //book!!.loadPage(pageView!!)
-            //updateView()
-            updateView(book!!.getCur())
+        if ( w != width || h != height) {
+            fullwidth = fw
+            fullheight = fh
+            width = w
+            height = h
+            if ( book != null) {
+                //book!!.loadPage(pageView!!)
+                //updateView()
+                Log.d(TAG, "updateSizeInfo: getCurPage")
+                updateView(book!!.getCur(recalc = true))
+            }
         }
     }
 
@@ -502,7 +552,8 @@ class ReaderActivity :
             }
             //book!!.loadPage(pageView!!)
             //updateView()
-            updateView(book!!.getCur())
+            Log.d(TAG, "onFinishQuickMenuDialog: getCurPage")
+            updateView(book!!.getCur(recalc = true))
             savePrefs()
         }
     }
@@ -511,7 +562,8 @@ class ReaderActivity :
         pageView!!.textSize = textSize
         //book!!.loadPage(pageView!!)
         //updateView()
-        updateView(book!!.getCur())
+        Log.d(TAG, "onChangeTextSize: getCurPage")
+        updateView(book!!.getCur(recalc = true))
     }
 
     override fun onCancelQuickMenu() {
@@ -519,7 +571,8 @@ class ReaderActivity :
             pageView!!.textSize = prefsHelper.textSize
             //book!!.loadPage(pageView!!)
             //updateView()
-            updateView(book!!.getCur())
+            Log.d(TAG, "onCancelQuickMenu: getCurPage")
+            updateView(book!!.getCur(recalc = true))
         }
         // ... other resets
     }
@@ -548,10 +601,11 @@ class ReaderActivity :
     }
 
     override fun onAccessGrantedReadExternalStorage() {
+        Log.d(TAG, "onAccessGrantedReadExternalStorage")
         if (prefsHelper.bookPath != null) {
             loadBook()
             loadPositionForBook()
-            updateSizeInfo()
+            updateView(book!!.getCur(recalc = true))
         } else  {
             Toast.makeText(applicationContext, "Open a book", Toast.LENGTH_LONG).show()
             openMainMenu()
@@ -559,13 +613,23 @@ class ReaderActivity :
     }
 
     override fun onSelectBookmark(bookmark: Bookmark) {
+        if (
+                bookmark.position_section >= book!!.curPage!!.startBookPosition.section
+                &&
+                bookmark.position_section <= book!!.curPage!!.endBookPosition.section
+                &&
+                bookmark.position_offset >= book!!.curPage!!.startBookPosition.offSet
+                &&
+                bookmark.position_offset < book!!.curPage!!.endBookPosition.offSet
+        ) return
         // go to selected bookmark
         book!!.curPage = Page(null, BookPosition(bookmark), BookPosition())
         //book!!.nextPage = null
         //book!!.prevPage = null
         //book!!.loadPage(pageView!!)
         //updateView()
-        updateView(book!!.getCur())
+        Log.d(TAG, "onSelectBookmark: getCurPage")
+        updateView(book!!.getCur(recalc = true))
         savePositionForBook()
     }
 
@@ -575,7 +639,8 @@ class ReaderActivity :
 //        book!!.prevPage = null
 //        book!!.loadPage(pageView!!)
 //        updateView()
-        updateView(book!!.getCur())
+        Log.d(TAG, "onFinishGotoMenuDialog: getCurPage")
+        updateView(book!!.getCur(recalc = true))
         savePositionForBook()
     }
 

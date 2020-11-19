@@ -7,6 +7,7 @@
     <color name="background_sepia">#FBF0D9</color>
     <color name="foreground_sepia">#5F4B32</color>
     <color name="foreground_sepia_title">#915100</color>
+    <color name="foreground_sepia_link">#2196F3</color>
 
     <color name="background_sepia2">#fef2da</color>
     <color name="foreground_sepia2">#546b8d</color>

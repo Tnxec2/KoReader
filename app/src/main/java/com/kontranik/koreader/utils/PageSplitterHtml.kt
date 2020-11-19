@@ -1,13 +1,11 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.utils
 
-import android.graphics.text.LineBreaker
-import android.icu.lang.UCharacter
 import android.text.*
+import android.text.style.QuoteSpan
 import android.widget.TextView
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookPosition
 import com.kontranik.koreader.model.Page
-import com.kontranik.koreader.utils.CustomImageGetter
 
 
 open class PageSplitterHtml(private val textView: TextView) {
@@ -29,7 +27,29 @@ open class PageSplitterHtml(private val textView: TextView) {
             SpannableStringBuilder(Html.fromHtml(
                     html, Html.FROM_HTML_MODE_LEGACY, CustomImageGetter(book, pageWidth, pageHeight), null))
         } else {
-            SpannableStringBuilder(Html.fromHtml(html,  CustomImageGetter(book, pageWidth, pageHeight), null))
+            SpannableStringBuilder(Html.fromHtml(html, CustomImageGetter(book, pageWidth, pageHeight), null))
+        }
+
+        val quoteColor = textView.currentTextColor
+        val newQuoteSpan = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            QuoteSpan(quoteColor, 5, 10)
+        } else {
+            QuoteSpan(quoteColor)
+        }
+        for ( quoteSpan in content.getSpans(0, content.length, QuoteSpan::class.java)) {
+            // get the span range
+
+            // get the span range
+            val start: Int = content.getSpanStart(quoteSpan)
+            val end: Int = content.getSpanEnd(quoteSpan)
+
+            // remove the bold span
+
+            // remove the bold span
+            content.removeSpan(quoteSpan)
+
+            // add an new QuoteSpan span in the same place
+            content.setSpan(newQuoteSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
 
         staticLayout = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
@@ -56,11 +76,11 @@ open class PageSplitterHtml(private val textView: TextView) {
             val lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageHeight ) endLine - 1 else endLine
             startOffset = staticLayout!!.getLineStart(startLine)
             endOffset = staticLayout!!.getLineEnd(lastFullyVisibleLine)
-            pages.add( Page(
-                    content = SpannableStringBuilder().append(content.subSequence(startOffset, endOffset)) ,
+            pages.add(Page(
+                    content = SpannableStringBuilder().append(content.subSequence(startOffset, endOffset)),
                     startBookPosition = BookPosition(section = section, offSet = startOffset),
                     endBookPosition = BookPosition(section = section, offSet = endOffset)
-                )
+            )
             )
 
             if ( endLine >= staticLayout!!.lineCount-1 ) break

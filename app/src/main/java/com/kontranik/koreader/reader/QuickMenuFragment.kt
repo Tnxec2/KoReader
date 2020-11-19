@@ -1,6 +1,5 @@
 package com.kontranik.koreader.reader
 
-import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,6 +10,7 @@ import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
+import com.kontranik.koreader.utils.TextViewInitiator
 
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File

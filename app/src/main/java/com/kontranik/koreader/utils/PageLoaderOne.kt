@@ -1,4 +1,4 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.utils
 
 import android.os.Build
 import android.util.Log

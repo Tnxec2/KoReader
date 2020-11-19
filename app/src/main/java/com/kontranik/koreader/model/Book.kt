@@ -3,13 +3,10 @@ package com.kontranik.koreader.model
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.media.Image
 import android.text.SpannableStringBuilder
-import android.util.Base64
 import android.widget.TextView
-import com.kontranik.koreader.reader.PageLoader
+import com.kontranik.koreader.utils.PageLoader
 import com.kontranik.koreader.utils.EpubHelper
-import com.kontranik.koreader.utils.ImageUtils
 import nl.siegmann.epublib.domain.Book
 import org.jsoup.Jsoup
 import kotlin.math.ceil
@@ -132,18 +129,19 @@ class Book(private var c: Context, private var fileLocation: String, private val
     }
         */
 
-    fun getCur(): Page? {
-        return pageLoader.getPage(BookPosition(curPage!!.startBookPosition), false)
+    fun getCur(recalc: Boolean): Page? {
+        return pageLoader.getPage(BookPosition(curPage!!.startBookPosition), false, recalc)
     }
+
     fun getNext(): Page? {
         val bookPosition =  BookPosition(curPage!!.endBookPosition)
         bookPosition.offSet = bookPosition.offSet + 1
-        return pageLoader.getPage(BookPosition(bookPosition), false)
+        return pageLoader.getPage(BookPosition(bookPosition), false, false)
     }
 
     fun getPrev(): Page? {
         val bookPosition =  BookPosition(curPage!!.startBookPosition)
         bookPosition.offSet = bookPosition.offSet - 1
-        return pageLoader.getPage(BookPosition(bookPosition), true)
+        return pageLoader.getPage(BookPosition(bookPosition), true, false)
     }
 }

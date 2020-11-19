@@ -13,4 +13,8 @@ open class BookPosition(
             section = bookmark.position_section,
             offSet = bookmark.position_offset
     )
+
+    override fun toString(): String {
+        return "BookPosition: seciton = $section, offSet = $offSet"
+    }
 }

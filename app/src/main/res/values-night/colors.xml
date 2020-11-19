@@ -8,6 +8,7 @@
     <color name="background_sepia">#000000</color>
     <color name="foreground_sepia">#FBF0D9</color>
     <color name="foreground_sepia_title">#C1963C</color>
+    <color name="foreground_sepia_link">#2196F3</color>
 
     <color name="foreground_main">@color/foreground_sepia</color>
     <color name="background_main">@color/background_sepia</color>
