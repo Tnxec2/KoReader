@@ -430,6 +430,8 @@ class ReaderActivity :
         val w = pageView!!.measuredWidth - pageView!!.paddingLeft - pageView!!.paddingRight
         val h = pageView!!.measuredHeight - pageView!!.paddingTop - pageView!!.paddingBottom
 
+        // Toast.makeText(this, "$w x $h", Toast.LENGTH_SHORT).show()
+
         if ( w != width || h != height) {
             fullwidth = fw
             fullheight = fh

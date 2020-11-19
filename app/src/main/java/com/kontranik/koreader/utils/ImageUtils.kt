@@ -53,16 +53,14 @@ object ImageUtils {
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 
-    fun scaleBitmap(bm: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
-        var bm = bm
-        val mSize = getScaledSize(bm.width, bm.height, maxWidth, maxHeight)
-        bm = Bitmap.createScaledBitmap(bm, mSize.width(), mSize.height(), true)
-        return bm
+    fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+        val mSize = getScaledSize(bitmap.width, bitmap.height, maxWidth, maxHeight)
+        return Bitmap.createScaledBitmap(bitmap, mSize.width(), mSize.height(), true)
     }
 
     fun getScaledSize(originalWidth: Int, originalHeight: Int, maxWidth: Int, maxHeight: Int): Rect {
-        var width = originalWidth.toFloat()
-        var height = originalHeight.toFloat()
+        var width: Float = originalWidth.toFloat()
+        var height: Float = originalHeight.toFloat()
         if (width > height) {
             // landscape
             val ratio = width / maxWidth
@@ -78,6 +76,18 @@ object ImageUtils {
             height = maxHeight.toFloat()
             width = maxWidth.toFloat()
         }
+
+        if ( width > maxWidth) {
+            val ratio = width / maxWidth
+            width = maxWidth.toFloat()
+            height = height / ratio
+        }
+        if ( height > maxHeight) {
+            val ratio = height / maxHeight
+            height = maxHeight.toFloat()
+            width = width / ratio
+        }
+
         return Rect(0, 0, width.toInt(), height.toInt())
     }
 }

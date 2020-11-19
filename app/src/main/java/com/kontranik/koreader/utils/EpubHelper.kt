@@ -3,6 +3,7 @@ package com.kontranik.koreader.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.text.Html
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -102,14 +103,19 @@ class EpubHelper(
         return cover.data
     }
 
-    fun getCover(pageWidth: Int, pageHeight: Int): SpannableStringBuilder {
+    fun getCover(width: Int, height: Int): SpannableStringBuilder {
         val cover = getCover(context, fileLocation)
         if ( cover != null ) {
 
             var bitmap = BitmapFactory.decodeByteArray(cover, 0, cover.size)
-            bitmap = ImageUtils.scaleBitmap(bitmap, pageWidth, pageHeight)
+            var mImage =  BitmapDrawable(context.resources, bitmap)
+            val mSize = ImageUtils.getScaledSize(
+                    mImage.intrinsicWidth, mImage.intrinsicHeight,
+                    width, height)
+            mImage.setBounds(0, 0, mSize.width(), mSize.height())
+            // bitmap = ImageUtils.scaleBitmap(bitmap, width, height)
 
-            val span = ImageSpan(context, bitmap, ImageSpan.ALIGN_BASELINE)
+            val span = ImageSpan(mImage, ImageSpan.ALIGN_BOTTOM)
             val text = " "
             val ssb = SpannableStringBuilder(text)
             ssb.setSpan(span, 0, text.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)

@@ -65,6 +65,7 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         } else if ( section == 0 ) {
             val pageWidth: Int = pageView.measuredWidth - pageView.paddingLeft - pageView.paddingRight
             val pageHeight: Int = pageView.measuredHeight - pageView.paddingTop - pageView.paddingBottom
+            Log.d(TAG, "cover: $pageWidth x $pageHeight")
             pages = mutableListOf(coverPage(pageWidth, pageHeight))
         }
     }
