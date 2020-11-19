@@ -12,7 +12,7 @@ import org.jsoup.Jsoup
 import kotlin.math.ceil
 
 
-class Book(private var c: Context, private var fileLocation: String, pageView: TextView) {
+class Book(private var c: Context, var fileLocation: String, pageView: TextView) {
 
     var curPage: Page? = Page(null, BookPosition())
 

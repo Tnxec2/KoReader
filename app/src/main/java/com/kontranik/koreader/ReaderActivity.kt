@@ -79,9 +79,9 @@ class ReaderActivity :
         TextViewInitiator.initiateTextView(pageView!!, "")
         pageView!!.textSize = prefsHelper.textSize
         pageView!!.typeface = prefsHelper.font.getTypeface()
-        pageView!!.addOnLayoutChangeListener(OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+        pageView!!.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             updateSizeInfo()
-        })
+        }
 
 
         textViewInfoCenter = findViewById(R.id.tv_infotext_center)
@@ -101,7 +101,7 @@ class ReaderActivity :
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         //Here you can get the size of pageView!
-
+        Log.d(TAG, "onWindowFocusChanged")
         val ph = PermissionsHelper(this)
         ph.checkPermissionsExternalStorage(pageView!!)
     }
@@ -164,8 +164,8 @@ class ReaderActivity :
         if ( data.hasExtra(PrefsHelper.PREF_BOOK_PATH) ) {
             prefsHelper.bookPath = data.getStringExtra(PrefsHelper.PREF_BOOK_PATH)
             savePrefs()
-            loadPositionForBook()
             loadBook()
+            loadPositionForBook()
             Log.d(TAG, "openBookFromIntent: getCurPage")
             updateView(book!!.getCur(recalc = true))
         }
@@ -174,7 +174,6 @@ class ReaderActivity :
     private fun loadPositionForBook() {
         if ( book == null) return
         val startPosition = bookStatusService!!.getPosition(prefsHelper.bookPath!!) ?: BookPosition()
-
         book!!.curPage = Page(null, startPosition, BookPosition())
     }
 
@@ -186,7 +185,7 @@ class ReaderActivity :
 
     override fun onPause() {
         super.onPause()
-        savePositionForBook()
+        // savePositionForBook()
     }
 
     override fun onStop() {
@@ -302,9 +301,9 @@ class ReaderActivity :
                     val zone = ScreenZone.zone(point, width, height)
                     textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, zone)
                     when (zone) {
-                        ScreenZone.BottomRight -> doPageNext()
-                        ScreenZone.BottomLeft -> doPagePrev()
-                        ScreenZone.MiddleCenter -> openMainMenu()
+                        ScreenZone.BottomRight -> { doPageNext() }
+                        ScreenZone.BottomLeft -> { doPagePrev() }
+                        ScreenZone.MiddleCenter -> { openMainMenu() }
                         else -> {}
                     }
                 }
@@ -343,7 +342,7 @@ class ReaderActivity :
             }
 
             override fun onDoubleClick(point: Point) {
-                super.onDoubleClick(point)
+                //super.onDoubleClick(point)
                 val zone = ScreenZone.zone(point, width, height)
                 when (zone) {
                     ScreenZone.MiddleCenter -> openQuickMenu()
@@ -500,6 +499,7 @@ class ReaderActivity :
     }
 
     private fun openQuickMenu() {
+        Log.d(TAG, "openQuickMenu")
         val quickMenuFragment: QuickMenuFragment = QuickMenuFragment.newInstance(prefsHelper.textSize, prefsHelper.font)
         quickMenuFragment.show(supportFragmentManager, "fragment_quick_menu")
     }
@@ -571,9 +571,11 @@ class ReaderActivity :
     override fun onAccessGrantedReadExternalStorage() {
         Log.d(TAG, "onAccessGrantedReadExternalStorage")
         if (prefsHelper.bookPath != null) {
-            loadBook()
-            loadPositionForBook()
-            updateView(book!!.getCur(recalc = true))
+            if ( book == null || book!!.fileLocation != prefsHelper.bookPath) {
+                loadBook()
+                loadPositionForBook()
+                updateView(book!!.getCur(recalc = true))
+            }
         } else  {
             Toast.makeText(applicationContext, "Open a book", Toast.LENGTH_LONG).show()
             openMainMenu()

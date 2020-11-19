@@ -25,14 +25,18 @@ internal open class OnSwipeTouchListener(c: Context?) :
             return true
         }
 
-        override fun onSingleTapUp(e: MotionEvent): Boolean {
-            onClick(Point( e.x.toInt(), e.y.toInt()))
-            return super.onSingleTapUp(e)
+        override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+            if ( e!= null) {
+                onClick(Point(e.x.toInt(), e.y.toInt()))
+            }
+            return super.onSingleTapConfirmed(e)
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
-            onDoubleClick(Point( e.x.toInt(), e.y.toInt()))
-            return super.onDoubleTap(e)
+            if ( e != null) {
+                onDoubleClick(Point(e.x.toInt(), e.y.toInt()))
+            }
+            return super.onDoubleTapEvent(e)
         }
 
         override fun onLongPress(e: MotionEvent) {
