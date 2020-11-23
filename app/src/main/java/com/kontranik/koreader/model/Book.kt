@@ -9,6 +9,10 @@ import com.kontranik.koreader.utils.PageLoader
 import com.kontranik.koreader.utils.EpubHelper
 import nl.siegmann.epublib.domain.Book
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Attributes
+import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
+import org.jsoup.parser.Tag
 import kotlin.math.ceil
 
 
@@ -62,9 +66,32 @@ class Book(private var c: Context, var fileLocation: String, pageView: TextView)
     fun getPageBody(page: Int): String? {
         val aSection = epubHelper?.getPage(page)
         val document = Jsoup.parse(aSection)
-        document.select("head").remove()
+
+        removeHead(document)
+        replaceSvgWithImg(document)
 
         return document.html()
+    }
+
+    private fun removeHead(document: Document) {
+        document.select("head").remove()
+    }
+
+    /*
+     * replace svg-image-Tag with img-Tag
+     */
+    private fun replaceSvgWithImg(document: Document) {
+        val svgElements = document.select("svg")
+        for ( svg in svgElements) {
+            val imagesElements = svg.select("image")
+            if ( imagesElements.isNotEmpty()) {
+                val svgImage = imagesElements[0]
+                val attrs = Attributes()
+                attrs.add("src", svgImage.attr("xlink:href"))
+                val img = Element(Tag.valueOf("img"), null, attrs  )
+                svg.replaceWith(img)
+            }
+        }
     }
 
     fun getImageByteArray(source: String): ByteArray? {
@@ -95,7 +122,7 @@ class Book(private var c: Context, var fileLocation: String, pageView: TextView)
             if (resource != null) {
                 val s = String(resource.data)
                 val document = Jsoup.parse(s)
-                document.select("head").remove()
+                removeHead(document)
                 return document.html()
             }
         }
