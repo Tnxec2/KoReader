@@ -57,24 +57,12 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     }
 
     private fun loadPages(section: Int) {
-        if (section > 0 && section < book.scheme.sectionCount) {
+        if (section >= 0 && section < book.scheme.sectionCount) {
             val html = book.getPageBody(section)
             if ( html != null) {
                 splitPages(book, section, html)
             }
-        } else if ( section == 0 ) {
-            val pageWidth: Int = pageView.measuredWidth - pageView.paddingLeft - pageView.paddingRight
-            val pageHeight: Int = pageView.measuredHeight - pageView.paddingTop - pageView.paddingBottom
-            Log.d(TAG, "cover: $pageWidth x $pageHeight")
-            pages = mutableListOf(coverPage(pageWidth, pageHeight))
         }
-    }
-
-    private fun coverPage(width: Int, height: Int): Page {
-        val content = book.getCover(width, height)
-        val startCursor = BookPosition(0, 0)
-        val endCursor = BookPosition(0, 1)
-        return Page( content, startCursor, endCursor)
     }
 
     companion object {
