@@ -40,13 +40,9 @@ class BookmarkService(var adapter: BookmarksDatabaseAdapter) {
         var file: File
         for( i in 0 until list.size) {
             val item = list.get(i)
-            if ( item.path == null ) {
+            file = File(item.path)
+            if ( ! file.exists() ) {
                 adapter.delete(item.id!!)
-            } else {
-                file = File(item.path!!)
-                if ( ! file.exists() ) {
-                    adapter.delete(item.id!!)
-                }
             }
         }
         adapter.close()

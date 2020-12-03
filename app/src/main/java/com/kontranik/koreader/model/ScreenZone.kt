@@ -16,7 +16,6 @@ enum class ScreenZone {
 
     companion object {
         fun zone(point: Point, width: Int, height: Int): ScreenZone {
-            var zone: ScreenZone
             if ( isLeft(point.x, width) && isTop(point.y, height)) return TopLeft
             else if ( isCenter(point.x, width) && isTop(point.y, height)) return TopCenter
             else if ( isRight(point.x, width) && isTop(point.y, height)) return TopRight

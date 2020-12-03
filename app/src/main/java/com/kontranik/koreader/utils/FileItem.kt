@@ -13,10 +13,10 @@ class FileItem(
         var isRoot: Boolean,
         var bookInfo: BookInfo? = null
         ) {
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
-        val fileItem = o as FileItem
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val fileItem = other as FileItem
         return path == fileItem.path
     }
 

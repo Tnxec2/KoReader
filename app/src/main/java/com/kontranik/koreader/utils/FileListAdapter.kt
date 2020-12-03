@@ -8,6 +8,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.kontranik.koreader.R
+import com.kontranik.koreader.model.BookInfo
+import com.kontranik.koreader.parser.epubreader.EpubHelper
+import com.kontranik.koreader.parser.fb2reader.FB2Helper
 import com.kontranik.koreader.utils.ImageUtils.getBitmap
 
 class FileListAdapter(
@@ -30,23 +33,24 @@ class FileListAdapter(
         val fileItem: FileItem = fileitems[position]
 
         if ( fileItem.bookInfo == null ) {
+            var bookInfo: BookInfo? = null
             if ( fileItem.name.endsWith(".epub", true)) {
-                val bookInfo = EpubHelper(context, fileItem.path).getBookInfo(fileItem.path)
-                fileItem.bookInfo = bookInfo
-                if ( bookInfo != null) {
-                    holder.nameView.text = bookInfo.title ?: fileItem.name
-                    holder.descView.text = bookInfo.authorsAsString()
-                    if (bookInfo.cover != null) {
-                        bookInfo.cover = ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100 )
-                    } else {
-                        bookInfo.cover = getBitmap(context, ImageEnum.Epub)
-                    }
-                    holder.imageView.setImageBitmap(bookInfo.cover!!)
+                bookInfo = EpubHelper(fileItem.path).getBookInfoTemporary(fileItem.path)
+            } else if ( fileItem.name.endsWith(".fb2", true)
+                    || fileItem.name.endsWith(".fb2.zip", true)
+            ) {
+                bookInfo = FB2Helper(context, fileItem.path).getBookInfoTemporary(fileItem.path)
+            }
+            fileItem.bookInfo = bookInfo
+            if ( bookInfo != null ) {
+                holder.nameView.text = bookInfo.title ?: fileItem.name
+                holder.descView.text = bookInfo.authorsAsString()
+                if (bookInfo.cover != null) {
+                    bookInfo.cover = ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100 )
                 } else {
-                    holder.nameView.text = fileItem.name
-                    holder.descView.text = ""
-                    holder.imageView.setImageBitmap(getBitmap(context, fileItem.image))
+                    bookInfo.cover = getBitmap(context, ImageEnum.Ebook)
                 }
+                holder.imageView.setImageBitmap(bookInfo.cover!!)
             }  else {
                 holder.nameView.text = fileItem.name
                 holder.descView.text = ""

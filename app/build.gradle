@@ -7,7 +7,7 @@ android {
     defaultConfig {
         vectorDrawables.useSupportLibrary = true
         applicationId "com.kontranik.koreader"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -51,12 +51,11 @@ dependencies {
 
     implementation 'it.sephiroth.android.library.imagezoom:imagezoom:2.3.0'
 
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
+
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
     implementation "androidx.core:core-ktx:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    compile files('libs/fb2parser.jar')
-
 }
 repositories {
     mavenCentral()

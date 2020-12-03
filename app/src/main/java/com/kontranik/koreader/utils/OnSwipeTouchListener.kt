@@ -33,9 +33,7 @@ internal open class OnSwipeTouchListener(c: Context?) :
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
-            if ( e != null) {
-                onDoubleClick(Point(e.x.toInt(), e.y.toInt()))
-            }
+            onDoubleClick(Point(e.x.toInt(), e.y.toInt()))
             return super.onDoubleTapEvent(e)
         }
 

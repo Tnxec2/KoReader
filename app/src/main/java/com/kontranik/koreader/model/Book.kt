@@ -3,11 +3,11 @@ package com.kontranik.koreader.model
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.text.SpannableStringBuilder
 import android.widget.TextView
+import com.kontranik.koreader.parser.EbookHelper
+import com.kontranik.koreader.parser.epubreader.EpubHelper
+import com.kontranik.koreader.parser.fb2reader.FB2Helper
 import com.kontranik.koreader.utils.PageLoader
-import com.kontranik.koreader.utils.EpubHelper
-import nl.siegmann.epublib.domain.Book
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Attributes
 import org.jsoup.nodes.Document
@@ -16,14 +16,13 @@ import org.jsoup.parser.Tag
 import kotlin.math.ceil
 
 
-class Book(private var c: Context, var fileLocation: String, pageView: TextView) {
+class Book(private var context: Context, var fileLocation: String, pageView: TextView) {
 
     var curPage: Page? = Page(null, BookPosition())
 
     var scheme: BookScheme = BookScheme()
 
-    private var epubHelper: EpubHelper? = null
-    private var epubBook: Book? = null
+    private var ebookHelper: EbookHelper? = null
 
     private var pageLoader: PageLoader = PageLoader(pageView, this)
 
@@ -32,18 +31,25 @@ class Book(private var c: Context, var fileLocation: String, pageView: TextView)
     }
 
     private fun loadBook() {
-        if (fileLocation.endsWith("epub")) {
-            epubHelper = EpubHelper(c, fileLocation)
-            epubBook = epubHelper!!.epubBook
+        if (fileLocation.endsWith(".epub", true)) {
+            ebookHelper = EpubHelper(fileLocation)
+            ebookHelper!!.readBook()
+            calculateScheme()
+        } else if (
+            fileLocation.endsWith(".fb2", ignoreCase = true)
+            || fileLocation.endsWith(".fb2.zip", ignoreCase = true)
+                ) {
+            ebookHelper = FB2Helper(context, fileLocation)
+            ebookHelper!!.readBook()
             calculateScheme()
         }
     }
 
     private fun calculateScheme() {
-        if ( epubBook == null || epubBook!!.contents.size == 0   ) return
+        if ( ebookHelper == null || ebookHelper!!.getContentSize() == 0   ) return
 
         scheme = BookScheme()
-        scheme.sectionCount = epubBook!!.contents.size
+        scheme.sectionCount = ebookHelper!!.getContentSize()
         for( pageIndex in 0 until scheme.sectionCount) {
             val textSize = getPageTextSize(pageIndex)
             val pages = ceil(textSize.toDouble() / BookScheme.CHAR_PER_PAGE).toInt()
@@ -53,18 +59,14 @@ class Book(private var c: Context, var fileLocation: String, pageView: TextView)
         }
     }
 
-    fun getCover(width: Int, height: Int): SpannableStringBuilder? {
-        return epubHelper?.epubBook?.let { epubHelper!!.getCover(width, height) }
-    }
-
     private fun getPageTextSize(page: Int): Int {
-        val aSection = epubHelper?.getPage(page)
+        val aSection = ebookHelper?.getPage(page)
         val document = Jsoup.parse(aSection)
         return document.body().wholeText().length
     }
 
     fun getPageBody(page: Int): String? {
-        val aSection = epubHelper?.getPage(page)
+        val aSection = ebookHelper?.getPage(page)
         val document = Jsoup.parse(aSection)
 
         removeHead(document)
@@ -74,7 +76,8 @@ class Book(private var c: Context, var fileLocation: String, pageView: TextView)
     }
 
     private fun removeHead(document: Document) {
-        document.select("head").remove()
+        val head: Element = document.head()
+        head.select("title").remove()
     }
 
     /*
@@ -88,40 +91,38 @@ class Book(private var c: Context, var fileLocation: String, pageView: TextView)
                 val svgImage = imagesElements[0]
                 val attrs = Attributes()
                 attrs.add("src", svgImage.attr("xlink:href"))
-                val img = Element(Tag.valueOf("img"), null, attrs  )
+                val img = Element(Tag.valueOf("img"), null, attrs)
                 svg.replaceWith(img)
             }
         }
     }
 
     fun getImageByteArray(source: String): ByteArray? {
-        if ( epubBook != null) {
-            val resource = epubBook!!.resources.getByHref(source)
+        if ( ebookHelper != null) {
+            val resource = ebookHelper!!.getImageByHref(source)
             if (resource != null) {
-                return resource.data
+                return resource
             }
         }
         return  null
     }
 
     fun getImageBitmapDrawable(source: String): BitmapDrawable? {
-        if ( epubBook != null) {
-            val resource = epubBook!!.resources.getByHref(source)
+        if ( ebookHelper != null) {
+            val resource = ebookHelper!!.getImageByHref(source)
             if (resource != null) {
-                val mImage =  resource.data
-                val bitmap = BitmapFactory.decodeByteArray(mImage, 0, mImage.size)
-                return BitmapDrawable(c.resources, bitmap)
+                val bitmap = BitmapFactory.decodeByteArray(resource, 0, resource.size)
+                return BitmapDrawable(context.resources, bitmap)
             }
         }
         return  null
     }
 
     fun getNote(href: String): String? {
-        if ( epubBook != null) {
-            val resource = epubBook!!.resources.getByHref(href)
+        if ( ebookHelper != null) {
+            val resource = ebookHelper!!.getPageByHref(href)
             if (resource != null) {
-                val s = String(resource.data)
-                val document = Jsoup.parse(s)
+                val document = Jsoup.parse(resource)
                 removeHead(document)
                 return document.html()
             }

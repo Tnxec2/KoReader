@@ -14,7 +14,6 @@ import android.text.style.URLSpan
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
-import android.view.View.OnLayoutChangeListener
 import android.view.Window
 import android.view.WindowManager
 import android.widget.TextView
@@ -64,6 +63,7 @@ class ReaderActivity :
     private var bookStatusService: BookStatusService? = null
 
     private var backButtonPressedTime = Date().time
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,7 +120,6 @@ class ReaderActivity :
         book =  Book(applicationContext, prefsHelper.bookPath!!, pageView!!)
         if ( book != null ) {
             bookStatusService!!.updateLastOpenTime(prefsHelper.bookPath!!)
-            // updateView(book!!.getCur(recalc = true))
         } else {
             Toast.makeText(this, "Can't load book ${prefsHelper.bookPath}", Toast.LENGTH_LONG).show()
         }
@@ -164,6 +163,7 @@ class ReaderActivity :
         if ( data.hasExtra(PrefsHelper.PREF_BOOK_PATH) ) {
             prefsHelper.bookPath = data.getStringExtra(PrefsHelper.PREF_BOOK_PATH)
             savePrefs()
+            startProgress()
             loadBook()
             loadPositionForBook()
             Log.d(TAG, "openBookFromIntent: getCurPage")
@@ -301,10 +301,17 @@ class ReaderActivity :
                     val zone = ScreenZone.zone(point, width, height)
                     textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, zone)
                     when (zone) {
-                        ScreenZone.BottomRight -> { doPageNext() }
-                        ScreenZone.BottomLeft -> { doPagePrev() }
-                        ScreenZone.MiddleCenter -> { openMainMenu() }
-                        else -> {}
+                        ScreenZone.BottomRight -> {
+                            doPageNext()
+                        }
+                        ScreenZone.BottomLeft -> {
+                            doPagePrev()
+                        }
+                        ScreenZone.MiddleCenter -> {
+                            openMainMenu()
+                        }
+                        else -> {
+                        }
                     }
                 }
             }
@@ -346,7 +353,8 @@ class ReaderActivity :
                 val zone = ScreenZone.zone(point, width, height)
                 when (zone) {
                     ScreenZone.MiddleCenter -> openQuickMenu()
-                    else -> { }
+                    else -> {
+                    }
                 }
                 textViewInfoRight!!.text = resources.getString(R.string.doubleclick_in_zone, zone)
             }
@@ -363,7 +371,8 @@ class ReaderActivity :
                 } else {
                     val zone = ScreenZone.zone(point, width, height)
                     when (zone) {
-                        ScreenZone.MiddleCenter -> {}
+                        ScreenZone.MiddleCenter -> {
+                        }
                         else -> {
                         }
                     }
@@ -572,6 +581,7 @@ class ReaderActivity :
         Log.d(TAG, "onAccessGrantedReadExternalStorage")
         if (prefsHelper.bookPath != null) {
             if ( book == null || book!!.fileLocation != prefsHelper.bookPath) {
+                startProgress()
                 loadBook()
                 loadPositionForBook()
                 updateView(book!!.getCur(recalc = true))
@@ -604,6 +614,10 @@ class ReaderActivity :
         Log.d(TAG, "onFinishGotoMenuDialog: getCurPage")
         updateView(book!!.getCur(recalc = true))
         savePositionForBook()
+    }
+
+    private fun startProgress() {
+        pageView!!.text = "loading Book..."
     }
 
     companion object {

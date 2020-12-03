@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.kontranik.koreader.model.*
+import org.w3c.dom.Document
 import kotlin.math.max
 import kotlin.math.min
 

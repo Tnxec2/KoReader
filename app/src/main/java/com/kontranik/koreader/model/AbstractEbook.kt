@@ -1,7 +1,5 @@
 package com.kontranik.koreader.model
 
-import com.kursx.parser.fb2.Section
-
 class AbstractEbook {
 
     var cover: ByteArray? = null

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/activity_padding"
-    tools:context=".reader.FileChooseActivity"
+    tools:context=".epubParser.FileChooseActivity"
     android:background="@color/background_main_dialog"
     android:textColor="@color/foreground_main_dialog"
     >

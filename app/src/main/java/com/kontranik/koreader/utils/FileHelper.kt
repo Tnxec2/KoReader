@@ -71,8 +71,11 @@ object FileHelper {
         val files = dir.listFiles { current, name ->
             val f = File(current, name)
             (!f.isHidden && !name.startsWith(".")
-                    && name.toLowerCase(Locale.getDefault()).endsWith(".epub")
-                    // || name.toLowerCase().endsWith(".fb2")
+                    && (
+                    name.endsWith(".epub", true)
+                    || name.endsWith(".fb2", true)
+                    || name.endsWith(".fb2.zip", true)
+                    )
                     )
         }
         if (dirs != null && dirs.isNotEmpty()) {
@@ -86,12 +89,14 @@ object FileHelper {
         if (files != null && files.isNotEmpty()) {
             Arrays.sort(files)
             for (f in files) {
-                if (f.name.toLowerCase(Locale.getDefault()).endsWith(".epub")) {
+                if ( f.name.endsWith(".epub", true) ) {
                     result.add(FileItem(ImageEnum.Epub, f.name, f.path, f.isDirectory, false, null))
-                    //                } else if ( f.getName().toLowerCase().endsWith(".fb2")){
-//                    result.add(new FileItem( ImageEnum.Fb2, f.getName(), f.getPath(), f.isDirectory(), false));
-                } else {
-                    // result.add(new FileItem( ImageEnum.Ebook, f.getName(), f.getPath(), f.isDirectory(), false));
+                } else if (
+                    f.name.endsWith(".fb2", true)
+                    || f.name.endsWith(".fb2.zip", true)
+                ) {
+                    result.add(
+                            FileItem(ImageEnum.Fb2, f.name, f.path, f.isDirectory, false, null))
                 }
             }
         }

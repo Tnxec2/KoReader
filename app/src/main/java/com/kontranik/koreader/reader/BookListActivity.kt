@@ -11,7 +11,8 @@ import com.kontranik.koreader.database.BookStatusDatabaseAdapter
 import com.kontranik.koreader.database.BookStatusService
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.utils.BookListAdapter
-import com.kontranik.koreader.utils.EpubHelper
+import com.kontranik.koreader.parser.epubreader.EpubHelper
+import com.kontranik.koreader.parser.fb2reader.FB2Helper
 import com.kontranik.koreader.utils.PrefsHelper
 import java.io.File
 
@@ -69,7 +70,12 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
                         }
                         var bookInfo: BookInfo? = null
                         if ( bookstatus.path!!.endsWith(".epub")) {
-                            bookInfo = EpubHelper(this, bookstatus.path!!).getBookInfo(bookstatus.path!!)
+                            bookInfo = EpubHelper(bookstatus.path!!).getBookInfoTemporary(bookstatus.path!!)
+                        } else if (
+                                bookstatus.path!!.endsWith(".fb2")
+                                || bookstatus.path!!.endsWith(".fb2.zip")
+                        ) {
+                            bookInfo = FB2Helper(applicationContext, bookstatus.path!!).getBookInfoTemporary(bookstatus.path!!)
                         }
                         if (bookInfo != null) {
                             bookInfoList.add(bookInfo)

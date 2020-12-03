@@ -16,7 +16,15 @@ buildscript {
     }
 }
 
+plugins {
+    id "nebula.lint" version "16.9.0"
+}
+
 allprojects {
+    apply plugin :"nebula.lint"
+    gradleLint {
+        rules=['unused-dependency']
+    }
     repositories {
         google()
         jcenter()
