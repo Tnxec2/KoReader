@@ -6,17 +6,41 @@ import com.kontranik.koreader.model.*
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme
 import com.kontranik.koreader.utils.ImageUtils
+import org.jsoup.Jsoup
 
 import java.io.File
+import kotlin.math.ceil
 
 class FB2Helper(private val context: Context , fileLocation: String) : EbookHelper {
 
     private var fb2Reader: FB2Reader = FB2Reader(
        if ( context.externalCacheDir != null) context.externalCacheDir!!.absolutePath
        else context.filesDir.absolutePath, fileLocation)
+    override var pageScheme: BookPageScheme = BookPageScheme()
 
     override fun readBook() {
         fb2Reader.readBook()
+        calculateScheme()
+    }
+
+    private fun calculateScheme() {
+        if ( fb2Reader.fb2Scheme != null && getContentSize() == 0   ) return
+        pageScheme = BookPageScheme()
+        pageScheme.sectionCount = getContentSize()
+        for( pageIndex in 0 until pageScheme.sectionCount) {
+            val textSize = getPageTextSize(pageIndex)
+            val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
+            pageScheme.scheme[pageIndex] = BookSchemeCount(
+                    textSize = textSize, textPages = pages)
+            pageScheme.textSize += textSize
+            pageScheme.textPages += pages
+        }
+    }
+
+    private fun getPageTextSize(page: Int): Int {
+        val aSection = getPage(page)
+        val document = Jsoup.parse(aSection)
+        return document.body().wholeText().length
     }
 
     override fun getContentSize(): Int {

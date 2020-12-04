@@ -419,9 +419,9 @@ class ReaderActivity :
 
     private fun doPageNext() {
         if ( book == null) return
-        if ( book!!.curPage!!.endBookPosition.section >= book!!.scheme.sectionCount-1 &&
+        if ( book!!.curPage!!.endBookPosition.section >= book!!.getPageScheme()!!.sectionCount-1 &&
                 book!!.curPage!!.endBookPosition.offSet >=
-                book!!.scheme.scheme[book!!.scheme.sectionCount - 1]!!.textSize) return
+                book!!.getPageScheme()!!.scheme[book!!.getPageScheme()!!.sectionCount - 1]!!.textSize) return
         updateView(book!!.getNext())
         savePositionForBook()
     }
@@ -441,15 +441,15 @@ class ReaderActivity :
 
             var curTextPage = 0
             for (i in 0 .. curSection-2) {
-                curTextPage += book!!.scheme.scheme[i]!!.textPages
+                curTextPage += book!!.getPageScheme()!!.scheme[i]!!.textPages
             }
-            curTextPage += ( book!!.curPage!!.endBookPosition.offSet / BookScheme.CHAR_PER_PAGE )
+            curTextPage += ( book!!.curPage!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
 
             textViewInfoLeft!!.text =
-                    resources.getString(R.string.page_info_text, curTextPage, book!!.scheme.textPages)
+                    resources.getString(R.string.page_info_text, curTextPage, book!!.getPageScheme()!!.textPages)
 
             textViewInfoCenter!!.text =
-                    resources.getString(R.string.page_info_text, curSection, book!!.scheme.sectionCount)
+                    resources.getString(R.string.page_info_text, curSection, book!!.getPageScheme()!!.sectionCount)
         } else {
             textViewInfoCenter!!.text = getString(R.string.no_book) 
         }
@@ -517,7 +517,7 @@ class ReaderActivity :
         if ( book == null || book!!.curPage == null) return
         val gotoMenuFragment: GotoMenuFragment =
                 GotoMenuFragment
-                        .newInstance(book!!.curPage!!.endBookPosition.section, book!!.scheme.sectionCount)
+                        .newInstance(book!!.curPage!!.endBookPosition.section, book!!.getPageScheme()!!.sectionCount)
         gotoMenuFragment.show(supportFragmentManager, "fragment_goto_menu")
     }
 

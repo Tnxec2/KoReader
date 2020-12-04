@@ -13,17 +13,12 @@ import org.jsoup.nodes.Attributes
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Tag
-import kotlin.math.ceil
 
 
 class Book(private var context: Context, var fileLocation: String, pageView: TextView) {
 
     var curPage: Page? = Page(null, BookPosition())
-
-    var scheme: BookScheme = BookScheme()
-
-    private var ebookHelper: EbookHelper? = null
-
+    internal var ebookHelper: EbookHelper? = null
     private var pageLoader: PageLoader = PageLoader(pageView, this)
 
     init {
@@ -34,48 +29,26 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
         if (fileLocation.endsWith(".epub", true)) {
             ebookHelper = EpubHelper(fileLocation)
             ebookHelper!!.readBook()
-            calculateScheme()
         } else if (
             fileLocation.endsWith(".fb2", ignoreCase = true)
             || fileLocation.endsWith(".fb2.zip", ignoreCase = true)
                 ) {
             ebookHelper = FB2Helper(context, fileLocation)
             ebookHelper!!.readBook()
-            calculateScheme()
         }
-    }
-
-    private fun calculateScheme() {
-        if ( ebookHelper == null || ebookHelper!!.getContentSize() == 0   ) return
-
-        scheme = BookScheme()
-        scheme.sectionCount = ebookHelper!!.getContentSize()
-        for( pageIndex in 0 until scheme.sectionCount) {
-            val textSize = getPageTextSize(pageIndex)
-            val pages = ceil(textSize.toDouble() / BookScheme.CHAR_PER_PAGE).toInt()
-            scheme.scheme[pageIndex] = BookSchemeCount(textSize = textSize, textPages = pages)
-            scheme.textSize += textSize
-            scheme.textPages += pages
-        }
-    }
-
-    private fun getPageTextSize(page: Int): Int {
-        val aSection = ebookHelper?.getPage(page)
-        val document = Jsoup.parse(aSection)
-        return document.body().wholeText().length
     }
 
     fun getPageBody(page: Int): String? {
         val aSection = ebookHelper?.getPage(page)
         val document = Jsoup.parse(aSection)
 
-        removeHead(document)
+        preProcess(document)
         replaceSvgWithImg(document)
 
         return document.html()
     }
 
-    private fun removeHead(document: Document) {
+    private fun preProcess(document: Document) {
         val head: Element = document.head()
         head.select("title").remove()
     }
@@ -123,7 +96,7 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
             val resource = ebookHelper!!.getPageByHref(href)
             if (resource != null) {
                 val document = Jsoup.parse(resource)
-                removeHead(document)
+                preProcess(document)
                 return document.html()
             }
         }
@@ -144,5 +117,9 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
         val bookPosition =  BookPosition(curPage!!.startBookPosition)
         bookPosition.offSet = bookPosition.offSet - 1
         return pageLoader.getPage(BookPosition(bookPosition), revers = true, recalc = false)
+    }
+
+    fun getPageScheme(): BookPageScheme? {
+        return ebookHelper?.pageScheme
     }
 }

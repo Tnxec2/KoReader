@@ -5,7 +5,6 @@ import android.util.Log
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.kontranik.koreader.model.*
-import org.w3c.dom.Document
 import kotlin.math.max
 import kotlin.math.min
 
@@ -30,7 +29,7 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
             if ( ! revers) section++
             else section--
             section = max(0, section)
-            section = min(book.scheme.sectionCount-1, section)
+            section = min(book.getPageScheme()!!.sectionCount-1, section)
             loadPages(section)
             result = if ( pages.isEmpty() ) null else { if ( ! revers) pages[0] else pages[pages.size-1] }
         }
@@ -58,7 +57,7 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     }
 
     private fun loadPages(section: Int) {
-        if (section >= 0 && section < book.scheme.sectionCount) {
+        if (section >= 0 && section < book.getPageScheme()!!.sectionCount) {
             val html = book.getPageBody(section)
             if ( html != null) {
                 splitPages(book, section, html)
