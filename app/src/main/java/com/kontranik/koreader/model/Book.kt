@@ -26,20 +26,12 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
     }
 
     private fun loadBook() {
-        if (fileLocation.endsWith(".epub", true)) {
-            ebookHelper = EpubHelper(fileLocation)
-            ebookHelper!!.readBook()
-        } else if (
-            fileLocation.endsWith(".fb2", ignoreCase = true)
-            || fileLocation.endsWith(".fb2.zip", ignoreCase = true)
-                ) {
-            ebookHelper = FB2Helper(context, fileLocation)
-            ebookHelper!!.readBook()
-        }
+        ebookHelper = getHelper(context, fileLocation)
+        if ( ebookHelper != null) ebookHelper!!.readBook()
     }
 
     fun getPageBody(page: Int): String? {
-        val aSection = ebookHelper?.getPage(page)
+        val aSection = ebookHelper?.getPage(page) ?: return null
         val document = Jsoup.parse(aSection)
 
         preProcess(document)
@@ -50,7 +42,9 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
 
     private fun preProcess(document: Document) {
         val head: Element = document.head()
+        //head.remove()
         head.select("title").remove()
+        head.select("style").remove()
     }
 
     /*
@@ -82,7 +76,11 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
 
     fun getImageBitmapDrawable(source: String): BitmapDrawable? {
         if ( ebookHelper != null) {
-            val resource = ebookHelper!!.getImageByHref(source)
+            var s = source
+            if ( s.startsWith("../")) {
+                s = source.substring(3)
+            }
+            val resource = ebookHelper!!.getImageByHref(s)
             if (resource != null) {
                 val bitmap = BitmapFactory.decodeByteArray(resource, 0, resource.size)
                 return BitmapDrawable(context.resources, bitmap)
@@ -121,5 +119,19 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
 
     fun getPageScheme(): BookPageScheme? {
         return ebookHelper?.pageScheme
+    }
+
+    companion object {
+        fun getHelper(context: Context, path: String): EbookHelper? {
+            if (path.endsWith(".epub", true)) {
+                return EpubHelper(path)
+            } else if (
+                    path.endsWith(".fb2", ignoreCase = true)
+                    || path.endsWith(".fb2.zip", ignoreCase = true)
+            ) {
+                return FB2Helper(context, path)
+            }
+            return null
+        }
     }
 }

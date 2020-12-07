@@ -21,7 +21,8 @@ class EpubHelper(private val fileLocation: String) : EbookHelper {
     override var pageScheme: BookPageScheme = BookPageScheme()
 
     override fun readBook() {
-        epubBook = readBook(fileLocation)
+        readBook(fileLocation)
+        calculateScheme()
     }
 
     private fun readBook(path: String): Book? {
@@ -31,20 +32,20 @@ class EpubHelper(private val fileLocation: String) : EbookHelper {
             val fileInputStream = FileInputStream(bookFile)
             epubBook = epubReader.readEpub(fileInputStream)
             fileInputStream.close()
-            calculateScheme()
+            return epubBook
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        return null;
+        return null
     }
 
     private fun calculateScheme() {
         if ( epubBook != null && getContentSize() == 0   ) return
         pageScheme = BookPageScheme()
         pageScheme.sectionCount = getContentSize()
-        for( pageIndex in 0 until pageScheme.sectionCount) {
+        for( pageIndex in 0 until getContentSize()) {
             val textSize = getPageTextSize(pageIndex)
             val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
             pageScheme.scheme[pageIndex] = BookSchemeCount(
@@ -70,7 +71,7 @@ class EpubHelper(private val fileLocation: String) : EbookHelper {
     }
 
     override fun getPageByHref(href: String): String? {
-        val data = epubBook!!.resources.getByHref(href)?.data
+        val data = epubBook?.resources?.getByHref(href)?.data
         return data?.let { String(it) }
     }
 
@@ -92,7 +93,9 @@ class EpubHelper(private val fileLocation: String) : EbookHelper {
                     cover = coverBitmap,
                     authors = getAuthors(eb),
                     path = path,
-                    filename = File(path).name)
+                    filename = File(path).name,
+                    annotation = eb.metadata.descriptions.joinToString(separator = "\n", prefix = "<p>", postfix = "</p>")
+            )
         } else {
             return null
         }
@@ -102,6 +105,11 @@ class EpubHelper(private val fileLocation: String) : EbookHelper {
         return eBook.metadata.authors.map {
             Author(it.firstname, middlename = null, it.lastname)
         }
+    }
+
+    override fun getCoverPage(): String? {
+        val data = epubBook?.coverPage?.data
+        return data?.let { String(it) }
     }
 
 }

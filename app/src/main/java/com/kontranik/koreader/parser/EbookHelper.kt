@@ -13,4 +13,5 @@ interface EbookHelper {
     fun getPageByHref(href: String): String?
     fun getImageByHref(href: String): ByteArray?
     fun getBookInfoTemporary(path: String): BookInfo?
+    fun getCoverPage(): String?
 }

@@ -10,6 +10,8 @@ import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
+import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
+import java.io.File
 
 
 class FloatTextViewFragment : DialogFragment() {
@@ -34,19 +36,42 @@ class FloatTextViewFragment : DialogFragment() {
             dismiss()
         }
 
-        textView = view.findViewById(R.id.textView_floattextview_note)
+        val textSize = requireArguments().getFloat(QuickMenuFragment.TEXTSIZE)
+        val fontname = requireArguments().getString(QuickMenuFragment.FONTNAME, TypefaceRecord.SANSSERIF)
+        val fontpath = requireArguments().getString(QuickMenuFragment.FONTPATH, null)
+        val selectedFont = if ( fontpath != null ) {
+            val f = File(fontpath)
+            if (f.exists() && f.isFile && f.canRead())
+                TypefaceRecord(fontname, f)
+            else
+                TypefaceRecord.DEFAULT
+        } else {
+            TypefaceRecord(fontname)
+        }
+
+        textView = view.findViewById(R.id.textView_floattextview_content)
 
         val html = requireArguments().getString(CONTENT, "no Content")
         textView!!.text = Html.fromHtml(html)
+
+        textView!!.textSize = textSize
+        textView!!.typeface = selectedFont.getTypeface()
     }
+
 
     companion object {
         const val CONTENT = "content"
 
-        fun newInstance(html: String): FloatTextViewFragment {
+        fun newInstance(
+                html: String,
+                textSize: Float,
+                font: TypefaceRecord): FloatTextViewFragment {
             val frag = FloatTextViewFragment()
             val args = Bundle()
             args.putString(CONTENT, html)
+            args.putFloat(QuickMenuFragment.TEXTSIZE, textSize)
+            if ( font.file != null ) args.putString(QuickMenuFragment.FONTPATH, font.file.absolutePath)
+            else args.putString(QuickMenuFragment.FONTNAME, font.name)
             frag.arguments = args
 
             return frag

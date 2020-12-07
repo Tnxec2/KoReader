@@ -8,7 +8,8 @@ class BookInfo(
         var cover: Bitmap?,
         val authors: List<Author>?,
         val filename: String,
-        val path: String
+        val path: String,
+        val annotation: String
 ) {
 
     fun authorsAsString() : String {

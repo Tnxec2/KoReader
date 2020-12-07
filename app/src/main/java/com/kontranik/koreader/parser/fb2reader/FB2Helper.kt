@@ -26,8 +26,8 @@ class FB2Helper(private val context: Context , fileLocation: String) : EbookHelp
     private fun calculateScheme() {
         if ( fb2Reader.fb2Scheme != null && getContentSize() == 0   ) return
         pageScheme = BookPageScheme()
-        pageScheme.sectionCount = getContentSize()
-        for( pageIndex in 0 until pageScheme.sectionCount) {
+        pageScheme.sectionCount = getContentSize() + 1 // coverPage dazu
+        for( pageIndex in 0 until getContentSize()) {
             val textSize = getPageTextSize(pageIndex)
             val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
             pageScheme.scheme[pageIndex] = BookSchemeCount(
@@ -48,7 +48,8 @@ class FB2Helper(private val context: Context , fileLocation: String) : EbookHelp
     }
 
     override fun getPage(page: Int): String? {
-        return fb2Reader.getSectionHtml(page)
+        if ( page == 0) return getCoverPage()
+        return fb2Reader.getSectionHtml(page-1)
     }
 
     override fun getPageByHref(href: String): String? {
@@ -75,7 +76,9 @@ class FB2Helper(private val context: Context , fileLocation: String) : EbookHelp
                     cover = coverBitmap,
                     authors = getAuthors(tempScheme),
                     path = path,
-                    filename = File(path).name)
+                    filename = File(path).name,
+                    annotation = tempScheme.description.titleInfo.annotation.toString()
+            )
         } else {
             return null
         }
@@ -85,6 +88,10 @@ class FB2Helper(private val context: Context , fileLocation: String) : EbookHelp
         return tempScheme.description.titleInfo.authors.map {
             Author(it.firstname, it.middlename, it.lastname)
         }
+    }
+
+    override fun getCoverPage(): String? {
+        return fb2Reader.fb2Scheme.description.titleInfo.coverpage.toString()
     }
 
 }

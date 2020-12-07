@@ -1,5 +1,6 @@
 package com.kontranik.koreader.utils
 
+import android.content.Context
 import android.os.Environment
 import java.io.File
 import java.util.*
@@ -18,6 +19,16 @@ object FileHelper {
     fun getExt(filename: String): String { // FilenameUtils.getExtension(n)
         val i = filename.lastIndexOf('.')
         return if (i > 0) filename.substring(i + 1) else ""
+    }
+
+    fun getFSStorage(context: Context) : List<FileItem> {
+        val fsTools = FsTools(context)
+        val drives = fsTools.d
+        val result = mutableListOf<FileItem>()
+        for ((key, value) in drives.entries) {
+            result.add( FileItem(ImageEnum.SD, value, key.absolutePath, isDir = true, isRoot = true, null) )
+        }
+        return result
     }
 
     val storageList: List<FileItem>

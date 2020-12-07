@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageButton
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +21,9 @@ import java.util.*
 
 
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterClickListener {
+class FileChooseActivity : AppCompatActivity(),
+        FileListAdapter.FileListAdapterClickListener,
+        BookInfoFragment.BookInfoListener{
 
     private var listView: RecyclerView? = null
     private var fileListAdapter: FileListAdapter? = null
@@ -63,11 +66,11 @@ class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterC
     }
 
     private fun openBook(fileItem: FileItem) {
-        savePrefs()
         openBook(fileItem.path)
     }
 
     private fun openBook(path: String) {
+        savePrefs(path)
         val data = Intent()
         data.putExtra(ReaderActivity.PREF_TYPE, ReaderActivity.PREF_TYPE_OPEN_BOOK)
         data.putExtra(PrefsHelper.PREF_BOOK_PATH, path)
@@ -107,9 +110,9 @@ class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterC
         }
     }
 
-    private fun savePrefs() {
+    private fun savePrefs(path: String) {
         prefEditor = settings!!.edit()
-        prefEditor!!.putString(PREF_LAST_PATH, selectedPath)
+        prefEditor!!.putString(PREF_LAST_PATH, path)
         prefEditor!!.apply()
     }
 
@@ -117,7 +120,8 @@ class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterC
         selectedPath = "storage"
         fileItemList.clear()
         rootPaths.clear()
-        fileItemList.addAll(FileHelper.storageList)
+        // fileItemList.addAll(FileHelper.storageList)
+        fileItemList.addAll(FileHelper.getFSStorage(applicationContext))
         for (fileItem in fileItemList) {
             val parent = File(fileItem.path).parent
             if (!rootPaths.contains(parent)) rootPaths.add(parent)
@@ -138,7 +142,17 @@ class FileChooseActivity : AppCompatActivity(), FileListAdapter.FileListAdapterC
             pathsPosition[selectedPath!!] = lm.findFirstVisibleItemPosition()
             if (rootPaths.contains(selectedFileItem.path)) storageList() else getFileList(selectedFileItem)
         } else {
-            openBook(selectedFileItem)
+            //openBook(selectedFileItem)
+            openBookInfo(selectedFileItem.path)
         }
+    }
+
+    private fun openBookInfo(bookPath: String) {
+        val bookInfoFragment = BookInfoFragment.newInstance(bookPath)
+        bookInfoFragment.show(supportFragmentManager, "fragment_bookinfo")
+    }
+
+    override fun onReadBook(bookPath: String) {
+        openBook(bookPath)
     }
 }

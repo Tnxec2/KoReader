@@ -51,6 +51,9 @@
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="open">Open</string>
     <string name="delete">Delete</string>
+    <string name="readbook">Read Book</string>
+    <string name="note">Note</string>
+    <string name="bookinfo">Info</string>
 
     <!-- Preference Titles -->
     <string name="interface_header">Interface</string>
@@ -76,6 +79,6 @@
     <!-- Text Preferences -->
     <string name="usesystemfonts_title">Use System Fonts</string>
     <string name="show_noto_fonts_title">Show Noto Fonts</string>
-    <string name="note">Note</string>
+
 
 </resources>

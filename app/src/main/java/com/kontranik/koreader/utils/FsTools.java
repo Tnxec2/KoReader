@@ -53,6 +53,9 @@ public class FsTools {
         mContext = context;
     }
 
+    public Map<File, String> getD() {
+        return getDrives();
+    }
 
     private Map<File, String> getDrives() {
         List<File> roots = new ArrayList<>();
@@ -72,25 +75,28 @@ public class FsTools {
             try {
                 int sd = 1;
                 if (r!=null) {
-                    for (File e : r.listFiles()) {
-                        try {
-                            Log.d("storage", e.getPath() + " " + e.isDirectory());
-                            if (e.isDirectory()) { // && !e.getName().equals("emulated") && !e.getName().equals("self")) {
-                                boolean removable = false;
-                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                                    removable = Environment.isExternalStorageRemovable(e);
+                    File[] fs = r.listFiles();
+                    if (fs != null) {
+                        for (File e : fs) {
+                            try {
+                                Log.d("storage", e.getPath() + " " + e.isDirectory());
+                                if (e.isDirectory()) { // && !e.getName().equals("emulated") && !e.getName().equals("self")) {
+                                    boolean removable = false;
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                                        removable = Environment.isExternalStorageRemovable(e);
+                                    }
+                                    String name = "SD";
+                                    if (sd++ > 1) name += sd;
+                                    files.put(e, removable ? name : e.getName());
+                                    //Log.d("storage", name + " " + e.getPath());
                                 }
-                                String name = "SD";
-                                if (sd++ > 1) name += sd;
-                                files.put(e, removable ? name : e.getName());
-                                //Log.d("storage", name + " " + e.getPath());
+                            } catch (IllegalArgumentException ex) {
+                                Log.d("storage", e.getPath() + " is no good");
+                            } catch (Throwable t) {
+                                Log.e("storage", t.getMessage(), t);
                             }
-                        } catch (IllegalArgumentException ex) {
-                            Log.d("storage", e.getPath() + " is no good");
-                        } catch (Throwable t) {
-                            Log.e("storage", t.getMessage(), t);
-                        }
 
+                        }
                     }
                 }
             } catch (Exception e) {

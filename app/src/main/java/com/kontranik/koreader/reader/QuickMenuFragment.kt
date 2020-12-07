@@ -29,7 +29,6 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
 
     private var selectedFont: TypefaceRecord = TypefaceRecord.DEFAULT
 
-
     // 1. Defines the listener interface with a method passing back data result.
     interface QuickMenuDialogListener {
         fun onFinishQuickMenuDialog(textSize: Float, font: TypefaceRecord?)
@@ -162,7 +161,6 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
             val frag = QuickMenuFragment()
             val args = Bundle()
             args.putFloat(TEXTSIZE, textSize)
-
             if ( font.file != null ) args.putString(FONTPATH, font.file.absolutePath)
             else args.putString(FONTNAME, font.name)
 

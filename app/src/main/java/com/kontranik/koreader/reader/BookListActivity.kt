@@ -9,6 +9,7 @@ import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
 import com.kontranik.koreader.database.BookStatusDatabaseAdapter
 import com.kontranik.koreader.database.BookStatusService
+import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.utils.BookListAdapter
 import com.kontranik.koreader.parser.epubreader.EpubHelper
@@ -68,17 +69,12 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
                         if ( ! bookfile.exists() ) {
                             bookservice.delete(bookstatus.id!!)
                         }
-                        var bookInfo: BookInfo? = null
-                        if ( bookstatus.path!!.endsWith(".epub")) {
-                            bookInfo = EpubHelper(bookstatus.path!!).getBookInfoTemporary(bookstatus.path!!)
-                        } else if (
-                                bookstatus.path!!.endsWith(".fb2")
-                                || bookstatus.path!!.endsWith(".fb2.zip")
-                        ) {
-                            bookInfo = FB2Helper(applicationContext, bookstatus.path!!).getBookInfoTemporary(bookstatus.path!!)
-                        }
-                        if (bookInfo != null) {
-                            bookInfoList.add(bookInfo)
+                        val ebookHelper = Book.getHelper(this, bookstatus.path!!)
+                        if ( ebookHelper != null) {
+                            val bookInfo = ebookHelper.getBookInfoTemporary(bookstatus.path!!)
+                            if (bookInfo != null) {
+                                bookInfoList.add(bookInfo)
+                            }
                         }
                     }
                 }

@@ -483,7 +483,7 @@ class ReaderActivity :
     private fun showNote(html: String?) {
         if ( html == null) return
         val floatTextViewFragment: FloatTextViewFragment =
-                FloatTextViewFragment.newInstance(html)
+                FloatTextViewFragment.newInstance(html, prefsHelper.textSize, prefsHelper.font)
         floatTextViewFragment.show(supportFragmentManager, "fragment_floattextview")
     }
 
@@ -622,7 +622,7 @@ class ReaderActivity :
 
     companion object {
         private const val TAG = "ReaderActivity"
-        private const val PREFS_FILE = "MainActivitySettings"
+        internal const val PREFS_FILE = "MainActivitySettings"
         const val REQUEST_ACCESS_MAIN_MENU = 1
         const val REQUEST_ACCESS_QUICK_MENU = 2
         const val PREF_TYPE = "ReturnType"
