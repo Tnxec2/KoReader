@@ -39,6 +39,9 @@ public class FB2ParserObject {
 	public boolean onlyscheme;
 
 	public boolean isSupNote;
+    public boolean isTitle;
+    public boolean isBinary;
+    public boolean isCode;
 
     public void clearMyText() {
         myText = new StringBuffer();
@@ -68,5 +71,9 @@ public class FB2ParserObject {
         
        isSection = false;
        isNotes = false;
+       isSupNote = false;
+       isTitle = false;
+       isBinary = false;
+       isCode = false;
 	}
 }

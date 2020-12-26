@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/activity_padding"
-    tools:context=".epubParser.FileChooseActivity"
     android:background="@color/background_main_dialog"
     android:textColor="@color/foreground_main_dialog"
     >
@@ -29,6 +28,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/imageButton_filechoose_add_storage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_iconmonstr_folder_add"
+            android:contentDescription="@string/go_to_storage" />
 
         <ImageButton
             android:id="@+id/imageButton_filechoose_goto_storage"

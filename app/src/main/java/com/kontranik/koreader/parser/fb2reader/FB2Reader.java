@@ -4,29 +4,47 @@ import com.kontranik.koreader.parser.fb2reader.model.BinaryData;
 import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme;
 import com.kontranik.koreader.parser.fb2reader.model.FB2Section;
 
+import java.io.InputStream;
+
 public class FB2Reader {
     private String appDir;
-    private String filePath;
+    private String contentUri;
     private FB2Scheme fb2Scheme;
 
-    FB2Reader(String appDir, String filePath) {
+    FB2Reader(String appDir, String uri) {
     	this.appDir = appDir;
-        this.filePath = filePath;
+        this.contentUri = uri;
+		java.util.logging.Logger.getLogger("FB2READER").log(java.util.logging.Level.INFO, appDir);
 	}
 
-	public FB2Scheme readBook() {
+	public FB2Scheme readBook(String contentUri, InputStream fileInputStream) {
+
+		if ( contentUri != null ) {
+			try {
+				FB2Scheme schemeFile = new FileHelper(appDir).getScheme();
+				if ( schemeFile != null && contentUri.equals(schemeFile.path) ) {
+					this.fb2Scheme = schemeFile;
+					return schemeFile;
+				}
+			} catch ( Exception e) {
+				e.printStackTrace();
+				java.util.logging.Logger.getLogger("FB2READER").log(java.util.logging.Level.INFO, e.getMessage());
+			}
+
+		}
 		try {
-			this.fb2Scheme = new FB2Parser(appDir, filePath).parseBook();
+			this.fb2Scheme = new FB2Parser(appDir, contentUri, fileInputStream).parseBook();
 		} catch (Exception e) {
+			e.printStackTrace();
 			java.util.logging.Logger.getLogger("FB2READER").log(java.util.logging.Level.INFO, e.getMessage());
 			return null;
 		}
 		return fb2Scheme;
 	}
 
-	public FB2Scheme readScheme() {
+	public FB2Scheme readScheme(InputStream fileInputStream) {
 		try {
-			this.fb2Scheme = new FB2Parser(appDir, filePath).parseScheme();
+			this.fb2Scheme = new FB2Parser(appDir, contentUri, fileInputStream).parseScheme();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -87,10 +105,10 @@ public class FB2Reader {
 	}
 
 	/**
-	 * @return the filePath
+	 * @return the uri
 	 */
-	public String getFilePath() {
-		return filePath;
+	public String getContentUri() {
+		return contentUri;
 	}
 
 	/**

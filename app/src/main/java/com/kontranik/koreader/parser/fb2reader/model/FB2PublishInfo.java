@@ -6,6 +6,8 @@ public class FB2PublishInfo {
     public String city;
     public String year;
     public String isbn;
+
+    public FB2PublishInfo() {}
 	/**
 	 * @return the publisher
 	 */

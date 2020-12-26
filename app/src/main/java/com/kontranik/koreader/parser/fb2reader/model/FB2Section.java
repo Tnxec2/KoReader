@@ -10,6 +10,8 @@ public class FB2Section {
     public StringBuffer text;
     public Integer parentId;
 
+    public FB2Section() {}
+
     public FB2Section(Integer orderid, String id, FB2Elements typ, Integer deep, Integer parentId) {
 		this.orderid = orderid;
 		this.id = id;

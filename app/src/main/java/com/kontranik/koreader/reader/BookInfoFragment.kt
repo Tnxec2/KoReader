@@ -19,7 +19,7 @@ class BookInfoFragment : DialogFragment() {
 
     // 1. Defines the listener interface with a method passing back data result.
     interface BookInfoListener {
-        fun onReadBook(bookPath: String)
+        fun onReadBook(bookUri: String)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

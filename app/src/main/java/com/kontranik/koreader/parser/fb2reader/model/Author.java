@@ -7,6 +7,8 @@ public class Author {
     public String nickname;
     public String homepage;
     public String email;
+
+    public Author() {}
 	/**
 	 * @return the firstname
 	 */

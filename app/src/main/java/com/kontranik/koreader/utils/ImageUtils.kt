@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import androidx.core.content.res.ResourcesCompat
 import com.kontranik.koreader.R
 
 
@@ -31,13 +32,13 @@ object ImageUtils {
     fun getBitmap(c: Context, imageEnum: ImageEnum): Bitmap? {
 
         val d = when (imageEnum) {
-            ImageEnum.Parent -> c.resources.getDrawable(R.drawable.ic_baseline_arrow_back_24)
-            ImageEnum.SD -> c.resources.getDrawable(R.drawable.ic_baseline_sd_card_24)
-            ImageEnum.Dir -> c.resources.getDrawable(R.drawable.ic_folder_black_24dp)
-            else -> c.resources.getDrawable(R.drawable.ic_book_black_24dp)
+            ImageEnum.Parent -> ResourcesCompat.getDrawable(c.resources, R.drawable.ic_baseline_arrow_back_24, null)
+            ImageEnum.SD -> ResourcesCompat.getDrawable(c.resources, R.drawable.ic_baseline_sd_card_24, null)
+            ImageEnum.Dir ->ResourcesCompat.getDrawable(c.resources, R.drawable.ic_folder_black_24dp, null)
+            else ->  ResourcesCompat.getDrawable(c.resources, R.drawable.ic_book_black_24dp, null)
         }
 
-        val bitmap = drawableToBitmap(d)
+        val bitmap = drawableToBitmap(d!!)
         return bitmap
     }
 

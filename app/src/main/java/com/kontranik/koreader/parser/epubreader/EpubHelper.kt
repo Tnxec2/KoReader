@@ -1,36 +1,48 @@
 package com.kontranik.koreader.parser.epubreader
 
+import android.content.Context
 import android.graphics.Bitmap
-import com.kontranik.koreader.model.*
+import android.net.Uri
+import android.util.Log
+import com.kontranik.koreader.model.Author
+import com.kontranik.koreader.model.BookInfo
+import com.kontranik.koreader.model.BookPageScheme
+import com.kontranik.koreader.model.BookSchemeCount
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.utils.ImageUtils
-
 import nl.siegmann.epublib.domain.Book
 import nl.siegmann.epublib.epub.EpubReader
 import org.jsoup.Jsoup
-import java.io.File
-import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 
-class EpubHelper(private val fileLocation: String) : EbookHelper {
+class EpubHelper(private val context: Context, private val contentUri: String) : EbookHelper {
 
     private var epubReader = EpubReader()
     private var epubBook: Book? = null
+    override var bookInfo: BookInfo? = null
     override var pageScheme: BookPageScheme = BookPageScheme()
 
     override fun readBook() {
-        readBook(fileLocation)
+        readBook(contentUri)
         calculateScheme()
     }
 
-    private fun readBook(path: String): Book? {
-        val bookFile = File(path)
-
+    private fun readBook(documentUri: String): Book? {
         try {
-            val fileInputStream = FileInputStream(bookFile)
+            val fileInputStream = context.contentResolver.openInputStream(Uri.parse(documentUri)) ?: return null
             epubBook = epubReader.readEpub(fileInputStream)
+            if ( epubBook != null) {
+                bookInfo = BookInfo(
+                        title = epubBook!!.title,
+                        cover = getcoverbitmap(),
+                        authors = getAuthors(epubBook!!).toMutableList(),
+                        filename = documentUri,
+                        path = documentUri,
+                        annotation = epubBook!!.metadata.descriptions.joinToString("\n") )
+            }
             fileInputStream.close()
             return epubBook
         } catch (e: FileNotFoundException) {
@@ -79,21 +91,19 @@ class EpubHelper(private val fileLocation: String) : EbookHelper {
         return epubBook!!.resources.getByHref(href)?.data
     }
 
-    override fun getBookInfoTemporary(path: String): BookInfo? {
-        val eb = readBook(path)
+    override fun getBookInfoTemporary(contentUri: String): BookInfo? {
+        val eb = readBook(contentUri)
         if (eb != null) {
             val t = eb.title
             val coverImage = eb.coverImage
-            var coverBitmap: Bitmap? = null
-            if (coverImage != null) {
-                if ( coverImage.data != null)  coverBitmap = ImageUtils.byteArrayToBitmap(coverImage.data)
-            }
+            var coverBitmap = getCoverbitmap(coverImage?.data)
+
             return BookInfo(
-                    title =  t,
+                    title = t,
                     cover = coverBitmap,
-                    authors = getAuthors(eb),
-                    path = path,
-                    filename = File(path).name,
+                    authors = getAuthors(eb).toMutableList(),
+                    path = contentUri,
+                    filename = contentUri,
                     annotation = eb.metadata.descriptions.joinToString(separator = "\n", prefix = "<p>", postfix = "</p>")
             )
         } else {
@@ -101,15 +111,30 @@ class EpubHelper(private val fileLocation: String) : EbookHelper {
         }
     }
 
+    private fun getcoverbitmap(): Bitmap? {
+        return getCoverbitmap(epubBook?.coverImage?.data)
+    }
+
+    private fun getCoverbitmap(coverImage: ByteArray?): Bitmap? {
+        var coverBitmap: Bitmap? = null
+        if ( coverImage != null)  coverBitmap = ImageUtils.byteArrayToBitmap(coverImage)
+        return coverBitmap
+    }
+
     private fun getAuthors(eBook: Book): List<Author> {
-        return eBook.metadata.authors.map {
+        val list = eBook.metadata.authors.map {
             Author(it.firstname, middlename = null, it.lastname)
         }
+        return list
     }
 
     override fun getCoverPage(): String? {
         val data = epubBook?.coverPage?.data
         return data?.let { String(it) }
+    }
+
+    companion object {
+        private const val TAG = "Book"
     }
 
 }

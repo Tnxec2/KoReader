@@ -38,6 +38,38 @@
         <item>LandscapeSensor</item>
     </string-array>
 
+    <string-array name="tapzonen_entries">
+        <item>@string/tapzones_activity_none</item>
+        <item>@string/tapzones_activity_page_prev</item>
+        <item>@string/tapzones_activity_page_next</item>
+        <item>@string/tapzones_activity_quick_menu</item>
+        <item>@string/tapzones_activity_main_menu</item>
+    </string-array>
 
+    <string-array name="tapzonen_values">
+        <item>None</item>
+        <item>PagePrev</item>
+        <item>PageNext</item>
+        <item>QuickMenu</item>
+        <item>MainMenu</item>
+    </string-array>
+
+    <string-array name="line_spacing_entries">
+        <item>1</item>
+        <item>1,15</item>
+        <item>1,5</item>
+        <item>2,0</item>
+        <item>2,5</item>
+        <item>3,0</item>
+    </string-array>
+
+    <string-array  name="line_spacing_values">
+        <item>1</item>
+        <item>1.15</item>
+        <item>1.5</item>
+        <item>2.0</item>
+        <item>2.5</item>
+        <item>3.0</item>
+    </string-array>
 
 </resources>

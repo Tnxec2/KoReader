@@ -4,7 +4,8 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-class DatabaseHelper(val context: Context?) : SQLiteOpenHelper(context, DATABASE_NAME, null, SCHEMA) {
+class DatabaseHelper(val context: Context?) : SQLiteOpenHelper(
+        context, DATABASE_NAME, null, SCHEMA) {
     override fun onCreate(db: SQLiteDatabase) {
 
         db.execSQL("CREATE TABLE " + BookStatusHelper.TABLE + " (" + BookStatusHelper.COLUMN_ID
@@ -12,7 +13,9 @@ class DatabaseHelper(val context: Context?) : SQLiteOpenHelper(context, DATABASE
                 + BookStatusHelper.COLUMN_PATH + " TEXT, "
                 + BookStatusHelper.COLUMN_POSITION_PAGE + " NUMBER, "
                 + BookStatusHelper.COLUMN_POSITION_OFFSET + " NUMBER, "
-                + BookStatusHelper.COLUMN_LAST_OPEN_TIME + " NUMBER "
+                + BookStatusHelper.COLUMN_LAST_OPEN_TIME + " NUMBER, "
+                + BookStatusHelper.COLUMN_TITLE + " TEXT, "
+                + BookStatusHelper.COLUMN_AUTHOR + " TEXT "
 
                 + ");")
 
@@ -39,12 +42,17 @@ class DatabaseHelper(val context: Context?) : SQLiteOpenHelper(context, DATABASE
                     BookmarksHelper.COLUMN_POSITION_OFFSET + " NUMBER;")
             db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
                     BookStatusHelper.COLUMN_POSITION_OFFSET + " NUMBER;")
+        } else if ( oldVersion < 4) {
+            db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
+                    BookStatusHelper.COLUMN_TITLE + " TEXT;")
+            db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
+                    BookStatusHelper.COLUMN_AUTHOR + " TEXT;")
         }
     }
 
 
     companion object {
         private const val DATABASE_NAME = "books.db" // db name
-        private const val SCHEMA = 3 // db version
+        private const val SCHEMA = 5 // db version
     }
 }

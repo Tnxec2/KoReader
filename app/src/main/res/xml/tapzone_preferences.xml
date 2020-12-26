@@ -1,0 +1,26 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:title="@string/tapzones_header"
+        app:iconSpaceReserved="false"
+        >
+    <Preference
+        app:key="tapzone_one_preference"
+        app:title="@string/tapzones_one_click_header"
+        app:iconSpaceReserved="false"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$TapZoneOneSettingsFragment"
+        />
+    <Preference
+        app:key="tapzone_double_preference"
+        app:title="@string/tapzones_double_click_header"
+        app:iconSpaceReserved="false"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$TapZoneDoubleSettingsFragment"
+        />
+    <Preference
+        app:key="tapzone_long_preference"
+        app:title="@string/tapzones_long_click_header"
+        app:iconSpaceReserved="false"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$TapZoneLongSettingsFragment"
+        />
+    </PreferenceCategory>
+</PreferenceScreen>

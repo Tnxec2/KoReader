@@ -54,25 +54,16 @@ public class FileHelper {
 
     public FB2Scheme getScheme() throws Exception {
         File workdir = getworkdir();
-        FB2Scheme result = null;
-        File fileDescription = new File(workdir, Constant.DESCRIPTION_FILENAME);
-        File fileSections = new File(workdir, Constant.SECTIONS_FILENAME);
-        FB2Description description = mapper.readValue(fileDescription, FB2Description.class);
-        List<FB2Section> sections = mapper.readValue(fileSections, new TypeReference<List<FB2Section>>() { });
-        result = new FB2Scheme();
-        result.setDescription(description);
-        result.setSections(sections);
-        return result;
+        File fileScheme = new File(workdir, Constant.SCHEME_FILENAME);
+        return mapper.readValue(fileScheme, FB2Scheme.class);
     }
 
     public void writeSchema(FB2Scheme scheme) throws Exception {
         if ( scheme == null) return;
         File workdir = getworkdir();
-        File fileDescription = new File(workdir, Constant.DESCRIPTION_FILENAME);
-        File fileSections = new File(workdir, Constant.SECTIONS_FILENAME);
+        File fileScheme = new File(workdir, Constant.SCHEME_FILENAME);
         try {
-            mapper.writeValue(fileDescription, scheme.description);
-            mapper.writeValue(fileSections, scheme.sections);
+            mapper.writeValue(fileScheme, scheme);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -82,8 +73,7 @@ public class FileHelper {
         if ( sourceName.startsWith("#")) sourceName = sourceName.substring(1);
         File workdir = getworkdir();
         File fileBin = new File(workdir, Constant.PREFIX_BINARY + sourceName + ".json");
-        BinaryData binaryData = mapper.readValue(fileBin, BinaryData.class);
-        return binaryData;
+        return mapper.readValue(fileBin, BinaryData.class);
     }
 
     public void writeBinary(BinaryData data) throws Exception {

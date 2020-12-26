@@ -15,6 +15,7 @@
     <dimen name="padding_textview_bottom_fullscreen">6dp</dimen>
 
     <dimen name="text_size">13sp</dimen>
+    <item name="line_spacing" type="dimen" format="float">1.0</item>
 
     <dimen name="text_size_file_path">10sp</dimen>
     <dimen name="text_size_file_desc">10sp</dimen>

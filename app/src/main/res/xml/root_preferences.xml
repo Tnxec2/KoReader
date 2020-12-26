@@ -1,41 +1,28 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/interface_header">
-        <ListPreference
-            app:key="theme"
-            app:entries="@array/theme_entries"
-            app:entryValues="@array/theme_values"
-            app:defaultValue="Auto"
-            app:title="@string/theme_title"
-            app:useSimpleSummaryProvider="true" />
-        <ListPreference
-            app:key="brightness"
-            app:entries="@array/brightness_entries"
-            app:entryValues="@array/brightness_values"
-            app:defaultValue="Manual"
-            app:title="@string/brightness_title"
-            app:useSimpleSummaryProvider="true" />
-        <ListPreference
-            app:key="orientation"
-            app:entries="@array/orientation_enties"
-            app:entryValues="@array/orientation_values"
-            app:defaultValue="PortraitSensor"
-            app:title="@string/orientation_title"
-            app:useSimpleSummaryProvider="true" />
-    </PreferenceCategory>
+    <Preference
+        app:key="interface_preference"
+        app:title="@string/interface_header"
+        app:icon="@drawable/ic_iconmonstr_eye_3"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$InterfaceSettingsFragment"
+        />
 
-    <PreferenceCategory app:title="@string/text_header">
-        <SwitchPreference
-            app:key="useSystemFonts"
-            app:title="@string/usesystemfonts_title"
-            />
-
-        <SwitchPreference
-            app:key="showNotoFonts"
-            app:title="@string/show_noto_fonts_title"
-            app:dependency="useSystemFonts"
-            />
-    </PreferenceCategory>
-
-
+    <Preference
+        app:key="color_preference"
+        app:title="@string/color_header"
+        app:icon="@drawable/ic_iconmonstr_paintbrush_10"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorSettingsFragment"
+        />
+    <Preference
+        app:key="text_preference"
+        app:title="@string/text_header"
+        app:icon="@drawable/ic_iconmonstr_text_3"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$TextSettingsFragment"
+        />
+    <Preference
+        app:key="tapzones_preference"
+        app:title="@string/tapzones_header"
+        app:icon="@drawable/ic_iconmonstr_cursor_31"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$TapZonesSettingsFragment"
+        />
 </PreferenceScreen>

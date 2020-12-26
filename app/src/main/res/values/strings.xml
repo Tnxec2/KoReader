@@ -14,7 +14,7 @@
     <string name="swipe_right">Swipe Right</string>
     <string name="swipe_up">Swipe Up</string>
     <string name="swipe_down">Swipe Down</string>
-    <string name="click_in_zone">Click in %1$s</string>
+    <string name="click_in_zone">Click %1$d in %2$s</string>
     <string name="doubleclick_in_zone">Double Click in %1$s</string>
     <string name="longclick_in_zone">Long Click in %1$s</string>
     <string name="page_info_text">%1$d / %2$d</string>
@@ -24,6 +24,7 @@
     <string name="choose_file">Choose file</string>
     <string name="info">Info</string>
     <string name="go_to_storage">Go to Storage</string>
+    <string name="add_to_storage">Add a entry to Storage</string>
     <string name="back">Back</string>
     <string name="text">Text</string>
     <string name="position">Position</string>
@@ -57,9 +58,14 @@
 
     <!-- Preference Titles -->
     <string name="interface_header">Interface</string>
+    <string name="color_light_header">Color Light Theme</string>
+    <string name="color_dark_header">Color Dark Theme</string>
+    <string name="color_header">Color</string>
     <string name="text_header">Text</string>
+    <string name="font_header">Font</string>
 
     <!-- Interface Preferences -->
+    <string name="theme_header">Theme</string>
     <string name="theme_title">Theme</string>
     <string name="brightness_title">Brightness</string>
     <string name="orientation_title">Orientation</string>
@@ -76,9 +82,47 @@
     <string name="orientation_values_landscape">Landscape</string>
     <string name="orientation_values_landscape_sensor">Landscape Sensor</string>
 
+    <!-- Color Preferences -->
+    <string name="color_background">Backgroud</string>
+    <string name="color_foreground">Text color</string>
+    <string name="color_linktext">Link color</string>
+    <string name="default_color">set default color</string>
+
+    <string name="color_light_backgroud_default">#FBF0D9</string>
+    <string name="color_light_foregroud_default">#5F4B32</string>
+    <string name="color_light_linktext_default">#2196F3</string>
+    <string name="color_dark_backgroud_default">#000000</string>
+    <string name="color_dark_foregroud_default">#FBF0D9</string>
+    <string name="color_dark_linktext_default">#2196F3</string>
+
     <!-- Text Preferences -->
-    <string name="usesystemfonts_title">Use System Fonts</string>
+    <string name="font_name_title">Font name</string>
+    <string name="textsize_title">Text Size</string>
+    <string name="linespacing_title">Line Spacing</string>
+    <string name="showSystemFonts_title">Show System Fonts</string>
     <string name="show_noto_fonts_title">Show Noto Fonts</string>
 
+    <!-- Tap Zonen Preferences -->
+    <string name="tapzones_header">Tap Zones</string>
+    <string name="tapzones_one_click_header">One Click</string>
+    <string name="tapzones_double_click_header">Double Click</string>
+    <string name="tapzones_long_click_header">Long Click</string>
+
+    <string name="tapzone_top_left">top left</string>
+    <string name="tapzone_top_center">top center</string>
+    <string name="tapzone_top_right">top right</string>
+    <string name="tapzone_middle_left">middle left</string>
+    <string name="tapzone_middle_center">middle center</string>
+    <string name="tapzone_middle_right">middle right</string>
+    <string name="tapzone_bottom_left">bottom left</string>
+    <string name="tapzone_bottom_center">bottom center</string>
+    <string name="tapzone_bottom_right">bottom right</string>
+
+    <string name="tapzones_activity_none">none</string>
+    <string name="tapzones_activity_page_prev">previous page</string>
+    <string name="tapzones_activity_page_next">next page</string>
+    <string name="tapzones_activity_quick_menu">quick menu</string>
+    <string name="tapzones_activity_main_menu">main menu</string>
+    <string name="line_spacing">Line Spacing</string>
 
 </resources>

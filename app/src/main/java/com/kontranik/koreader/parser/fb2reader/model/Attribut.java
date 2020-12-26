@@ -1,8 +1,12 @@
 package com.kontranik.koreader.parser.fb2reader.model;
 
+import org.w3c.dom.Attr;
+
 public class Attribut {
     public  String name;
     public  String value;
+
+    public Attribut() {}
 	/**
 	 * @param name
 	 * @param value

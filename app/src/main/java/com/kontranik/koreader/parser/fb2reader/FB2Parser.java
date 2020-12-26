@@ -1,9 +1,13 @@
 package com.kontranik.koreader.parser.fb2reader;
 
+import android.net.Uri;
+import android.util.Log;
+
 import java.io.*;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.*;
 
@@ -25,10 +29,12 @@ public class FB2Parser extends DefaultHandler {
 
     FB2ParserObject object = new FB2ParserObject();
 
-    private String filePath;
+    InputStream fileInputStream;
+    String uri;
 
-    public FB2Parser(String appDir, String filePath) {
-        this.filePath = filePath;
+    public FB2Parser(String appDir, String uri, InputStream fileInputStream) {
+        this.uri = uri;
+        this.fileInputStream = fileInputStream;
         object.clear();
         object.fileHelper = new FileHelper(appDir);
     }
@@ -46,28 +52,29 @@ public class FB2Parser extends DefaultHandler {
 
         if ( !onlyscheme) object.fileHelper.clearworkdir();
 
-        if ( filePath.toLowerCase().endsWith(".zip")) {
+        if ( uri.toString().endsWith(".zip")) {
 
-            ZipFile zipFile = new ZipFile(filePath);
+            ZipInputStream zis = new ZipInputStream(fileInputStream);
 
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while(entries.hasMoreElements()){
-                ZipEntry entry = entries.nextElement();
-                if( ! entry.isDirectory()){
-                    if ( entry.getName().toLowerCase().endsWith(".fb2") ) {
-                        InputStream inputStream = zipFile.getInputStream(entry);
+            ZipEntry ze;
+
+            while ((ze = zis.getNextEntry()) != null) {
+
+                if( ! ze.isDirectory()){
+                    if ( ze.getName().toLowerCase().endsWith(".fb2") ) {
                         saxParser = SAXParserFactory.newInstance().newSAXParser();
-                        saxParser.parse(inputStream, this);
+                        saxParser.parse(zis, this);
                         break;
                     }
                 }
             }
-            zipFile.close();
-        } else if ( filePath.toLowerCase().endsWith(".fb2") ){
+            zis.close();
+        } else if ( uri.toString().toLowerCase().endsWith(".fb2") ){
             saxParser = SAXParserFactory.newInstance().newSAXParser();
-            saxParser.parse(new File(filePath), this);
+            saxParser.parse(fileInputStream, this);
         }
 
+        object.fb2scheme.path = uri;
         if ( ! object.onlyscheme ) object.fileHelper.writeSchema(object.fb2scheme);
 
         return object.fb2scheme;
@@ -129,6 +136,20 @@ public class FB2Parser extends DefaultHandler {
     // diesen in einen StringBuffer ein
     public void characters(char[] buf, int offset, int len) throws SAXException {
         String s = new String(buf, offset, len);
+
+        if ( object.isCode) {
+            Log.d("PARSER", s);
+        }
+        if ( ! object.isBinary ) {
+            if ( s.contains("<") || s.contains("&") || s.contains("\"") || s.contains(">")) {
+                Log.d("TEST", "before: " + s);
+                s = s.replaceAll("&", "&amp;");
+                s = s.replaceAll("\"", "&quot;");
+                s = s.replaceAll("<", "&lt;");
+                s = s.replaceAll(">", "&gt;");
+                Log.d("TEST", "after : " + s);
+            }
+        }
 
         if ( object.myParseText ) object.myText.append(s);
         

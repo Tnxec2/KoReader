@@ -24,9 +24,6 @@ public class FB2StartElement {
             case body:
                 gotNewSection(eName, fel, attrs, object);
                 break;
-            case title:
-                object.myParseText = true;
-                break;
             case binary:
                 startBinarys(object, attrs);
                 break;
@@ -41,6 +38,10 @@ public class FB2StartElement {
     }
 
     private static void parseStartElement(FB2Elements fel, Attributes attrs, FB2ParserObject object) {
+        if ( fel.equals(FB2Elements.title) ) {
+            object.myParseText = true;
+        }
+
         if ( ! object.isSection 
             && ! object.isAnnotation 
             && ! object.isCoverpage 
@@ -62,22 +63,24 @@ public class FB2StartElement {
         }
         switch (fel) {
             case emptyline:
-                result = "<br/>";
+                //result = "<br/>";
                 break;
             case p:
             case stanza:
-                result = "<p>";
+                if ( ! object.isTitle)
+                    result = "<p>";
                 break;
             case cite:
                 result = "<cite>";
                 break;
             case title:
+                object.isTitle = true;
                 int d = Math.min(deep, FB2ParserObject.maxHeader);
-                result = "<H" + d + 1 + ">";
+                result = "<H" + ( d + 1) + ">";
                 break;
             case subtitle:
                 int s = Math.min(deep+1, FB2ParserObject.maxHeader);
-                result = "<H" + s + 1 + ">";
+                result = "<H" + (s + 1) + ">";
                 break;
             case strong:
                 result = "<strong>";
@@ -95,16 +98,23 @@ public class FB2StartElement {
                 result = "<sup>";
                 break;
             case code:
-                result = "<code>";
+                object.isCode = true;
+                result = "<pre><code>";
+                break;
+            case epigraph:
+                result = "<blockquote>";
                 break;
             case a:
                 if ( href != null) {
-                    String cl = ""; object.isSupNote = false;
+                    String cl = "";
+                    String linktype = "";
+                    object.isSupNote = false;
                     if ( "note".equals(attrs.getValue("type")) ) {
-                        cl = "<sup>[";
+                        cl = "<sup>";
+                        linktype = "class=\"note\"";
                         object.isSupNote = true;
                     }
-                    result = " <a href=\"" + href + "\" " + ">" + cl;
+                    result = " <a href=\"" + href + "\" " +  linktype + " >" + cl;
                 } 
                 break;
             case image:
@@ -212,6 +222,7 @@ public class FB2StartElement {
         if ( object.isSection) {
             object.isSection = false;
         }
+        object.isBinary = true;
         String id = attrs.getValue("id");
         if ( ! object.onlyscheme || (
             object.fb2scheme.cover == null && 

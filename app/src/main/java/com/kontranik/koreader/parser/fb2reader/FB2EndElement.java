@@ -20,12 +20,6 @@ public class FB2EndElement {
             case body:
                 if ( ! object.onlyscheme && object.isSection )  object.fileHelper.writeSection(object.mySection);
                 break;
-            case title:
-                if (  object.mySection != null && object.mySection.title == null) {
-                    object.mySection.title = object.myText.toString().trim();
-                }
-                object.clearMyText();
-                break;
             case binary:
                 endElementBinary(object);
                 break;
@@ -72,6 +66,13 @@ public class FB2EndElement {
     }
 
     private static void parseEndElementInSection(FB2Elements fel, FB2ParserObject object) {
+        if ( fel.equals(FB2Elements.title)) {
+            if (object.mySection != null && object.mySection.title == null) {
+                object.mySection.title = object.myText.toString().trim();
+            }
+            object.clearMyText();
+        }
+
         if ( ! object.isSection && ! object.isAnnotation && ! object.isCoverpage && ! object.isHistory) return;
 
         if ( object.isSection && object.onlyscheme) return;
@@ -87,18 +88,21 @@ public class FB2EndElement {
                 break;
             case p:
             case stanza:
-                result = "</p>";
+                if ( ! object.isTitle)
+                    result = "<p>";
+                else result = "<br/>";
                 break;
             case cite:
                 result = "</cite>";
                 break;
             case title:
+                object.isTitle = false;
                 int d1 = Math.min(deep, FB2ParserObject.maxHeader);
-                result = "</H" + d1 + 1 + ">";
+                result = "</H" + (d1 + 1) + ">";
                 break;
             case subtitle:
                 int d2 = Math.min(deep + 1, FB2ParserObject.maxHeader);
-                result = "</H" + d2 + 1 + ">";
+                result = "</H" + (d2 + 1) + ">";
                 break;
             case strong:
                 result = "</strong>";
@@ -116,11 +120,15 @@ public class FB2EndElement {
                 result = "</sup>";
                 break;
             case code:
-                result = "</code>";
+                object.isCode = false;
+                result = "</code></pre>";
+                break;
+            case epigraph:
+                result = "</blockquote>";
                 break;
             case a:
                 if ( object.isSupNote ) {
-                    result = "]</sup></a>";
+                    result = "</sup></a>";
                     object.isSupNote = false;
                 } else {
                     result = "</a>";

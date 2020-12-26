@@ -8,6 +8,8 @@ public class FB2Description {
     public FB2DocumentInfo documentInfo = new FB2DocumentInfo();
     public FB2PublishInfo publishInfo = new FB2PublishInfo();
     public StringBuffer customInfo = new StringBuffer();
+
+    public  FB2Description() {}
 	/**
 	 * @return the titleInfo
 	 */

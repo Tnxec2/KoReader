@@ -1,13 +1,20 @@
 package com.kontranik.koreader
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Point
+import android.net.Uri
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.text.Spannable
 import android.text.style.ImageSpan
 import android.text.style.URLSpan
@@ -19,6 +26,8 @@ import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.database.BookStatusDatabaseAdapter
@@ -28,6 +37,7 @@ import com.kontranik.koreader.database.BookmarksDatabaseAdapter
 import com.kontranik.koreader.model.*
 import com.kontranik.koreader.reader.*
 import com.kontranik.koreader.utils.*
+import com.kontranik.koreader.utils.OnSwipeTouchListener
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -37,15 +47,15 @@ import java.util.*
 class ReaderActivity :
         AppCompatActivity(),
         QuickMenuFragment.QuickMenuDialogListener,
-        PermissionsHelper.PermissionsHelperListener,
         BookmarkListFragment.BookmarkListDialogListener,
         GotoMenuFragment.GotoMenuDialogListener
 {
 
-    private val prefsHelper = PrefsHelper()
+    private var prefsHelper: PrefsHelper? = null
 
     private var book: Book? = null
 
+    private var textViewHolder: ConstraintLayout? = null
     private var pageView: TextView? = null
 
     private var textViewInfoCenter: TextView? = null
@@ -57,9 +67,6 @@ class ReaderActivity :
     private var height: Int = 100
     private var fullheight: Int = 100
 
-    private var settings: SharedPreferences? = null
-    private var prefEditor: SharedPreferences.Editor? = null
-
     private var bookStatusService: BookStatusService? = null
 
     private var backButtonPressedTime = Date().time
@@ -68,42 +75,82 @@ class ReaderActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        loadSettings()
-        loadPrefs()
-
+        prefsHelper = PrefsHelper(this)
+        
         setContentView(R.layout.activity_reader_main)
 
         bookStatusService = BookStatusService(BookStatusDatabaseAdapter(this))
-
+        textViewHolder = findViewById(R.id.textViewHolder)
         pageView = findViewById(R.id.textView_pageview)
-        TextViewInitiator.initiateTextView(pageView!!, "")
-        pageView!!.textSize = prefsHelper.textSize
-        pageView!!.typeface = prefsHelper.font.getTypeface()
-        pageView!!.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-            updateSizeInfo()
+
+
+        // nachputzen falsche prefs
+        // linespace pref muss string sein - float ist falsch
+        val mySPrefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor = mySPrefs.edit()
+        try {
+            if (mySPrefs.getFloat(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, -1f) != -1f) {
+                editor.remove(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING)
+                editor.apply()
+            }
+        } catch (e: ClassCastException) {
+            // its ok
         }
 
+        TextViewInitiator.initiateTextView(pageView!!, "")
+
+        loadSettings()
+        loadPrefs()
+
+        pageView!!.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            Log.d(TAG, "pageView layout changed")
+            updateSizeInfo()
+        }
 
         textViewInfoCenter = findViewById(R.id.tv_infotext_center)
         textViewInfoLeft = findViewById(R.id.tv_infotext_left)
         textViewInfoRight = findViewById(R.id.tv_infotext_right)
 
+        setColors()
+
         setOnClickListener()
 
-        // bei jedem start - bereinigen
-        Thread {
-            Log.d(TAG, "cleanup...")
-            bookStatusService!!.cleanup()
-            Log.d(TAG, "ready...")
-        }.start()
+        AsyncTask.execute(Runnable {
+            bookStatusService!!.cleanup(applicationContext)
+        })
+
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         //Here you can get the size of pageView!
         Log.d(TAG, "onWindowFocusChanged")
-        val ph = PermissionsHelper(this)
-        ph.checkPermissionsExternalStorage(pageView!!)
+        //val ph = PermissionsHelper(this)
+        //ph.checkPermissionsExternalStorage(pageView!!)
+        setColors()
+        if (prefsHelper!!.bookPath != null) {
+            if ( book == null || book!!.fileLocation != prefsHelper!!.bookPath) {
+                val progressDialog = ProgressDialog(this)
+                progressDialog.setMessage("loading")
+                progressDialog.show()
+
+                runOnUiThread {
+                    try {
+                        loadBook()
+                        loadPositionForBook()
+                        updateView(book!!.getCur(recalc = true))
+                    } catch (e: Exception) {
+                        Log.e("tag", e.message)
+                    }
+                    // dismiss the progress dialog
+                    progressDialog.dismiss()
+                }
+
+            }
+        } else  {
+            Toast.makeText(applicationContext, "Open a book", Toast.LENGTH_LONG).show()
+            openMainMenu()
+        }
     }
 
     override fun onBackPressed() {
@@ -116,12 +163,17 @@ class ReaderActivity :
     }
 
     private fun loadBook() {
-        Log.d(TAG, "loadBook: ${prefsHelper.bookPath}")
-        book =  Book(applicationContext, prefsHelper.bookPath!!, pageView!!)
+        Log.d(TAG, "loadBook: ${prefsHelper!!.bookPath}")
+
+        if ( ! FileHelper.contentFileExist(applicationContext, prefsHelper!!.bookPath) ) {
+            Toast.makeText(this, "Can't load book ${prefsHelper!!.bookPath}", Toast.LENGTH_LONG).show()
+            openMainMenu()
+        }
+        book =  Book(applicationContext, prefsHelper!!.bookPath!!, pageView!!)
         if ( book != null ) {
-            bookStatusService!!.updateLastOpenTime(prefsHelper.bookPath!!)
+            bookStatusService!!.updateLastOpenTime(book!!)
         } else {
-            Toast.makeText(this, "Can't load book ${prefsHelper.bookPath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Can't load book ${prefsHelper!!.bookPath}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -131,7 +183,9 @@ class ReaderActivity :
                 if (data != null && data.hasExtra(PREF_TYPE)) {
                     when (data.getIntExtra(PREF_TYPE, 0)) {
                         PREF_TYPE_OPEN_BOOK -> openBookFromIntent(data)
-                        PREF_TYPE_SETTINGS -> loadSettings()
+                        PREF_TYPE_SETTINGS -> {
+                            loadSettings()
+                        }
                     }
                 }
             } else{
@@ -140,10 +194,18 @@ class ReaderActivity :
         } else if ( requestCode == REQUEST_ACCESS_QUICK_MENU) {
             if(resultCode==RESULT_OK){
                 if (data != null ) {
-                    if ( data.hasExtra(PrefsHelper.PREF_BOOK_TEXT_SIZE) ) {
-                        prefsHelper.textSize = data.getFloatExtra(PrefsHelper.PREF_BOOK_TEXT_SIZE, prefsHelper.defaultTextSize)
-                        savePrefs()
-                        pageView!!.textSize = prefsHelper.textSize
+                    var changed = false
+                    if ( data.hasExtra(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE) ) {
+                        prefsHelper!!.textSize = data.getFloatExtra(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, prefsHelper!!.defaultTextSize)
+                        pageView!!.textSize = prefsHelper!!.textSize
+                        changed = true
+                    }
+                    if ( data.hasExtra(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING) ) {
+                        prefsHelper!!.lineSpacing = data.getFloatExtra(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, prefsHelper!!.defaultLineSpacing)
+                        pageView!!.setLineSpacing(pageView!!.lineSpacingMultiplier, prefsHelper!!.lineSpacing)
+                        changed = true
+                    }
+                    if ( changed ) {
                         //book!!.loadPage(pageView!!)
                         //updateView( )
                         Log.d(TAG, "onActivityResult: getCurPage")
@@ -161,7 +223,7 @@ class ReaderActivity :
     private fun openBookFromIntent(data: Intent) {
         Log.d(TAG, "openBookFromIntent")
         if ( data.hasExtra(PrefsHelper.PREF_BOOK_PATH) ) {
-            prefsHelper.bookPath = data.getStringExtra(PrefsHelper.PREF_BOOK_PATH)
+            prefsHelper!!.bookPath = data.getStringExtra(PrefsHelper.PREF_BOOK_PATH)
             savePrefs()
             startProgress()
             loadBook()
@@ -173,13 +235,13 @@ class ReaderActivity :
 
     private fun loadPositionForBook() {
         if ( book == null) return
-        val startPosition = bookStatusService!!.getPosition(prefsHelper.bookPath!!) ?: BookPosition()
+        val startPosition = bookStatusService!!.getPosition(prefsHelper!!.bookPath!!) ?: BookPosition()
         book!!.curPage = Page(null, startPosition, BookPosition())
     }
 
     private fun savePositionForBook() {
-        if ( prefsHelper.bookPath != null && book != null && book!!.curPage != null) {
-            bookStatusService!!.savePosition(prefsHelper.bookPath!!, book!!.curPage!!.startBookPosition)
+        if ( prefsHelper!!.bookPath != null && book != null && book!!.curPage != null) {
+            bookStatusService!!.savePosition(book!!)
         }
     }
 
@@ -194,56 +256,127 @@ class ReaderActivity :
     }
 
     private fun loadPrefs() {
-        prefsHelper.defaultTextSize = resources.getDimension(R.dimen.text_size)
-        prefsHelper.textSize = prefsHelper.defaultTextSize
+        val settings = getSharedPreferences(PREFS_FILE, MODE_PRIVATE)
 
-        settings = getSharedPreferences(PREFS_FILE, MODE_PRIVATE)
-
-        if ( settings!!.contains(PrefsHelper.PREF_BOOK_PATH) ) {
-            prefsHelper.bookPath = settings!!.getString(PrefsHelper.PREF_BOOK_PATH, null)
+        if ( settings.contains(PrefsHelper.PREF_BOOK_PATH) ) {
+            prefsHelper!!.bookPath = settings!!.getString(PrefsHelper.PREF_BOOK_PATH, null)
         }
 
-        if ( settings!!.contains(PrefsHelper.PREF_BOOK_TEXT_SIZE) ) {
-            prefsHelper.textSize = settings!!.getFloat(PrefsHelper.PREF_BOOK_TEXT_SIZE, prefsHelper.defaultTextSize)
-        }
-
-        if ( settings!!.contains(PrefsHelper.PREF_SCREEN_BRIGHTNESS) ) {
-            prefsHelper.screenBrightnessLevel = settings!!.getFloat(PrefsHelper.PREF_SCREEN_BRIGHTNESS, prefsHelper.systemScreenBrightnessLevel)
-            prefsHelper.setScreenBrightness(this, prefsHelper.screenBrightnessLevel)
-        }
-
-        if ( settings!!.contains(PrefsHelper.PREF_BOOK_FONT_PATH) ) {
-            val fontpath = settings!!.getString(PrefsHelper.PREF_BOOK_FONT_PATH, null)
-            if ( fontpath != null) {
-                val fontFile = File(fontpath)
-                if ( fontFile.isFile && fontFile.canRead() ) {
-                    prefsHelper.font = TypefaceRecord(name = fontFile.name, file = fontFile)
-                }
-            }
-        } else if ( settings!!.contains(PrefsHelper.PREF_BOOK_FONT_NAME)) {
-            prefsHelper.font = TypefaceRecord(
-                    name = settings!!.getString(PrefsHelper.PREF_BOOK_FONT_NAME, TypefaceRecord.SANSSERIF)!!)
+        if ( settings.contains(PrefsHelper.PREF_SCREEN_BRIGHTNESS) ) {
+            prefsHelper!!.screenBrightnessLevel = settings!!.getFloat(PrefsHelper.PREF_SCREEN_BRIGHTNESS, prefsHelper!!.systemScreenBrightnessLevel)
+            prefsHelper!!.setScreenBrightness(this, prefsHelper!!.screenBrightnessLevel)
         }
     }
 
     private fun savePrefs() {
-        prefEditor = settings!!.edit()
-        prefEditor!!.putString(PrefsHelper.PREF_BOOK_PATH, prefsHelper.bookPath)
-        prefEditor!!.putFloat(PrefsHelper.PREF_BOOK_TEXT_SIZE, prefsHelper.textSize)
-        prefEditor!!.putFloat(PrefsHelper.PREF_SCREEN_BRIGHTNESS, prefsHelper.screenBrightnessLevel)
-        if ( prefsHelper.font.file != null) prefEditor!!.putString(PrefsHelper.PREF_BOOK_FONT_PATH, prefsHelper.font.file!!.absolutePath)
-        else prefEditor!!.putString(PrefsHelper.PREF_BOOK_FONT_NAME, prefsHelper.font.name)
-        prefEditor!!.apply()
+        val settings = getSharedPreferences(PREFS_FILE, MODE_PRIVATE)
+        val prefEditor = settings.edit()
+        prefEditor.putString(PrefsHelper.PREF_BOOK_PATH, prefsHelper!!.bookPath)
+        prefEditor.putFloat(PrefsHelper.PREF_SCREEN_BRIGHTNESS, prefsHelper!!.screenBrightnessLevel)
+        prefEditor.apply()
     }
 
     private fun loadSettings() {
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        prefsHelper.theme = prefs.getString(PrefsHelper.PREF_KEY_THEME, "Auto")
-        prefsHelper.screenOrientation = prefs.getString(PrefsHelper.PREF_KEY_ORIENTATION, "PortraitSensor")
-        prefsHelper.screenBrightness = prefs.getString(PrefsHelper.PREF_KEY_BRIGHTNESS, "Manual")
+        prefsHelper!!.theme = prefs.getString(PrefsHelper.PREF_KEY_THEME, "Auto")
+        prefsHelper!!.screenOrientation = prefs.getString(PrefsHelper.PREF_KEY_ORIENTATION, "PortraitSensor")
+        prefsHelper!!.screenBrightness = prefs.getString(PrefsHelper.PREF_KEY_BRIGHTNESS, "Manual")
 
-        prefsHelper.setOrientation(this)
-        prefsHelper.setTheme()
+        prefsHelper!!.textSize = prefs.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, prefsHelper!!.defaultTextSize)
+
+        val lineSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, null )
+        if ( lineSpacingString != null) prefsHelper!!.lineSpacing = lineSpacingString.toFloat()
+        else prefsHelper!!.lineSpacing = prefsHelper!!.defaultLineSpacing
+
+        if ( prefs.contains(PrefsHelper.PREF_KEY_BOOK_FONT_PATH) ) {
+            val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH, null)
+            if ( fontpath != null) {
+                val fontFile = File(fontpath)
+                if ( fontFile.isFile && fontFile.canRead() ) {
+                    prefsHelper!!.font = TypefaceRecord(name = fontFile.name, file = fontFile)
+                }
+            }
+        } else if ( prefs.contains(PrefsHelper.PREF_KEY_BOOK_FONT_NAME)) {
+            prefsHelper!!.font = TypefaceRecord(
+                    name = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME, TypefaceRecord.SANSSERIF)!!)
+        }
+
+        pageView!!.textSize = prefsHelper!!.textSize
+        pageView!!.typeface = prefsHelper!!.font.getTypeface()
+        pageView!!.setLineSpacing(pageView!!.lineSpacingMultiplier, prefsHelper!!.lineSpacing)
+
+        var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LIGHT_BACK, 0)
+        if ( co != 0 )
+            prefsHelper!!.colorLightBack = "#" + Integer.toHexString(co)
+        else
+            prefsHelper!!.colorLightBack = prefsHelper!!.colorLightBackDefault
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LIGHT_TEXT, 0)
+        if ( co != 0 )
+            prefsHelper!!.colorLightText = "#" + Integer.toHexString(co)
+        else
+            prefsHelper!!.colorLightText = prefsHelper!!.colorLightTextDefault
+
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LIGHT_LINKTEXT, 0)
+        if ( co != 0 )
+            prefsHelper!!.colorLightLinkText = "#" + Integer.toHexString(co)
+        else
+            prefsHelper!!.colorLightLinkText = prefsHelper!!.colorLightLinkTextDefault
+
+
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_DARK_BACK, 0)
+        if ( co != 0 )
+            prefsHelper!!.colorDarkBack = "#" + Integer.toHexString(co)
+        else
+            prefsHelper!!.colorDarkBack = prefsHelper!!.colorDarkBackDefault
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_DARK_TEXT, 0)
+        if ( co != 0 )
+            prefsHelper!!.colorDarkText = "#" + Integer.toHexString(co)
+        else
+            prefsHelper!!.colorDarkText = prefsHelper!!.colorDarkTextDefault
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_DARK_LINKTEXT, 0)
+        if ( co != 0 )
+            prefsHelper!!.colorDarkLinkText = "#" + Integer.toHexString(co)
+        else
+            prefsHelper!!.colorDarkLinkText = prefsHelper!!.colorDarkLinkTextDefault
+
+        prefsHelper!!.tapDoubleAction = hashMapOf(
+                ScreenZone.TopLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_TOP_LEFT, prefsHelper!!.tapZoneDoubleTopLeft),
+                ScreenZone.TopCenter to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_TOP_CENTER, prefsHelper!!.tapZoneDoubleTopCenter),
+                ScreenZone.TopRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_TOP_RIGHT, prefsHelper!!.tapZoneDoubleTopRight),
+                ScreenZone.MiddleLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_MIDDLE_LEFT, prefsHelper!!.tapZoneDoubleMiddleLeft),
+                ScreenZone.MiddleCenter to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_MIDDLE_CENTER, prefsHelper!!.tapZoneDoubleMiddleCenter),
+                ScreenZone.MiddleRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_MIDDLE_RIGHT, prefsHelper!!.tapZoneDoubleMiddleRight),
+                ScreenZone.BottomLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT, prefsHelper!!.tapZoneDoubleBottomLeft),
+                ScreenZone.BottomCenter to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER, prefsHelper!!.tapZoneDoubleBottomCenter),
+                ScreenZone.BottomRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT, prefsHelper!!.tapZoneDoubleBottomRight),
+        )
+        
+        prefsHelper!!.tapOneAction = hashMapOf(
+                ScreenZone.TopLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_ONE_TOP_LEFT, prefsHelper!!.tapZoneOneTopLeft),
+                ScreenZone.TopCenter to prefs.getString(PrefsHelper.PREF_KEY_TAP_ONE_TOP_CENTER, prefsHelper!!.tapZoneOneTopCenter),
+                ScreenZone.TopRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_ONE_TOP_RIGHT, prefsHelper!!.tapZoneOneTopRight),
+                ScreenZone.MiddleLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_ONE_MIDDLE_LEFT, prefsHelper!!.tapZoneOneMiddleLeft),
+                ScreenZone.MiddleCenter to prefs.getString(PrefsHelper.PREF_KEY_TAP_ONE_MIDDLE_CENTER, prefsHelper!!.tapZoneOneMiddleCenter),
+                ScreenZone.MiddleRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_ONE_MIDDLE_RIGHT, prefsHelper!!.tapZoneOneMiddleRight),
+                ScreenZone.BottomLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_ONE_BOTTOM_LEFT, prefsHelper!!.tapZoneOneBottomLeft),
+                ScreenZone.BottomCenter to prefs.getString(PrefsHelper.PREF_KEY_TAP_ONE_BOTTOM_CENTER, prefsHelper!!.tapZoneOneBottomCenter),
+                ScreenZone.BottomRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_ONE_BOTTOM_RIGHT, prefsHelper!!.tapZoneOneBottomRight),
+        )        
+        prefsHelper!!.tapLongAction = hashMapOf(
+                ScreenZone.TopLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_TOP_LEFT, prefsHelper!!.tapZoneLongTopLeft),
+                ScreenZone.TopCenter to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_TOP_CENTER, prefsHelper!!.tapZoneLongTopCenter),
+                ScreenZone.TopRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_TOP_RIGHT, prefsHelper!!.tapZoneLongTopRight),
+                ScreenZone.MiddleLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_MIDDLE_LEFT, prefsHelper!!.tapZoneLongMiddleLeft),
+                ScreenZone.MiddleCenter to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_MIDDLE_CENTER, prefsHelper!!.tapZoneLongMiddleCenter),
+                ScreenZone.MiddleRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_MIDDLE_RIGHT, prefsHelper!!.tapZoneLongMiddleRight),
+                ScreenZone.BottomLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_BOTTOM_LEFT, prefsHelper!!.tapZoneLongBottomLeft),
+                ScreenZone.BottomCenter to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_BOTTOM_CENTER, prefsHelper!!.tapZoneLongBottomCenter),
+                ScreenZone.BottomRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_BOTTOM_RIGHT, prefsHelper!!.tapZoneLongBottomRight),
+        )
+
+       
+        prefsHelper!!.setOrientation(this)
+        prefsHelper!!.setTheme()
 
         try {
             if (Build.VERSION.SDK_INT >= 21) {
@@ -265,6 +398,45 @@ class ReaderActivity :
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun checkTap(point: Point, tap: Int) {
+
+        val zone = ScreenZone.zone(point, width, height)
+        // textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, tap, zone)
+        Log.d(TAG, "Tap $tap in Zone $zone")
+        when (tap) {
+            1 -> { // double tap
+                doTapAction(prefsHelper!!.tapOneAction[zone])
+            }
+            2 -> { // double tap
+                doTapAction(prefsHelper!!.tapDoubleAction[zone])
+            }
+            3 -> { // long tap
+                doTapAction(prefsHelper!!.tapLongAction[zone])
+            }
+        }
+    }
+
+    private fun doTapAction(tapAction: String?) {
+        Log.d(TAG, "doTapAction: $tapAction")
+        if ( tapAction == null) return
+        when (tapAction) {
+            "PagePrev" -> {
+                doPagePrev()
+            }
+            "PageNext" -> {
+                doPageNext()
+            }
+            "QuickMenu" -> {
+                openQuickMenu()
+            }
+            "MainMenu" -> {
+                openMainMenu()
+            }
+            "None" -> {
+            }
         }
     }
 
@@ -298,21 +470,7 @@ class ReaderActivity :
                     showNote(book!!.getNote(url))
                 } else {
                     // not a link, normal click
-                    val zone = ScreenZone.zone(point, width, height)
-                    textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, zone)
-                    when (zone) {
-                        ScreenZone.BottomRight -> {
-                            doPageNext()
-                        }
-                        ScreenZone.BottomLeft -> {
-                            doPagePrev()
-                        }
-                        ScreenZone.MiddleCenter -> {
-                            openMainMenu()
-                        }
-                        else -> {
-                        }
-                    }
+                    checkTap(point, 1)
                 }
             }
 
@@ -340,23 +498,17 @@ class ReaderActivity :
 
             override fun onSlideUp(point: Point) {
                 super.onSlideUp(point)
-                prefsHelper.increaseScreenBrghtness(this@ReaderActivity, point, fullwidth)
+                prefsHelper!!.increaseScreenBrghtness(this@ReaderActivity, point, fullwidth)
             }
 
             override fun onSlideDown(point: Point) {
                 super.onSlideDown(point)
-                prefsHelper.decreaseScreenBrghtness(this@ReaderActivity, point, fullwidth)
+                prefsHelper!!.decreaseScreenBrghtness(this@ReaderActivity, point, fullwidth)
             }
 
             override fun onDoubleClick(point: Point) {
                 //super.onDoubleClick(point)
-                val zone = ScreenZone.zone(point, width, height)
-                when (zone) {
-                    ScreenZone.MiddleCenter -> openQuickMenu()
-                    else -> {
-                    }
-                }
-                textViewInfoRight!!.text = resources.getString(R.string.doubleclick_in_zone, zone)
+                checkTap(point, 2)
             }
 
             override fun onLongClick(point: Point) {
@@ -369,14 +521,7 @@ class ReaderActivity :
                 if (image.isNotEmpty()) {
                     showImage(image[0])
                 } else {
-                    val zone = ScreenZone.zone(point, width, height)
-                    when (zone) {
-                        ScreenZone.MiddleCenter -> {
-                        }
-                        else -> {
-                        }
-                    }
-                    textViewInfoRight!!.text = resources.getString(R.string.longclick_in_zone, zone)
+                    checkTap(point, 3)
                 }
             }
 
@@ -483,7 +628,7 @@ class ReaderActivity :
     private fun showNote(html: String?) {
         if ( html == null) return
         val floatTextViewFragment: FloatTextViewFragment =
-                FloatTextViewFragment.newInstance(html, prefsHelper.textSize, prefsHelper.font)
+                FloatTextViewFragment.newInstance(html, prefsHelper!!.textSize, prefsHelper!!.font)
         floatTextViewFragment.show(supportFragmentManager, "fragment_floattextview")
     }
 
@@ -509,7 +654,7 @@ class ReaderActivity :
 
     private fun openQuickMenu() {
         Log.d(TAG, "openQuickMenu")
-        val quickMenuFragment: QuickMenuFragment = QuickMenuFragment.newInstance(prefsHelper.textSize, prefsHelper.font)
+        val quickMenuFragment: QuickMenuFragment = QuickMenuFragment()
         quickMenuFragment.show(supportFragmentManager, "fragment_quick_menu")
     }
 
@@ -521,18 +666,19 @@ class ReaderActivity :
         gotoMenuFragment.show(supportFragmentManager, "fragment_goto_menu")
     }
 
-    override fun onFinishQuickMenuDialog(textSize: Float, font: TypefaceRecord?) {
+    override fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, font: TypefaceRecord?) {
         Log.d(TAG, "onFinishQuickMenuDialog. TextSize: $textSize")
         if ( textSize != pageView!!.textSize
-                || ( font != null && font.getTypeface() != pageView!!.typeface) ) {
-            prefsHelper.textSize = textSize
+                || lineSpacing != pageView!!.lineSpacingMultiplier
+                || ( font != null && font.getTypeface() != pageView!!.typeface)  ) {
+            prefsHelper!!.textSize = textSize
+            prefsHelper!!.lineSpacing = lineSpacing
             pageView!!.textSize = textSize
+            pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, lineSpacing)
             if ( font != null) {
-                prefsHelper.font = font
+                prefsHelper!!.font = font
                 pageView!!.typeface = font.getTypeface()
             }
-            //book!!.loadPage(pageView!!)
-            //updateView()
             Log.d(TAG, "onFinishQuickMenuDialog: getCurPage")
             updateView(book!!.getCur(recalc = true))
             savePrefs()
@@ -545,9 +691,16 @@ class ReaderActivity :
         updateView(book!!.getCur(recalc = true))
     }
 
+    override fun onChangeLineSpacing(lineSpacing: Float) {
+        pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, lineSpacing)
+        Log.d(TAG, "onChangeLineSpacing: getCurPage")
+        updateView(book!!.getCur(recalc = true))
+    }
+
     override fun onCancelQuickMenu() {
-        if ( pageView!!.textSize != prefsHelper.textSize ) {
-            pageView!!.textSize = prefsHelper.textSize
+        if ( pageView!!.textSize != prefsHelper!!.textSize || pageView!!.lineSpacingMultiplier != prefsHelper!!.lineSpacing ) {
+            pageView!!.textSize = prefsHelper!!.textSize
+            pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, prefsHelper!!.lineSpacing)
             Log.d(TAG, "onCancelQuickMenu: getCurPage")
             updateView(book!!.getCur(recalc = true))
         }
@@ -557,7 +710,7 @@ class ReaderActivity :
     override fun onAddBookmark(): Boolean {
         val bookmarkService = BookmarkService(BookmarksDatabaseAdapter(this))
         val bookmark = Bookmark(
-                path = prefsHelper.bookPath!!,
+                path = prefsHelper!!.bookPath!!,
                 text = pageView!!.text.toString().substring(0, 100),
                 position_section = book!!.curPage!!.startBookPosition.section,
                 position_offset = book!!.curPage!!.startBookPosition.offSet,
@@ -572,15 +725,16 @@ class ReaderActivity :
     }
 
     override fun onShowBookmarklist() {
-        if ( prefsHelper.bookPath == null ) return
-        val bookmarkListFragment: BookmarkListFragment = BookmarkListFragment.newInstance(prefsHelper.bookPath!!)
+        if ( prefsHelper!!.bookPath == null ) return
+        val bookmarkListFragment: BookmarkListFragment = BookmarkListFragment.newInstance(prefsHelper!!.bookPath!!)
         bookmarkListFragment.show(supportFragmentManager, "fragment_bookmark_list")
     }
 
+    /*
     override fun onAccessGrantedReadExternalStorage() {
         Log.d(TAG, "onAccessGrantedReadExternalStorage")
-        if (prefsHelper.bookPath != null) {
-            if ( book == null || book!!.fileLocation != prefsHelper.bookPath) {
+        if (prefsHelper!!.bookPath != null) {
+            if ( book == null || book!!.fileLocation != prefsHelper!!.bookPath) {
                 startProgress()
                 loadBook()
                 loadPositionForBook()
@@ -591,6 +745,7 @@ class ReaderActivity :
             openMainMenu()
         }
     }
+    */
 
     override fun onSelectBookmark(bookmark: Bookmark) {
         if (
@@ -619,6 +774,61 @@ class ReaderActivity :
     private fun startProgress() {
         pageView!!.text = "loading Book..."
     }
+
+    private fun setColors() {
+        when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_UNDEFINED,
+            Configuration.UI_MODE_NIGHT_YES -> {
+                textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorDarkBack))
+                pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
+                pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorDarkLinkText))
+                textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
+                textViewInfoCenter!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
+                textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
+            }
+            Configuration.UI_MODE_NIGHT_NO -> {
+                textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorLightBack))
+                pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
+                pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorLightLinkText))
+                textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
+                textViewInfoCenter!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
+                textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
+            }
+        }
+    }
+
+
+    fun isExternalStorageReadable(): Boolean {
+        val state: String = Environment.getExternalStorageState()
+        return Environment.MEDIA_MOUNTED == state ||
+                Environment.MEDIA_MOUNTED_READ_ONLY == state
+    }
+
+    private fun checkPermissions(): Boolean {
+        if (!isExternalStorageReadable() ) {
+            Toast.makeText(this, "external storage not available", Toast.LENGTH_LONG).show()
+            return false
+        }
+        val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), FontPickerFragment.READ_STORAGE_PERMISSION_REQUEST_CODE)
+            return false
+        }
+        return true
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+        when (requestCode) {
+            FontPickerFragment.READ_STORAGE_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "read permissions granted", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "need permissions to read external storage", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
 
     companion object {
         private const val TAG = "ReaderActivity"

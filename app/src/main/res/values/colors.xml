@@ -9,15 +9,8 @@
     <color name="foreground_sepia_title">#915100</color>
     <color name="foreground_sepia_link">#2196F3</color>
 
-    <color name="background_sepia2">#FEF2DA</color>
-    <color name="foreground_sepia2">#546b8d</color>
-    <color name="foreground_sepia_title2">#915100</color>
-
     <color name="foreground_main">@color/foreground_sepia</color>
     <color name="background_main">@color/background_sepia</color>
-
-    <color name="foreground_main2">@color/foreground_sepia2</color>
-    <color name="background_main2">@color/background_sepia2</color>
 
     <color name="foreground_main_dialog">#000000</color>
     <color name="background_main_dialog">#FFFFFF</color>

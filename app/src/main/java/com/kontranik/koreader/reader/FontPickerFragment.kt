@@ -1,12 +1,18 @@
 package com.kontranik.koreader.reader
 
+import android.Manifest
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.Toast
 import androidx.annotation.Nullable
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,8 +36,12 @@ class FontPickerFragment :
     private var selectedFont: TypefaceRecord? = null
     private var textSize: Float = 0F
 
-    private var useSystemFonts: Boolean = false
+    private var showSystemFonts: Boolean = false
     private var showNotoFonts: Boolean = false
+
+    private var permissionGranted = false
+
+    private var mView: View? = null
 
     // 1. Defines the listener interface with a method passing back data result.
     interface FontPickerDialogListener {
@@ -50,18 +60,38 @@ class FontPickerFragment :
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
 
-        return inflater.inflate(R.layout.fragment_font_menu, container)
+        return inflater.inflate(R.layout.fragment_font_menu, container, false)
     }
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(view.context)
-        useSystemFonts = prefs.getBoolean(PrefsHelper.PREF_KEY_USE_SYSTEM_FONTS, false)
+        showSystemFonts = prefs.getBoolean(PrefsHelper.PREF_KEY_USE_SYSTEM_FONTS, false)
         showNotoFonts = prefs.getBoolean(PrefsHelper.PREF_KEY_SHOW_NOTO_FONTS, false)
 
         textSize = requireArguments().getFloat(TEXTSIZE, textSizeMin)
 
+        mView = view
+
+        if ( ! permissionGranted) {
+            checkPermissions()
+        }
+
+        loadFonts()
+    }
+
+    private fun save() {
+        // Return Data back to activity through the implemented listener
+        listener!!.onSaveFontPickerDialog(selectedFont)
+
+        // Close the dialog and return back to the parent activity
+        if ( !parentFragmentManager.popBackStackImmediate() ) {
+            dismiss()
+        }
+    }
+
+    private fun loadFonts() {
         val fonts: HashMap<String, File>?
 
         fontList = mutableListOf(
@@ -69,7 +99,7 @@ class FontPickerFragment :
                 TypefaceRecord(name = TypefaceRecord.SERIF),
                 TypefaceRecord(name = TypefaceRecord.MONO))
         try {
-            fonts = FontManager.enumerateFonts(useSystemFonts, showNotoFonts)
+            fonts = FontManager.enumerateFonts(showSystemFonts, showNotoFonts)
             // val collectedFonts = ZLTTFInfoDetector().collectFonts(fonts!!.values)
             val collectedFonts: MutableList<TypefaceRecord> = mutableListOf()
             if ( fonts != null) {
@@ -90,10 +120,10 @@ class FontPickerFragment :
             return
         }
 
-        val fontListView = view.findViewById<RecyclerView>(R.id.reciclerView_font_list)
+        val fontListView = mView!!.findViewById<RecyclerView>(R.id.reciclerView_font_list)
 
         fontListView.adapter = FontPickerListItemAdapter(
-                view.context,
+                mView!!.context,
                 textSize,
                 fontList,
                 this
@@ -116,18 +146,51 @@ class FontPickerFragment :
         AdapterView.OnItemClickListener { parent, v, position, id ->
             selectedFont = fontList[position]
         }
-
     }
 
-    private fun save() {
-        // Return Data back to activity through the implemented listener
-        listener!!.onSaveFontPickerDialog(selectedFont)
 
-        // Close the dialog and return back to the parent activity
-        dismiss()
+
+    override fun onFontlistItemClickListener(position: Int) {
+        selectedFont = fontList[position]
+        save()
+    }
+
+    fun isExternalStorageReadable(): Boolean {
+        val state: String = Environment.getExternalStorageState()
+        return Environment.MEDIA_MOUNTED == state ||
+                Environment.MEDIA_MOUNTED_READ_ONLY == state
+    }
+
+    private fun checkPermissions(): Boolean {
+        if (!isExternalStorageReadable() ) {
+            Toast.makeText(requireContext(), "external storage not available", Toast.LENGTH_LONG).show()
+            return false
+        }
+        val permissionCheck = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), READ_STORAGE_PERMISSION_REQUEST_CODE)
+            return false
+        }
+        return true
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+        when (requestCode) {
+            READ_STORAGE_PERMISSION_REQUEST_CODE -> {
+                if ( grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    permissionGranted = true
+                    Toast.makeText(requireContext(), "read permissions granted", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(requireContext(), "need permissions to read external storage", Toast.LENGTH_LONG).show()
+                }
+                loadFonts()
+            }
+        }
     }
 
     companion object {
+        const val READ_STORAGE_PERMISSION_REQUEST_CODE=0x3
+
         const val TEXTSIZE = "textsize"
         const val FONTPATH = "fontpath"
         const val FONTNAME = "fontname"
@@ -146,11 +209,4 @@ class FontPickerFragment :
 
         private const val textSizeMin: Float = 6F
     }
-
-    override fun onFontlistItemClickListener(position: Int) {
-        selectedFont = fontList[position]
-        save()
-    }
-
-
 }

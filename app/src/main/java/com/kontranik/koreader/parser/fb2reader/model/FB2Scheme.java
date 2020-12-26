@@ -8,6 +8,9 @@ public class FB2Scheme {
     public FB2Description description = new FB2Description();
 	public List<FB2Section> sections = new ArrayList<>();
 	public BinaryData cover;
+	public String path;
+
+	public FB2Scheme() {}
 
 	public FB2Section getSection(Integer orderId) {
 		return sections.get(orderId);

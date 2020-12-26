@@ -3,6 +3,7 @@ package com.kontranik.koreader.model
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.util.Log
 import android.widget.TextView
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.parser.epubreader.EpubHelper
@@ -122,14 +123,15 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
     }
 
     companion object {
-        fun getHelper(context: Context, path: String): EbookHelper? {
-            if (path.endsWith(".epub", true)) {
-                return EpubHelper(path)
+        fun getHelper(context: Context, contentUri: String): EbookHelper? {
+            Log.d("Book", contentUri)
+            if (contentUri.endsWith(".epub", true)) {
+                return EpubHelper(context, contentUri)
             } else if (
-                    path.endsWith(".fb2", ignoreCase = true)
-                    || path.endsWith(".fb2.zip", ignoreCase = true)
+                    contentUri.endsWith(".fb2", ignoreCase = true)
+                    || contentUri.endsWith(".fb2.zip", ignoreCase = true)
             ) {
-                return FB2Helper(context, path)
+                return FB2Helper(context, contentUri)
             }
             return null
         }

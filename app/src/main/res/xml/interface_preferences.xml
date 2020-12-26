@@ -1,0 +1,30 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/interface_header"  app:iconSpaceReserved="false">
+        <ListPreference
+            app:key="theme"
+            app:entries="@array/theme_entries"
+            app:entryValues="@array/theme_values"
+            app:defaultValue="Auto"
+            app:title="@string/theme_title"
+            app:icon="@drawable/ic_baseline_preview_24"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="brightness"
+            app:entries="@array/brightness_entries"
+            app:entryValues="@array/brightness_values"
+            app:defaultValue="Manual"
+            app:title="@string/brightness_title"
+            app:icon="@drawable/ic_baseline_brightness_medium_24"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="orientation"
+            app:entries="@array/orientation_enties"
+            app:entryValues="@array/orientation_values"
+            app:defaultValue="PortraitSensor"
+            app:title="@string/orientation_title"
+            app:icon="@drawable/ic_baseline_screen_rotation_24"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

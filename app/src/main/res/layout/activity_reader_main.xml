@@ -21,7 +21,6 @@
         android:paddingBottom="@dimen/padding_textview_bottom"
         android:text=""
         android:textIsSelectable="true"
-        android:textColor="@color/foreground_sepia"
         android:textColorLink="@color/foreground_sepia_link"
 
         app:layout_constraintBottom_toTopOf="@+id/ll_infobereich"

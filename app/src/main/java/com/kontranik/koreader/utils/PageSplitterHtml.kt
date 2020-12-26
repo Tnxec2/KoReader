@@ -57,7 +57,8 @@ open class PageSplitterHtml(private val textView: TextView) {
             startLineTop = staticLayout!!.getLineTop(startLine)
             endLine = staticLayout!!.getLineForVertical(startLineTop + pageHeight)
             endLineBottom = staticLayout!!.getLineBottom(endLine)
-            val lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageHeight ) endLine - 1 else endLine
+            var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageHeight ) endLine - 1 else endLine
+            if ( lastFullyVisibleLine < startLine) lastFullyVisibleLine = startLine
             startOffset = staticLayout!!.getLineStart(startLine)
             endOffset = staticLayout!!.getLineEnd(lastFullyVisibleLine)
             pages.add(Page(

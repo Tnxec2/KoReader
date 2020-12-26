@@ -1,6 +1,7 @@
 package com.kontranik.koreader.reader
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
@@ -12,11 +13,8 @@ import com.kontranik.koreader.database.BookStatusService
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.utils.BookListAdapter
-import com.kontranik.koreader.parser.epubreader.EpubHelper
-import com.kontranik.koreader.parser.fb2reader.FB2Helper
+import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.PrefsHelper
-import java.io.File
-
 
 class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterClickListener {
 
@@ -65,17 +63,20 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
                 bookInfoList.clear()
                 for ( bookstatus in books) {
                     if ( bookstatus.path != null) {
-                        val bookfile = File(bookstatus.path!!)
-                        if ( ! bookfile.exists() ) {
+                        if ( ! FileHelper.contentFileExist(applicationContext, bookstatus.path) ){
                             bookservice.delete(bookstatus.id!!)
                         }
-                        val ebookHelper = Book.getHelper(this, bookstatus.path!!)
-                        if ( ebookHelper != null) {
-                            val bookInfo = ebookHelper.getBookInfoTemporary(bookstatus.path!!)
-                            if (bookInfo != null) {
-                                bookInfoList.add(bookInfo)
-                            }
-                        }
+
+                        val bookInfo = BookInfo(
+                                title = bookstatus.title,
+                                cover = null,
+                                authors = mutableListOf(),
+                                filename = bookstatus.path!!,
+                                path = bookstatus.path!!,
+                                annotation = ""
+                        )
+                        bookInfoList.add(bookInfo)
+
                     }
                 }
                 bookListAdapter!!.notifyDataSetChanged()

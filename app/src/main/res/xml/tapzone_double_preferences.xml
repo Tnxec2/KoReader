@@ -1,0 +1,79 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/tapzones_double_click_header" app:iconSpaceReserved="false">
+        <ListPreference
+            app:key="tapZoneDoubleClickTopLeft"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_top_left"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneDoubleClickTopCenter"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_top_center"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneDoubleClickTopRight"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_top_right"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneDoubleClickMiddleLeft"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_middle_left"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneDoubleClickMiddleCenter"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="QuickMenu"
+            app:title="@string/tapzone_middle_center"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneDoubleClickMiddleRight"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_middle_right"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:key="tapZoneDoubleClickBottomLeft"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_bottom_left"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneDoubleClickBottomCenter"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_bottom_center"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneDoubleClickBottomRight"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:iconSpaceReserved="false"
+            app:title="@string/tapzone_bottom_right"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

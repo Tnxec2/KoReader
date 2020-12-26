@@ -1,22 +1,25 @@
 package com.kontranik.koreader.reader
 
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.*
+import android.widget.AdapterView.OnItemSelectedListener
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
+import androidx.preference.PreferenceManager
 import com.kontranik.koreader.R
+import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.TextViewInitiator
-
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
-
 import kotlin.math.max
 import kotlin.math.min
+
 
 class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogListener {
 
@@ -27,12 +30,15 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
     private var textSize: Float = 0F
     private val textSizeStep: Float = 1F
 
+    private var lineSpacing: Float = 1f
+
     private var selectedFont: TypefaceRecord = TypefaceRecord.DEFAULT
 
     // 1. Defines the listener interface with a method passing back data result.
     interface QuickMenuDialogListener {
-        fun onFinishQuickMenuDialog(textSize: Float, font: TypefaceRecord?)
+        fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, font: TypefaceRecord?)
         fun onChangeTextSize(textSize: Float)
+        fun onChangeLineSpacing(lineSpacing: Float)
         fun onCancelQuickMenu()
         fun onAddBookmark(): Boolean
         fun onShowBookmarklist()
@@ -55,8 +61,6 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
 
         listener = activity as QuickMenuDialogListener
 
-        textSize = requireArguments().getFloat(TEXTSIZE, textSizeMin)
-
         val close = view.findViewById<ImageButton>(R.id.imageButton_quickmenu_back)
         close.setOnClickListener {
             listener!!.onCancelQuickMenu()
@@ -69,8 +73,41 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
         }
 
         initialTextSize(view)
+        initialLineSpacing(view)
         initialBookmarks(view)
 
+    }
+
+    private fun initialLineSpacing(view: View) {
+        val spinner: Spinner = view.findViewById(R.id.spinner_quick_menu_line_spacing)
+
+        val valArray = view.resources.getStringArray(R.array.line_spacing_values)
+
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter.createFromResource(
+                view.context,
+                R.array.line_spacing_entries,
+                android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            // Apply the adapter to the spinner
+            spinner.adapter = adapter
+        }
+        spinner.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+
+                lineSpacing = valArray[position].toFloat()
+                listener!!.onChangeLineSpacing(lineSpacing)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                // sometimes you need nothing here
+            }
+        }
+
+        spinner.setSelection(valArray.indexOf(lineSpacing.toString()) )
     }
 
     private fun initialBookmarks(view: View) {
@@ -89,10 +126,21 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
     private fun initialTextSize(view: View) {
         textViewTextSIze = view.findViewById(R.id.textView_quick_menU_textSizeExample)
         TextViewInitiator.initiateTextView(textViewTextSIze!!, getString(R.string.textSizeExampleText))
-        textViewTextSIze!!.textSize = textSize
 
-        val fontname = requireArguments().getString(FONTNAME, TypefaceRecord.SANSSERIF)
-        val fontpath = requireArguments().getString(FONTPATH, null)
+        val defaultTextSize = requireContext().resources.getDimension(R.dimen.text_size)
+
+        val typedValue = TypedValue()
+        requireContext().resources.getValue(R.dimen.line_spacing, typedValue, true)
+        val defaultLineSpacing = typedValue.float
+
+        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH, null)
+        textSize = prefs.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
+        val lineSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, defaultLineSpacing.toString() )
+        if ( lineSpacingString != null) lineSpacing = lineSpacingString.toFloat()
+        val fontname = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME, TypefaceRecord.DEFAULT.name)!!
+
+        textViewTextSIze!!.textSize = textSize
 
         selectedFont = if ( fontpath != null ) {
             val f = File(fontpath)
@@ -126,21 +174,28 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
     }
 
     private fun save() {
+        val prefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit()
+        prefEditor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
+        prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, lineSpacing.toString())
+        prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH, selectedFont.file?.absolutePath)
+        prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME, selectedFont.name)
+        prefEditor.apply()
+
         // Return Data back to activity through the implemented listener
-        listener!!.onFinishQuickMenuDialog(textSize, selectedFont)
+        listener!!.onFinishQuickMenuDialog(textSize, lineSpacing, selectedFont)
 
         // Close the dialog and return back to the parent activity
         dismiss()
     }
 
     private fun decreaseTextSize() {
-        textSize = max(Companion.textSizeMin, textSize - textSizeStep)
+        textSize = max(PrefsHelper.textSizeMin, textSize - textSizeStep)
         textViewTextSIze!!.textSize = textSize
         listener!!.onChangeTextSize(textSize)
     }
 
     private fun increaseTextSize() {
-        textSize = min(Companion.textSizeMax, textSize + textSizeStep)
+        textSize = min(PrefsHelper.textSizeMax, textSize + textSizeStep)
         textViewTextSIze!!.textSize = textSize
         listener!!.onChangeTextSize(textSize)
     }
@@ -154,22 +209,10 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
 
     companion object {
         const val TEXTSIZE = "textSize"
+        const val LINESPACING = "lineSpacing"
         const val FONTPATH = "fontpath"
         const val FONTNAME = "fontname"
 
-        fun newInstance(textSize: Float, font: TypefaceRecord): QuickMenuFragment {
-            val frag = QuickMenuFragment()
-            val args = Bundle()
-            args.putFloat(TEXTSIZE, textSize)
-            if ( font.file != null ) args.putString(FONTPATH, font.file.absolutePath)
-            else args.putString(FONTNAME, font.name)
-
-            frag.arguments = args
-            return frag
-        }
-
-        private const val textSizeMax: Float = 50F
-        private const val textSizeMin: Float = 6F
     }
 
 }

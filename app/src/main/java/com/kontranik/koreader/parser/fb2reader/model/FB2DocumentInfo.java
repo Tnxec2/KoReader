@@ -9,6 +9,8 @@ public class FB2DocumentInfo {
     public String version;
     public StringBuffer history = new StringBuffer();
     public Date date;
+
+    public FB2DocumentInfo() {}
 	/**
 	 * @return the authors
 	 */

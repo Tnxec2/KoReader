@@ -1,0 +1,48 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:preference="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+    <PreferenceCategory
+        app:title="@string/text_header"
+        app:iconSpaceReserved="false"
+        >
+
+        <com.kontranik.koreader.utils.FontPickerPreference
+            app:key="fontPicker"
+            app:title="@string/textsize_title"
+            app:iconSpaceReserved="false" />
+
+        <ListPreference
+            app:key="LineSpacing"
+            app:defaultValue="1.15"
+            app:entries="@array/line_spacing_entries"
+            app:entryValues="@array/line_spacing_values"
+            app:icon="@drawable/ic_baseline_format_line_spacing_24"
+            app:title="@string/linespacing_title"
+            app:useSimpleSummaryProvider="true"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/font_header"
+        app:iconSpaceReserved="false"
+        >
+
+        <SwitchPreference
+            app:key="showSystemFonts"
+            app:title="@string/showSystemFonts_title"
+            app:iconSpaceReserved="false"
+            />
+
+        <SwitchPreference
+            app:key="showNotoFonts"
+            app:title="@string/show_noto_fonts_title"
+            app:iconSpaceReserved="false"
+            app:dependency="showSystemFonts"
+            />
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

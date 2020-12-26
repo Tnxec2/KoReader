@@ -17,6 +17,8 @@ public class FB2TitleInfo {
     public List<Author> translators = new ArrayList<>();
     public String sequenceName;
     public String sequenceNumber;
+
+    public  FB2TitleInfo() {}
 	/**
 	 * @return the genre
 	 */

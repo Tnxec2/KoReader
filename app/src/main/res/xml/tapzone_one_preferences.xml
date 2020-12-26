@@ -1,0 +1,81 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/tapzones_one_click_header" app:iconSpaceReserved="false">
+        <ListPreference
+            app:key="tapZoneOneClickTopLeft"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="PrevPage"
+            app:title="@string/tapzone_top_left"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneOneClickTopCenter"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_top_center"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneOneClickTopRight"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="PageNext"
+            app:title="@string/tapzone_top_right"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:key="tapZoneOneClickMiddleLeft"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_middle_left"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneOneClickMiddleCenter"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="MainMenu"
+            app:title="@string/tapzone_middle_center"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneOneClickMiddleRight"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_middle_right"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:key="tapZoneOneClickBottomLeft"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="PagePrev"
+            app:title="@string/tapzone_bottom_left"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneOneClickBottomCenter"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="None"
+            app:title="@string/tapzone_bottom_center"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:key="tapZoneOneClickBottomRight"
+            app:entries="@array/tapzonen_entries"
+            app:entryValues="@array/tapzonen_values"
+            app:defaultValue="PageNext"
+            app:title="@string/tapzone_bottom_right"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

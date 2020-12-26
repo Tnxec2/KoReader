@@ -1,22 +1,24 @@
 package com.kontranik.koreader.reader
 
+import android.app.Activity
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
-import com.kontranik.koreader.utils.FileHelper
-import com.kontranik.koreader.utils.FileItem
-import com.kontranik.koreader.utils.FileListAdapter
-import com.kontranik.koreader.utils.PrefsHelper
-import java.io.File
+import com.kontranik.koreader.utils.*
 import java.util.*
 
 
@@ -25,21 +27,28 @@ class FileChooseActivity : AppCompatActivity(),
         FileListAdapter.FileListAdapterClickListener,
         BookInfoFragment.BookInfoListener{
 
+    private var externalPaths = mutableSetOf<String>()
+
     private var listView: RecyclerView? = null
     private var fileListAdapter: FileListAdapter? = null
     private var fileItemList: MutableList<FileItem> = ArrayList()
-    private val rootPaths: MutableList<String> = ArrayList()
 
-    private var selectedPath: String? = null
+    private var selectedDocumentFileUriString: String? = null
 
     private var settings: SharedPreferences? = null
     private var prefEditor: SharedPreferences.Editor? = null
 
     private var pathsPosition: HashMap<String, Int> = hashMapOf()
 
+    private var addStorage: ImageButton? = null
+
+    private var progressDialog: ProgressDialog? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_filechoose)
+
+        progressDialog = ProgressDialog(this)
 
         val close = findViewById<ImageButton>(R.id.imageButton_filechoose_close)
         close.setOnClickListener {
@@ -56,6 +65,12 @@ class FileChooseActivity : AppCompatActivity(),
             storageList()
         }
 
+        addStorage = findViewById<ImageButton>(R.id.imageButton_filechoose_add_storage)
+        addStorage!!.setOnClickListener {
+            storageAdd()
+        }
+        addStorage!!.visibility = View.GONE
+
         listView = findViewById(R.id.reciclerView_files)
         fileListAdapter = FileListAdapter(this, fileItemList, this)
         listView!!.adapter = fileListAdapter
@@ -66,14 +81,15 @@ class FileChooseActivity : AppCompatActivity(),
     }
 
     private fun openBook(fileItem: FileItem) {
-        openBook(fileItem.path)
+        openBook(fileItem.uriString)
     }
 
-    private fun openBook(path: String) {
-        savePrefs(path)
+    private fun openBook(uriString: String?) {
+        if ( uriString == null) return
+        savePrefs(uriString)
         val data = Intent()
         data.putExtra(ReaderActivity.PREF_TYPE, ReaderActivity.PREF_TYPE_OPEN_BOOK)
-        data.putExtra(PrefsHelper.PREF_BOOK_PATH, path)
+        data.putExtra(PrefsHelper.PREF_BOOK_PATH, uriString)
         setResult(RESULT_OK, data)
         finish()
     }
@@ -85,53 +101,90 @@ class FileChooseActivity : AppCompatActivity(),
     }
 
     private fun loadPath() {
-        if ( selectedPath == null ) storageList()
-        else getFileList(selectedPath!!)
+        if ( selectedDocumentFileUriString == null ) storageList()
+        else {
+            getFileList(selectedDocumentFileUriString)
+        }
     }
 
     private fun getFileList(fileItem: FileItem) {
-        selectedPath = fileItem.path
-        getFileList(fileItem.path)
+        addStorage!!.visibility = View.GONE
+        selectedDocumentFileUriString = fileItem.uriString
+        getFileList(fileItem.uriString)
     }
 
-    private fun getFileList(path: String) {
-        fileItemList.clear()
-        fileItemList.addAll(FileHelper.getFileList(path))
-        fileListAdapter!!.notifyDataSetChanged()
+    private fun getFileList(documentFilePath: String?) {
+        if ( documentFilePath == null) {
+            storageList()
+            return
+        } else {
+            fileItemList.clear()
+            // val fl = FileHelper.getFileList(applicationContext, documentFile)
 
-        if ( pathsPosition.containsKey(path)) {
-            listView!!.scrollToPosition(pathsPosition[path]!!)
+            val fl = FileHelper.getFileListDC(applicationContext, documentFilePath)
+            fileItemList.addAll(fl)
+            fileListAdapter!!.notifyDataSetChanged()
+
+            if (pathsPosition.containsKey(documentFilePath)) {
+                listView!!.scrollToPosition(pathsPosition[documentFilePath]!!)
+            }
         }
     }
 
     private fun loadPrefs() {
         if ( settings!!.contains(PREF_LAST_PATH) ) {
-            selectedPath = settings!!.getString(PREF_LAST_PATH, null)
+            val lastPaht = settings!!.getString(PREF_LAST_PATH, null)
+            if ( lastPaht != null) {
+                val index = lastPaht.lastIndexOf("%2F")
+                val parent = if ( index > 0)  {
+                        lastPaht.substring(0, index)
+                    } else lastPaht
+                val directoryUri = Uri.parse(parent).toString()
+                // val sf = DocumentFile.fromSingleUri(applicationContext, directoryUri)
+                selectedDocumentFileUriString = directoryUri
+            }
+        }
+
+        if ( settings!!.contains(PREF_EXTERNAL_PATHS)) {
+            val eP = settings!!.getStringSet(PREF_EXTERNAL_PATHS, null)
+            if ( eP != null) {
+                externalPaths.addAll(eP)
+            }
         }
     }
 
-    private fun savePrefs(path: String) {
+    private fun savePrefs(uriString: String?) {
         prefEditor = settings!!.edit()
-        prefEditor!!.putString(PREF_LAST_PATH, path)
+        if ( uriString != null) prefEditor!!.putString(PREF_LAST_PATH, uriString)
+        prefEditor!!.putStringSet(PREF_EXTERNAL_PATHS, externalPaths)
         prefEditor!!.apply()
     }
 
     private fun storageList() {
-        selectedPath = "storage"
-        fileItemList.clear()
-        rootPaths.clear()
-        // fileItemList.addAll(FileHelper.storageList)
-        fileItemList.addAll(FileHelper.getFSStorage(applicationContext))
-        for (fileItem in fileItemList) {
-            val parent = File(fileItem.path).parent
-            if (!rootPaths.contains(parent)) rootPaths.add(parent)
+        if ( externalPaths.isEmpty() ) {
+            performFileSearch()
+            return
         }
-        fileListAdapter!!.notifyDataSetChanged()
-    }
+        fileItemList.clear()
 
-    companion object {
-        private const val PREFS_FILE = "OpenFileActivitySettings"
-        const val PREF_LAST_PATH = "LastPath"
+        for ( path in externalPaths ) {
+
+            val directoryUri = Uri.parse(path)
+                    ?: throw IllegalArgumentException("Must pass URI of directory to open")
+            val documentsTree = DocumentFile.fromTreeUri(application, directoryUri)
+            if ( documentsTree == null || ! documentsTree.isDirectory || ! documentsTree.canRead() ) {
+                externalPaths.remove(path)
+            } else {
+                //val childDocuments = documentsTree.listFiles()
+                var name = documentsTree.name
+                if ( name == null) name = documentsTree.uri.toString()
+                fileItemList.add(FileItem(ImageEnum.SD, name = name, path = documentsTree.uri.pathSegments.last(), documentsTree.uri.toString(), isDir = true, isRoot = false, null))
+            }
+        }
+        fileItemList.sortBy { it.name }
+
+        fileListAdapter!!.notifyDataSetChanged()
+        addStorage!!.visibility = View.VISIBLE
     }
 
     override fun onFilelistItemClickListener(position: Int) {
@@ -139,20 +192,68 @@ class FileChooseActivity : AppCompatActivity(),
 
         if (selectedFileItem.isDir) {
             val lm = listView!!.layoutManager as LinearLayoutManager
-            pathsPosition[selectedPath!!] = lm.findFirstVisibleItemPosition()
-            if (rootPaths.contains(selectedFileItem.path)) storageList() else getFileList(selectedFileItem)
+            if ( selectedFileItem.isRoot ) {
+                if ( externalPaths.contains(selectedFileItem.uriString) )
+                    getFileList(selectedFileItem)
+                else
+                    storageList()
+            } else {
+                getFileList(selectedFileItem)
+            }
         } else {
             //openBook(selectedFileItem)
-            openBookInfo(selectedFileItem.path)
+            if ( selectedFileItem.uriString != null) {
+                openBookInfo(selectedFileItem.uriString)
+            }
         }
     }
 
-    private fun openBookInfo(bookPath: String) {
-        val bookInfoFragment = BookInfoFragment.newInstance(bookPath)
-        bookInfoFragment.show(supportFragmentManager, "fragment_bookinfo")
+    private fun openBookInfo(bookUri: String?) {
+        if ( bookUri != null) {
+            val bookInfoFragment = BookInfoFragment.newInstance(bookUri)
+            bookInfoFragment.show(supportFragmentManager, "fragment_bookinfo")
+        }
     }
 
-    override fun onReadBook(bookPath: String) {
-        openBook(bookPath)
+    override fun onReadBook(bookUri: String) {
+        openBook(bookUri)
+    }
+
+    private fun storageAdd() {
+        performFileSearch()
+    }
+
+    /**
+     * Fires an intent to spin up the "file chooser" UI and select an image.
+     */
+    private fun performFileSearch() {
+        Toast.makeText(applicationContext, "Select directory or storage from dialog, and grant access", Toast.LENGTH_LONG).show()
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        startActivityForResult(intent, OPEN_DIRECTORY_REQUEST_CODE)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == OPEN_DIRECTORY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val directoryUri = data?.data ?: return
+
+            contentResolver.takePersistableUriPermission(
+                    directoryUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            Log.d(TAG, directoryUri.toString())
+            externalPaths.add(directoryUri.toString())
+            savePrefs(uriString = null)
+            storageList()
+        }
+    }
+
+    companion object {
+        private const val PREFS_FILE = "OpenFileActivitySettings"
+        const val PREF_LAST_PATH = "LastPath"
+        const val PREF_EXTERNAL_PATHS = "ExternalPaths"
+        const val TAG = "FileChooseActivity"
+
+        private const val OPEN_DIRECTORY_REQUEST_CODE = 0xf11e
     }
 }

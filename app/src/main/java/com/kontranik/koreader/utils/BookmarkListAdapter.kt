@@ -55,4 +55,6 @@ class BookmarkListAdapter(
         val textView = view.findViewById<View>(R.id.textView_bookmarklist_text) as TextView
         val positionView = view.findViewById<View>(R.id.textView_bookmarklist_position) as TextView
     }
+
+
 }
