@@ -125,6 +125,13 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
+        <ImageButton
+            android:id="@+id/imageButton_mainmenu_bookinfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_iconmonstr_book_info"
+            android:contentDescription="@string/bookinfo" />
+
         <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"

@@ -122,6 +122,22 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
         return ebookHelper?.pageScheme
     }
 
+    fun getCurSection(): Int {
+        if ( curPage == null ) return  0
+        var curSection = curPage!!.endBookPosition.section
+        curSection++
+        return curSection
+    }
+
+    fun getCurTextPage(): Int {
+        var curTextPage = 0
+        for (i in 0 until curPage!!.endBookPosition.section) {
+            curTextPage += getPageScheme()!!.scheme[i]!!.textPages
+        }
+        curTextPage += ( curPage!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
+        return curTextPage
+    }
+
     companion object {
         fun getHelper(context: Context, contentUri: String): EbookHelper? {
             Log.d("Book", contentUri)

@@ -4,9 +4,12 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import com.kontranik.koreader.R
+import com.kontranik.koreader.ReaderActivity
+import com.kontranik.koreader.utils.PrefsHelper
 
 class MainMenuActivity : AppCompatActivity() {
 
@@ -33,8 +36,21 @@ class MainMenuActivity : AppCompatActivity() {
         settings.setOnClickListener {
             settings()
         }
-    }
 
+        var bookPath: String? = null
+        val prefs = getSharedPreferences(ReaderActivity.PREFS_FILE, AppCompatActivity.MODE_PRIVATE)
+
+        if ( prefs.contains(PrefsHelper.PREF_BOOK_PATH) ) {
+            bookPath = prefs.getString(PrefsHelper.PREF_BOOK_PATH, null)
+        }
+
+        val bookinfo = findViewById<ImageButton>(R.id.imageButton_mainmenu_bookinfo)
+        bookinfo.setOnClickListener {
+            openBookInfo(bookPath)
+        }
+        if ( bookPath == null) bookinfo.visibility = View.GONE
+
+    }
 
     private fun openFile() {
         val intent = Intent(this, FileChooseActivity::class.java)
@@ -49,6 +65,13 @@ class MainMenuActivity : AppCompatActivity() {
     private fun openLastOpened() {
         val intent = Intent( this, BookListActivity::class.java)
         startActivityForResult(intent, REQUEST_ACCESS_TYPE_OPENFILE)
+    }
+
+    private fun openBookInfo(bookUri: String?) {
+        if ( bookUri != null) {
+            val bookInfoFragment: BookInfoFragment = BookInfoFragment.newInstance(bookUri)
+            bookInfoFragment.show(supportFragmentManager, "fragment_bookinfo")
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

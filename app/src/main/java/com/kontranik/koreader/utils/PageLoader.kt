@@ -29,9 +29,19 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
             if ( ! revers) section++
             else section--
             section = max(0, section)
-            section = min(book.getPageScheme()!!.sectionCount-1, section)
-            loadPages(section)
-            result = if ( pages.isEmpty() ) null else { if ( ! revers) pages[0] else pages[pages.size-1] }
+            section = min(book.getPageScheme()!!.sectionCount, section)
+            if (section >= 0 && section < book.getPageScheme()!!.sectionCount) {
+                loadPages(section)
+                result = if (pages.isEmpty()) null else {
+                    if (!revers) pages.first() else pages.last()
+                }
+            } else {
+                if ( section <= 0 && revers ) {
+                    result = pages.first()
+                } else if ( ! revers && section >= book.getPageScheme()!!.sectionCount) {
+                    result = pages.last()
+                }
+            }
         }
 
         return result

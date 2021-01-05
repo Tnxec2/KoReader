@@ -10,7 +10,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
-import android.net.Uri
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
@@ -118,7 +117,6 @@ class ReaderActivity :
         AsyncTask.execute(Runnable {
             bookStatusService!!.cleanup(applicationContext)
         })
-
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -581,14 +579,9 @@ class ReaderActivity :
 
     private fun updateInfo() {
         if ( book != null && book!!.curPage != null) {
-            var curSection = book!!.curPage!!.endBookPosition.section
-            curSection++
+            val curSection = book!!.getCurSection()
 
-            var curTextPage = 0
-            for (i in 0 .. curSection-2) {
-                curTextPage += book!!.getPageScheme()!!.scheme[i]!!.textPages
-            }
-            curTextPage += ( book!!.curPage!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
+            val curTextPage = book!!.getCurTextPage()
 
             textViewInfoLeft!!.text =
                     resources.getString(R.string.page_info_text, curTextPage, book!!.getPageScheme()!!.textPages)
@@ -658,13 +651,7 @@ class ReaderActivity :
         quickMenuFragment.show(supportFragmentManager, "fragment_quick_menu")
     }
 
-    private fun openGotoMenu() {
-        if ( book == null || book!!.curPage == null) return
-        val gotoMenuFragment: GotoMenuFragment =
-                GotoMenuFragment
-                        .newInstance(book!!.curPage!!.endBookPosition.section, book!!.getPageScheme()!!.sectionCount)
-        gotoMenuFragment.show(supportFragmentManager, "fragment_goto_menu")
-    }
+
 
     override fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, font: TypefaceRecord?) {
         Log.d(TAG, "onFinishQuickMenuDialog. TextSize: $textSize")
@@ -764,7 +751,27 @@ class ReaderActivity :
         savePositionForBook()
     }
 
-    override fun onFinishGotoMenuDialog(section: Int) {
+    private fun openGotoMenu() {
+        if ( book == null || book!!.curPage == null) return
+        val gotoMenuFragment: GotoMenuFragment =
+                GotoMenuFragment
+                        .newInstance(
+                                book!!.curPage!!.endBookPosition.section,
+                                book!!.getCurTextPage(),
+                                book!!.getPageScheme()!!.textPages,
+                                book!!.getPageScheme()!!.sections.toTypedArray()
+                        )
+        gotoMenuFragment.show(supportFragmentManager, "fragment_goto_menu")
+    }
+
+    override fun onFinishGotoMenuDialogPage(page: Int) {
+        book!!.curPage = Page(null, book!!.ebookHelper!!.pageScheme.getBookPositionForPage(page), BookPosition())
+        Log.d(TAG, "onFinishGotoMenuDialog: getCurPage")
+        updateView(book!!.getCur(recalc = true))
+        savePositionForBook()
+    }
+
+    override fun onFinishGotoMenuDialogSection(section: Int) {
         book!!.curPage = Page(null, BookPosition(section = section), BookPosition())
         Log.d(TAG, "onFinishGotoMenuDialog: getCurPage")
         updateView(book!!.getCur(recalc = true))

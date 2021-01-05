@@ -10,7 +10,6 @@
 
         <com.kontranik.koreader.utils.FontPickerPreference
             app:key="fontPicker"
-            app:title="@string/textsize_title"
             app:iconSpaceReserved="false" />
 
         <ListPreference

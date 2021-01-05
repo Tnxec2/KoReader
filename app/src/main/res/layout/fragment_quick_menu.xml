@@ -117,6 +117,13 @@
         android:layout_marginTop="@dimen/activity_vertical_margin"
         >
 
+        <ImageButton
+            android:id="@+id/imageButton_quickmenu_bookinfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_iconmonstr_book_info"
+            android:contentDescription="@string/bookinfo" />
+
         <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"

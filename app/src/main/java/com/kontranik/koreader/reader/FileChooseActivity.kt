@@ -211,11 +211,12 @@ class FileChooseActivity : AppCompatActivity(),
     private fun openBookInfo(bookUri: String?) {
         if ( bookUri != null) {
             val bookInfoFragment = BookInfoFragment.newInstance(bookUri)
+            bookInfoFragment.setListener(this)
             bookInfoFragment.show(supportFragmentManager, "fragment_bookinfo")
         }
     }
 
-    override fun onReadBook(bookUri: String) {
+    override fun onBookInfoFragmentReadBook(bookUri: String) {
         openBook(bookUri)
     }
 

@@ -37,6 +37,7 @@
     <string name="add_bookmark">add bookmark</string>
     <string name="go_to">GoTo</string>
     <string name="section">Section</string>
+    <string name="page">Page</string>
     <string name="left">Left</string>
     <string name="right">Right</string>
     <string name="save">Save</string>
@@ -55,6 +56,7 @@
     <string name="readbook">Read Book</string>
     <string name="note">Note</string>
     <string name="bookinfo">Info</string>
+    <string name="toc">Table of content</string>
 
     <!-- Preference Titles -->
     <string name="interface_header">Interface</string>

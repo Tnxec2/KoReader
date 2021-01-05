@@ -3,11 +3,10 @@ package com.kontranik.koreader.parser.epubreader
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import android.util.Log
 import com.kontranik.koreader.model.Author
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme
-import com.kontranik.koreader.model.BookSchemeCount
+import com.kontranik.koreader.model.BookSchemeItem
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.utils.ImageUtils
 import nl.siegmann.epublib.domain.Book
@@ -15,7 +14,6 @@ import nl.siegmann.epublib.epub.EpubReader
 import org.jsoup.Jsoup
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 
 class EpubHelper(private val context: Context, private val contentUri: String) : EbookHelper {
@@ -35,13 +33,7 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
             val fileInputStream = context.contentResolver.openInputStream(Uri.parse(documentUri)) ?: return null
             epubBook = epubReader.readEpub(fileInputStream)
             if ( epubBook != null) {
-                bookInfo = BookInfo(
-                        title = epubBook!!.title,
-                        cover = getcoverbitmap(),
-                        authors = getAuthors(epubBook!!).toMutableList(),
-                        filename = documentUri,
-                        path = documentUri,
-                        annotation = epubBook!!.metadata.descriptions.joinToString("\n") )
+                bookInfo = getBookInfoFromBook(epubBook!!)
             }
             fileInputStream.close()
             return epubBook
@@ -54,21 +46,28 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
     }
 
     private fun calculateScheme() {
+        if ( epubBook == null ) return
         if ( epubBook != null && getContentSize() == 0   ) return
         pageScheme = BookPageScheme()
         pageScheme.sectionCount = getContentSize()
         for( pageIndex in 0 until getContentSize()) {
-            val textSize = getPageTextSize(pageIndex)
-            val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
-            pageScheme.scheme[pageIndex] = BookSchemeCount(
-                    textSize = textSize, textPages = pages)
-            pageScheme.textSize += textSize
-            pageScheme.textPages += pages
+            val aSection = getPage(pageIndex)
+            if ( aSection != null) {
+                val textSize = getPageTextSize(aSection)
+                val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
+                pageScheme.scheme[pageIndex] = BookSchemeItem(
+                        textSize = textSize, textPages = pages)
+                pageScheme.textSize += textSize
+                pageScheme.textPages += pages
+            }
+        }
+        pageScheme.sections = mutableListOf()
+        epubBook!!.contents.forEachIndexed { index, element ->
+            pageScheme.sections.add(element.title ?: index.toString())
         }
     }
 
-    private fun getPageTextSize(page: Int): Int {
-        val aSection = getPage(page)
+    private fun getPageTextSize(aSection: String): Int {
         val document = Jsoup.parse(aSection)
         return document.body().wholeText().length
     }
@@ -94,21 +93,25 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
     override fun getBookInfoTemporary(contentUri: String): BookInfo? {
         val eb = readBook(contentUri)
         if (eb != null) {
-            val t = eb.title
-            val coverImage = eb.coverImage
-            var coverBitmap = getCoverbitmap(coverImage?.data)
-
-            return BookInfo(
-                    title = t,
-                    cover = coverBitmap,
-                    authors = getAuthors(eb).toMutableList(),
-                    path = contentUri,
-                    filename = contentUri,
-                    annotation = eb.metadata.descriptions.joinToString(separator = "\n", prefix = "<p>", postfix = "</p>")
-            )
+            return getBookInfoFromBook(eb)
         } else {
             return null
         }
+    }
+
+    private fun getBookInfoFromBook(eb: Book): BookInfo {
+        val t = eb.title
+        val coverImage = eb.coverImage
+        var coverBitmap = getCoverbitmap(coverImage?.data)
+
+        return BookInfo(
+                title = t,
+                cover = coverBitmap,
+                authors = getAuthors(eb).toMutableList(),
+                path = contentUri,
+                filename = contentUri,
+                annotation = eb.metadata.descriptions.joinToString(separator = "\n", prefix = "<p>", postfix = "</p>"),
+        )
     }
 
     private fun getcoverbitmap(): Bitmap? {

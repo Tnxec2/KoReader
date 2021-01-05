@@ -10,9 +10,11 @@ import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
 import androidx.annotation.Nullable
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.R
+import com.kontranik.koreader.ReaderActivity
 import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.TextViewInitiator
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
@@ -71,6 +73,19 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
         save.setOnClickListener {
             save()
         }
+
+        val settings = requireActivity().getSharedPreferences(ReaderActivity.PREFS_FILE, AppCompatActivity.MODE_PRIVATE)
+
+        var bookPath: String? = null
+        if ( settings.contains(PrefsHelper.PREF_BOOK_PATH) ) {
+            bookPath = settings!!.getString(PrefsHelper.PREF_BOOK_PATH, null)
+        }
+
+        val bookinfo = view.findViewById<ImageButton>(R.id.imageButton_quickmenu_bookinfo)
+        bookinfo.setOnClickListener {
+            openBookInfo(bookPath)
+        }
+        if ( bookPath == null) bookinfo.visibility = View.GONE
 
         initialTextSize(view)
         initialLineSpacing(view)
@@ -173,6 +188,13 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
         fontPickerFragment.show(requireActivity().supportFragmentManager, "fragment_font_picker")
     }
 
+    private fun openBookInfo(bookUri: String?) {
+        if ( bookUri != null) {
+            val bookInfoFragment: BookInfoFragment = BookInfoFragment.newInstance(bookUri)
+            bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
+        }
+    }
+
     private fun save() {
         val prefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit()
         prefEditor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
@@ -212,7 +234,6 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
         const val LINESPACING = "lineSpacing"
         const val FONTPATH = "fontpath"
         const val FONTNAME = "fontname"
-
     }
 
 }

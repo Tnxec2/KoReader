@@ -12,6 +12,7 @@ import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.model.Book
+import com.kontranik.koreader.model.BookInfo
 
 class BookInfoFragment : DialogFragment() {
 
@@ -19,7 +20,7 @@ class BookInfoFragment : DialogFragment() {
 
     // 1. Defines the listener interface with a method passing back data result.
     interface BookInfoListener {
-        fun onReadBook(bookUri: String)
+        fun onBookInfoFragmentReadBook(bookUri: String)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,9 +36,7 @@ class BookInfoFragment : DialogFragment() {
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        listener = activity as BookInfoListener
-
-        val bookPath = requireArguments().getString(BOOK_PATH)
+        val bookPath = requireArguments().getString(BOOK_PATH, null)
         if ( bookPath == null) dismiss()
 
         val close = view.findViewById<ImageButton>(R.id.imageButton_bookinfo_close)
@@ -47,8 +46,14 @@ class BookInfoFragment : DialogFragment() {
 
         val read = view.findViewById<ImageButton>(R.id.imageButton_bookinfo_read)
         read.setOnClickListener {
-            listener!!.onReadBook(bookPath!!)
-            dismiss()
+            if ( listener != null) {
+                listener!!.onBookInfoFragmentReadBook(bookPath!!)
+                dismiss()
+            }
+        }
+
+        if ( listener == null) {
+            read.visibility = View.GONE
         }
 
         val titleView = view.findViewById<TextView>(R.id.textView_bookinfo_title)
@@ -59,6 +64,7 @@ class BookInfoFragment : DialogFragment() {
 
         val ebookHelper = Book.getHelper(requireContext(), bookPath!!)
         val bookInfo = ebookHelper?.getBookInfoTemporary(bookPath)
+
         if ( bookInfo != null ) {
             titleView.text = bookInfo.title
 
@@ -73,19 +79,21 @@ class BookInfoFragment : DialogFragment() {
         }
     }
 
-
+    fun setListener(listener: BookInfoListener) {
+        this.listener  = listener
+    }
 
     companion object {
         private const val BOOK_PATH = "book_path"
 
-        fun newInstance(bookPath: String): BookInfoFragment {
+        fun newInstance(bookPath: String?): BookInfoFragment {
             val frag = BookInfoFragment()
             val args = Bundle()
             args.putString(BOOK_PATH, bookPath)
-
             frag.arguments = args
             return frag
         }
+
 
     }
 

@@ -16,7 +16,7 @@ class CustomImageGetter(
             if ( mImage != null) {
                 val mSize = ImageUtils.getScaledSize(
                         mImage.intrinsicWidth, mImage.intrinsicHeight,
-                        pageWidth, pageHeight/3*2)
+                        pageWidth, pageHeight)
                 mImage.setBounds(0, 0, mSize.width(), mSize.height())
             }
             return mImage

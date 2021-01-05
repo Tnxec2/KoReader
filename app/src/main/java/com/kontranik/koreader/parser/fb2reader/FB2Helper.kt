@@ -6,7 +6,7 @@ import android.net.Uri
 import com.kontranik.koreader.model.Author
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme
-import com.kontranik.koreader.model.BookSchemeCount
+import com.kontranik.koreader.model.BookSchemeItem
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme
 import com.kontranik.koreader.utils.ImageUtils
@@ -17,7 +17,7 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
 
     private var fb2Reader: FB2Reader = FB2Reader(
             if (context.externalCacheDir != null) context.externalCacheDir!!.absolutePath
-            else context.filesDir.absolutePath, contentUri )
+            else context.filesDir.absolutePath, contentUri)
 
     override var bookInfo: BookInfo? = null
     override var pageScheme: BookPageScheme = BookPageScheme()
@@ -41,19 +41,28 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
     private fun calculateScheme() {
         if ( fb2Reader.fb2Scheme != null && getContentSize() == 0  ) return
         pageScheme = BookPageScheme()
-        pageScheme.sectionCount = getContentSize() // coverPage dazu
-        for( pageIndex in 0 until getContentSize()) {
-            val textSize = getPageTextSize(pageIndex)
-            val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
-            pageScheme.scheme[pageIndex] = BookSchemeCount(
-                    textSize = textSize, textPages = pages)
-            pageScheme.textSize += textSize
-            pageScheme.textPages += pages
+        pageScheme.sectionCount = getContentSize() + 1 // coverPage dazu
+        for( pageIndex in 0 until pageScheme.sectionCount) {
+            val aSection = getPage(pageIndex)
+            if ( aSection != null) {
+                val textSize = getPageTextSize(aSection)
+                val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
+                pageScheme.scheme[pageIndex] = BookSchemeItem(
+                        textSize = textSize, textPages = pages)
+                pageScheme.textSize += textSize
+                pageScheme.textPages += pages
+            }
         }
+        pageScheme.sections = mutableListOf()
+        pageScheme.sections.add("Cover")
+        fb2Reader.fb2Scheme.sections.forEach{
+            val title = it.title ?: it.orderid.toString()
+            pageScheme.sections.add(title)
+        }
+
     }
 
-    private fun getPageTextSize(page: Int): Int {
-        val aSection = getPage(page)
+    private fun getPageTextSize(aSection: String): Int {
         val document = Jsoup.parse(aSection)
         return document.body().wholeText().length
     }
@@ -82,7 +91,8 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         if (tempScheme != null) {
             val t = tempScheme.description.titleInfo.booktitle
             val coverImage = tempScheme.cover
-            var coverBitmap: Bitmap? = getCoverbitmap(coverImage.contentsArray)
+            var coverBitmap: Bitmap?
+            coverBitmap = getCoverbitmap(coverImage?.contentsArray)
             return BookInfo(
                     title = t,
                     cover = coverBitmap,

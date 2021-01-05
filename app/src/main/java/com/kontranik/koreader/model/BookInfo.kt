@@ -2,6 +2,7 @@ package com.kontranik.koreader.model
 
 import android.graphics.Bitmap
 import com.kontranik.koreader.utils.FileItem
+import java.io.Serializable
 
 
 class BookInfo(
@@ -11,7 +12,7 @@ class BookInfo(
         val filename: String,
         val path: String,
         val annotation: String
-) {
+) : Serializable {
     constructor(fileItem: FileItem) : this(title = fileItem.name, cover = null, authors = null, filename = fileItem.name, path = fileItem.path, annotation = "")
 
     fun authorsAsString() : String {

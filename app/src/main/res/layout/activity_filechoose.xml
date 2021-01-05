@@ -63,6 +63,8 @@
         android:id="@+id/reciclerView_files"
         app:layoutManager="LinearLayoutManager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:divider="@color/colorAccent"
+        android:dividerHeight="4px"/>
 
 </LinearLayout>

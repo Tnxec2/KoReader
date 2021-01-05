@@ -5,12 +5,13 @@
     android:orientation="horizontal"
     android:paddingTop="16dp"
     android:paddingBottom="16dp"
+
     >
 
     <ImageView
         android:id="@+id/fileimage"
         android:layout_width="50dp"
-        android:layout_height="match_parent"
+        android:layout_height="100dp"
         app:srcCompat ="@drawable/ic_book_black_24dp"
         android:contentDescription="@string/icon" />
 
