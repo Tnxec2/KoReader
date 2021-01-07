@@ -13,6 +13,7 @@
     <color name="background_main">@color/background_sepia</color>
 
     <color name="foreground_main_dialog">#000000</color>
+    <color name="list_divider">#5F4B32</color>
     <color name="background_main_dialog">#FFFFFF</color>
 
     <color name="icon_fill">#3E3E3E</color>

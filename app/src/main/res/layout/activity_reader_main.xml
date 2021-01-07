@@ -39,36 +39,28 @@
         android:paddingLeft="@dimen/padding_textview_left"
         android:paddingRight="@dimen/padding_textview_right"
         android:paddingStart="@dimen/padding_textview_left"
-        android:paddingEnd="@dimen/padding_textview_right">
+        android:paddingEnd="@dimen/padding_textview_right"
+        android:paddingBottom="2dp">
 
     <TextView
         android:id="@+id/tv_infotext_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity=""
+        android:gravity="left"
         android:text="" />
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-    <TextView
-        android:id="@+id/tv_infotext_center"
-        android:layout_width="wrap_content"
+
+    <Space
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity=""
-        android:text=""
- />
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+        android:layout_weight="1" />
+
     <TextView
         android:id="@+id/tv_infotext_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity=""
+        android:gravity="right"
         android:text=""
- />
+    />
 
     </LinearLayout>
 

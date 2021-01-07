@@ -22,6 +22,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -57,9 +58,9 @@ class ReaderActivity :
     private var textViewHolder: ConstraintLayout? = null
     private var pageView: TextView? = null
 
-    private var textViewInfoCenter: TextView? = null
     private var textViewInfoLeft: TextView? = null
     private var textViewInfoRight: TextView? = null
+    private var linearLayoutInfobereich: LinearLayout? = null
 
     private var width: Int = 100
     private var fullwidth: Int = 100
@@ -106,9 +107,9 @@ class ReaderActivity :
             updateSizeInfo()
         }
 
-        textViewInfoCenter = findViewById(R.id.tv_infotext_center)
         textViewInfoLeft = findViewById(R.id.tv_infotext_left)
         textViewInfoRight = findViewById(R.id.tv_infotext_right)
+        linearLayoutInfobereich = findViewById(R.id.ll_infobereich)
 
         setColors()
 
@@ -372,31 +373,10 @@ class ReaderActivity :
                 ScreenZone.BottomRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_BOTTOM_RIGHT, prefsHelper!!.tapZoneLongBottomRight),
         )
 
-       
+
         prefsHelper!!.setOrientation(this)
         prefsHelper!!.setTheme()
 
-        try {
-            if (Build.VERSION.SDK_INT >= 21) {
-                val window: Window = window
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
-
-                when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-                    Configuration.UI_MODE_NIGHT_YES -> {
-                    }
-                    Configuration.UI_MODE_NIGHT_NO -> {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR // set status text dark
-                        }
-                    }
-                    Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 
     private fun checkTap(point: Point, tap: Int) {
@@ -441,7 +421,7 @@ class ReaderActivity :
     @SuppressLint("ClickableViewAccessibility")
     private fun setOnClickListener() {
 
-        textViewInfoCenter!!.setOnTouchListener(object : OnSwipeTouchListener(this@ReaderActivity) {
+        linearLayoutInfobereich!!.setOnTouchListener(object : OnSwipeTouchListener(this@ReaderActivity) {
             override fun onClick(point: Point) {
                 super.onClick(point)
                 openGotoMenu()
@@ -474,24 +454,20 @@ class ReaderActivity :
 
             override fun onSwipeLeft() {
                 super.onSwipeLeft()
-                textViewInfoRight!!.text = getString(R.string.swipe_left)
                 doPageNext()
             }
 
             override fun onSwipeRight() {
                 super.onSwipeRight()
-                textViewInfoRight!!.text = getString(R.string.swipe_right)
                 doPagePrev()
             }
 
             override fun onSwipeUp() {
                 super.onSwipeUp()
-                textViewInfoRight!!.text = getString(R.string.swipe_up)
             }
 
             override fun onSwipeDown() {
                 super.onSwipeDown()
-                textViewInfoRight!!.text = getString(R.string.swipe_down)
             }
 
             override fun onSlideUp(point: Point) {
@@ -586,10 +562,10 @@ class ReaderActivity :
             textViewInfoLeft!!.text =
                     resources.getString(R.string.page_info_text, curTextPage, book!!.getPageScheme()!!.textPages)
 
-            textViewInfoCenter!!.text =
+            textViewInfoRight!!.text =
                     resources.getString(R.string.page_info_text, curSection, book!!.getPageScheme()!!.sectionCount)
         } else {
-            textViewInfoCenter!!.text = getString(R.string.no_book) 
+            textViewInfoRight!!.text = getString(R.string.no_book)
         }
     }
 
@@ -790,7 +766,6 @@ class ReaderActivity :
                 pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
                 pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorDarkLinkText))
                 textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
-                textViewInfoCenter!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
                 textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
             }
             Configuration.UI_MODE_NIGHT_NO -> {
@@ -798,9 +773,40 @@ class ReaderActivity :
                 pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
                 pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorLightLinkText))
                 textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
-                textViewInfoCenter!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
                 textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
             }
+        }
+
+        try {
+            if (Build.VERSION.SDK_INT >= 21) {
+                val window: Window = window
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                //window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
+
+                var pIsDark = false
+                when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+                    Configuration.UI_MODE_NIGHT_YES -> {
+                        window.statusBarColor = Color.parseColor(prefsHelper!!.colorDarkBack)
+                        pIsDark = true
+                    }
+                    Configuration.UI_MODE_NIGHT_NO -> {
+                        window.statusBarColor = Color.parseColor(prefsHelper!!.colorLightBack)
+                    }
+                    Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                        window.statusBarColor = Color.parseColor(prefsHelper!!.colorDarkBack)
+                    }
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    val lFlags = window.decorView.systemUiVisibility;
+                    window.decorView.systemUiVisibility =
+                            if (pIsDark) (lFlags and (View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR).inv() ) else
+                                      (lFlags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
