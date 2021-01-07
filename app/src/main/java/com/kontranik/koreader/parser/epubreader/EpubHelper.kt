@@ -10,6 +10,7 @@ import com.kontranik.koreader.model.BookSchemeItem
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.utils.ImageUtils
 import nl.siegmann.epublib.domain.Book
+import nl.siegmann.epublib.domain.TOCReference
 import nl.siegmann.epublib.epub.EpubReader
 import org.jsoup.Jsoup
 import java.io.FileNotFoundException
@@ -62,9 +63,22 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
             }
         }
         pageScheme.sections = mutableListOf()
+
         epubBook!!.contents.forEachIndexed { index, element ->
-            pageScheme.sections.add(element.title ?: index.toString())
+            val title = element.title ?: findHrefInTOC(element.href, epubBook!!.tableOfContents.tocReferences)
+            pageScheme.sections.add(title ?: index.toString())
         }
+    }
+
+    private fun findHrefInTOC(href: String, tocr: List<TOCReference>): String? {
+        tocr.forEach {
+            if (href == it.resource.href) {
+                return it.title
+            }
+            val result = findHrefInTOC(href, it.children)
+            if (result != null) return result
+        }
+        return null
     }
 
     private fun getPageTextSize(aSection: String): Int {
@@ -125,10 +139,9 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
     }
 
     private fun getAuthors(eBook: Book): List<Author> {
-        val list = eBook.metadata.authors.map {
+        return eBook.metadata.authors.map {
             Author(it.firstname, middlename = null, it.lastname)
         }
-        return list
     }
 
     override fun getCoverPage(): String? {
