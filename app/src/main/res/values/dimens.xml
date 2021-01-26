@@ -16,6 +16,7 @@
 
     <dimen name="text_size">13sp</dimen>
     <item name="line_spacing" type="dimen" format="float">1.0</item>
+    <item name="letter_spacing" type="dimen" format="float">0.05</item>
 
     <dimen name="text_size_file_path">10sp</dimen>
     <dimen name="text_size_file_desc">10sp</dimen>

@@ -29,6 +29,8 @@ class PrefsHelper(val context: Context) {
 
     var defaultLineSpacing: Float = 1.0f
     var lineSpacing: Float = defaultLineSpacing
+    var defaultLetterSpacing: Float = 0.1f
+    var letterSpacing: Float = defaultLetterSpacing
 
     init {
         defaultTextSize = context.resources.getDimension(R.dimen.text_size)
@@ -181,6 +183,7 @@ class PrefsHelper(val context: Context) {
         const val PREF_BOOK_PATH = "BookPath"
         const val PREF_KEY_BOOK_TEXT_SIZE = "TextSize"
         const val PREF_KEY_BOOK_LINE_SPACING = "LineSpacing"
+        const val PREF_KEY_BOOK_LETTER_SPACING = "LetterSpacing"
         const val PREF_KEY_BOOK_FONT_NAME = "FontName"
         const val PREF_KEY_BOOK_FONT_PATH = "FontPath"
         const val PREF_SCREEN_BRIGHTNESS = "ScreenBrightness"

@@ -1,9 +1,7 @@
 package com.kontranik.koreader.utils
 
 import android.graphics.Typeface
-import android.util.TypedValue
 import android.widget.TextView
-import com.kontranik.koreader.R
 
 class TextViewInitiator {
 
@@ -11,6 +9,7 @@ class TextViewInitiator {
         fun initiateTextView(textView: TextView, startText: String) {
             textView.setTypeface(Typeface.SANS_SERIF, Typeface.NORMAL)
             textView.setLineSpacing(0f, 1f)
+            textView.letterSpacing = 0.05f
             textView.text = startText
         }
     }

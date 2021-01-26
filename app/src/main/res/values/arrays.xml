@@ -72,4 +72,26 @@
         <item>3.0</item>
     </string-array>
 
+    <string-array name="letter_spacing_entries">
+        <item>0</item>
+        <item>0,01</item>
+        <item>0,05</item>
+        <item>0,1</item>
+        <item>0,15</item>
+        <item>0,2</item>
+        <item>0,25</item>
+        <item>0,3</item>
+    </string-array>
+
+    <string-array  name="letter_spacing_values">
+        <item>0</item>
+        <item>0.01</item>
+        <item>0.05</item>
+        <item>0.1</item>
+        <item>0.15</item>
+        <item>0.2</item>
+        <item>0.25</item>
+        <item>0.3</item>
+    </string-array>
+
 </resources>

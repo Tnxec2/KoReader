@@ -101,6 +101,7 @@
     <string name="font_name_title">Font name</string>
     <string name="textsize_title">Text Size</string>
     <string name="linespacing_title">Line Spacing</string>
+    <string name="letterspacing_title">Letter Spacing</string>
     <string name="showSystemFonts_title">Show System Fonts</string>
     <string name="show_noto_fonts_title">Show Noto Fonts</string>
 
@@ -126,5 +127,6 @@
     <string name="tapzones_activity_quick_menu">quick menu</string>
     <string name="tapzones_activity_main_menu">main menu</string>
     <string name="line_spacing">Line Spacing</string>
+    <string name="letter_spacing">Letter Spacing</string>
 
 </resources>

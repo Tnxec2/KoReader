@@ -85,12 +85,20 @@ class ReaderActivity :
 
 
         // nachputzen falsche prefs
-        // linespace pref muss string sein - float ist falsch
+        // linespace und LetterSpace  pref muss string sein - float ist falsch
         val mySPrefs = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = mySPrefs.edit()
         try {
             if (mySPrefs.getFloat(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, -1f) != -1f) {
                 editor.remove(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING)
+                editor.apply()
+            }
+        } catch (e: ClassCastException) {
+            // its ok
+        }
+        try {
+            if (mySPrefs.getFloat(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, -1f) != -1f) {
+                editor.remove(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING)
                 editor.apply()
             }
         } catch (e: ClassCastException) {
@@ -287,6 +295,10 @@ class ReaderActivity :
         if ( lineSpacingString != null) prefsHelper!!.lineSpacing = lineSpacingString.toFloat()
         else prefsHelper!!.lineSpacing = prefsHelper!!.defaultLineSpacing
 
+        val letterSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, null )
+        if ( letterSpacingString != null) prefsHelper!!.letterSpacing = letterSpacingString.toFloat()
+        else prefsHelper!!.letterSpacing = prefsHelper!!.defaultLetterSpacing
+
         if ( prefs.contains(PrefsHelper.PREF_KEY_BOOK_FONT_PATH) ) {
             val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH, null)
             if ( fontpath != null) {
@@ -303,6 +315,7 @@ class ReaderActivity :
         pageView!!.textSize = prefsHelper!!.textSize
         pageView!!.typeface = prefsHelper!!.font.getTypeface()
         pageView!!.setLineSpacing(pageView!!.lineSpacingMultiplier, prefsHelper!!.lineSpacing)
+        pageView!!.letterSpacing = prefsHelper!!.letterSpacing
 
         var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LIGHT_BACK, 0)
         if ( co != 0 )
@@ -577,6 +590,8 @@ class ReaderActivity :
             pageView!!.text = "no page content"
         }
 
+        pageView!!.fontFeatureSettings
+
         updateInfo()
     }
 
@@ -629,13 +644,15 @@ class ReaderActivity :
 
 
 
-    override fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, font: TypefaceRecord?) {
+    override fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float, font: TypefaceRecord?) {
         Log.d(TAG, "onFinishQuickMenuDialog. TextSize: $textSize")
         if ( textSize != pageView!!.textSize
                 || lineSpacing != pageView!!.lineSpacingMultiplier
+                || letterSpacing != pageView!!.letterSpacing
                 || ( font != null && font.getTypeface() != pageView!!.typeface)  ) {
             prefsHelper!!.textSize = textSize
             prefsHelper!!.lineSpacing = lineSpacing
+            prefsHelper!!.letterSpacing = letterSpacing
             pageView!!.textSize = textSize
             pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, lineSpacing)
             if ( font != null) {
@@ -660,10 +677,17 @@ class ReaderActivity :
         updateView(book!!.getCur(recalc = true))
     }
 
+    override fun onChangeLetterSpacing(letterSpacing: Float) {
+        pageView!!.letterSpacing = letterSpacing
+        Log.d(TAG, "onChangeLetterSpacing: getCurPage")
+        updateView(book!!.getCur(recalc = true))
+    }
+
     override fun onCancelQuickMenu() {
         if ( pageView!!.textSize != prefsHelper!!.textSize || pageView!!.lineSpacingMultiplier != prefsHelper!!.lineSpacing ) {
             pageView!!.textSize = prefsHelper!!.textSize
             pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, prefsHelper!!.lineSpacing)
+            pageView!!.letterSpacing = prefsHelper!!.letterSpacing
             Log.d(TAG, "onCancelQuickMenu: getCurPage")
             updateView(book!!.getCur(recalc = true))
         }

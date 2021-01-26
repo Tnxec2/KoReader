@@ -22,6 +22,16 @@
             app:useSimpleSummaryProvider="true"
             />
 
+        <ListPreference
+            app:key="LetterSpacing"
+            app:defaultValue="0.01"
+            app:entries="@array/letter_spacing_entries"
+            app:entryValues="@array/letter_spacing_values"
+            app:icon="@drawable/ic_letter_spacing"
+            app:title="@string/letterspacing_title"
+            app:useSimpleSummaryProvider="true"
+            />
+
     </PreferenceCategory>
 
     <PreferenceCategory

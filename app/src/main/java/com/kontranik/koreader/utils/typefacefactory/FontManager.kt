@@ -39,7 +39,7 @@ object FontManager {
             } else if ( file.canRead() ) {
                 var fontname = analyzer.getTtfFontName(file.absolutePath)
                 if (fontname == null) fontname = file.name.substringBeforeLast('.')
-                if (!showNotoFonts && fontname.substring(0, 4).toLowerCase(Locale.getDefault()) == "noto") continue
+                if (!showNotoFonts && fontname.startsWith("noto", ignoreCase = true) ) continue
                 fonts[fontname] = file
             }
         }

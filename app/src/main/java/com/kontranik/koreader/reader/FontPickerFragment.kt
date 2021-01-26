@@ -132,16 +132,14 @@ class FontPickerFragment :
         val fontpath = requireArguments().getString(FONTPATH, null)
         val fontname = requireArguments().getString(FONTNAME, TypefaceRecord.SANSSERIF)
         var pos = 0
-        for ( i in 0 .. fontList.size) {
+        for ( i in 0 until fontList.size) {
             if ( fontpath != null && fontList[i].file != null && fontpath == fontList[i].file!!.absolutePath ) {
                 pos = i
-                break
             } else if ( fontname == fontList[i].name) {
                 pos = i
-                break
             }
         }
-        fontListView.scrollToPosition(pos)
+        if ( pos < fontList.size) fontListView.scrollToPosition(pos)
 
         AdapterView.OnItemClickListener { parent, v, position, id ->
             selectedFont = fontList[position]
