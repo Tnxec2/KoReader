@@ -1,6 +1,7 @@
 package com.kontranik.koreader.reader
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.widget.ImageButton
@@ -44,10 +45,18 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
 
     private fun openBook(path: String) {
         val data = Intent()
+        savePrefs(path)
         data.putExtra(ReaderActivity.PREF_TYPE, ReaderActivity.PREF_TYPE_OPEN_BOOK)
         data.putExtra(PrefsHelper.PREF_BOOK_PATH, path)
         setResult(RESULT_OK, data)
         finish()
+    }
+
+    private fun savePrefs(uriString: String?) {
+        val settings: SharedPreferences? = getSharedPreferences(FileChooseActivity.PREFS_FILE, MODE_PRIVATE)
+        val prefEditor = settings!!.edit()
+        if ( uriString != null) prefEditor!!.putString(FileChooseActivity.PREF_LAST_PATH, uriString)
+        prefEditor.apply()
     }
 
     private fun loadBooklist() {

@@ -268,7 +268,7 @@ class FileChooseActivity : AppCompatActivity(),
     }
 
     companion object {
-        private const val PREFS_FILE = "OpenFileActivitySettings"
+        const val PREFS_FILE = "OpenFileActivitySettings"
         const val PREF_LAST_PATH = "LastPath"
         const val PREF_EXTERNAL_PATHS = "ExternalPaths"
         const val TAG = "FileChooseActivity"

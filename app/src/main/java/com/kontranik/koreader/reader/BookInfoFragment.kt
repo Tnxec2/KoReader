@@ -63,20 +63,24 @@ class BookInfoFragment : DialogFragment() {
         val coverView = view.findViewById<ImageView>(R.id.imageView_bookinfo_cover)
 
         val ebookHelper = Book.getHelper(requireContext(), bookPath!!)
+
+        if ( ebookHelper == null) dismiss()
+
         val bookInfo = ebookHelper?.getBookInfoTemporary(bookPath)
 
-        if ( bookInfo != null ) {
-            titleView.text = bookInfo.title
+        if ( bookInfo == null ) dismiss()
 
-            if ( bookInfo.cover != null) {
-                coverView.setImageBitmap(bookInfo.cover)
-            } else {
-                coverView.visibility = View.GONE
-            }
-            booktitleView.text = bookInfo.title
-            autorsView.text = bookInfo.authorsAsString()
-            annotationView.text = Html.fromHtml(bookInfo.annotation)
+        titleView.text = bookInfo!!.title
+
+        if ( bookInfo.cover != null) {
+            coverView.setImageBitmap(bookInfo.cover)
+        } else {
+            coverView.visibility = View.GONE
         }
+        booktitleView.text = bookInfo.title
+        autorsView.text = bookInfo.authorsAsString()
+        annotationView.text = Html.fromHtml(bookInfo.annotation)
+
     }
 
     fun setListener(listener: BookInfoListener) {
