@@ -38,9 +38,19 @@ class FileListAdapter(
         holder.descView.text = ""
         holder.imageView.setImageBitmap(getBitmap(context, fileItem.image))
         holder.pathView.text = fileItem.path
-        if ( ! fileItem.isDir && fileItem.bookInfo == null ) {
-            val asyncTask = ReadBookInfoAsync(context, holder)
-            asyncTask.execute(fileItem)
+        if ( ! fileItem.isDir ) {
+            if ( fileItem.bookInfo == null ) {
+                val asyncTask = ReadBookInfoAsync(context, holder)
+                asyncTask.execute(fileItem)
+            } else {
+                holder.nameView.text = fileItem.bookInfo!!.title
+                holder.descView.text = fileItem.bookInfo!!.authorsAsString()
+                holder.pathView.text = fileItem.name
+                if (fileItem.bookInfo!!.cover == null) {
+                    fileItem.bookInfo!!.cover = getBitmap(context, ImageEnum.Ebook)
+                }
+                holder.imageView.setImageBitmap(fileItem.bookInfo!!.cover!!)
+            }
         }
 
         holder.itemView.setOnClickListener {
