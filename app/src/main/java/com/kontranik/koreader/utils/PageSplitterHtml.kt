@@ -12,7 +12,7 @@ import com.kontranik.koreader.model.Page
 import it.sephiroth.android.library.imagezoom.ImageViewTouch
 
 
-open class PageSplitterHtml(private val textView: TextView) {
+open class PageSplitterHtml(private val textView: FontTextView) {
 
     var pages: MutableList<Page> = mutableListOf()
 

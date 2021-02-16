@@ -3,11 +3,13 @@ package com.kontranik.koreader.model
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.fonts.Font
 import android.util.Log
 import android.widget.TextView
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.parser.epubreader.EpubHelper
 import com.kontranik.koreader.parser.fb2reader.FB2Helper
+import com.kontranik.koreader.utils.FontTextView
 import com.kontranik.koreader.utils.PageLoader
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Attributes
@@ -16,7 +18,7 @@ import org.jsoup.nodes.Element
 import org.jsoup.parser.Tag
 
 
-class Book(private var context: Context, var fileLocation: String, pageView: TextView) {
+class Book(private var context: Context, var fileLocation: String, pageView: FontTextView) {
 
     var curPage: Page? = Page(null, BookPosition())
     internal var ebookHelper: EbookHelper? = null
@@ -37,6 +39,7 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
 
         preProcess(document)
         replaceSvgWithImg(document)
+        replacePreWithTT(document)
 
         return document.html()
     }
@@ -46,6 +49,13 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
         //head.remove()
         head.select("title").remove()
         head.select("style").remove()
+    }
+
+    private fun replacePreWithTT(document: Document) {
+        val codeElements = document.select("pre")
+        for ( code in codeElements) {
+            code.tagName("tt")
+        }
     }
 
     /*

@@ -10,7 +10,7 @@ import kotlin.math.min
 
 class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
 
-    constructor(private val pageView: TextView, private val book: Book) : PageSplitterHtml(pageView){
+    constructor(private val pageView: FontTextView, private val book: Book) : PageSplitterHtml(pageView){
 
     fun getPage(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page? {
         Log.d(TAG, "getPage:  $bookPosition , revers = $revers, recalc = $recalc")

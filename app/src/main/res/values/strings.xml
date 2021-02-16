@@ -58,6 +58,13 @@
     <string name="bookinfo">Info</string>
     <string name="toc">Table of content</string>
 
+
+    <string name="text_normal">Normal</string>
+    <string name="text_bold">Bold</string>
+    <string name="text_italic">Italic</string>
+    <string name="text_bolditalic">Bold Italic</string>
+    <string name="text_monospace">Monospace</string>
+
     <!-- Preference Titles -->
     <string name="interface_header">Interface</string>
     <string name="color_light_header">Color Light Theme</string>
@@ -128,5 +135,6 @@
     <string name="tapzones_activity_main_menu">main menu</string>
     <string name="line_spacing">Line Spacing</string>
     <string name="letter_spacing">Letter Spacing</string>
+    <string name="textsize_sample">ABCabc</string>
 
 </resources>

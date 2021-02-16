@@ -56,7 +56,8 @@ class ReaderActivity :
     private var book: Book? = null
 
     private var textViewHolder: ConstraintLayout? = null
-    private var pageView: TextView? = null
+
+    private var pageView: FontTextView? = null
 
     private var textViewInfoLeft: TextView? = null
     private var textViewInfoRight: TextView? = null
@@ -299,21 +300,22 @@ class ReaderActivity :
         if ( letterSpacingString != null) prefsHelper!!.letterSpacing = letterSpacingString.toFloat()
         else prefsHelper!!.letterSpacing = prefsHelper!!.defaultLetterSpacing
 
-        if ( prefs.contains(PrefsHelper.PREF_KEY_BOOK_FONT_PATH) ) {
-            val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH, null)
+        if ( prefs.contains(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL) ) {
+            val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
             if ( fontpath != null) {
                 val fontFile = File(fontpath)
                 if ( fontFile.isFile && fontFile.canRead() ) {
                     prefsHelper!!.font = TypefaceRecord(name = fontFile.name, file = fontFile)
                 }
             }
-        } else if ( prefs.contains(PrefsHelper.PREF_KEY_BOOK_FONT_NAME)) {
+        } else if ( prefs.contains(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL)) {
             prefsHelper!!.font = TypefaceRecord(
-                    name = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME, TypefaceRecord.SANSSERIF)!!)
+                    name = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.SANSSERIF)!!)
         }
 
         pageView!!.textSize = prefsHelper!!.textSize
         pageView!!.typeface = prefsHelper!!.font.getTypeface()
+
         pageView!!.setLineSpacing(pageView!!.lineSpacingMultiplier, prefsHelper!!.lineSpacing)
         pageView!!.letterSpacing = prefsHelper!!.letterSpacing
 
@@ -642,23 +644,17 @@ class ReaderActivity :
         quickMenuFragment.show(supportFragmentManager, "fragment_quick_menu")
     }
 
-
-
-    override fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float, font: TypefaceRecord?) {
+    override fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float) {
         Log.d(TAG, "onFinishQuickMenuDialog. TextSize: $textSize")
         if ( textSize != pageView!!.textSize
                 || lineSpacing != pageView!!.lineSpacingMultiplier
                 || letterSpacing != pageView!!.letterSpacing
-                || ( font != null && font.getTypeface() != pageView!!.typeface)  ) {
+                 ) {
             prefsHelper!!.textSize = textSize
             prefsHelper!!.lineSpacing = lineSpacing
             prefsHelper!!.letterSpacing = letterSpacing
             pageView!!.textSize = textSize
             pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, lineSpacing)
-            if ( font != null) {
-                prefsHelper!!.font = font
-                pageView!!.typeface = font.getTypeface()
-            }
             Log.d(TAG, "onFinishQuickMenuDialog: getCurPage")
             updateView(book!!.getCur(recalc = true))
             savePrefs()

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.util.AttributeSet
-import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -17,8 +16,6 @@ import com.kontranik.koreader.reader.FontPickerFragment
 import com.kontranik.koreader.reader.SettingsActivity
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
-import kotlin.math.max
-import kotlin.math.min
 
 
 /**
@@ -29,7 +26,6 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
     private var selectedFont: TypefaceRecord = TypefaceRecord.DEFAULT
 
     private var textSize: Float = PrefsHelper.textSizeMin
-    private val textSizeStep: Float = 1F
 
     private var showSystemFonts: Boolean = false
     private var showNotoFonts: Boolean = false
@@ -40,6 +36,8 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
 
     private var fontname: String = TypefaceRecord.DEFAULT.name
     private var fontpath: String ? = null
+
+    private val fonttype = TextType.fromString(attrs.getAttributeValue(null, "fonttype"))
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
@@ -59,8 +57,9 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
         val defaultTextSize = context.resources.getDimension(R.dimen.text_size)
 
         textSize = sharedPreferences.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
-        fontpath = sharedPreferences.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH, null)
-        fontname = sharedPreferences.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME, TypefaceRecord.DEFAULT.name)!!
+
+        fontpath = sharedPreferences.getString(getFontPathPref(), null)
+        fontname = sharedPreferences.getString(getFontNamePref(), TypefaceRecord.DEFAULT.name)!!
 
         selectedFont = if ( fontpath != null)
             TypefaceRecord(fontname, File(fontpath!!))
@@ -80,34 +79,6 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
                     .addToBackStack(null)
                     .commit()
         }
-
-
-        val decrease = holder.findViewById(R.id.imageView_preference_font_textSizeDecrease) as ImageButton?
-        decrease!!.setOnClickListener {
-            decreaseTextSize()
-        }
-        val increase = holder.findViewById(R.id.imageView_preference_font_textSizeIncrease) as ImageButton?
-        increase!!.setOnClickListener {
-            increaseTextSize()
-        }
-
-    }
-
-    private fun decreaseTextSize() {
-        textSize = max(PrefsHelper.textSizeMin, textSize - textSizeStep)
-        updateTextSize()
-    }
-
-    private fun increaseTextSize() {
-        textSize = min(PrefsHelper.textSizeMax, textSize + textSizeStep)
-        updateTextSize()
-    }
-
-    private fun updateTextSize() {
-        textViewFontName!!.textSize = textSize
-        val editor = sharedPreferences.edit()
-        editor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
-        editor.apply()
     }
 
     override fun onSaveFontPickerDialog(font: TypefaceRecord?) {
@@ -115,9 +86,50 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
             selectedFont = font
             textViewFontName!!.text = font.name
             val editor = sharedPreferences.edit()
-            editor.putString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH, selectedFont.file?.absolutePath)
-            editor.putString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME, selectedFont.name)
+
+            editor.putString(getFontPathPref(), selectedFont.file?.absolutePath)
+            editor.putString(getFontNamePref(), selectedFont.name)
             editor.apply()
+        }
+    }
+
+    private fun getFontPathPref(): String {
+        return when (fonttype) {
+            TextType.Monospace -> {
+                PrefsHelper.PREF_KEY_BOOK_FONT_PATH_MONOSPACE
+            }
+            TextType.Bold -> {
+                PrefsHelper.PREF_KEY_BOOK_FONT_PATH_BOLD
+            }
+            TextType.Italic -> {
+                PrefsHelper.PREF_KEY_BOOK_FONT_PATH_ITALIC
+            }
+            TextType.BoldItalic -> {
+                PrefsHelper.PREF_KEY_BOOK_FONT_PATH_BOLDITALIC
+            }
+            else -> {
+                PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL
+            }
+        }
+    }
+
+    private fun getFontNamePref(): String {
+        return when (fonttype) {
+            TextType.Monospace -> {
+                PrefsHelper.PREF_KEY_BOOK_FONT_NAME_MONOSPACE
+            }
+            TextType.Bold -> {
+                PrefsHelper.PREF_KEY_BOOK_FONT_NAME_BOLD
+            }
+            TextType.Italic -> {
+                PrefsHelper.PREF_KEY_BOOK_FONT_NAME_ITALIC
+            }
+            TextType.BoldItalic -> {
+                PrefsHelper.PREF_KEY_BOOK_FONT_NAME_BOLDITALIC
+            }
+            else -> {
+                PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL
+            }
         }
     }
 
@@ -125,4 +137,34 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
         widgetLayoutResource = R.layout.preference_font_name
     }
 
+}
+
+enum class TextType {
+    Bold,
+    Italic,
+    BoldItalic,
+    Normal,
+    Monospace;
+
+    companion object {
+        fun fromString(s: String): TextType {
+            return when (s) {
+                "monospace", "mono" -> {
+                    Monospace
+                }
+                "bold" -> {
+                    Bold
+                }
+                "italic" -> {
+                    Italic
+                }
+                "bolditalic" -> {
+                    BoldItalic
+                }
+                else -> {
+                    Normal
+                }
+            }
+        }
+    }
 }

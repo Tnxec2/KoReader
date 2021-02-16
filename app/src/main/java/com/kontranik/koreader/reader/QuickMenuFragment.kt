@@ -23,7 +23,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 
-class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogListener {
+class QuickMenuFragment : DialogFragment() {
 
     private var listener: QuickMenuDialogListener? = null
 
@@ -35,11 +35,9 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
     private var lineSpacing: Float = 1f
     private var letterSpacing: Float = 0.05f
 
-    private var selectedFont: TypefaceRecord = TypefaceRecord.DEFAULT
-
     // 1. Defines the listener interface with a method passing back data result.
     interface QuickMenuDialogListener {
-        fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float,  font: TypefaceRecord?)
+        fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float)
         fun onChangeTextSize(textSize: Float)
         fun onChangeLineSpacing(lineSpacing: Float)
         fun onChangeLetterSpacing(letterSpacing: Float)
@@ -186,17 +184,17 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
         val defaultLetterSpacing = typedValue.float
 
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH, null)
+        val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
         textSize = prefs.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
         val lineSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, defaultLineSpacing.toString() )
         if ( lineSpacingString != null) lineSpacing = lineSpacingString.toFloat()
         val letterSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, defaultLetterSpacing.toString() )
         if ( letterSpacingString != null) letterSpacing = letterSpacingString.toFloat()
-        val fontname = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME, TypefaceRecord.DEFAULT.name)!!
+        val fontname = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.DEFAULT.name)!!
 
         textViewTextSIze!!.textSize = textSize
 
-        selectedFont = if ( fontpath != null ) {
+        val selectedFont = if ( fontpath != null ) {
             val f = File(fontpath)
             if (f.exists() && f.isFile && f.canRead())
                 TypefaceRecord(fontname, f)
@@ -207,9 +205,6 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
         }
         textViewTextSIze!!.typeface = selectedFont.getTypeface()
 
-        textViewTextSIze!!.setOnClickListener {
-            openFontPicker(view)
-        }
 
         val decrease = view.findViewById<ImageButton>(R.id.imageView_quick_menU_textSizeDecrease)
         decrease.setOnClickListener {
@@ -219,12 +214,6 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
         increase.setOnClickListener {
             increaseTextSize()
         }
-    }
-
-    private fun openFontPicker(view: View) {
-        val fontPickerFragment: FontPickerFragment = FontPickerFragment.newInstance(textSize, selectedFont)
-        fontPickerFragment.setCallBack(this)
-        fontPickerFragment.show(requireActivity().supportFragmentManager, "fragment_font_picker")
     }
 
     private fun openBookInfo(bookUri: String?) {
@@ -239,12 +228,10 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
         prefEditor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
         prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, lineSpacing.toString())
         prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, letterSpacing.toString())
-        prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH, selectedFont.file?.absolutePath)
-        prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME, selectedFont.name)
         prefEditor.apply()
 
         // Return Data back to activity through the implemented listener
-        listener!!.onFinishQuickMenuDialog(textSize, lineSpacing, letterSpacing, selectedFont)
+        listener!!.onFinishQuickMenuDialog(textSize, lineSpacing, letterSpacing)
 
         // Close the dialog and return back to the parent activity
         dismiss()
@@ -260,13 +247,6 @@ class QuickMenuFragment : DialogFragment(), FontPickerFragment.FontPickerDialogL
         textSize = min(PrefsHelper.textSizeMax, textSize + textSizeStep)
         textViewTextSIze!!.textSize = textSize
         listener!!.onChangeTextSize(textSize)
-    }
-
-    override fun onSaveFontPickerDialog(font: TypefaceRecord?) {
-        if ( font != null ) {
-            selectedFont = font
-            textViewTextSIze!!.typeface = font.getTypeface()
-        }
     }
 
     companion object {

@@ -1,6 +1,7 @@
 package com.kontranik.koreader.utils.typefacefactory
 
 import android.os.Environment
+import android.util.Log
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -38,6 +39,7 @@ object FontManager {
                 fonts.putAll(addFonts(file, showSystemFonts, showNotoFonts))
             } else if ( file.canRead() ) {
                 var fontname = analyzer.getTtfFontName(file.absolutePath)
+                Log.d("FontManager", "fontname: " + fontname)
                 if (fontname == null) fontname = file.name.substringBeforeLast('.')
                 if (!showNotoFonts && fontname.startsWith("noto", ignoreCase = true) ) continue
                 fonts[fontname] = file
@@ -93,6 +95,8 @@ internal class TTFAnalyzer {
                     // Getting the count and string offset - remembering it's big endian.
                     val count = getWord(table, 2)
                     val string_offset = getWord(table, 4)
+
+                    val s = String(table)
 
                     // Record starts from offset 6
                     for (record in 0 until count) {
