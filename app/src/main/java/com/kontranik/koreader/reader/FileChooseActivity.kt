@@ -34,6 +34,7 @@ class FileChooseActivity : AppCompatActivity(),
     private var fileItemList: MutableList<FileItem> = ArrayList()
 
     private var selectedDocumentFileUriString: String? = null
+    private var lastPaht: String? = null
 
     private var settings: SharedPreferences? = null
     private var prefEditor: SharedPreferences.Editor? = null
@@ -104,6 +105,16 @@ class FileChooseActivity : AppCompatActivity(),
         if ( selectedDocumentFileUriString == null ) storageList()
         else {
             getFileList(selectedDocumentFileUriString)
+
+            if ( lastPaht != null) {
+                for (pos in 0 until fileItemList.size) {
+                    val uriString = fileItemList[pos].uriString
+                    if (uriString == lastPaht!!) {
+                        (listView!!.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
+                        break
+                    }
+                }
+            }
         }
     }
 
@@ -126,18 +137,19 @@ class FileChooseActivity : AppCompatActivity(),
             fileListAdapter!!.notifyDataSetChanged()
 
             if (pathsPosition.containsKey(documentFilePath)) {
-                listView!!.scrollToPosition(pathsPosition[documentFilePath]!!)
+               //listView!!.scrollToPosition(pathsPosition[documentFilePath]!!)
+                (listView!!.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pathsPosition[documentFilePath]!!, 0)
             }
         }
     }
 
     private fun loadPrefs() {
         if ( settings!!.contains(PREF_LAST_PATH) ) {
-            val lastPaht = settings!!.getString(PREF_LAST_PATH, null)
+            lastPaht = settings!!.getString(PREF_LAST_PATH, null)
             if ( lastPaht != null) {
-                val index = lastPaht.lastIndexOf("%2F")
+                val index = lastPaht!!.lastIndexOf("%2F")
                 val parent = if ( index > 0)  {
-                        lastPaht.substring(0, index)
+                        lastPaht!!.substring(0, index)
                     } else lastPaht
                 val directoryUri = Uri.parse(parent).toString()
                 // val sf = DocumentFile.fromSingleUri(applicationContext, directoryUri)
@@ -189,6 +201,12 @@ class FileChooseActivity : AppCompatActivity(),
 
     override fun onFilelistItemClickListener(position: Int) {
         val selectedFileItem = fileItemList[position]
+
+        if ( position > 0) {
+            if ( selectedDocumentFileUriString != null)
+                pathsPosition.remove(selectedFileItem.uriString)
+                pathsPosition[selectedDocumentFileUriString!!] = position
+        }
 
         if (selectedFileItem.isDir) {
             val lm = listView!!.layoutManager as LinearLayoutManager
