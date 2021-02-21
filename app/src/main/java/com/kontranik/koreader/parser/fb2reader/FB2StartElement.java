@@ -138,11 +138,14 @@ public class FB2StartElement {
 	}
 
 	private static void gotNewSection(String eName, FB2Elements el, Attributes attrs, FB2ParserObject object) throws Exception {
-        object.isSection = true;
         if ( attrs.getValue("notes") != null) {
             object.isNotes = true;
+            object.isSection = true;
         } else {
-            if ( ! object.onlyscheme && object.isSection ) object.fileHelper.writeSection(object.mySection);
+            if ( ! object.onlyscheme && object.isSection ) {
+                object.fileHelper.writeSection(object.mySection);
+            }
+            object.isSection = true;
 
             Integer parentid = object.mySection != null ? object.mySection.orderid : null;
             object.mySection = new FB2Section(object.sectionid, attrs.getValue("id"), el, object.sectionDeep, parentid);

@@ -18,7 +18,10 @@ public class FB2EndElement {
                 if ( object.sectionDeep > 0 ) object.sectionDeep--;
                 break;
             case body:
-                if ( ! object.onlyscheme && object.isSection )  object.fileHelper.writeSection(object.mySection);
+                if ( ! object.onlyscheme && object.isSection )  {
+                    object.fileHelper.writeSection(object.mySection);
+                    object.isSection = false;
+                }
                 break;
             case binary:
                 endElementBinary(object);
@@ -89,7 +92,7 @@ public class FB2EndElement {
             case p:
             case stanza:
                 if ( ! object.isTitle)
-                    result = "<p>";
+                    result = "</p>";
                 else result = "<br/>";
                 break;
             case cite:
@@ -137,7 +140,7 @@ public class FB2EndElement {
             case image:
                 break;
             default:
-                System.out.println("Other EndElement: " + fel.elName);
+                java.util.logging.Logger.getLogger("FB2ENDELEMENT").log(java.util.logging.Level.INFO, "Other EndElement: " + fel.elName);
                 break;
         }
         if ( object.isAnnotation ) {
@@ -148,6 +151,9 @@ public class FB2EndElement {
             object.fb2scheme.description.documentInfo.history.append(result);
         } else if ( object.isSection ) {
             object.mySection.text.append(result);
+        } else {
+            java.util.logging.Logger.getLogger("FB2ENDELEMENT")
+                    .log(java.util.logging.Level.INFO, "FEL: " + fel.elName + ", Other FB2ParserObject: " + object.toString());
         }
 	}
 

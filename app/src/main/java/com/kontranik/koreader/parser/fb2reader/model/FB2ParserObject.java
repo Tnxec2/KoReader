@@ -48,7 +48,35 @@ public class FB2ParserObject {
         myParseText = false;
     }
 
-	public void clear() {
+    @Override
+    public String toString() {
+        return "FB2ParserObject{" +
+                "mySection=" + mySection +
+                ", sectionid=" + sectionid +
+                ", sectionDeep=" + sectionDeep +
+                ", myParseText=" + myParseText +
+                ", myText=" + myText +
+                ", isDescription=" + isDescription +
+                ", isDescriptionCustomInfo=" + isDescriptionCustomInfo +
+                ", isDescriptionPublishInfo=" + isDescriptionPublishInfo +
+                ", isDescriptionDocumentInfo=" + isDescriptionDocumentInfo +
+                ", isDescriptionTitleInfo=" + isDescriptionTitleInfo +
+                ", isCoverpage=" + isCoverpage +
+                ", isAnnotation=" + isAnnotation +
+                ", isAuthor=" + isAuthor +
+                ", isTranslator=" + isTranslator +
+                ", isHistory=" + isHistory +
+                ", isSection=" + isSection +
+                ", isNotes=" + isNotes +
+                ", onlyscheme=" + onlyscheme +
+                ", isSupNote=" + isSupNote +
+                ", isTitle=" + isTitle +
+                ", isBinary=" + isBinary +
+                ", isCode=" + isCode +
+                '}';
+    }
+
+    public void clear() {
 
         mySection = null;
        sectionid = 0;
