@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -25,8 +28,6 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
 
     private var selectedFont: TypefaceRecord = TypefaceRecord.DEFAULT
 
-    private var textSize: Float = PrefsHelper.textSizeMin
-
     private var showSystemFonts: Boolean = false
     private var showNotoFonts: Boolean = false
 
@@ -41,6 +42,7 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
+
         holder.itemView.isClickable = false // disable parent click
 
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -55,8 +57,7 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
         textViewFontName = holder.findViewById(R.id.textView_preference_font_fontname) as TextView?
 
         val defaultTextSize = context.resources.getDimension(R.dimen.text_size)
-
-        textSize = sharedPreferences.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
+        var textSize: Float = sharedPreferences.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
 
         fontpath = sharedPreferences.getString(getFontPathPref(), null)
         fontname = sharedPreferences.getString(getFontNamePref(), TypefaceRecord.DEFAULT.name)!!
