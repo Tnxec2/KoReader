@@ -18,10 +18,10 @@ public class FB2EndElement {
                 if ( object.sectionDeep > 0 ) object.sectionDeep--;
                 break;
             case body:
-                if ( ! object.onlyscheme && object.isSection )  {
-                    object.fileHelper.writeSection(object.mySection);
-                    object.isSection = false;
-                }
+//                if ( ! object.onlyscheme && object.isSection )  {
+//                    object.fileHelper.writeSection(object.mySection);
+//                    object.isSection = false;
+//                }
                 break;
             case binary:
                 endElementBinary(object);

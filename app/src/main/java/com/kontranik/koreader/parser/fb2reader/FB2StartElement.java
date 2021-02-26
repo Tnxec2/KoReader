@@ -1,5 +1,6 @@
 package com.kontranik.koreader.parser.fb2reader;
 
+import com.kontranik.koreader.model.BookPageScheme;
 import com.kontranik.koreader.parser.fb2reader.model.Author;
 import com.kontranik.koreader.parser.fb2reader.model.BinaryData;
 import com.kontranik.koreader.parser.fb2reader.model.FB2Elements;
@@ -7,6 +8,8 @@ import com.kontranik.koreader.parser.fb2reader.model.FB2ParserObject;
 import com.kontranik.koreader.parser.fb2reader.model.FB2Section;
 
 import org.xml.sax.*;
+
+import java.util.ArrayList;
 
 /**
  * FB2StartElement
@@ -37,7 +40,7 @@ public class FB2StartElement {
         }
     }
 
-    private static void parseStartElement(FB2Elements fel, Attributes attrs, FB2ParserObject object) {
+    private static void parseStartElement(FB2Elements fel, Attributes attrs, FB2ParserObject object) throws Exception {
         if ( fel.equals(FB2Elements.title) ) {
             object.myParseText = true;
         }
@@ -51,6 +54,12 @@ public class FB2StartElement {
 
         String result = "";
         int deep = object.isSection ? object.mySection.deep : 0;
+
+        if ( object.isSection ) {
+            if ( object.mySection.text.length()  > (BookPageScheme.CHAR_PER_PAGE * BookPageScheme.MAX_PAGE_PER_SECTION) ) {
+                gotNewSection(object);
+            }
+        }
 
         String href = null;
         for ( int a = 0; a < attrs.getLength(); a++ ) {
@@ -136,6 +145,21 @@ public class FB2StartElement {
             object.mySection.text.append(result);
         }
 	}
+
+	private static void gotNewSection(FB2ParserObject object) throws Exception {
+        if (object.mySection != null) {
+            object.fileHelper.writeSection(object.mySection);
+
+            object.isSection = true;
+
+            Integer parentid = object.mySection != null ? object.mySection.orderid : null;
+            object.mySection = new FB2Section(object.sectionid, object.mySection.id, object.mySection.typ, object.sectionDeep, parentid);
+            object.fb2scheme.sections.add(object.mySection);
+            // System.out.printf("New Section Id: " + object.sectionid + ", deep: " + object.sectionDeep + ", Name: " + el.elName + "\n");
+            object.sectionid++;
+            object.sectionDeep++;
+        }
+    }
 
 	private static void gotNewSection(String eName, FB2Elements el, Attributes attrs, FB2ParserObject object) throws Exception {
         if ( attrs.getValue("notes") != null) {

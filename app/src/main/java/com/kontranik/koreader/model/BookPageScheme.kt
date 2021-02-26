@@ -9,6 +9,7 @@ class BookPageScheme {
 
     companion object {
         const val CHAR_PER_PAGE = 1500
+        const val MAX_PAGE_PER_SECTION = 50
     }
 
     fun getBookPositionForPage(page: Int): BookPosition {
