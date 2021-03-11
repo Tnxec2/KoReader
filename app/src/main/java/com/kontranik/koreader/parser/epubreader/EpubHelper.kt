@@ -66,7 +66,7 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
 
         epubBook!!.contents.forEachIndexed { index, element ->
             val title = element.title ?: findHrefInTOC(element.href, epubBook!!.tableOfContents.tocReferences)
-            pageScheme.sections.add(title ?: index.toString())
+            pageScheme.sections.add("(${index}) $title")
         }
     }
 

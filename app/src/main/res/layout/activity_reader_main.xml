@@ -9,15 +9,15 @@
     android:textColor="@color/foreground_main"
     >
 
-    <com.kontranik.koreader.utils.FontTextView
+    <TextView
         android:id="@+id/textView_pageview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:paddingStart="@dimen/padding_textview_left"
-        android:paddingLeft="@dimen/padding_textview_left"
+        
         android:paddingTop="@dimen/padding_textview_top"
         android:paddingEnd="@dimen/padding_textview_right"
-        android:paddingRight="@dimen/padding_textview_right"
+        
         android:paddingBottom="@dimen/padding_textview_bottom"
         android:text=""
         android:textIsSelectable="true"
@@ -36,8 +36,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:paddingLeft="@dimen/padding_textview_left"
-        android:paddingRight="@dimen/padding_textview_right"
+        
+        
         android:paddingStart="@dimen/padding_textview_left"
         android:paddingEnd="@dimen/padding_textview_right"
         android:paddingBottom="2dp">

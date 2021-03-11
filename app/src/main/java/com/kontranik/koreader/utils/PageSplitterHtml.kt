@@ -1,25 +1,24 @@
 package com.kontranik.koreader.utils
 
 import android.text.*
-import android.text.style.ClickableSpan
-import android.text.style.ImageSpan
 import android.text.style.QuoteSpan
-import android.view.View
+import android.util.Log
 import android.widget.TextView
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookPosition
 import com.kontranik.koreader.model.Page
-import it.sephiroth.android.library.imagezoom.ImageViewTouch
 
 
-open class PageSplitterHtml(private val textView: FontTextView) {
+open class PageSplitterHtml(private val textView: TextView) : FontsHelper(textView.context) {
 
     var pages: MutableList<Page> = mutableListOf()
 
     private var content: SpannableStringBuilder = SpannableStringBuilder()
     private var staticLayout: StaticLayout? = null
 
-    fun splitPages(book: Book, section: Int, html: String) {
+    fun splitPages(book: Book, section: Int, html: String, reloadFonts: Boolean) {
+        Log.d("splitPages", "reloadfonts = $reloadFonts")
+        if ( reloadFonts ) loadFonts()
 
         val pageWidth: Int = textView.measuredWidth - textView.paddingLeft - textView.paddingRight
         val pageHeight: Int = textView.measuredHeight - textView.paddingTop - textView.paddingBottom
@@ -65,8 +64,7 @@ open class PageSplitterHtml(private val textView: FontTextView) {
                     content = SpannableStringBuilder().append(content.subSequence(startOffset, endOffset)),
                     startBookPosition = BookPosition(section = section, offSet = startOffset),
                     endBookPosition = BookPosition(section = section, offSet = endOffset)
-            )
-            )
+            ))
 
             if ( endLine >= staticLayout!!.lineCount-1 ) break
             startLine = lastFullyVisibleLine + 1
@@ -75,6 +73,10 @@ open class PageSplitterHtml(private val textView: FontTextView) {
 
     private fun postformatContent() {
         formatQuotes()
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            content = SpannableStringBuilder(replaceStyledSpans(content, content.length))
+            content = SpannableStringBuilder(replaceTypefaces(content))
+        }
         //formatImages()
     }
 

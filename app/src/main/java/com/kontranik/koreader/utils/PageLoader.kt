@@ -10,16 +10,17 @@ import kotlin.math.min
 
 class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
 
-    constructor(private val pageView: FontTextView, private val book: Book) : PageSplitterHtml(pageView){
+    constructor(private val pageView: TextView, private val book: Book) : PageSplitterHtml(pageView){
 
     fun getPage(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page? {
         Log.d(TAG, "getPage:  $bookPosition , revers = $revers, recalc = $recalc")
+
         var result: Page?
         if ( pages.isEmpty() || recalc) {
-            loadPages(bookPosition.section)
+            loadPages(bookPosition.section, recalc)
         } else if ( bookPosition.section < pages[0].startBookPosition.section
                     || bookPosition.section > pages[pages.size-1].endBookPosition.section) {
-            loadPages(bookPosition.section)
+            loadPages(bookPosition.section, recalc)
         }
 
          result = findPage(bookPosition.offSet)
@@ -31,7 +32,7 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
             section = max(0, section)
             section = min(book.getPageScheme()!!.sectionCount, section)
             if (section >= 0 && section < book.getPageScheme()!!.sectionCount) {
-                loadPages(section)
+                loadPages(section, recalc)
                 result = if (pages.isEmpty()) null else {
                     if (!revers) pages.first() else pages.last()
                 }
@@ -66,11 +67,11 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         return null
     }
 
-    private fun loadPages(section: Int) {
+    private fun loadPages(section: Int, recalc: Boolean) {
         if (section >= 0 && section < book.getPageScheme()!!.sectionCount) {
             val html = book.getPageBody(section)
             if ( html != null) {
-                splitPages(book, section, html)
+                splitPages(book, section, html, reloadFonts = recalc)
             }
         }
     }

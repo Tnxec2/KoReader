@@ -55,9 +55,9 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         }
         pageScheme.sections = mutableListOf()
         pageScheme.sections.add("Cover")
-        fb2Reader.fb2Scheme.sections.forEach{
+        fb2Reader.fb2Scheme.sections.forEachIndexed { index, it ->
             val title = it.title ?: it.orderid.toString()
-            pageScheme.sections.add(title)
+            pageScheme.sections.add("(${index}) $title")
         }
 
     }

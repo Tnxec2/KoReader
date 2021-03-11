@@ -57,7 +57,7 @@ class ReaderActivity :
 
     private var textViewHolder: ConstraintLayout? = null
 
-    private var pageView: FontTextView? = null
+    private var pageView: TextView? = null
 
     private var textViewInfoLeft: TextView? = null
     private var textViewInfoRight: TextView? = null
@@ -318,6 +318,8 @@ class ReaderActivity :
 
         pageView!!.setLineSpacing(pageView!!.lineSpacingMultiplier, prefsHelper!!.lineSpacing)
         pageView!!.letterSpacing = prefsHelper!!.letterSpacing
+
+        if ( book != null) updateView(book!!.getCur(recalc = true))
 
         var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LIGHT_BACK, 0)
         if ( co != 0 )
