@@ -477,10 +477,12 @@ class ReaderActivity :
 
             override fun onSwipeUp() {
                 super.onSwipeUp()
+                doPageNext()
             }
 
             override fun onSwipeDown() {
                 super.onSwipeDown()
+                doPagePrev()
             }
 
             override fun onSlideUp(point: Point) {
