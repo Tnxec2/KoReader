@@ -6,12 +6,12 @@ import java.io.Serializable
 
 
 class BookInfo(
-        val title: String?,
+        var title: String?,
         var cover: Bitmap?,
         var authors: MutableList<Author>?,
         val filename: String,
         val path: String,
-        val annotation: String
+        var annotation: String
 ) : Serializable {
     constructor(fileItem: FileItem) : this(title = fileItem.name, cover = null, authors = null, filename = fileItem.name, path = fileItem.path, annotation = "")
 

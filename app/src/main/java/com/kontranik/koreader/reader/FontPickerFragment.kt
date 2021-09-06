@@ -34,7 +34,6 @@ class FontPickerFragment :
     private var fontList: MutableList<TypefaceRecord> = mutableListOf()
 
     private var selectedFont: TypefaceRecord? = null
-    private var textSize: Float = 0F
 
     private var showSystemFonts: Boolean = false
     private var showNotoFonts: Boolean = false
@@ -70,8 +69,6 @@ class FontPickerFragment :
         showSystemFonts = prefs.getBoolean(PrefsHelper.PREF_KEY_USE_SYSTEM_FONTS, false)
         showNotoFonts = prefs.getBoolean(PrefsHelper.PREF_KEY_SHOW_NOTO_FONTS, false)
 
-        textSize = requireArguments().getFloat(TEXTSIZE, textSizeMin)
-
         mView = view
 
         if ( ! permissionGranted) {
@@ -99,7 +96,7 @@ class FontPickerFragment :
                 TypefaceRecord(name = TypefaceRecord.SERIF),
                 TypefaceRecord(name = TypefaceRecord.MONO))
         try {
-            fonts = FontManager.enumerateFonts(showSystemFonts, showNotoFonts)
+            fonts = FontManager.enumerateFonts(requireContext(), showSystemFonts, showNotoFonts)
             // val collectedFonts = ZLTTFInfoDetector().collectFonts(fonts!!.values)
             val collectedFonts: MutableList<TypefaceRecord> = mutableListOf()
             if ( fonts != null) {
@@ -124,7 +121,7 @@ class FontPickerFragment :
 
         fontListView.adapter = FontPickerListItemAdapter(
                 mView!!.context,
-                textSize,
+                // textSize,
                 fontList,
                 this
         )
@@ -193,11 +190,9 @@ class FontPickerFragment :
         const val FONTPATH = "fontpath"
         const val FONTNAME = "fontname"
 
-        fun newInstance(textSize: Float, font: TypefaceRecord): FontPickerFragment {
+        fun newInstance(font: TypefaceRecord): FontPickerFragment {
             val frag = FontPickerFragment()
             val args = Bundle()
-            args.putFloat(TEXTSIZE, textSize)
-
             if ( font.file != null ) args.putString(QuickMenuFragment.FONTPATH, font.file.absolutePath)
             else args.putString(QuickMenuFragment.FONTNAME, font.name)
 

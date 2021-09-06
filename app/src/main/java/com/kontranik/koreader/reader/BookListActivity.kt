@@ -20,7 +20,6 @@ import com.kontranik.koreader.utils.PrefsHelper
 class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterClickListener {
 
     private var listView: RecyclerView? = null
-    private var bookListAdapter: BookListAdapter? = null
     private var bookInfoList: MutableList<BookInfo> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,8 +32,8 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
         }
 
         listView = findViewById(R.id.reciclerView_booklist_list)
-        bookListAdapter = BookListAdapter(this, bookInfoList, this)
-        listView!!.adapter = bookListAdapter
+
+        listView!!.adapter = BookListAdapter(this, bookInfoList, this)
 
         loadBooklist()
     }
@@ -70,6 +69,8 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
                 val bookservice = BookStatusService(BookStatusDatabaseAdapter(this))
                 val books = bookservice.getLastOpened(LAST_OPENED_COUNT)
                 bookInfoList.clear()
+                listView!!.adapter = null
+
                 for ( bookstatus in books) {
                     if ( bookstatus.path != null) {
                         if ( ! FileHelper.contentFileExist(applicationContext, bookstatus.path) ){
@@ -88,7 +89,7 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
 
                     }
                 }
-                bookListAdapter!!.notifyDataSetChanged()
+                listView!!.adapter = BookListAdapter(this, bookInfoList, this)
             }
             else -> {}
         }

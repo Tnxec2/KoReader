@@ -30,7 +30,6 @@ class FileChooseActivity : AppCompatActivity(),
     private var externalPaths = mutableSetOf<String>()
 
     private var listView: RecyclerView? = null
-    private var fileListAdapter: FileListAdapter? = null
     private var fileItemList: MutableList<FileItem> = ArrayList()
 
     private var selectedDocumentFileUriString: String? = null
@@ -43,13 +42,9 @@ class FileChooseActivity : AppCompatActivity(),
 
     private var addStorage: ImageButton? = null
 
-    private var progressDialog: ProgressDialog? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_filechoose)
-
-        progressDialog = ProgressDialog(this)
 
         val close = findViewById<ImageButton>(R.id.imageButton_filechoose_close)
         close.setOnClickListener {
@@ -73,8 +68,7 @@ class FileChooseActivity : AppCompatActivity(),
         addStorage!!.visibility = View.GONE
 
         listView = findViewById(R.id.reciclerView_files)
-        fileListAdapter = FileListAdapter(this, fileItemList, this)
-        listView!!.adapter = fileListAdapter
+        listView!!.adapter = FileListAdapter(this, fileItemList, this)
 
         settings = getSharedPreferences(PREFS_FILE, MODE_PRIVATE)
         loadPrefs()
@@ -130,11 +124,12 @@ class FileChooseActivity : AppCompatActivity(),
             return
         } else {
             fileItemList.clear()
+            listView!!.adapter = null
             // val fl = FileHelper.getFileList(applicationContext, documentFile)
 
             val fl = FileHelper.getFileListDC(applicationContext, documentFilePath)
             fileItemList.addAll(fl)
-            fileListAdapter!!.notifyDataSetChanged()
+            listView!!.adapter = FileListAdapter(this, fileItemList, this)
 
             if (pathsPosition.containsKey(documentFilePath)) {
                //listView!!.scrollToPosition(pathsPosition[documentFilePath]!!)
@@ -178,6 +173,7 @@ class FileChooseActivity : AppCompatActivity(),
             return
         }
         fileItemList.clear()
+        listView!!.adapter = null
 
         for ( path in externalPaths ) {
 
@@ -195,7 +191,8 @@ class FileChooseActivity : AppCompatActivity(),
         }
         fileItemList.sortBy { it.name }
 
-        fileListAdapter!!.notifyDataSetChanged()
+        listView!!.adapter = FileListAdapter(this, fileItemList, this)
+
         addStorage!!.visibility = View.VISIBLE
     }
 
@@ -209,7 +206,7 @@ class FileChooseActivity : AppCompatActivity(),
         }
 
         if (selectedFileItem.isDir) {
-            val lm = listView!!.layoutManager as LinearLayoutManager
+            listView!!.layoutManager as LinearLayoutManager
             if ( selectedFileItem.isRoot ) {
                 if ( externalPaths.contains(selectedFileItem.uriString) )
                     getFileList(selectedFileItem)

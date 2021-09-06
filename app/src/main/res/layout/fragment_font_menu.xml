@@ -10,13 +10,29 @@
     tools:layout_editor_absoluteX="16dp"
     android:background="@color/background_main_dialog"
     android:textColor="@color/foreground_main_dialog"
-
     >
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/font_select_help"
+            android:textSize="12sp"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/textView_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/font_select_title"
+            android:textSize="@dimen/text_size_dialog_title"
+            android:textStyle="italic" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/reciclerView_font_list"
             app:layoutManager="LinearLayoutManager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            />
 
 </LinearLayout>

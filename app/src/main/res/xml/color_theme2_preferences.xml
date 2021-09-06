@@ -1,0 +1,33 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+    <PreferenceCategory app:title="@string/color_theme2_header" app:iconSpaceReserved="false">
+
+        <com.rarepebble.colorpicker.ColorPreference
+            app:key="colorBackTheme2"
+            app:title="@string/color_background"
+            android:defaultValue="@string/color_theme2_backgroud_default"
+            app:colorpicker_showAlpha="false"
+            app:iconSpaceReserved="false"
+            app:colorpicker_selectNoneButtonText="@string/default_color"
+            />
+        <com.rarepebble.colorpicker.ColorPreference
+            app:key="colorTextTheme2"
+            app:title="@string/color_foreground"
+            android:defaultValue="@string/color_theme2_foregroud_default"
+            app:colorpicker_showAlpha="false"
+            app:iconSpaceReserved="false"
+            app:colorpicker_selectNoneButtonText="@string/default_color"
+            />
+        <com.rarepebble.colorpicker.ColorPreference
+            app:key="colorLinkTheme2"
+            app:title="@string/color_linktext"
+            android:defaultValue="@string/color_theme2_linktext_default"
+            app:colorpicker_showAlpha="false"
+            app:iconSpaceReserved="false"
+            app:colorpicker_selectNoneButtonText="@string/default_color"
+            />
+    </PreferenceCategory>
+
+</PreferenceScreen>

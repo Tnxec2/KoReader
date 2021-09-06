@@ -2,7 +2,6 @@ package com.kontranik.koreader.utils
 
 import android.content.Context
 import android.os.AsyncTask
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,12 +12,11 @@ import com.kontranik.koreader.R
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.parser.epubreader.EpubHelper
 import com.kontranik.koreader.parser.fb2reader.FB2Helper
-import java.lang.ref.WeakReference
 import java.net.URLDecoder
 
 class BookListAdapter(
         val context: Context,
-        private val books: List<BookInfo>,
+        private val books: MutableList<BookInfo>,
         private val bookListAdapterClickListener: BookListAdapterClickListener) :
         RecyclerView.Adapter<BookListAdapter.ViewHolder>() {
 
@@ -42,9 +40,9 @@ class BookListAdapter(
         if (bookInfo.cover != null) {
             holder.imageView.setImageBitmap(ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100 ))
         } else {
-            val asyncTask = ReadBookInfoAsync(context, holder)
-            asyncTask.execute(bookInfo)
             holder.imageView.setImageBitmap(ImageUtils.getBitmap(context, ImageEnum.Ebook))
+            val asyncTask = ReadBookInfoAsync(this)
+            asyncTask.execute(position)
         }
 
         holder.itemView.setOnClickListener {
@@ -64,48 +62,35 @@ class BookListAdapter(
     }
 
 
-    class ReadBookInfoAsync(context: Context, val holder: ViewHolder) : AsyncTask<BookInfo?, Int?, BookInfo?>() {
-        // Weak references will still allow the Activity to be garbage-collected
-        private val weakContext: WeakReference<Context> = WeakReference(context)
+    class ReadBookInfoAsync(val adapter: BookListAdapter) : AsyncTask<Int?, Int?, BookInfo?>() {
 
-        override fun doInBackground(vararg params: BookInfo?): BookInfo? {
-            var result: BookInfo? = null
-            if (params.isNotEmpty()) {
-                result = params.first()
-                val contentUriPath = result!!.path
+        var position = 0
+        override fun doInBackground(vararg params: Int?): BookInfo? {
+            var bookInfo: BookInfo? = null
+            if (params.isNotEmpty() && params.first() != null) {
+                val position = params.first()!!
+                bookInfo = adapter.books[position]
+                val contentUriPath = bookInfo.path
 
-                val mContext = weakContext.get()
                 if (contentUriPath.endsWith(".epub", ignoreCase = true)) {
-                    result = EpubHelper(mContext!!, contentUriPath).getBookInfoTemporary(contentUriPath)
+                    bookInfo = EpubHelper(adapter.context, contentUriPath).getBookInfoTemporary(contentUriPath)
                 } else if (contentUriPath.endsWith(".fb2", ignoreCase = true)
                         || contentUriPath.endsWith(".fb2.zip", ignoreCase = true)) {
-                    result = FB2Helper(mContext!!, contentUriPath).getBookInfoTemporary(contentUriPath)
+                    bookInfo = FB2Helper(adapter.context, contentUriPath).getBookInfoTemporary(contentUriPath)
+                }
+                if ( bookInfo != null) {
+                    if (bookInfo.cover != null) {
+                        bookInfo.cover = ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100)
+                    } else {
+                        bookInfo.cover = ImageUtils.getBitmap(adapter.context, ImageEnum.Ebook)
+                    }
                 }
             }
-            return result
+            return bookInfo
         }
 
-        protected fun onProgressUpdate() {
-            //called when the background task makes any progress
+        override fun onPostExecute(result: BookInfo?) {
+            if ( result != null) adapter.notifyItemChanged(position)
         }
-
-        override fun onPreExecute() {
-            //called before doInBackground() is started
-        }
-
-        override fun onPostExecute(bookInfo: BookInfo?) {
-            Log.d("ReadBookInfoAsync", bookInfo.toString())
-            if ( bookInfo != null ) {
-                holder.titleView.text = bookInfo.title
-                holder.authorView.text = bookInfo.authorsAsString()
-                if (bookInfo.cover != null) {
-                    bookInfo.cover = ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100)
-                } else {
-                    bookInfo.cover = ImageUtils.getBitmap(weakContext.get()!!, ImageEnum.Ebook)
-                }
-                holder.imageView.setImageBitmap(bookInfo.cover!!)
-            }
-        }
-
     }
 }

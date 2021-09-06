@@ -13,11 +13,11 @@ import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.parser.epubreader.EpubHelper
 import com.kontranik.koreader.parser.fb2reader.FB2Helper
 import com.kontranik.koreader.utils.ImageUtils.getBitmap
-import java.lang.ref.WeakReference
+
 
 class FileListAdapter(
         val context: Context,
-        private val fileitems: List<FileItem>,
+        private val fileItems: MutableList<FileItem>,
         private val fileListAdapterClickListener: FileListAdapterClickListener) : RecyclerView.Adapter<FileListAdapter.ViewHolder>() {
 
     private val inflater = LayoutInflater.from(context)
@@ -32,7 +32,7 @@ class FileListAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val fileItem: FileItem = fileitems[position]
+        val fileItem: FileItem = fileItems[position]
 
         holder.nameView.text = fileItem.name
         holder.descView.text = ""
@@ -40,8 +40,8 @@ class FileListAdapter(
         holder.pathView.text = fileItem.path
         if ( ! fileItem.isDir ) {
             if ( fileItem.bookInfo == null ) {
-                val asyncTask = ReadBookInfoAsync(context, holder)
-                asyncTask.execute(fileItem)
+                val asyncTask = ReadBookInfoAsync(this)
+                asyncTask.execute(position)
             } else {
                 holder.nameView.text = fileItem.bookInfo!!.title
                 holder.descView.text = fileItem.bookInfo!!.authorsAsString()
@@ -59,7 +59,7 @@ class FileListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return fileitems.size
+        return fileItems.size
     }
 
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -69,24 +69,36 @@ class FileListAdapter(
         val pathView = itemView.findViewById<View>(R.id.filepath) as TextView
     }
 
-    class ReadBookInfoAsync(context: Context, val holder: ViewHolder) : AsyncTask<FileItem?, Int?, FileItem?>() {
-        // Weak references will still allow the Activity to be garbage-collected
-        private val weakContext: WeakReference<Context> = WeakReference(context)
 
-        override fun doInBackground(vararg params: FileItem?): FileItem? {
+    class ReadBookInfoAsync(private val adapter: FileListAdapter) : AsyncTask<Int?, Int?, FileItem?>() {
+
+        var position = 0
+        override fun doInBackground(vararg params: Int?): FileItem? {
             var result: FileItem? = null
-            if (params.isNotEmpty()) {
-                result = params.first()
-                val contentUriPath = result!!.uriString
+            if (params.isNotEmpty() && params.first() != null) {
+                position = params.first()!!
+                if ( position >= adapter.fileItems.size ) return null
+                result = adapter.fileItems[position]
+                val contentUriPath = result.uriString
                 if ( contentUriPath != null) {
-                    val mContext = weakContext.get()
+                    val mContext = adapter.context
                     if (contentUriPath.endsWith(".epub", ignoreCase = true)) {
-                        result.bookInfo = EpubHelper(mContext!!, contentUriPath).getBookInfoTemporary(contentUriPath)
+                        result.bookInfo = EpubHelper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
                     } else if (contentUriPath.endsWith(".fb2", ignoreCase = true)
                             || contentUriPath.endsWith(".fb2.zip", ignoreCase = true)) {
-                        result.bookInfo = FB2Helper(mContext!!, contentUriPath).getBookInfoTemporary(contentUriPath)
+                        result.bookInfo = FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
                     } else {
                         result.bookInfo = BookInfo(result)
+                    }
+
+                    if ( result.bookInfo != null) {
+                        if (result.bookInfo!!.cover != null) {
+                            result.bookInfo!!.cover = ImageUtils.scaleBitmap(result.bookInfo!!.cover!!, 50, 100)
+                        } else {
+                            result.bookInfo!!.cover = getBitmap(adapter.context, ImageEnum.Ebook)
+                        }
+
+
                     }
                 }
             }
@@ -94,27 +106,8 @@ class FileListAdapter(
             return result
         }
 
-        protected fun onProgressUpdate() {
-            //called when the background task makes any progress
+        override fun onPostExecute(result: FileItem?) {
+            if ( result != null) adapter.notifyItemChanged(position)
         }
-
-        override fun onPreExecute() {
-            //called before doInBackground() is started
-        }
-
-        override fun onPostExecute(fileItem: FileItem?) {
-            if (fileItem?.bookInfo != null) {
-                holder.nameView.text = fileItem.bookInfo!!.title
-                holder.descView.text = fileItem.bookInfo!!.authorsAsString()
-                holder.pathView.text = fileItem.name
-                if (fileItem.bookInfo!!.cover != null) {
-                    fileItem.bookInfo!!.cover = ImageUtils.scaleBitmap(fileItem.bookInfo!!.cover!!, 50, 100)
-                } else {
-                    fileItem.bookInfo!!.cover = getBitmap(weakContext.get()!!, ImageEnum.Ebook)
-                }
-                holder.imageView.setImageBitmap(fileItem.bookInfo!!.cover!!)
-            }
-        }
-
     }
 }

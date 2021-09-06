@@ -3,6 +3,8 @@ package com.kontranik.koreader.parser.fb2reader
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.text.Html
+import android.util.Log
 import com.kontranik.koreader.model.Author
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme
@@ -11,6 +13,7 @@ import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme
 import com.kontranik.koreader.utils.ImageUtils
 import org.jsoup.Jsoup
+import java.util.*
 import kotlin.math.ceil
 
 class FB2Helper(private val context: Context, private val contentUri: String) : EbookHelper {
@@ -27,12 +30,12 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         fb2Reader.readBook(contentUri, fileInputStream)
         if ( fb2Reader.fb2Scheme != null) {
             bookInfo = BookInfo(
-                    title = fb2Reader.fb2Scheme.description.titleInfo.booktitle,
+                    title = fb2Reader.fb2Scheme!!.description.titleInfo.booktitle,
                     cover = getcoverbitmap(),
-                    authors = getAuthors(fb2Reader.fb2Scheme).toMutableList(),
+                    authors = getAuthors(fb2Reader.fb2Scheme!!).toMutableList(),
                     path = contentUri,
                     filename = contentUri,
-                    annotation = fb2Reader.fb2Scheme.description.titleInfo.annotation.toString()
+                    annotation = fb2Reader.fb2Scheme!!.description.titleInfo.annotation.toString()
             )
         }
         calculateScheme()
@@ -41,34 +44,34 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
     private fun calculateScheme() {
         if ( fb2Reader.fb2Scheme != null && getContentSize() == 0  ) return
         pageScheme = BookPageScheme()
-        pageScheme.sectionCount = getContentSize() + 1 // coverPage dazu
-        for( pageIndex in 0 until pageScheme.sectionCount) {
+        pageScheme.sectionCount = getContentSize()
+        for( pageIndex in 0 .. pageScheme.sectionCount) {
             val aSection = getPage(pageIndex)
             if ( aSection != null) {
                 val textSize = getPageTextSize(aSection)
                 val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
                 pageScheme.scheme[pageIndex] = BookSchemeItem(
-                        textSize = textSize, textPages = pages)
+                        textSize = textSize, countTextPages = pages)
                 pageScheme.textSize += textSize
-                pageScheme.textPages += pages
+                pageScheme.countTextPages += pages
             }
         }
         pageScheme.sections = mutableListOf()
-        pageScheme.sections.add("Cover")
-        fb2Reader.fb2Scheme.sections.forEachIndexed { index, it ->
+        pageScheme.sections.add("(0) Cover")
+        fb2Reader.fb2Scheme!!.sections.forEachIndexed { index, it ->
             val title = it.title ?: it.orderid.toString()
-            pageScheme.sections.add("(${index}) $title")
+            pageScheme.sections.add("(${index + 1}) $title")
         }
-
     }
 
     private fun getPageTextSize(aSection: String): Int {
         val document = Jsoup.parse(aSection)
-        return document.body().wholeText().length
+        val r2 = document.body().wholeText().length
+        return r2
     }
 
     override fun getContentSize(): Int {
-        return fb2Reader.fb2Scheme.sections.size
+        return fb2Reader.fb2Scheme!!.sections.size
     }
 
     override fun getPage(page: Int): String? {
@@ -123,7 +126,7 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
     }
 
     override fun getCoverPage(): String? {
-        return fb2Reader.fb2Scheme.description.titleInfo.coverpage.toString()
+        return fb2Reader.fb2Scheme!!.description.titleInfo.coverpage.toString()
     }
 
 }

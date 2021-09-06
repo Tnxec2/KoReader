@@ -2,15 +2,13 @@ package com.kontranik.koreader
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
-import android.os.AsyncTask
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -29,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.database.BookStatusDatabaseAdapter
 import com.kontranik.koreader.database.BookStatusService
@@ -37,10 +36,10 @@ import com.kontranik.koreader.database.BookmarksDatabaseAdapter
 import com.kontranik.koreader.model.*
 import com.kontranik.koreader.reader.*
 import com.kontranik.koreader.utils.*
-import com.kontranik.koreader.utils.OnSwipeTouchListener
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -61,6 +60,17 @@ class ReaderActivity :
 
     private var textViewInfoLeft: TextView? = null
     private var textViewInfoRight: TextView? = null
+
+    private var textViewInfoSystemstatus: TextView? = null
+
+    private val simpleDateFormatTime = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+    private val mTimeInfoReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(ctxt: Context?, intent: Intent) {
+            updateSystemStatus()
+        }
+    }
+
     private var linearLayoutInfobereich: LinearLayout? = null
 
     private var width: Int = 100
@@ -77,7 +87,11 @@ class ReaderActivity :
         super.onCreate(savedInstanceState)
 
         prefsHelper = PrefsHelper(this)
-        
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        this.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN)
+
         setContentView(R.layout.activity_reader_main)
 
         bookStatusService = BookStatusService(BookStatusDatabaseAdapter(this))
@@ -118,15 +132,14 @@ class ReaderActivity :
 
         textViewInfoLeft = findViewById(R.id.tv_infotext_left)
         textViewInfoRight = findViewById(R.id.tv_infotext_right)
+        textViewInfoSystemstatus = findViewById(R.id.tv_infotext_systemstatus)
+
+        registerReceiver(mTimeInfoReceiver, IntentFilter(Intent.ACTION_TIME_TICK));
+
         linearLayoutInfobereich = findViewById(R.id.ll_infobereich)
 
         setColors()
-
         setOnClickListener()
-
-        AsyncTask.execute(Runnable {
-            bookStatusService!!.cleanup(applicationContext)
-        })
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -137,23 +150,19 @@ class ReaderActivity :
         //ph.checkPermissionsExternalStorage(pageView!!)
         setColors()
         if (prefsHelper!!.bookPath != null) {
-            if ( book == null || book!!.fileLocation != prefsHelper!!.bookPath) {
-                val progressDialog = ProgressDialog(this)
-                progressDialog.setMessage("loading")
-                progressDialog.show()
-
-                runOnUiThread {
-                    try {
+            runOnUiThread {
+                try {
+                    if ( book == null || book!!.fileLocation != prefsHelper!!.bookPath) {
                         loadBook()
                         loadPositionForBook()
-                        updateView(book!!.getCur(recalc = true))
-                    } catch (e: Exception) {
-                        Log.e("tag", e.message)
                     }
-                    // dismiss the progress dialog
-                    progressDialog.dismiss()
+                    if ( book != null) {
+                        Log.d(TAG, "onWindowFocusChanged: getCurPage")
+                        updateView(book!!.getCur(recalc = true))
+                    }
+                } catch (e: Exception) {
+                    Log.e("tag", e.stackTraceToString())
                 }
-
             }
         } else  {
             Toast.makeText(applicationContext, "Open a book", Toast.LENGTH_LONG).show()
@@ -177,6 +186,7 @@ class ReaderActivity :
             Toast.makeText(this, "Can't load book ${prefsHelper!!.bookPath}", Toast.LENGTH_LONG).show()
             openMainMenu()
         }
+        Toast.makeText(this, "book load...", Toast.LENGTH_SHORT).show()
         book =  Book(applicationContext, prefsHelper!!.bookPath!!, pageView!!)
         if ( book != null ) {
             bookStatusService!!.updateLastOpenTime(book!!)
@@ -243,7 +253,7 @@ class ReaderActivity :
 
     private fun loadPositionForBook() {
         if ( book == null) return
-        val startPosition = bookStatusService!!.getPosition(prefsHelper!!.bookPath!!) ?: BookPosition()
+        val startPosition = bookStatusService!!.getPosition(prefsHelper?.bookPath) ?: BookPosition()
         book!!.curPage = Page(null, startPosition, BookPosition())
     }
 
@@ -261,6 +271,8 @@ class ReaderActivity :
     override fun onStop() {
         super.onStop()
         savePrefs()
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mTimeInfoReceiver)
     }
 
     private fun loadPrefs() {
@@ -286,17 +298,17 @@ class ReaderActivity :
 
     private fun loadSettings() {
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        prefsHelper!!.theme = prefs.getString(PrefsHelper.PREF_KEY_THEME, "Auto")
+        prefsHelper!!.interfaceTheme = prefs.getString(PrefsHelper.PREF_KEY_THEME, "Auto")
         prefsHelper!!.screenOrientation = prefs.getString(PrefsHelper.PREF_KEY_ORIENTATION, "PortraitSensor")
         prefsHelper!!.screenBrightness = prefs.getString(PrefsHelper.PREF_KEY_BRIGHTNESS, "Manual")
 
         prefsHelper!!.textSize = prefs.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, prefsHelper!!.defaultTextSize)
 
-        val lineSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, null )
+        val lineSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, null)
         if ( lineSpacingString != null) prefsHelper!!.lineSpacing = lineSpacingString.toFloat()
         else prefsHelper!!.lineSpacing = prefsHelper!!.defaultLineSpacing
 
-        val letterSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, null )
+        val letterSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, null)
         if ( letterSpacingString != null) prefsHelper!!.letterSpacing = letterSpacingString.toFloat()
         else prefsHelper!!.letterSpacing = prefsHelper!!.defaultLetterSpacing
 
@@ -321,39 +333,8 @@ class ReaderActivity :
 
         if ( book != null) updateView(book!!.getCur(recalc = true))
 
-        var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LIGHT_BACK, 0)
-        if ( co != 0 )
-            prefsHelper!!.colorLightBack = "#" + Integer.toHexString(co)
-        else
-            prefsHelper!!.colorLightBack = prefsHelper!!.colorLightBackDefault
-        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LIGHT_TEXT, 0)
-        if ( co != 0 )
-            prefsHelper!!.colorLightText = "#" + Integer.toHexString(co)
-        else
-            prefsHelper!!.colorLightText = prefsHelper!!.colorLightTextDefault
-
-        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LIGHT_LINKTEXT, 0)
-        if ( co != 0 )
-            prefsHelper!!.colorLightLinkText = "#" + Integer.toHexString(co)
-        else
-            prefsHelper!!.colorLightLinkText = prefsHelper!!.colorLightLinkTextDefault
-
-
-        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_DARK_BACK, 0)
-        if ( co != 0 )
-            prefsHelper!!.colorDarkBack = "#" + Integer.toHexString(co)
-        else
-            prefsHelper!!.colorDarkBack = prefsHelper!!.colorDarkBackDefault
-        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_DARK_TEXT, 0)
-        if ( co != 0 )
-            prefsHelper!!.colorDarkText = "#" + Integer.toHexString(co)
-        else
-            prefsHelper!!.colorDarkText = prefsHelper!!.colorDarkTextDefault
-        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_DARK_LINKTEXT, 0)
-        if ( co != 0 )
-            prefsHelper!!.colorDarkLinkText = "#" + Integer.toHexString(co)
-        else
-            prefsHelper!!.colorDarkLinkText = prefsHelper!!.colorDarkLinkTextDefault
+        prefsHelper!!.colorTheme = prefs.getString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, "1")
+        loadColorSettings()
 
         prefsHelper!!.tapDoubleAction = hashMapOf(
                 ScreenZone.TopLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_TOP_LEFT, prefsHelper!!.tapZoneDoubleTopLeft),
@@ -390,10 +371,22 @@ class ReaderActivity :
                 ScreenZone.BottomRight to prefs.getString(PrefsHelper.PREF_KEY_TAP_LONG_BOTTOM_RIGHT, prefsHelper!!.tapZoneLongBottomRight),
         )
 
-
         prefsHelper!!.setOrientation(this)
-        prefsHelper!!.setTheme()
+        prefsHelper!!.setThemeDefault()
 
+    }
+
+    private fun loadColorSettings() {
+        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + prefsHelper!!.colorTheme, 0)
+        prefsHelper!!.colorBack = if ( co != 0) "#" + Integer.toHexString(co) else prefsHelper!!.colorBackDefault
+
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + prefsHelper!!.colorTheme, 0)
+        prefsHelper!!.colorText = if ( co != 0 ) "#" + Integer.toHexString(co) else prefsHelper!!.colorTextDefault
+
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LINKTEXT + prefsHelper!!.colorTheme, 0)
+        prefsHelper!!.colorLinkText = if ( co != 0 ) "#" + Integer.toHexString(co) else prefsHelper!!.colorLinkTextDefault
     }
 
     private fun checkTap(point: Point, tap: Int) {
@@ -429,6 +422,9 @@ class ReaderActivity :
             }
             "MainMenu" -> {
                 openMainMenu()
+            }
+            "GoTo" -> {
+                openGotoMenu()
             }
             "None" -> {
             }
@@ -555,17 +551,17 @@ class ReaderActivity :
 
     private fun doPageNext() {
         if ( book == null) return
-        if ( book!!.curPage!!.endBookPosition.section >= book!!.getPageScheme()!!.sectionCount-1 &&
-                book!!.curPage!!.endBookPosition.offSet >=
-                book!!.getPageScheme()!!.scheme[book!!.getPageScheme()!!.sectionCount - 1]!!.textSize) return
-        updateView(book!!.getNext())
-        savePositionForBook()
+        else {
+            if (book!!.isLastSection() && book!!.isLastPage()) return
+            updateView(book!!.getNext())
+            savePositionForBook()
+        }
     }
+
 
     private fun doPagePrev() {
         if ( book == null) return
-        if ( book!!.curPage!!.startBookPosition.section <= 0 &&
-                book!!.curPage!!.startBookPosition.offSet <= 0) return
+        if ( book!!.isFirstSection() && book!!.isFirstPage() ) return
         updateView(book!!.getPrev())
         savePositionForBook()
     }
@@ -577,13 +573,25 @@ class ReaderActivity :
             val curTextPage = book!!.getCurTextPage()
 
             textViewInfoLeft!!.text =
-                    resources.getString(R.string.page_info_text, curTextPage, book!!.getPageScheme()!!.textPages)
+                    resources.getString(R.string.page_info_text_left,
+                            curTextPage,
+                            book!!.getPageScheme()!!.countTextPages,
+                            curTextPage * 100 / book!!.getPageScheme()!!.countTextPages
+                    )
 
             textViewInfoRight!!.text =
-                    resources.getString(R.string.page_info_text, curSection, book!!.getPageScheme()!!.sectionCount)
+                    resources.getString(R.string.page_info_text_right, curSection, book!!.getPageScheme()!!.sectionCount)
         } else {
             textViewInfoRight!!.text = getString(R.string.no_book)
         }
+        updateSystemStatus()
+    }
+
+    private fun updateSystemStatus() {
+        val bm = getSystemService(BATTERY_SERVICE) as BatteryManager
+        val batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        val strTime: String = simpleDateFormatTime.format(Date().time)
+        textViewInfoSystemstatus!!.text = "$strTime $batLevel%"
     }
 
     private fun updateView(page: Page?) {
@@ -646,50 +654,73 @@ class ReaderActivity :
         quickMenuFragment.show(supportFragmentManager, "fragment_quick_menu")
     }
 
-    override fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float) {
+    override fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float, colorTheme: String) {
         Log.d(TAG, "onFinishQuickMenuDialog. TextSize: $textSize")
-        if ( textSize != pageView!!.textSize
-                || lineSpacing != pageView!!.lineSpacingMultiplier
-                || letterSpacing != pageView!!.letterSpacing
+
+        if ( textSize != prefsHelper!!.textSize
+                || lineSpacing != prefsHelper!!.lineSpacing
+                || letterSpacing != prefsHelper!!.letterSpacing
+                || colorTheme != prefsHelper!!.colorTheme
                  ) {
             prefsHelper!!.textSize = textSize
             prefsHelper!!.lineSpacing = lineSpacing
             prefsHelper!!.letterSpacing = letterSpacing
+            prefsHelper!!.colorTheme = colorTheme
             pageView!!.textSize = textSize
             pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, lineSpacing)
-            Log.d(TAG, "onFinishQuickMenuDialog: getCurPage")
-            updateView(book!!.getCur(recalc = true))
+            //Log.d(TAG, "onFinishQuickMenuDialog: getCurPage")
+            //updateView(book!!.getCur(recalc = true))
+            prefsHelper!!.setThemeDefault()
+            loadColorSettings()
+            setColors()
             savePrefs()
         }
     }
 
+    override fun onChangeColorTheme(theme: String) {
+        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + theme, 0)
+        val colorBack = if ( co != 0) "#" + Integer.toHexString(co) else prefsHelper!!.colorBackDefault
+
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + theme, 0)
+        val colorText = if ( co != 0 ) "#" + Integer.toHexString(co) else prefsHelper!!.colorTextDefault
+
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LINKTEXT + theme, 0)
+        val colorLinkText = if ( co != 0 ) "#" + Integer.toHexString(co) else prefsHelper!!.colorLinkTextDefault
+
+        textViewHolder!!.setBackgroundColor(Color.parseColor(colorBack))
+        pageView!!.setTextColor(Color.parseColor(colorText))
+        pageView!!.setLinkTextColor(Color.parseColor(colorLinkText))
+        textViewInfoLeft!!.setTextColor(Color.parseColor(colorText))
+        textViewInfoRight!!.setTextColor(Color.parseColor(colorText))
+        textViewInfoSystemstatus!!.setTextColor(Color.parseColor(colorText))
+    }
+
     override fun onChangeTextSize(textSize: Float) {
         pageView!!.textSize = textSize
-        Log.d(TAG, "onChangeTextSize: getCurPage")
-        updateView(book!!.getCur(recalc = true))
+        updateView(book!!.getCur(recalc = false))
     }
 
     override fun onChangeLineSpacing(lineSpacing: Float) {
+        if (pageView!!.lineSpacingMultiplier == lineSpacing) return
         pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, lineSpacing)
         Log.d(TAG, "onChangeLineSpacing: getCurPage")
-        updateView(book!!.getCur(recalc = true))
+        updateView(book!!.getCur(recalc = false))
     }
 
     override fun onChangeLetterSpacing(letterSpacing: Float) {
+        if (pageView!!.letterSpacing == letterSpacing) return
         pageView!!.letterSpacing = letterSpacing
         Log.d(TAG, "onChangeLetterSpacing: getCurPage")
-        updateView(book!!.getCur(recalc = true))
+        updateView(book!!.getCur(recalc = false))
     }
 
     override fun onCancelQuickMenu() {
-        if ( pageView!!.textSize != prefsHelper!!.textSize || pageView!!.lineSpacingMultiplier != prefsHelper!!.lineSpacing ) {
-            pageView!!.textSize = prefsHelper!!.textSize
-            pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, prefsHelper!!.lineSpacing)
-            pageView!!.letterSpacing = prefsHelper!!.letterSpacing
-            Log.d(TAG, "onCancelQuickMenu: getCurPage")
-            updateView(book!!.getCur(recalc = true))
-        }
-        // ... other resets
+        pageView!!.textSize = prefsHelper!!.textSize
+        pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, prefsHelper!!.lineSpacing)
+        pageView!!.letterSpacing = prefsHelper!!.letterSpacing
+        setColors()
     }
 
     override fun onAddBookmark(): Boolean {
@@ -756,7 +787,7 @@ class ReaderActivity :
                         .newInstance(
                                 book!!.curPage!!.endBookPosition.section,
                                 book!!.getCurTextPage(),
-                                book!!.getPageScheme()!!.textPages,
+                                book!!.getPageScheme()!!.countTextPages,
                                 book!!.getPageScheme()!!.sections.toTypedArray()
                         )
         gotoMenuFragment.show(supportFragmentManager, "fragment_goto_menu")
@@ -781,23 +812,32 @@ class ReaderActivity :
     }
 
     private fun setColors() {
-        when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-            Configuration.UI_MODE_NIGHT_UNDEFINED,
-            Configuration.UI_MODE_NIGHT_YES -> {
-                textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorDarkBack))
-                pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
-                pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorDarkLinkText))
-                textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
-                textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
-            }
-            Configuration.UI_MODE_NIGHT_NO -> {
-                textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorLightBack))
-                pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
-                pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorLightLinkText))
-                textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
-                textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
-            }
-        }
+//        when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+//            Configuration.UI_MODE_NIGHT_UNDEFINED,
+//            Configuration.UI_MODE_NIGHT_YES -> {
+//                textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorDarkBack))
+//                pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
+//                pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorDarkLinkText))
+//                textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
+//                textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
+//                textViewInfoSystemstatus!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
+//            }
+//            Configuration.UI_MODE_NIGHT_NO -> {
+//                textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorLightBack))
+//                pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
+//                pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorLightLinkText))
+//                textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
+//                textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
+//                textViewInfoSystemstatus!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
+//            }
+//        }
+
+        textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorBack))
+        pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorText))
+        pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorLinkText))
+        textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorText))
+        textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorText))
+        textViewInfoSystemstatus!!.setTextColor(Color.parseColor(prefsHelper!!.colorText))
 
         try {
             if (Build.VERSION.SDK_INT >= 21) {
@@ -808,14 +848,15 @@ class ReaderActivity :
                 var pIsDark = false
                 when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
                     Configuration.UI_MODE_NIGHT_YES -> {
-                        window.statusBarColor = Color.parseColor(prefsHelper!!.colorDarkBack)
+                        //window.statusBarColor = Color.parseColor(prefsHelper!!.colorDarkBack)
                         pIsDark = true
                     }
                     Configuration.UI_MODE_NIGHT_NO -> {
-                        window.statusBarColor = Color.parseColor(prefsHelper!!.colorLightBack)
+                        //window.statusBarColor = Color.parseColor(prefsHelper!!.colorLightBack)
                     }
                     Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                        window.statusBarColor = Color.parseColor(prefsHelper!!.colorDarkBack)
+                        //window.statusBarColor = Color.parseColor(prefsHelper!!.colorDarkBack)
+                        pIsDark = true;
                     }
                 }
 
@@ -853,6 +894,7 @@ class ReaderActivity :
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             FontPickerFragment.READ_STORAGE_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

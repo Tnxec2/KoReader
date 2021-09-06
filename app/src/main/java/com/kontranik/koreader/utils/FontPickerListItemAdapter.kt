@@ -12,7 +12,6 @@ import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 
 class FontPickerListItemAdapter(
         context: Context?,
-        val textSize: Float,
         private val fonts: MutableList<TypefaceRecord>?,
         private val fontPickerListAdapterClickListener: FontPickerListAdapterClickListener
 ) :
@@ -34,7 +33,6 @@ class FontPickerListItemAdapter(
 
         holder.fontview.typeface = font.getTypeface()
         holder.fontview.text = font.name
-        holder.fontview.textSize = textSize
 
         holder.itemView.setOnClickListener {
             fontPickerListAdapterClickListener.onFontlistItemClickListener(position)

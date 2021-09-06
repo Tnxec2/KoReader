@@ -51,7 +51,7 @@ class PrefsHelper(val context: Context) {
     /*
      * App Parameters
      */
-    var theme: String? = PREF_THEME_DEFAULT
+    var interfaceTheme: String? = PREF_THEME_DEFAULT
 
 
 
@@ -62,22 +62,17 @@ class PrefsHelper(val context: Context) {
     var screenBrightnessLevel: Float = 0F
     var systemScreenBrightnessLevel: Float = 0.5f
 
+
     /*
      *  Color
      */
-    val colorLightBackDefault: String = context.resources.getString(R.string.color_light_backgroud_default)
-    var colorLightBack: String? = colorLightBackDefault
-    val colorLightTextDefault: String = context.resources.getString(R.string.color_light_foregroud_default)
-    var colorLightText: String? = colorLightTextDefault
-    val colorLightLinkTextDefault: String = context.resources.getString(R.string.color_light_linktext_default)
-    var colorLightLinkText: String? = colorLightLinkTextDefault
-
-    val colorDarkBackDefault: String = context.resources.getString(R.string.color_dark_backgroud_default)
-    var colorDarkBack: String? = colorDarkBackDefault
-    val colorDarkTextDefault: String = context.resources.getString(R.string.color_dark_foregroud_default)
-    var colorDarkText: String? = colorDarkTextDefault
-    val colorDarkLinkTextDefault: String = context.resources.getString(R.string.color_dark_linktext_default)
-    var colorDarkLinkText: String? = colorDarkLinkTextDefault
+    var colorTheme: String? = PREF_COLOR_SELECTED_THEME_DEFAULT
+    val colorBackDefault: String = context.resources.getString(R.string.color_theme1_backgroud_default)
+    var colorBack: String? = colorBackDefault
+    val colorTextDefault: String = context.resources.getString(R.string.color_theme1_foregroud_default)
+    var colorText: String? = colorTextDefault
+    val colorLinkTextDefault: String = context.resources.getString(R.string.color_theme1_linktext_default)
+    var colorLinkText: String? = colorLinkTextDefault
 
     /*
      *  Tap Zonen
@@ -154,8 +149,12 @@ class PrefsHelper(val context: Context) {
         }
     }
 
-    fun setTheme( ) {
-        when ( theme) {
+    fun setThemeDefault() {
+        setThemeByName(interfaceTheme)
+    }
+
+    fun setThemeByName(mTheme: String?) {
+        when ( mTheme) {
             "Light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             "Dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             else -> { AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) }
@@ -208,12 +207,12 @@ class PrefsHelper(val context: Context) {
         const val PREF_BRIGHTNESS_MANUAL = "Manual"
         const val PREF_THEME_DEFAULT = "Manual"
 
-        const val PREF_KEY_COLOR_LIGHT_BACK = "colorBackLightTheme"
-        const val PREF_KEY_COLOR_LIGHT_TEXT = "colorTextLightTheme"
-        const val PREF_KEY_COLOR_LIGHT_LINKTEXT = "colorLinkLightTheme"
-        const val PREF_KEY_COLOR_DARK_BACK = "colorBackDarkTheme"
-        const val PREF_KEY_COLOR_DARK_TEXT = "colorTextDarkTheme"
-        const val PREF_KEY_COLOR_DARK_LINKTEXT = "colorLinkDarkTheme"
+        const val PREF_COLOR_SELECTED_THEME_DEFAULT = "1"
+        const val PREF_KEY_COLOR_SELECTED_THEME = "selected_theme"
+
+        const val PREF_KEY_COLOR_BACK = "colorBackTheme"
+        const val PREF_KEY_COLOR_TEXT = "colorTextTheme"
+        const val PREF_KEY_COLOR_LINKTEXT = "colorLinkTheme"
 
         const val PREF_KEY_TAP_ONE_TOP_LEFT = "tapZoneOneClickTopLeft"
         const val PREF_KEY_TAP_ONE_TOP_CENTER = "tapZoneOneClickTopCenter"

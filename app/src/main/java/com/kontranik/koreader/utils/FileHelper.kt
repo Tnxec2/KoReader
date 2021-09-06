@@ -21,7 +21,6 @@ object FileHelper {
                 DocumentsContract.getDocumentId(mUri))
         val resultF: ArrayList<Triple<Uri, String, String>> = ArrayList()
 
-        Log.d(TAG, "getFileListDC start resolve uris...")
         var c: Cursor? = null
         try {
             val requestedColumns = arrayOf(
@@ -42,7 +41,6 @@ object FileHelper {
         } finally {
             c?.close()
         }
-        Log.d(TAG, "getFileListDC end resolve uris...")
 
         val resultFiles = mutableListOf<FileItem>()
 
@@ -67,7 +65,6 @@ object FileHelper {
         val dirs: MutableList<FileItem> = mutableListOf()
         val files: MutableList<FileItem> = mutableListOf()
 
-        Log.d(TAG, "getFileListDC start parse uris...")
         for (i in resultF.indices) {
             val uriToLoad = resultF[i].first
 
@@ -90,7 +87,6 @@ object FileHelper {
                 }
             }
         }
-        Log.d(TAG, "getFileListDC end parse uris...")
         if ( dirs.isNotEmpty()) {
             dirs.sortBy { it.name }
             resultFiles.addAll(dirs)

@@ -3,6 +3,7 @@ package com.kontranik.koreader.parser.epubreader
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.text.Html
 import com.kontranik.koreader.model.Author
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme
@@ -50,16 +51,16 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
         if ( epubBook == null ) return
         if ( epubBook != null && getContentSize() == 0   ) return
         pageScheme = BookPageScheme()
-        pageScheme.sectionCount = getContentSize()
-        for( pageIndex in 0 until getContentSize()) {
+        pageScheme.sectionCount = getContentSize()-1
+        for( pageIndex in 0 .. getContentSize()) {
             val aSection = getPage(pageIndex)
             if ( aSection != null) {
                 val textSize = getPageTextSize(aSection)
                 val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
                 pageScheme.scheme[pageIndex] = BookSchemeItem(
-                        textSize = textSize, textPages = pages)
+                        textSize = textSize, countTextPages = pages)
                 pageScheme.textSize += textSize
-                pageScheme.textPages += pages
+                pageScheme.countTextPages += pages
             }
         }
         pageScheme.sections = mutableListOf()
@@ -91,8 +92,12 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
     }
 
     override fun getPage(page: Int): String? {
-        val data = epubBook?.contents?.get(page)?.data
-        return data?.let { String(it) }
+        if ( epubBook?.contents != null ) {
+            if ( page > epubBook?.contents!!.lastIndex) return null
+            val data = epubBook?.contents?.get(page)?.data
+            return data?.let { String(it) }
+        } else
+            return null
     }
 
     override fun getPageByHref(href: String): String? {

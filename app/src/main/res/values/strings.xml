@@ -17,7 +17,8 @@
     <string name="click_in_zone">Click %1$d in %2$s</string>
     <string name="doubleclick_in_zone">Double Click in %1$s</string>
     <string name="longclick_in_zone">Long Click in %1$s</string>
-    <string name="page_info_text">%1$d / %2$d</string>
+    <string name="page_info_text_left">%1$d / %2$d (%3$d%%)</string>
+    <string name="page_info_text_right">%1$d / %2$d</string>
     <string name="openfile">Open File</string>
     <string name="textSizeExampleText">ABCabc</string>
     <string name="settings">Settings</string>
@@ -67,22 +68,22 @@
 
     <!-- Preference Titles -->
     <string name="interface_header">Interface</string>
-    <string name="color_light_header">Color Light Theme</string>
-    <string name="color_dark_header">Color Dark Theme</string>
-    <string name="color_header">Color</string>
+    <string name="interface_light_header">Day Theme</string>
+    <string name="interface_dark_header">Night Theme</string>
+    <string name="color_theme_header">Color Theme</string>
     <string name="text_header">Text</string>
     <string name="font_header">Font</string>
 
     <!-- Interface Preferences -->
-    <string name="theme_header">Theme</string>
-    <string name="theme_title">Theme</string>
+    <string name="interface_theme_header">Interface</string>
+    <string name="interface_theme_title">Theme</string>
     <string name="brightness_title">Brightness</string>
     <string name="orientation_title">Orientation</string>
 
     <!-- Interface entries -->
-    <string name="ThemeDark">Dark</string>
-    <string name="ThemeLight">Light</string>
-    <string name="ThemeAutoSystem">Auto System</string>
+    <string name="InterfaceDark">Dark</string>
+    <string name="InterfaceLight">Light</string>
+    <string name="InterfaceAutoSystem">Auto System</string>
     <string name="brightness_values_system">System</string>
     <string name="brightness_values_manual">Manual</string>
     <string name="orientation_values_sensor">Sensor</string>
@@ -97,12 +98,27 @@
     <string name="color_linktext">Link color</string>
     <string name="default_color">set default color</string>
 
-    <string name="color_light_backgroud_default">#FBF0D9</string>
-    <string name="color_light_foregroud_default">#5F4B32</string>
-    <string name="color_light_linktext_default">#2196F3</string>
-    <string name="color_dark_backgroud_default">#000000</string>
-    <string name="color_dark_foregroud_default">#FBF0D9</string>
-    <string name="color_dark_linktext_default">#2196F3</string>
+    <string name="color_theme1_header">Theme 1</string>
+    <string name="color_theme2_header">Theme 2</string>
+    <string name="color_theme3_header">Theme 3</string>
+    <string name="color_theme4_header">Theme 4</string>
+    <string name="color_theme5_header">Theme 5</string>
+
+    <string name="color_theme1_backgroud_default">#FBF0D9</string>
+    <string name="color_theme1_foregroud_default">#5F4B32</string>
+    <string name="color_theme1_linktext_default">#2196F3</string>
+    <string name="color_theme2_backgroud_default">#000000</string>
+    <string name="color_theme2_foregroud_default">#FBF0D9</string>
+    <string name="color_theme2_linktext_default">#2196F3</string>
+    <string name="color_theme3_backgroud_default">#000000</string>
+    <string name="color_theme3_foregroud_default">#FBF0D9</string>
+    <string name="color_theme3_linktext_default">#2196F3</string>
+    <string name="color_theme4_backgroud_default">#000000</string>
+    <string name="color_theme4_foregroud_default">#FBF0D9</string>
+    <string name="color_theme4_linktext_default">#2196F3</string>
+    <string name="color_theme5_backgroud_default">#000000</string>
+    <string name="color_theme5_foregroud_default">#FBF0D9</string>
+    <string name="color_theme5_linktext_default">#2196F3</string>
 
     <!-- Text Preferences -->
     <string name="font_name_title">Font name</string>
@@ -133,8 +149,11 @@
     <string name="tapzones_activity_page_next">next page</string>
     <string name="tapzones_activity_quick_menu">quick menu</string>
     <string name="tapzones_activity_main_menu">main menu</string>
+    <string name="tapzones_activity_goto">go to…</string>
     <string name="line_spacing">Line Spacing</string>
     <string name="letter_spacing">Letter Spacing</string>
     <string name="textsize_sample">ABCabc</string>
+    <string name="font_select_help">place custom fonts in folder: internal_storage/Android/data/com.kontranik.koreader/files/fonts/</string>
+    <string name="font_select_title">Select font</string>
 
 </resources>

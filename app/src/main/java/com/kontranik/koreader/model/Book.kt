@@ -56,6 +56,13 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
         }
     }
 
+    fun isLastPage() = curPage!!.endBookPosition.offSet >=
+            getPageScheme()!!.getLastSheme()!!.textSize
+
+    fun isLastSection() =
+            curPage!!.endBookPosition.section >= getPageScheme()!!.sectionCount
+
+
     /*
      * replace svg-image-Tag with img-Tag
      */
@@ -133,18 +140,21 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
     fun getCurSection(): Int {
         if ( curPage == null ) return  0
         var curSection = curPage!!.endBookPosition.section
-        curSection++
+        //curSection++
         return curSection
     }
 
     fun getCurTextPage(): Int {
         var curTextPage = 0
         for (i in 0 until curPage!!.endBookPosition.section) {
-            curTextPage += getPageScheme()!!.scheme[i]!!.textPages
+            curTextPage += getPageScheme()!!.scheme[i]!!.countTextPages
         }
         curTextPage += ( curPage!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
         return curTextPage
     }
+
+    fun isFirstSection() = curPage!!.startBookPosition.section <= 0
+    fun isFirstPage() = curPage!!.startBookPosition.offSet <= 0
 
     companion object {
         fun getHelper(context: Context, contentUri: String): EbookHelper? {

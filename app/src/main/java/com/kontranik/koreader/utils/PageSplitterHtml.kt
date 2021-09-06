@@ -17,7 +17,6 @@ open class PageSplitterHtml(private val textView: TextView) : FontsHelper(textVi
     private var staticLayout: StaticLayout? = null
 
     fun splitPages(book: Book, section: Int, html: String, reloadFonts: Boolean) {
-        Log.d("splitPages", "reloadfonts = $reloadFonts")
         if ( reloadFonts ) loadFonts()
 
         val pageWidth: Int = textView.measuredWidth - textView.paddingLeft - textView.paddingRight

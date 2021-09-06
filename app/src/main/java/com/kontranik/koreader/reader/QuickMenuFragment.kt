@@ -1,6 +1,7 @@
 package com.kontranik.koreader.reader
 
 import android.content.SharedPreferences
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -15,6 +16,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
+import com.kontranik.koreader.utils.ColoredArrayAdapter
 import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.TextViewInitiator
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
@@ -35,15 +37,20 @@ class QuickMenuFragment : DialogFragment() {
     private var lineSpacing: Float = 1f
     private var letterSpacing: Float = 0.05f
 
+    private var theme: String = "Auto"
+
+    private val typeFace: Typeface = TypefaceRecord.DEFAULT.getTypeface()
+
     // 1. Defines the listener interface with a method passing back data result.
     interface QuickMenuDialogListener {
-        fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float)
+        fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float, theme: String)
         fun onChangeTextSize(textSize: Float)
         fun onChangeLineSpacing(lineSpacing: Float)
         fun onChangeLetterSpacing(letterSpacing: Float)
         fun onCancelQuickMenu()
         fun onAddBookmark(): Boolean
         fun onShowBookmarklist()
+        fun onChangeColorTheme(theme: String)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,8 +67,6 @@ class QuickMenuFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         Log.d("QuickMenuFragment", view.context.theme.toString())
-
-        listener = activity as QuickMenuDialogListener
 
         val close = view.findViewById<ImageButton>(R.id.imageButton_quickmenu_back)
         close.setOnClickListener {
@@ -88,9 +93,45 @@ class QuickMenuFragment : DialogFragment() {
         if ( bookPath == null) bookinfo.visibility = View.GONE
 
         initialTextSize(view)
+        initialTheming(view)
         initialLineSpacing(view)
         initialLetterSpacing(view)
         initialBookmarks(view)
+
+        listener = activity as QuickMenuDialogListener
+
+    }
+
+    private fun initialTheming(view: View) {
+
+        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+        theme = prefs.getString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, "1") ?: "1"
+
+        val spinner: Spinner = view.findViewById(R.id.spinner_quick_menu_themes)
+
+        val valArray = view.resources.getStringArray(R.array.selected_theme_values)
+        val entryArray = view.resources.getStringArray(R.array.selected_theme_entries)
+
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        val adapter = ColoredArrayAdapter(view.context, android.R.layout.simple_spinner_item,  entryArray.asList(), textSize, typeFace)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        // Apply the adapter to the spinner
+        spinner.adapter = adapter
+
+        spinner.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+
+                theme = valArray[position]
+                listener!!.onChangeColorTheme(theme)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // sometimes you need nothing here
+            }
+        }
+
+        spinner.setSelection(valArray.indexOf(theme) )
 
     }
 
@@ -225,13 +266,14 @@ class QuickMenuFragment : DialogFragment() {
 
     private fun save() {
         val prefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit()
+        prefEditor.putString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, theme)
         prefEditor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
         prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, lineSpacing.toString())
         prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, letterSpacing.toString())
         prefEditor.apply()
 
         // Return Data back to activity through the implemented listener
-        listener!!.onFinishQuickMenuDialog(textSize, lineSpacing, letterSpacing)
+        listener!!.onFinishQuickMenuDialog(textSize, lineSpacing, letterSpacing, theme)
 
         // Close the dialog and return back to the parent activity
         dismiss()
@@ -250,6 +292,7 @@ class QuickMenuFragment : DialogFragment() {
     }
 
     companion object {
+        const val THEME = "theme"
         const val TEXTSIZE = "textSize"
         const val LINESPACING = "lineSpacing"
         const val LETTERSPACING = "letterSpacing"

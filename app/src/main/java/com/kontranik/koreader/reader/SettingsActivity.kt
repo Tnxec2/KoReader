@@ -80,19 +80,72 @@ class SettingsActivity : AppCompatActivity(),
             setPreferencesFromResource(R.xml.tapzone_double_preferences, rootKey)
         }
     }
+
     class TapZoneLongSettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.tapzone_long_preferences, rootKey)
         }
     }
+
     class TextSettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.text_preferences, rootKey)
         }
     }
+
     class ColorSettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.color_preferences, rootKey)
+        }
+    }
+
+    class ColorTheme1SettingsFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            setPreferencesFromResource(R.xml.color_theme1_preferences, rootKey)
+        }
+        override fun onDisplayPreferenceDialog(preference: Preference?) {
+            if (preference is ColorPreference) {
+                preference.showDialog(this, 0)
+            } else super.onDisplayPreferenceDialog(preference)
+        }
+    }
+
+    class ColorTheme2SettingsFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            setPreferencesFromResource(R.xml.color_theme2_preferences, rootKey)
+        }
+        override fun onDisplayPreferenceDialog(preference: Preference?) {
+            if (preference is ColorPreference) {
+                preference.showDialog(this, 0)
+            } else super.onDisplayPreferenceDialog(preference)
+        }
+    }
+
+    class ColorTheme3SettingsFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            setPreferencesFromResource(R.xml.color_theme3_preferences, rootKey)
+        }
+        override fun onDisplayPreferenceDialog(preference: Preference?) {
+            if (preference is ColorPreference) {
+                preference.showDialog(this, 0)
+            } else super.onDisplayPreferenceDialog(preference)
+        }
+    }
+
+    class ColorTheme4SettingsFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            setPreferencesFromResource(R.xml.color_theme4_preferences, rootKey)
+        }
+        override fun onDisplayPreferenceDialog(preference: Preference?) {
+            if (preference is ColorPreference) {
+                preference.showDialog(this, 0)
+            } else super.onDisplayPreferenceDialog(preference)
+        }
+    }
+
+    class ColorTheme5SettingsFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            setPreferencesFromResource(R.xml.color_theme5_preferences, rootKey)
         }
         override fun onDisplayPreferenceDialog(preference: Preference?) {
             if (preference is ColorPreference) {

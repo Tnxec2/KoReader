@@ -2,63 +2,48 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     >
 
-    <PreferenceCategory app:title="@string/color_light_header" app:iconSpaceReserved="false">
+    <ListPreference
+        app:key="selected_theme"
+        app:entries="@array/selected_theme_entries"
+        app:entryValues="@array/selected_theme_values"
+        app:defaultValue="1"
+        app:title="@string/color_theme_header"
+        app:icon="@drawable/ic_iconmonstr_paintbrush_10"
+        app:useSimpleSummaryProvider="true" />
 
-        <com.rarepebble.colorpicker.ColorPreference
-            app:key="colorBackLightTheme"
-            app:title="@string/color_background"
-            android:defaultValue="@string/color_light_backgroud_default"
-            app:colorpicker_showAlpha="false"
-            app:iconSpaceReserved="false"
-            app:colorpicker_selectNoneButtonText="@string/default_color"
-            />
-        <com.rarepebble.colorpicker.ColorPreference
-            app:key="colorTextLightTheme"
-            app:title="@string/color_foreground"
-            android:defaultValue="@string/color_light_foregroud_default"
-            app:colorpicker_showAlpha="false"
-            app:iconSpaceReserved="false"
-            app:colorpicker_selectNoneButtonText="@string/default_color"
-            />
-        <com.rarepebble.colorpicker.ColorPreference
-            app:key="colorLinkLightTheme"
-            app:title="@string/color_linktext"
-            android:defaultValue="@string/color_light_linktext_default"
-            app:colorpicker_showAlpha="false"
-            app:iconSpaceReserved="false"
-            app:colorpicker_selectNoneButtonText="@string/default_color"
-            />
-    </PreferenceCategory>
+    <Preference
+        app:key="color_theme1_preference"
+        app:title="@string/color_theme1_header"
+        app:iconSpaceReserved="false"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorTheme1SettingsFragment"
+        />
 
-    <PreferenceCategory app:title="@string/color_dark_header">
+    <Preference
+        app:key="color_theme2_preference"
+        app:title="@string/color_theme2_header"
+        app:iconSpaceReserved="false"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorTheme2SettingsFragment"
+        />
 
-        <com.rarepebble.colorpicker.ColorPreference
-            app:key="colorBackDarkTheme"
-            app:title="@string/color_background"
-            app:defaultValue="@string/color_dark_backgroud_default"
-            app:colorpicker_showAlpha="false"
-            app:iconSpaceReserved="false"
-            app:colorpicker_selectNoneButtonText="@string/default_color"
-            />
+    <Preference
+        app:key="color_theme3_preference"
+        app:title="@string/color_theme3_header"
+        app:iconSpaceReserved="false"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorTheme3SettingsFragment"
+        />
 
-        <com.rarepebble.colorpicker.ColorPreference
-            app:key="colorTextDarkTheme"
-            app:title="@string/color_foreground"
-            app:defaultValue="@string/color_dark_foregroud_default"
-            app:colorpicker_showAlpha="false"
-            app:iconSpaceReserved="false"
-            app:colorpicker_selectNoneButtonText="@string/default_color"
-            />
+    <Preference
+        app:key="color_theme4_preference"
+        app:title="@string/color_theme4_header"
+        app:iconSpaceReserved="false"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorTheme4SettingsFragment"
+        />
 
-        <com.rarepebble.colorpicker.ColorPreference
-            app:key="colorLinkDarkTheme"
-            app:title="@string/color_linktext"
-            android:defaultValue="@string/color_dark_linktext_default"
-            app:colorpicker_showAlpha="false"
-            app:iconSpaceReserved="false"
-            app:colorpicker_selectNoneButtonText="@string/default_color"
-            />
-    </PreferenceCategory>
-
+    <Preference
+        app:key="color_theme5_preference"
+        app:title="@string/color_theme5_header"
+        app:iconSpaceReserved="false"
+        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorTheme5SettingsFragment"
+        />
 
 </PreferenceScreen>

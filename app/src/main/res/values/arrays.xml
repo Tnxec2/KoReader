@@ -1,12 +1,12 @@
 <resources>
 
-    <string-array name="theme_entries">
-        <item>@string/ThemeLight</item>
-        <item>@string/ThemeDark</item>
-        <item>@string/ThemeAutoSystem</item>
+    <string-array name="interface_entries">
+        <item>@string/InterfaceLight</item>
+        <item>@string/InterfaceDark</item>
+        <item>@string/InterfaceAutoSystem</item>
     </string-array>
 
-    <string-array name="theme_values">
+    <string-array name="interface_values">
         <item>Light</item>
         <item>Dark</item>
         <item>Auto</item>
@@ -38,12 +38,29 @@
         <item>LandscapeSensor</item>
     </string-array>
 
+    <string-array name="selected_theme_entries">
+        <item>@string/color_theme1_header</item>
+        <item>@string/color_theme2_header</item>
+        <item>@string/color_theme3_header</item>
+        <item>@string/color_theme4_header</item>
+        <item>@string/color_theme5_header</item>
+    </string-array>
+
+    <string-array name="selected_theme_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
     <string-array name="tapzonen_entries">
         <item>@string/tapzones_activity_none</item>
         <item>@string/tapzones_activity_page_prev</item>
         <item>@string/tapzones_activity_page_next</item>
         <item>@string/tapzones_activity_quick_menu</item>
         <item>@string/tapzones_activity_main_menu</item>
+        <item>@string/tapzones_activity_goto</item>
     </string-array>
 
     <string-array name="tapzonen_values">
@@ -52,6 +69,7 @@
         <item>PageNext</item>
         <item>QuickMenu</item>
         <item>MainMenu</item>
+        <item>GoTo</item>
     </string-array>
 
     <string-array name="line_spacing_entries">

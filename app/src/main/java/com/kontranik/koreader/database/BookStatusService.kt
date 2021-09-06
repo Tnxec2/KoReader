@@ -38,7 +38,8 @@ class BookStatusService(var adapter: BookStatusDatabaseAdapter) {
         adapter.close()
     }
 
-    fun getPosition(path: String): BookPosition? {
+    fun getPosition(path: String?): BookPosition? {
+        if ( path == null) return null
         adapter.open()
         val bookStatus = adapter.getBookStatusByPath(path)
         adapter.close()
@@ -63,6 +64,7 @@ class BookStatusService(var adapter: BookStatusDatabaseAdapter) {
     }
 
     fun cleanup(context: Context) {
+        Log.d("BookStatusCleanup", "Start: " + Date().toString())
         adapter.open()
         val list = adapter.allBookStatus
         var file: File
@@ -83,6 +85,7 @@ class BookStatusService(var adapter: BookStatusDatabaseAdapter) {
         }
         Log.d(TAG, "cleanup: finish")
         adapter.close()
+        Log.d("BookStatusCleanup", "Ende: " + Date().toString())
     }
 
     companion object {

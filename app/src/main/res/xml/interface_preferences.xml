@@ -2,11 +2,11 @@
 
     <PreferenceCategory app:title="@string/interface_header"  app:iconSpaceReserved="false">
         <ListPreference
-            app:key="theme"
-            app:entries="@array/theme_entries"
-            app:entryValues="@array/theme_values"
+            app:key="interface"
+            app:entries="@array/interface_entries"
+            app:entryValues="@array/interface_values"
             app:defaultValue="Auto"
-            app:title="@string/theme_title"
+            app:title="@string/interface_theme_title"
             app:icon="@drawable/ic_baseline_preview_24"
             app:useSimpleSummaryProvider="true" />
         <ListPreference

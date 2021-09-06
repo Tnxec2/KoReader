@@ -37,6 +37,7 @@ class FloatTextViewFragment : DialogFragment() {
         }
 
         val textSize = requireArguments().getFloat(QuickMenuFragment.TEXTSIZE)
+        val theme = requireArguments().getString(QuickMenuFragment.THEME)
         val fontname = requireArguments().getString(QuickMenuFragment.FONTNAME, TypefaceRecord.SANSSERIF)
         val fontpath = requireArguments().getString(QuickMenuFragment.FONTPATH, null)
         val selectedFont = if ( fontpath != null ) {

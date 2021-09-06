@@ -15,43 +15,51 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     fun getPage(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page? {
         Log.d(TAG, "getPage:  $bookPosition , revers = $revers, recalc = $recalc")
 
-        var result: Page?
-        if ( pages.isEmpty() || recalc) {
-            loadPages(bookPosition.section, recalc)
-        } else if ( bookPosition.section < pages[0].startBookPosition.section
-                    || bookPosition.section > pages[pages.size-1].endBookPosition.section) {
+        var restultPage: Page?
+        if ( pages.isEmpty() || recalc || !isCurrentSectionLoaded(bookPosition)) {
             loadPages(bookPosition.section, recalc)
         }
 
-         result = findPage(bookPosition.offSet)
+         restultPage = findPage(bookPosition.offSet)
 
+         if ( restultPage == null) restultPage = section(bookPosition, restultPage, revers, recalc)
+
+        return restultPage
+    }
+
+    private fun isCurrentSectionLoaded(bookPosition: BookPosition) =
+            (bookPosition.section >= pages.first().startBookPosition.section
+                    && bookPosition.section <= pages.last().endBookPosition.section)
+
+    private fun section(bookPosition: BookPosition, page: Page?, revers: Boolean, recalc: Boolean): Page? {
+        var resultPage = page
         var section = bookPosition.section
-        while ( result == null) {
-            if ( ! revers) section++
+        while (resultPage == null) {
+            if (!revers) section++
             else section--
+
             section = max(0, section)
-            section = min(book.getPageScheme()!!.sectionCount, section)
-            if (section >= 0 && section < book.getPageScheme()!!.sectionCount) {
+//            section = min(book.getPageScheme()!!.sectionCount, section)
+            if (section >= 0 && section <= book.getPageScheme()!!.sectionCount) {
                 loadPages(section, recalc)
-                result = if (pages.isEmpty()) null else {
+                resultPage = if (pages.isEmpty()) null else {
                     if (!revers) pages.first() else pages.last()
                 }
             } else {
-                if ( section <= 0 && revers ) {
-                    result = pages.first()
-                } else if ( ! revers && section >= book.getPageScheme()!!.sectionCount) {
-                    result = pages.last()
+                if (section <= 0 && revers) {
+                    resultPage = pages.first()
+                } else if (!revers && section >= book.getPageScheme()!!.sectionCount) {
+                    resultPage = pages.last()
                 }
             }
         }
-
-        return result
+        return resultPage
     }
 
     private fun findPage(offset: Int): Page? {
         if ( offset < 0) return null
         if ( pages.isEmpty() ) return null
-        if ( offset > pages[pages.size-1].endBookPosition.offSet) return null
+        if ( offset > pages.last().endBookPosition.offSet) return null
 
         var startOffset: Int
         var endOffset: Int
@@ -68,7 +76,7 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     }
 
     private fun loadPages(section: Int, recalc: Boolean) {
-        if (section >= 0 && section < book.getPageScheme()!!.sectionCount) {
+        if (section >= 0 && section <= book.getPageScheme()!!.sectionCount) {
             val html = book.getPageBody(section)
             if ( html != null) {
                 splitPages(book, section, html, reloadFonts = recalc)

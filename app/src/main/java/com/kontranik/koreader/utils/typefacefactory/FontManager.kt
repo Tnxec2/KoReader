@@ -1,5 +1,6 @@
 package com.kontranik.koreader.utils.typefacefactory
 
+import android.content.Context
 import android.os.Environment
 import android.util.Log
 import java.io.File
@@ -13,12 +14,12 @@ object FontManager {
 
     // This function enumerates all fonts on Android system and returns the HashMap with the font
     // absolute file name as key, and the font literal name (embedded into the font) as value.
-    fun enumerateFonts(showSystemFonts: Boolean, showNotoFonts: Boolean): HashMap<String, File>? {
+    fun enumerateFonts(context: Context, showSystemFonts: Boolean, showNotoFonts: Boolean): HashMap<String, File>? {
         val fontdirs: MutableList<String> = mutableListOf()
-        if ( Environment.getExternalStorageDirectory() != null) {
-            fontdirs.add(Environment.getExternalStorageDirectory().absolutePath + "/fonts")
-            fontdirs.add(Environment.getExternalStorageDirectory().absolutePath + "/Fonts")
-        }
+
+        if ( context.getExternalFilesDir(null) != null)
+            fontdirs.add(context.getExternalFilesDir(null)!!.absolutePath + "/fonts")
+
         if ( showSystemFonts ) fontdirs.addAll(listOf("/system/fonts", "/system/font", "/data/fonts"))
 
         val fonts = HashMap<String, File>()

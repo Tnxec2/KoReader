@@ -56,31 +56,36 @@
         <com.kontranik.koreader.utils.FontPickerPreference
             app:key="fontPickerNormal"
             fonttype="normal"
-            app:summary="@string/text_normal"
+            android:title="@string/text_normal"
+            app:singleLineTitle="true"
             app:iconSpaceReserved="false" />
 
         <com.kontranik.koreader.utils.FontPickerPreference
             app:key="fontPickerBold"
             fonttype="bold"
-            app:summary="@string/text_bold"
+            android:title="@string/text_bold"
+            app:singleLineTitle="true"
             app:iconSpaceReserved="false" />
 
         <com.kontranik.koreader.utils.FontPickerPreference
             app:key="fontPickerItalic"
             fonttype="italic"
-            app:summary="@string/text_italic"
+            android:title="@string/text_italic"
+            app:singleLineTitle="true"
             app:iconSpaceReserved="false" />
 
         <com.kontranik.koreader.utils.FontPickerPreference
             app:key="fontPickerBoldItalic"
             fonttype="bolditalic"
-            app:summary="@string/text_bolditalic"
+            android:title="@string/text_bolditalic"
+            app:singleLineTitle="true"
             app:iconSpaceReserved="false" />
 
         <com.kontranik.koreader.utils.FontPickerPreference
             app:key="fontPickerMonospace"
             fonttype="monospace"
-            app:summary="@string/text_monospace"
+            android:title="@string/text_monospace"
+            app:singleLineTitle="true"
             app:iconSpaceReserved="false" />
 
     </PreferenceCategory>
