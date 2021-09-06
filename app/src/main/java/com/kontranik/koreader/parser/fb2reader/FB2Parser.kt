@@ -1,8 +1,6 @@
 package com.kontranik.koreader.parser.fb2reader
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.kontranik.koreader.parser.fb2reader.model.FB2Elements
 import com.kontranik.koreader.parser.fb2reader.model.FB2ParserObject
 import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme
@@ -11,18 +9,18 @@ import org.xml.sax.SAXException
 import org.xml.sax.helpers.DefaultHandler
 import java.io.InputStream
 import java.nio.charset.Charset
+import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
 
-@RequiresApi(Build.VERSION_CODES.N)
-class FB2Parser(appDir: String, var uri: String, var fileInputStream: InputStream) : DefaultHandler() {
+class FB2Parser(appDir: String, private var uri: String, private var fileInputStream: InputStream) : DefaultHandler() {
     // SAX-EventHandler erstellen
     // private DefaultHandler handler = this;
     // Inhalt mit dem Default-Parser parsen
     private var saxParser: SAXParser = SAXParserFactory.newInstance().newSAXParser()
-    var fB2ParserObject = FB2ParserObject(FileHelper(appDir))
+    private var fB2ParserObject = FB2ParserObject(FileHelper(appDir))
 
     @Throws(Exception::class)
     fun parseBook(): FB2Scheme {
@@ -40,14 +38,18 @@ class FB2Parser(appDir: String, var uri: String, var fileInputStream: InputStrea
         if (!onlyscheme) fB2ParserObject.fileHelper.clearworkdir()
         Log.d("fb2parser", uri)
         if (uri.endsWith(".zip")) {
-            val zis = ZipInputStream(fileInputStream, Charset.forName("Cp437"))
+            val zis = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                ZipInputStream(fileInputStream, Charset.forName("Cp437"))
+            } else {
+                ZipInputStream(fileInputStream)
+            }
             var ze: ZipEntry
 
             while (true) {
                 ze = zis.nextEntry
                 if ( ze == null) break
                 if (!ze.isDirectory) {
-                    if (ze.name.toLowerCase().endsWith(".fb2")) {
+                    if (ze.name.toLowerCase(Locale.getDefault()).endsWith(".fb2")) {
                         saxParser.parse(zis, this)
                         break
                     }
@@ -55,7 +57,7 @@ class FB2Parser(appDir: String, var uri: String, var fileInputStream: InputStrea
             }
 
             zis.close()
-        } else if (uri.toLowerCase().endsWith(".fb2")) {
+        } else if (uri.toLowerCase(Locale.getDefault()).endsWith(".fb2")) {
             saxParser.parse(fileInputStream, this)
         }
         fB2ParserObject.fb2scheme.path = uri
@@ -78,7 +80,7 @@ class FB2Parser(appDir: String, var uri: String, var fileInputStream: InputStrea
     override fun startElement(namespaceURI: String, localName: String,
                               qName: String, attrs: Attributes) {
         val eName = if ("" == localName) qName else localName
-        val fel = FB2Elements.fromString(eName.toLowerCase())
+        val fel = FB2Elements.fromString(eName.toLowerCase(Locale.getDefault()))
         if (fel == null) {
             println(eName)
             return
@@ -93,7 +95,7 @@ class FB2Parser(appDir: String, var uri: String, var fileInputStream: InputStrea
     @Throws(SAXException::class)
     override fun endElement(namespaceURI: String, localName: String, qName: String) {
         val eName = if ("" == localName) qName else localName
-        val fel = FB2Elements.fromString(eName.toLowerCase())
+        val fel = FB2Elements.fromString(eName.toLowerCase(Locale.getDefault()))
         if (fel == null) {
             println("EndElement: $eName")
             return
