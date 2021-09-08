@@ -43,7 +43,7 @@ class QuickMenuFragment : DialogFragment() {
 
     // 1. Defines the listener interface with a method passing back data result.
     interface QuickMenuDialogListener {
-        fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float, theme: String)
+        fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float, colorTheme: String)
         fun onChangeTextSize(textSize: Float)
         fun onChangeLineSpacing(lineSpacing: Float)
         fun onChangeLetterSpacing(letterSpacing: Float)

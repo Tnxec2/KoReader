@@ -196,7 +196,7 @@ class PrefsHelper(val context: Context) {
         const val PREF_KEY_BOOK_FONT_PATH_MONOSPACE = "FontPathMonospace"
         const val PREF_SCREEN_BRIGHTNESS = "ScreenBrightness"
 
-        const val PREF_KEY_THEME = "theme"
+        const val PREF_KEY_THEME = "interface_theme"
         const val PREF_KEY_BRIGHTNESS = "brightness"
         const val PREF_KEY_ORIENTATION = "orientation"
         const val PREF_KEY_USE_SYSTEM_FONTS = "showSystemFonts"

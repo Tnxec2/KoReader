@@ -125,11 +125,6 @@ class ReaderActivity :
         loadSettings()
         loadPrefs()
 
-        pageView!!.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-            Log.d(TAG, "pageView layout changed")
-            updateSizeInfo()
-        }
-
         textViewInfoLeft = findViewById(R.id.tv_infotext_left)
         textViewInfoRight = findViewById(R.id.tv_infotext_right)
         textViewInfoSystemstatus = findViewById(R.id.tv_infotext_systemstatus)
@@ -140,6 +135,12 @@ class ReaderActivity :
 
         setColors()
         setOnClickListener()
+
+        pageView!!.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            Log.d(TAG, "pageView layout changed")
+            updateSizeInfo()
+        }
+
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -261,11 +262,6 @@ class ReaderActivity :
         if ( prefsHelper!!.bookPath != null && book != null && book!!.curPage != null) {
             bookStatusService!!.savePosition(book!!)
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        // savePositionForBook()
     }
 
     override fun onStop() {
@@ -593,7 +589,8 @@ class ReaderActivity :
         val bm = getSystemService(BATTERY_SERVICE) as BatteryManager
         val batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         val strTime: String = simpleDateFormatTime.format(Date().time)
-        textViewInfoSystemstatus!!.text = "$strTime $batLevel%"
+        textViewInfoSystemstatus!!.text = resources.getString(R.string.page_info_text_time, strTime, batLevel)
+
     }
 
     private fun updateView(page: Page?) {
@@ -601,7 +598,7 @@ class ReaderActivity :
             book!!.curPage = Page(page)
             pageView!!.text = page.content
         } else {
-            pageView!!.text = "no page content"
+            pageView!!.text = resources.getString(R.string.no_page_content)
         }
 
         pageView!!.fontFeatureSettings
@@ -652,7 +649,7 @@ class ReaderActivity :
 
     private fun openQuickMenu() {
         Log.d(TAG, "openQuickMenu")
-        val quickMenuFragment: QuickMenuFragment = QuickMenuFragment()
+        val quickMenuFragment = QuickMenuFragment()
         quickMenuFragment.show(supportFragmentManager, "fragment_quick_menu")
     }
 
@@ -670,9 +667,7 @@ class ReaderActivity :
             prefsHelper!!.colorTheme = colorTheme
             pageView!!.textSize = textSize
             pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, lineSpacing)
-            //Log.d(TAG, "onFinishQuickMenuDialog: getCurPage")
-            //updateView(book!!.getCur(recalc = true))
-            prefsHelper!!.setThemeDefault()
+
             loadColorSettings()
             setColors()
             savePrefs()
@@ -810,7 +805,7 @@ class ReaderActivity :
     }
 
     private fun startProgress() {
-        pageView!!.text = "loading Book..."
+        pageView!!.text = resources.getString(R.string.loading_book)
     }
 
     private fun setColors() {
@@ -858,7 +853,7 @@ class ReaderActivity :
                     }
                     Configuration.UI_MODE_NIGHT_UNDEFINED -> {
                         //window.statusBarColor = Color.parseColor(prefsHelper!!.colorDarkBack)
-                        pIsDark = true;
+                        pIsDark = true
                     }
                 }
 
@@ -874,40 +869,6 @@ class ReaderActivity :
             e.printStackTrace()
         }
     }
-
-
-    fun isExternalStorageReadable(): Boolean {
-        val state: String = Environment.getExternalStorageState()
-        return Environment.MEDIA_MOUNTED == state ||
-                Environment.MEDIA_MOUNTED_READ_ONLY == state
-    }
-
-    private fun checkPermissions(): Boolean {
-        if (!isExternalStorageReadable() ) {
-            Toast.makeText(this, "external storage not available", Toast.LENGTH_LONG).show()
-            return false
-        }
-        val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), FontPickerFragment.READ_STORAGE_PERMISSION_REQUEST_CODE)
-            return false
-        }
-        return true
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            FontPickerFragment.READ_STORAGE_PERMISSION_REQUEST_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "read permissions granted", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(this, "need permissions to read external storage", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
-
 
     companion object {
         private const val TAG = "ReaderActivity"
