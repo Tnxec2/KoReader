@@ -97,6 +97,7 @@
     <string name="color_background">Backgroud</string>
     <string name="color_foreground">Text color</string>
     <string name="color_linktext">Link color</string>
+    <string name="color_infotext">Text color in info area</string>
     <string name="default_color">set default color</string>
 
     <string name="color_theme1_header">Theme 1</string>
@@ -104,6 +105,8 @@
     <string name="color_theme3_header">Theme 3</string>
     <string name="color_theme4_header">Theme 4</string>
     <string name="color_theme5_header">Theme 5</string>
+
+    <string name="color_theme_backgroundimage_header">Backgroundimage</string>
 
     <string name="color_theme1_backgroud_default">#FBF0D9</string>
     <string name="color_theme1_foregroud_default">#5F4B32</string>
@@ -151,6 +154,7 @@
     <string name="tapzones_activity_quick_menu">quick menu</string>
     <string name="tapzones_activity_main_menu">main menu</string>
     <string name="tapzones_activity_goto">go to…</string>
+
     <string name="line_spacing">Line Spacing</string>
     <string name="letter_spacing">Letter Spacing</string>
     <string name="textsize_sample">ABCabc</string>
@@ -158,5 +162,15 @@
     <string name="font_select_title">Select font</string>
     <string name="no_page_content">no page content</string>
     <string name="loading_book">loading Book...</string>
+
+    <string name="color_theme_show_background_image">show background image</string>
+    <string name="color_theme_selected_image">selected image</string>
+    <string name="repeat_tiled_image">repeat tiled image</string>
+
+    <string name="marginTop">Margin Top</string>
+    <string name="marginBottom">Margin Bottom</string>
+    <string name="marginRight">Margin Right</string>
+    <string name="marginLeft">Margin Left</string>
+    <string name="default_margin_value">16</string>
 
 </resources>

@@ -66,13 +66,22 @@ class PrefsHelper(val context: Context) {
     /*
      *  Color
      */
-    var colorTheme: String? = PREF_COLOR_SELECTED_THEME_DEFAULT
+    var colorTheme: String = PREF_COLOR_SELECTED_THEME_DEFAULT
     val colorBackDefault: String = context.resources.getString(R.string.color_theme1_backgroud_default)
     var colorBack: String? = colorBackDefault
     val colorTextDefault: String = context.resources.getString(R.string.color_theme1_foregroud_default)
     var colorText: String? = colorTextDefault
     val colorLinkTextDefault: String = context.resources.getString(R.string.color_theme1_linktext_default)
     var colorLinkText: String? = colorLinkTextDefault
+    var colorInfoText: String? = colorTextDefault
+    var showBackgroundImage: Boolean = false
+    var backgroundImageUri: String? = null
+    var backgroundImageTiledRepeat: Boolean = false
+    val marginDefault: Int = Integer.parseInt(context.resources.getString(R.string.default_margin_value))
+    var marginTop: Int = marginDefault
+    var marginBottom: Int = marginDefault
+    var marginLeft: Int = marginDefault
+    var marginRight: Int = marginDefault
 
     /*
      *  Tap Zonen
@@ -209,10 +218,19 @@ class PrefsHelper(val context: Context) {
 
         const val PREF_COLOR_SELECTED_THEME_DEFAULT = "1"
         const val PREF_KEY_COLOR_SELECTED_THEME = "selected_theme"
+        const val PREF_KEY_BACKGROUND_IMAGE_URI = "backgroundImageTheme"
+        const val PREF_KEY_SHOW_BACKGROUND_IMAGE = "backgroundImageEnableTheme"
+        const val PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT = "backgroundImageTileTheme"
+
 
         const val PREF_KEY_COLOR_BACK = "colorBackTheme"
         const val PREF_KEY_COLOR_TEXT = "colorTextTheme"
+        const val PREF_KEY_COLOR_INFOTEXT = "colorInfoTheme"
         const val PREF_KEY_COLOR_LINKTEXT = "colorLinkTheme"
+        const val PREF_KEY_MERGE_TOP = "marginTopTheme"
+        const val PREF_KEY_MERGE_BOTTOM = "marginBottomTheme"
+        const val PREF_KEY_MERGE_LEFT = "marginLeftTheme1"
+        const val PREF_KEY_MERGE_RIGHT = "marginRightTheme"
 
         const val PREF_KEY_TAP_ONE_TOP_LEFT = "tapZoneOneClickTopLeft"
         const val PREF_KEY_TAP_ONE_TOP_CENTER = "tapZoneOneClickTopCenter"

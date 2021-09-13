@@ -37,7 +37,7 @@ class QuickMenuFragment : DialogFragment() {
     private var lineSpacing: Float = 1f
     private var letterSpacing: Float = 0.05f
 
-    private var theme: String = "Auto"
+    private var colorTheme: String = PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
 
     private val typeFace: Typeface = TypefaceRecord.DEFAULT.getTypeface()
 
@@ -50,7 +50,7 @@ class QuickMenuFragment : DialogFragment() {
         fun onCancelQuickMenu()
         fun onAddBookmark(): Boolean
         fun onShowBookmarklist()
-        fun onChangeColorTheme(theme: String)
+        fun onChangeColorTheme(colorTheme: String)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,7 +106,7 @@ class QuickMenuFragment : DialogFragment() {
 
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
-        theme = prefs.getString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, "1") ?: "1"
+        colorTheme = prefs.getString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT) ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
 
         val spinner: Spinner = view.findViewById(R.id.spinner_quick_menu_themes)
 
@@ -122,8 +122,8 @@ class QuickMenuFragment : DialogFragment() {
         spinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
-                theme = valArray[position]
-                listener!!.onChangeColorTheme(theme)
+                colorTheme = valArray[position]
+                listener!!.onChangeColorTheme(colorTheme)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -131,7 +131,7 @@ class QuickMenuFragment : DialogFragment() {
             }
         }
 
-        spinner.setSelection(valArray.indexOf(theme) )
+        spinner.setSelection(valArray.indexOf(colorTheme) )
 
     }
 
@@ -266,14 +266,14 @@ class QuickMenuFragment : DialogFragment() {
 
     private fun save() {
         val prefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit()
-        prefEditor.putString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, theme)
+        prefEditor.putString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, colorTheme)
         prefEditor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
         prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, lineSpacing.toString())
         prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, letterSpacing.toString())
         prefEditor.apply()
 
         // Return Data back to activity through the implemented listener
-        listener!!.onFinishQuickMenuDialog(textSize, lineSpacing, letterSpacing, theme)
+        listener!!.onFinishQuickMenuDialog(textSize, lineSpacing, letterSpacing, colorTheme)
 
         // Close the dialog and return back to the parent activity
         dismiss()

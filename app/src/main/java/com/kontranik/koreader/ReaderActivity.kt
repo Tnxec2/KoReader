@@ -1,17 +1,17 @@
 package com.kontranik.koreader
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.*
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.Shader
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.text.Spannable
 import android.text.style.ImageSpan
 import android.text.style.URLSpan
@@ -25,8 +25,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.database.BookStatusDatabaseAdapter
@@ -39,6 +37,7 @@ import com.kontranik.koreader.utils.*
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -133,7 +132,7 @@ class ReaderActivity :
 
         linearLayoutInfobereich = findViewById(R.id.ll_infobereich)
 
-        setColors()
+        setColorTheme()
         setOnClickListener()
 
         pageView!!.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
@@ -149,7 +148,7 @@ class ReaderActivity :
         Log.d(TAG, "onWindowFocusChanged")
         //val ph = PermissionsHelper(this)
         //ph.checkPermissionsExternalStorage(pageView!!)
-        setColors()
+        setColorTheme()
         if (prefsHelper!!.bookPath != null) {
             runOnUiThread {
                 try {
@@ -329,8 +328,9 @@ class ReaderActivity :
 
         if ( book != null) updateView(book!!.getCur(recalc = true))
 
-        prefsHelper!!.colorTheme = prefs.getString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, "1")
-        loadColorSettings()
+        prefsHelper!!.colorTheme = prefs.getString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT)
+                ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
+        loadColorThemeSettings()
 
         prefsHelper!!.tapDoubleAction = hashMapOf(
                 ScreenZone.TopLeft to prefs.getString(PrefsHelper.PREF_KEY_TAP_DOUBLE_TOP_LEFT, prefsHelper!!.tapZoneDoubleTopLeft),
@@ -372,7 +372,7 @@ class ReaderActivity :
 
     }
 
-    private fun loadColorSettings() {
+    private fun loadColorThemeSettings() {
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + prefsHelper!!.colorTheme, 0)
@@ -383,6 +383,38 @@ class ReaderActivity :
 
         co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LINKTEXT + prefsHelper!!.colorTheme, 0)
         prefsHelper!!.colorLinkText = if ( co != 0 ) "#" + Integer.toHexString(co) else prefsHelper!!.colorLinkTextDefault
+
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_INFOTEXT + prefsHelper!!.colorTheme, 0)
+        prefsHelper!!.colorInfoText = if ( co != 0 ) "#" + Integer.toHexString(co) else prefsHelper!!.colorTextDefault
+
+        prefsHelper!!.showBackgroundImage = prefs.getBoolean(PrefsHelper.PREF_KEY_SHOW_BACKGROUND_IMAGE + prefsHelper!!.colorTheme, false)
+        prefsHelper!!.backgroundImageUri = prefs.getString(PrefsHelper.PREF_KEY_BACKGROUND_IMAGE_URI + prefsHelper!!.colorTheme, null)
+        prefsHelper!!.backgroundImageTiledRepeat = prefs.getBoolean(PrefsHelper.PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT + prefsHelper!!.colorTheme, false)
+
+        var sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_TOP + prefsHelper!!.colorTheme, null)
+        try {
+            prefsHelper!!.marginTop = if ( sMargin != null) Integer.parseInt(sMargin) else prefsHelper!!.marginDefault
+        } catch (e: Exception) {
+            prefsHelper!!.marginTop = prefsHelper!!.marginDefault
+        }
+        sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_BOTTOM + prefsHelper!!.colorTheme, null)
+        try {
+            prefsHelper!!.marginBottom = if ( sMargin != null) Integer.parseInt(sMargin) else prefsHelper!!.marginDefault
+        } catch (e: Exception) {
+            prefsHelper!!.marginBottom = prefsHelper!!.marginDefault
+        }
+        sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_LEFT + prefsHelper!!.colorTheme, null)
+        try {
+            prefsHelper!!.marginLeft = if ( sMargin != null) Integer.parseInt(sMargin) else prefsHelper!!.marginDefault
+        } catch (e: Exception) {
+            prefsHelper!!.marginLeft = prefsHelper!!.marginDefault
+        }
+        sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_RIGHT + prefsHelper!!.colorTheme, null)
+        try {
+            prefsHelper!!.marginRight = if ( sMargin != null) Integer.parseInt(sMargin) else prefsHelper!!.marginDefault
+        } catch (e: Exception) {
+            prefsHelper!!.marginRight = prefsHelper!!.marginDefault
+        }
     }
 
     private fun checkTap(point: Point, tap: Int) {
@@ -473,12 +505,12 @@ class ReaderActivity :
 
             override fun onSwipeUp() {
                 super.onSwipeUp()
-                doPageNext()
+                //doPageNext()
             }
 
             override fun onSwipeDown() {
                 super.onSwipeDown()
-                doPagePrev()
+                //doPagePrev()
             }
 
             override fun onSlideUp(point: Point) {
@@ -668,30 +700,94 @@ class ReaderActivity :
             pageView!!.textSize = textSize
             pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, lineSpacing)
 
-            loadColorSettings()
-            setColors()
+            loadColorThemeSettings()
+            setColorTheme()
             savePrefs()
         }
     }
 
-    override fun onChangeColorTheme(theme: String) {
+    override fun onChangeColorTheme(colorTheme: String) {
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-        var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + theme, 0)
+        var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + colorTheme, 0)
         val colorBack = if ( co != 0) "#" + Integer.toHexString(co) else prefsHelper!!.colorBackDefault
 
-        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + theme, 0)
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + colorTheme, 0)
         val colorText = if ( co != 0 ) "#" + Integer.toHexString(co) else prefsHelper!!.colorTextDefault
 
-        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LINKTEXT + theme, 0)
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LINKTEXT + colorTheme, 0)
         val colorLinkText = if ( co != 0 ) "#" + Integer.toHexString(co) else prefsHelper!!.colorLinkTextDefault
 
-        textViewHolder!!.setBackgroundColor(Color.parseColor(colorBack))
+        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_INFOTEXT + colorTheme, 0)
+        val colorInfoText = if ( co != 0 ) "#" + Integer.toHexString(co) else prefsHelper!!.colorTextDefault
+
+        val showBackgroundImage = prefs.getBoolean(PrefsHelper.PREF_KEY_SHOW_BACKGROUND_IMAGE + colorTheme, false)
+        val backgroundImageUri = prefs.getString(PrefsHelper.PREF_KEY_BACKGROUND_IMAGE_URI + colorTheme, null)
+        val backgroundImageTiledRepeat = prefs.getBoolean(PrefsHelper.PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT + colorTheme, false)
+
+        if ( showBackgroundImage && backgroundImageUri != null && backgroundImageUri != "") {
+            textViewHolder!!.setBackgroundColor(Color.TRANSPARENT)
+            try {
+                val uri = Uri.parse(backgroundImageUri)
+                val inputStream: InputStream? = contentResolver.openInputStream(uri)
+                val bitmap = BitmapDrawable(resources, inputStream)
+                if ( backgroundImageTiledRepeat )
+                    bitmap.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+                textViewHolder!!.background = bitmap
+                // val backgroundDrawable = Drawable.createFromStream(inputStream, uri.toString())
+                // textViewHolder!!.background = backgroundDrawable
+            } catch (e: Exception) {
+                textViewHolder!!.background = null
+                textViewHolder!!.setBackgroundColor(Color.parseColor(colorBack))
+            }
+        } else {
+            textViewHolder!!.background = null
+            textViewHolder!!.setBackgroundColor(Color.parseColor(colorBack))
+        }
+
         pageView!!.setTextColor(Color.parseColor(colorText))
         pageView!!.setLinkTextColor(Color.parseColor(colorLinkText))
-        textViewInfoLeft!!.setTextColor(Color.parseColor(colorText))
-        textViewInfoRight!!.setTextColor(Color.parseColor(colorText))
-        textViewInfoSystemstatus!!.setTextColor(Color.parseColor(colorText))
+        textViewInfoLeft!!.setTextColor(Color.parseColor(colorInfoText))
+        textViewInfoRight!!.setTextColor(Color.parseColor(colorInfoText))
+        textViewInfoSystemstatus!!.setTextColor(Color.parseColor(colorInfoText))
+
+        var marginTop = prefsHelper!!.marginDefault
+        var marginBottom = prefsHelper!!.marginDefault
+        var marginLeft = prefsHelper!!.marginDefault
+        var marginRight = prefsHelper!!.marginDefault
+
+        var sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_TOP + colorTheme, null)
+        try {
+            marginTop = if ( sMargin != null) Integer.parseInt(sMargin) else prefsHelper!!.marginDefault
+        } catch (e: Exception) {
+
+        }
+        sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_BOTTOM + colorTheme, null)
+        try {
+            marginBottom = if ( sMargin != null) Integer.parseInt(sMargin) else prefsHelper!!.marginDefault
+        } catch (e: Exception) {
+
+        }
+        sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_LEFT + colorTheme, null)
+        try {
+            marginLeft = if ( sMargin != null) Integer.parseInt(sMargin) else prefsHelper!!.marginDefault
+        } catch (e: Exception) {
+
+        }
+        sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_RIGHT + colorTheme, null)
+        try {
+            marginRight = if ( sMargin != null) Integer.parseInt(sMargin) else prefsHelper!!.marginDefault
+        } catch (e: Exception) {
+
+        }
+
+        val density = this.resources.displayMetrics.density
+        val marginTopPixel = (marginTop * density).toInt()
+        val marginBottomPixel = (marginBottom * density).toInt()
+        val marginLeftPixel = (marginLeft * density).toInt()
+        val marginRightPixel = (marginRight * density).toInt()
+        pageView!!.setPadding(marginLeftPixel, marginTopPixel, marginRightPixel, marginBottomPixel)
+
     }
 
     override fun onChangeTextSize(textSize: Float) {
@@ -717,7 +813,7 @@ class ReaderActivity :
         pageView!!.textSize = prefsHelper!!.textSize
         pageView!!.setLineSpacing(pageView!!.lineSpacingExtra, prefsHelper!!.lineSpacing)
         pageView!!.letterSpacing = prefsHelper!!.letterSpacing
-        setColors()
+        setColorTheme()
     }
 
     override fun onAddBookmark(): Boolean {
@@ -808,33 +904,39 @@ class ReaderActivity :
         pageView!!.text = resources.getString(R.string.loading_book)
     }
 
-    private fun setColors() {
-//        when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-//            Configuration.UI_MODE_NIGHT_UNDEFINED,
-//            Configuration.UI_MODE_NIGHT_YES -> {
-//                textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorDarkBack))
-//                pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
-//                pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorDarkLinkText))
-//                textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
-//                textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
-//                textViewInfoSystemstatus!!.setTextColor(Color.parseColor(prefsHelper!!.colorDarkText))
-//            }
-//            Configuration.UI_MODE_NIGHT_NO -> {
-//                textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorLightBack))
-//                pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
-//                pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorLightLinkText))
-//                textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
-//                textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
-//                textViewInfoSystemstatus!!.setTextColor(Color.parseColor(prefsHelper!!.colorLightText))
-//            }
-//        }
+    private fun setColorTheme() {
+        if ( prefsHelper!!.showBackgroundImage && prefsHelper!!.backgroundImageUri != null && !prefsHelper!!.backgroundImageUri.equals("")) {
+            textViewHolder!!.setBackgroundColor(Color.TRANSPARENT)
+            try {
+                val uri = Uri.parse(prefsHelper!!.backgroundImageUri)
+                val inputStream: InputStream? = contentResolver.openInputStream(uri)
+                val bitmap = BitmapDrawable(resources, inputStream)
+                if ( prefsHelper!!.backgroundImageTiledRepeat)
+                    bitmap.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+                textViewHolder!!.background = bitmap
+                // val backgroundDrawable = Drawable.createFromStream(inputStream, uri.toString())
+                // textViewHolder!!.background = backgroundDrawable
+            } catch (e: Exception) {
+                textViewHolder!!.background = null
+                textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorBack))
+            }
+        } else {
+            textViewHolder!!.background = null
+            textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorBack))
+        }
 
-        textViewHolder!!.setBackgroundColor(Color.parseColor(prefsHelper!!.colorBack))
         pageView!!.setTextColor(Color.parseColor(prefsHelper!!.colorText))
         pageView!!.setLinkTextColor(Color.parseColor(prefsHelper!!.colorLinkText))
-        textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorText))
-        textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorText))
-        textViewInfoSystemstatus!!.setTextColor(Color.parseColor(prefsHelper!!.colorText))
+        textViewInfoLeft!!.setTextColor(Color.parseColor(prefsHelper!!.colorInfoText))
+        textViewInfoRight!!.setTextColor(Color.parseColor(prefsHelper!!.colorInfoText))
+        textViewInfoSystemstatus!!.setTextColor(Color.parseColor(prefsHelper!!.colorInfoText))
+
+        val density = this.resources.displayMetrics.density
+        val marginTopPixel = (prefsHelper!!.marginTop * density).toInt()
+        val marginBottomPixel = (prefsHelper!!.marginBottom * density).toInt()
+        val marginLeftPixel = (prefsHelper!!.marginLeft * density).toInt()
+        val marginRightPixel = (prefsHelper!!.marginRight * density).toInt()
+        pageView!!.setPadding(marginLeftPixel, marginTopPixel, marginRightPixel, marginBottomPixel)
 
         try {
             if (Build.VERSION.SDK_INT >= 21) {

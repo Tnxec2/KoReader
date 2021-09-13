@@ -1,19 +1,20 @@
 package com.kontranik.koreader.reader
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
+import com.kontranik.koreader.utils.ImagePickerPreference
+import com.kontranik.koreader.utils.PrefsHelper
 import com.rarepebble.colorpicker.ColorPreference
-
-
 
 
 class SettingsActivity : AppCompatActivity(),
@@ -52,6 +53,8 @@ class SettingsActivity : AppCompatActivity(),
                     .commit()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+
     }
 
     class RootSettingsFragment : PreferenceFragmentCompat() {
@@ -99,60 +102,57 @@ class SettingsActivity : AppCompatActivity(),
         }
     }
 
-    class ColorTheme1SettingsFragment : PreferenceFragmentCompat() {
+    open class ColorThemeGeneralSettingsFragment(val themeId: Int) : PreferenceFragmentCompat() {
+        var imageUri = ""
+        var preference: Preference? = null
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.color_theme1_preferences, rootKey)
+            if ( themeId == 1)
+                setPreferencesFromResource(R.xml.color_theme1_preferences, rootKey)
+            else if ( themeId == 2)
+                setPreferencesFromResource(R.xml.color_theme2_preferences, rootKey)
+            else if ( themeId == 3)
+                setPreferencesFromResource(R.xml.color_theme3_preferences, rootKey)
+            else if ( themeId == 4)
+                setPreferencesFromResource(R.xml.color_theme4_preferences, rootKey)
+            else if ( themeId == 5)
+                setPreferencesFromResource(R.xml.color_theme5_preferences, rootKey)
         }
+
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            super.onActivityResult(requestCode, resultCode, data)
+            if (resultCode == RESULT_OK && requestCode == ImagePickerPreference.PICK_IMAGE) {
+                imageUri = data!!.data.toString()
+                findPreference<ImagePickerPreference>("backgroundImageTheme$themeId")?.setImageUri(imageUri)
+            }
+        }
+
         override fun onDisplayPreferenceDialog(preference: Preference?) {
             if (preference is ColorPreference) {
                 preference.showDialog(this, 0)
-            } else super.onDisplayPreferenceDialog(preference)
+            } else if ( preference is ImagePickerPreference) {
+                val intent = Intent()
+                intent.type = "image/*"
+                intent.action = Intent.ACTION_OPEN_DOCUMENT
+                intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+                startActivityForResult(Intent.createChooser(intent, "Select backgroud image"), ImagePickerPreference.PICK_IMAGE)
+            } else {
+                super.onDisplayPreferenceDialog(preference)
+            }
         }
     }
 
-    class ColorTheme2SettingsFragment : PreferenceFragmentCompat() {
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.color_theme2_preferences, rootKey)
-        }
-        override fun onDisplayPreferenceDialog(preference: Preference?) {
-            if (preference is ColorPreference) {
-                preference.showDialog(this, 0)
-            } else super.onDisplayPreferenceDialog(preference)
-        }
-    }
+    class ColorTheme1SettingsFragment : ColorThemeGeneralSettingsFragment(1) {  }
 
-    class ColorTheme3SettingsFragment : PreferenceFragmentCompat() {
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.color_theme3_preferences, rootKey)
-        }
-        override fun onDisplayPreferenceDialog(preference: Preference?) {
-            if (preference is ColorPreference) {
-                preference.showDialog(this, 0)
-            } else super.onDisplayPreferenceDialog(preference)
-        }
-    }
+    class ColorTheme2SettingsFragment : ColorThemeGeneralSettingsFragment(2) {  }
 
-    class ColorTheme4SettingsFragment : PreferenceFragmentCompat() {
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.color_theme4_preferences, rootKey)
-        }
-        override fun onDisplayPreferenceDialog(preference: Preference?) {
-            if (preference is ColorPreference) {
-                preference.showDialog(this, 0)
-            } else super.onDisplayPreferenceDialog(preference)
-        }
-    }
+    class ColorTheme3SettingsFragment : ColorThemeGeneralSettingsFragment(3) {  }
 
-    class ColorTheme5SettingsFragment : PreferenceFragmentCompat() {
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.color_theme5_preferences, rootKey)
-        }
-        override fun onDisplayPreferenceDialog(preference: Preference?) {
-            if (preference is ColorPreference) {
-                preference.showDialog(this, 0)
-            } else super.onDisplayPreferenceDialog(preference)
-        }
-    }
+    class ColorTheme4SettingsFragment : ColorThemeGeneralSettingsFragment(4) {  }
+
+    class ColorTheme5SettingsFragment : ColorThemeGeneralSettingsFragment(5) {  }
 
     override fun onPreferenceStartFragment(
             caller: PreferenceFragmentCompat?,

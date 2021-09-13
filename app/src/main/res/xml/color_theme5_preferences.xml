@@ -28,6 +28,68 @@
             app:iconSpaceReserved="false"
             app:colorpicker_selectNoneButtonText="@string/default_color"
             />
+        <com.rarepebble.colorpicker.ColorPreference
+            app:key="colorInfoTheme5"
+            app:title="color_infotext"
+            android:defaultValue="@string/color_theme1_foregroud_default"
+            app:colorpicker_showAlpha="false"
+            app:iconSpaceReserved="false"
+            app:colorpicker_selectNoneButtonText="@string/default_color"
+            />
     </PreferenceCategory>
+    <PreferenceCategory app:title="@string/color_theme_backgroundimage_header" app:iconSpaceReserved="false">
+        <SwitchPreference
+            app:key="backgroundImageEnableTheme5"
+            app:title="@string/color_theme_show_background_image"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            />
 
+        <com.kontranik.koreader.utils.ImagePickerPreference
+            app:key="backgroundImageTheme5"
+            app:title="@string/color_theme_selected_image"
+            android:defaultValue="test"
+            app:dependency="backgroundImageEnableTheme5"
+            app:iconSpaceReserved="false"
+            themeid="5"
+            />
+
+        <SwitchPreference
+            app:key="backgroundImageTileTheme5"
+            app:title="@string/repeat_tiled_image"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:dependency="backgroundImageEnableTheme5"
+            />
+    </PreferenceCategory>
+    <PreferenceCategory app:title="Margins" app:iconSpaceReserved="false">
+        <EditTextPreference
+            app:key="marginTopTheme5"
+            app:title="@string/marginTop"
+            android:defaultValue="@string/default_margin_value"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true"
+            />
+        <EditTextPreference
+            app:key="marginBottomTheme5"
+            app:title="@string/marginBottom"
+            android:defaultValue="@string/default_margin_value"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true"
+            />
+        <EditTextPreference
+            app:key="marginRightTheme5"
+            app:title="@string/marginRight"
+            android:defaultValue="@string/default_margin_value"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true"
+            />
+        <EditTextPreference
+            app:key="marginLeftTheme5"
+            app:title="@string/marginLeft"
+            android:defaultValue="@string/default_margin_value"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true"
+            />
+    </PreferenceCategory>
 </PreferenceScreen>
