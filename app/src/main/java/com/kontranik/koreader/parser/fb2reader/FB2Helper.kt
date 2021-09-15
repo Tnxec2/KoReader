@@ -3,8 +3,6 @@ package com.kontranik.koreader.parser.fb2reader
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import android.text.Html
-import android.util.Log
 import com.kontranik.koreader.model.Author
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme
@@ -13,7 +11,6 @@ import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme
 import com.kontranik.koreader.utils.ImageUtils
 import org.jsoup.Jsoup
-import java.util.*
 import kotlin.math.ceil
 
 class FB2Helper(private val context: Context, private val contentUri: String) : EbookHelper {
@@ -46,9 +43,8 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         pageScheme = BookPageScheme()
         pageScheme.sectionCount = getContentSize()
         for( pageIndex in 0 .. pageScheme.sectionCount) {
-            val aSection = getPage(pageIndex)
-            if ( aSection != null) {
-                val textSize = getPageTextSize(aSection)
+            val textSize = getPageTextSize(pageIndex)
+            if ( textSize != null) {
                 val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
                 pageScheme.scheme[pageIndex] = BookSchemeItem(
                         textSize = textSize, countTextPages = pages)
@@ -64,10 +60,17 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         }
     }
 
-    private fun getPageTextSize(aSection: String): Int {
-        val document = Jsoup.parse(aSection)
-        val r2 = document.body().wholeText().length
-        return r2
+    private fun getPageTextSize(pageIndex: Int): Int? {
+        if ( pageIndex != 0 ) {
+            val textsize = fb2Reader.fb2Scheme!!.sections[pageIndex-1].textsize
+            if ( textsize != null ) return textsize
+        }
+        val aSection = getPage(pageIndex)
+        if ( aSection != null) {
+            return getSizeOfHtmlText(aSection)
+        } else {
+            return null
+        }
     }
 
     override fun getContentSize(): Int {
@@ -129,4 +132,11 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         return fb2Reader.fb2Scheme!!.description.titleInfo.coverpage.toString()
     }
 
+    companion object {
+        fun getSizeOfHtmlText(htmlText: String): Int {
+            val document = Jsoup.parse(htmlText)
+            val r2 = document.body().wholeText().length
+            return r2
+        }
+    }
 }

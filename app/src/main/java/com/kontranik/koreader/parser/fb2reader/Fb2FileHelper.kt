@@ -89,7 +89,7 @@ class FileHelper(private val appDir: String) {
     }
 
     @Throws(Exception::class)
-    fun writeSection(mySection: FB2Section?) {
+    fun writeSection(mySection: FB2Section?, fB2Scheme: FB2Scheme) {
         if (mySection == null) return
         val workdir = getworkdir()
         val fileSection = File(workdir, Constant.PREFIX_SECTION + mySection.orderid + ".html")
@@ -98,6 +98,7 @@ class FileHelper(private val appDir: String) {
         writer.append(mySection.text.toString())
         writer.append(Constant.HTML_NACHSPAN)
         writer.close()
+        fB2Scheme.sections[mySection.orderid].textsize = FB2Helper.getSizeOfHtmlText(mySection.text.toString())
         mySection.text = StringBuffer()
     }
 }

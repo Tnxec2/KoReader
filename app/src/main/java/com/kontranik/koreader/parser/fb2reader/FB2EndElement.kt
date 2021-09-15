@@ -14,7 +14,7 @@ object FB2EndElement {
             FB2Elements.TRANSLATOR -> fB2ParserObject.isTranslator = false
             FB2Elements.SECTION -> if (fB2ParserObject.sectionDeep > 0) { fB2ParserObject.sectionDeep-- }
             FB2Elements.BODY -> if (!fB2ParserObject.onlyscheme && fB2ParserObject.isSection) {
-                fB2ParserObject.fileHelper.writeSection(fB2ParserObject.mySection)
+                fB2ParserObject.fileHelper.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
             }
             FB2Elements.BINARY -> endElementBinary(fB2ParserObject)
             FB2Elements.description -> fB2ParserObject.isDescription = false

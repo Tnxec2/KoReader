@@ -107,7 +107,7 @@ object FB2StartElement {
     @Throws(Exception::class)
     private fun gotNewSection(fB2ParserObject: FB2ParserObject) {
         if (fB2ParserObject.mySection != null) {
-            fB2ParserObject.fileHelper!!.writeSection(fB2ParserObject.mySection)
+            fB2ParserObject.fileHelper!!.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
             fB2ParserObject.isSection = true
             val parentid = if (fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.orderid else null
             fB2ParserObject.mySection = FB2Section(fB2ParserObject.sectionid, fB2ParserObject.mySection!!.id, fB2ParserObject.mySection!!.typ, fB2ParserObject.sectionDeep, parentid)
@@ -125,7 +125,7 @@ object FB2StartElement {
             fB2ParserObject.isSection = true
         } else {
             if (!fB2ParserObject.onlyscheme && fB2ParserObject.isSection) {
-                fB2ParserObject.fileHelper!!.writeSection(fB2ParserObject.mySection)
+                fB2ParserObject.fileHelper!!.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
             }
             fB2ParserObject.isSection = true
             val parentid = if (fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.orderid else null
