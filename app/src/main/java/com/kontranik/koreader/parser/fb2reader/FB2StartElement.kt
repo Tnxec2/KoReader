@@ -38,7 +38,7 @@ object FB2StartElement {
         var result = ""
         val deep = if (`object`.isSection) `object`.mySection!!.deep!! else 0
         if (`object`.isSection) {
-            if (`object`.mySection!!.text!!.length > BookPageScheme.CHAR_PER_PAGE * BookPageScheme.MAX_PAGE_PER_SECTION) {
+            if (`object`.mySection!!.text.length > BookPageScheme.CHAR_PER_PAGE * BookPageScheme.MAX_PAGE_PER_SECTION) {
                 gotNewSection(`object`)
             }
         }
@@ -100,14 +100,14 @@ object FB2StartElement {
         } else if (`object`.isHistory) {
             `object`.fb2scheme.description.documentInfo.history.append(result)
         } else if (`object`.isSection) {
-            `object`.mySection!!.text!!.append(result)
+            `object`.mySection!!.text.append(result)
         }
     }
 
     @Throws(Exception::class)
     private fun gotNewSection(fB2ParserObject: FB2ParserObject) {
         if (fB2ParserObject.mySection != null) {
-            fB2ParserObject.fileHelper!!.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
+            fB2ParserObject.fileHelper.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
             fB2ParserObject.isSection = true
             val parentid = if (fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.orderid else null
             fB2ParserObject.mySection = FB2Section(fB2ParserObject.sectionid, fB2ParserObject.mySection!!.id, fB2ParserObject.mySection!!.typ, fB2ParserObject.sectionDeep, parentid)
@@ -120,13 +120,13 @@ object FB2StartElement {
 
     @Throws(Exception::class)
     private fun gotNewSection(eName: String, el: FB2Elements, attrs: Attributes, fB2ParserObject: FB2ParserObject) {
+        if (!fB2ParserObject.onlyscheme && fB2ParserObject.isSection) {
+            fB2ParserObject.fileHelper.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
+        }
         if (attrs.getValue("notes") != null) {
             fB2ParserObject.isNotes = true
             fB2ParserObject.isSection = true
         } else {
-            if (!fB2ParserObject.onlyscheme && fB2ParserObject.isSection) {
-                fB2ParserObject.fileHelper!!.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
-            }
             fB2ParserObject.isSection = true
             val parentid = if (fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.orderid else null
             fB2ParserObject.mySection = FB2Section(fB2ParserObject.sectionid, attrs.getValue("id"), el, fB2ParserObject.sectionDeep, parentid)

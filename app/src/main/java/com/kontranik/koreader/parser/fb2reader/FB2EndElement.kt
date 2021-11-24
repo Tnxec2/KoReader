@@ -13,8 +13,11 @@ object FB2EndElement {
             FB2Elements.AUTHOR -> fB2ParserObject.isAuthor = false
             FB2Elements.TRANSLATOR -> fB2ParserObject.isTranslator = false
             FB2Elements.SECTION -> if (fB2ParserObject.sectionDeep > 0) { fB2ParserObject.sectionDeep-- }
-            FB2Elements.BODY -> if (!fB2ParserObject.onlyscheme && fB2ParserObject.isSection) {
-                fB2ParserObject.fileHelper.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
+            FB2Elements.BODY -> {
+                if (!fB2ParserObject.onlyscheme && fB2ParserObject.isSection) {
+                    fB2ParserObject.fileHelper.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
+                    fB2ParserObject.mySection = null
+                }
             }
             FB2Elements.BINARY -> endElementBinary(fB2ParserObject)
             FB2Elements.description -> fB2ParserObject.isDescription = false
@@ -106,7 +109,7 @@ object FB2EndElement {
     }
 
     private fun endElementDescription(el: FB2Elements, `object`: FB2ParserObject) {
-        var aIndex: Int
+        val aIndex: Int
         when (el) {
             FB2Elements.GENRE -> {
                 if (`object`.isDescriptionTitleInfo) `object`.fb2scheme.description.titleInfo.genre.add(`object`.myText.toString().trim { it <= ' ' })
