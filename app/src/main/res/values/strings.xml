@@ -162,6 +162,10 @@
     <string name="font_select_title">Select font</string>
     <string name="no_page_content">no page content</string>
     <string name="loading_book">loading Book...</string>
+    <string name="can_not_load_book">can not load book %1$s</string>
+    <string name="press_again_to_exit">Press again to exit</string>
+    <string name="open_book">Open a book</string>
+    <string name="bookmark_saved">Bookmark saved</string>
 
     <string name="color_theme_show_background_image">show background image</string>
     <string name="color_theme_selected_image">selected image</string>

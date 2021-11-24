@@ -165,7 +165,7 @@ class ReaderActivity :
                 }
             }
         } else  {
-            Toast.makeText(applicationContext, "Open a book", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, resources.getString(R.string.open_book), Toast.LENGTH_LONG).show()
             openMainMenu()
         }
     }
@@ -175,23 +175,21 @@ class ReaderActivity :
             finish()
         } else {
             backButtonPressedTime = Date().time
-            Toast.makeText(this, "Press again to exit", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, resources.getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun loadBook() {
-        Log.d(TAG, "loadBook: ${prefsHelper!!.bookPath}")
-
         if ( ! FileHelper.contentFileExist(applicationContext, prefsHelper!!.bookPath) ) {
-            Toast.makeText(this, "Can't load book ${prefsHelper!!.bookPath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, resources.getString(R.string.can_not_load_book,prefsHelper!!.bookPath) , Toast.LENGTH_LONG).show()
             openMainMenu()
         }
-        Toast.makeText(this, "book load...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, resources.getString(R.string.loading_book), Toast.LENGTH_SHORT).show()
         book =  Book(applicationContext, prefsHelper!!.bookPath!!, pageView!!)
         if ( book != null ) {
             bookStatusService!!.updateLastOpenTime(book!!)
         } else {
-            Toast.makeText(this, "Can't load book ${prefsHelper!!.bookPath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, resources.getString(R.string.can_not_load_book,prefsHelper!!.bookPath), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -293,7 +291,7 @@ class ReaderActivity :
 
     private fun loadSettings() {
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        prefsHelper!!.interfaceTheme = prefs.getString(PrefsHelper.PREF_KEY_THEME, "Auto")
+        prefsHelper!!.interfaceTheme = prefs.getString(PrefsHelper.PREF_KEY_THEME,  "Auto")
         prefsHelper!!.screenOrientation = prefs.getString(PrefsHelper.PREF_KEY_ORIENTATION, "PortraitSensor")
         prefsHelper!!.screenBrightness = prefs.getString(PrefsHelper.PREF_KEY_BRIGHTNESS, "Manual")
 
@@ -606,7 +604,7 @@ class ReaderActivity :
                     resources.getString(R.string.page_info_text_left,
                             curTextPage,
                             book!!.getPageScheme()!!.countTextPages,
-                            curTextPage * 100 / book!!.getPageScheme()!!.countTextPages
+                            if (book!!.getPageScheme()!!.countTextPages == 0) 0 else curTextPage * 100 / book!!.getPageScheme()!!.countTextPages
                     )
 
             textViewInfoRight!!.text =
@@ -826,7 +824,7 @@ class ReaderActivity :
         )
 
         return if ( bookmarkService.addBookmark(bookmark) ) {
-            Toast.makeText(this, "Bookmark saved", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, resources.getString(R.string.bookmark_saved), Toast.LENGTH_SHORT).show()
             true
         } else {
             false
@@ -838,23 +836,6 @@ class ReaderActivity :
         val bookmarkListFragment: BookmarkListFragment = BookmarkListFragment.newInstance(prefsHelper!!.bookPath!!)
         bookmarkListFragment.show(supportFragmentManager, "fragment_bookmark_list")
     }
-
-    /*
-    override fun onAccessGrantedReadExternalStorage() {
-        Log.d(TAG, "onAccessGrantedReadExternalStorage")
-        if (prefsHelper!!.bookPath != null) {
-            if ( book == null || book!!.fileLocation != prefsHelper!!.bookPath) {
-                startProgress()
-                loadBook()
-                loadPositionForBook()
-                updateView(book!!.getCur(recalc = true))
-            }
-        } else  {
-            Toast.makeText(applicationContext, "Open a book", Toast.LENGTH_LONG).show()
-            openMainMenu()
-        }
-    }
-    */
 
     override fun onSelectBookmark(bookmark: Bookmark) {
         if (
