@@ -47,7 +47,7 @@ class FB2Reader internal constructor(private val appDir: String,
         return fb2Scheme
     }
 
-    val coverPage: String?
+    val coverPage: String
         get() = fb2Scheme!!.description.titleInfo.coverpage.toString()
 
     val cover: ByteArray?
@@ -57,7 +57,7 @@ class FB2Reader internal constructor(private val appDir: String,
                 if (coverSrc.startsWith("#")) coverSrc = coverSrc.substring(1)
                 return try {
                     val binaryData = FileHelper(appDir).getBinary(coverSrc)
-                    binaryData!!.contentsArray
+                    binaryData.contentsArray
                 } catch (e: Exception) {
                     null
                 }
@@ -86,16 +86,13 @@ class FB2Reader internal constructor(private val appDir: String,
 
     fun getBinary(binaryname: String): ByteArray? {
         var name = binaryname
-        if (name != null) {
-            if (name.startsWith("#")) name = name.substring(1)
-            return try {
-                val binaryData = FileHelper(appDir).getBinary(name)
-                binaryData.contentsArray
-            } catch (e: Exception) {
-                null
-            }
+        if (name.startsWith("#")) name = name.substring(1)
+        return try {
+            val binaryData = FileHelper(appDir).getBinary(name)
+            binaryData.contentsArray
+        } catch (e: Exception) {
+            null
         }
-        return null
     }
 
     init {

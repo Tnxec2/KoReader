@@ -1,36 +1,32 @@
 package com.kontranik.koreader.reader
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
-import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
+import com.kontranik.koreader.databinding.ActivitySettingsBinding
 import com.kontranik.koreader.utils.ImagePickerPreference
-import com.kontranik.koreader.utils.PrefsHelper
 import com.rarepebble.colorpicker.ColorPreference
 
 
 class SettingsActivity : AppCompatActivity(),
         PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
-    var close: ImageButton? = null
+    private lateinit var binding: ActivitySettingsBinding
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        binding = ActivitySettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        close = findViewById(R.id.imageButton_settings_back)
+        binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_close_24))
 
-        close!!.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_close_24))
-
-        close!!.setOnClickListener {
+        binding.imageButtonSettingsBack.setOnClickListener {
             if (!supportFragmentManager.popBackStackImmediate()) {
                 val data = Intent()
                 data.putExtra(ReaderActivity.PREF_TYPE, ReaderActivity.PREF_TYPE_SETTINGS)
@@ -42,9 +38,9 @@ class SettingsActivity : AppCompatActivity(),
         if (savedInstanceState == null) {
             supportFragmentManager.addOnBackStackChangedListener {
                 if (supportFragmentManager.backStackEntryCount == 0) {
-                    close!!.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_close_24))
+                    binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_close_24))
                 } else {
-                    close!!.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_arrow_back_24))
+                    binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_arrow_back_24))
                 }
             }
             supportFragmentManager
@@ -171,7 +167,4 @@ class SettingsActivity : AppCompatActivity(),
                 .commit()
         return true
     }
-
-
-
 }

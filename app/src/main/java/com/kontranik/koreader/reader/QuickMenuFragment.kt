@@ -16,6 +16,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
+import com.kontranik.koreader.databinding.FragmentQuickMenuBinding
 import com.kontranik.koreader.utils.ColoredArrayAdapter
 import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.TextViewInitiator
@@ -27,10 +28,11 @@ import kotlin.math.min
 
 class QuickMenuFragment : DialogFragment() {
 
+    private lateinit var binding: FragmentQuickMenuBinding
+
     private var listener: QuickMenuDialogListener? = null
 
     // textSize
-    private var textViewTextSIze: TextView? = null
     private var textSize: Float = 0F
     private val textSizeStep: Float = 1F
 
@@ -60,7 +62,8 @@ class QuickMenuFragment : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_quick_menu, container)
+        binding = FragmentQuickMenuBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
@@ -68,14 +71,12 @@ class QuickMenuFragment : DialogFragment() {
 
         Log.d("QuickMenuFragment", view.context.theme.toString())
 
-        val close = view.findViewById<ImageButton>(R.id.imageButton_quickmenu_back)
-        close.setOnClickListener {
+        binding.imageButtonQuickmenuBack.setOnClickListener {
             listener!!.onCancelQuickMenu()
             dismiss()
         }
 
-        val save = view.findViewById<ImageButton>(R.id.imageButton_quickmenu_save)
-        save.setOnClickListener {
+        binding.imageButtonQuickmenuSave.setOnClickListener {
             save()
         }
 
@@ -86,40 +87,37 @@ class QuickMenuFragment : DialogFragment() {
             bookPath = settings!!.getString(PrefsHelper.PREF_BOOK_PATH, null)
         }
 
-        val bookinfo = view.findViewById<ImageButton>(R.id.imageButton_quickmenu_bookinfo)
-        bookinfo.setOnClickListener {
+        binding.imageButtonQuickmenuBookinfo.setOnClickListener {
             openBookInfo(bookPath)
         }
-        if ( bookPath == null) bookinfo.visibility = View.GONE
+        if ( bookPath == null) binding.imageButtonQuickmenuBookinfo.visibility = View.GONE
 
-        initialTextSize(view)
-        initialTheming(view)
-        initialLineSpacing(view)
-        initialLetterSpacing(view)
-        initialBookmarks(view)
+        initialTextSize()
+        initialTheming()
+        initialLineSpacing()
+        initialLetterSpacing()
+        initialBookmarks()
 
         listener = activity as QuickMenuDialogListener
 
     }
 
-    private fun initialTheming(view: View) {
+    private fun initialTheming() {
 
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
         colorTheme = prefs.getString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT) ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
 
-        val spinner: Spinner = view.findViewById(R.id.spinner_quick_menu_themes)
-
-        val valArray = view.resources.getStringArray(R.array.selected_theme_values)
-        val entryArray = view.resources.getStringArray(R.array.selected_theme_entries)
+        val valArray = resources.getStringArray(R.array.selected_theme_values)
+        val entryArray = resources.getStringArray(R.array.selected_theme_entries)
 
         // Create an ArrayAdapter using the string array and a default spinner layout
-        val adapter = ColoredArrayAdapter(view.context, android.R.layout.simple_spinner_item,  entryArray.asList(), textSize, typeFace)
+        val adapter = ColoredArrayAdapter(requireContext(), android.R.layout.simple_spinner_item,  entryArray.asList(), textSize, typeFace)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         // Apply the adapter to the spinner
-        spinner.adapter = adapter
+        binding.spinnerQuickMenuThemes.adapter = adapter
 
-        spinner.onItemSelectedListener = object : OnItemSelectedListener {
+        binding.spinnerQuickMenuThemes.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
                 colorTheme = valArray[position]
@@ -131,27 +129,25 @@ class QuickMenuFragment : DialogFragment() {
             }
         }
 
-        spinner.setSelection(valArray.indexOf(colorTheme) )
+        binding.spinnerQuickMenuThemes.setSelection(valArray.indexOf(colorTheme) )
 
     }
 
-    private fun initialLineSpacing(view: View) {
-        val spinner: Spinner = view.findViewById(R.id.spinner_quick_menu_line_spacing)
-
-        val valArray = view.resources.getStringArray(R.array.line_spacing_values)
+    private fun initialLineSpacing() {
+        val valArray = resources.getStringArray(R.array.line_spacing_values)
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
-                view.context,
+                requireContext(),
                 R.array.line_spacing_entries,
                 android.R.layout.simple_spinner_item
         ).also { adapter ->
             // Specify the layout to use when the list of choices appears
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             // Apply the adapter to the spinner
-            spinner.adapter = adapter
+            binding.spinnerQuickMenuLineSpacing.adapter = adapter
         }
-        spinner.onItemSelectedListener = object : OnItemSelectedListener {
+        binding.spinnerQuickMenuLineSpacing.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
                 lineSpacing = valArray[position].toFloat()
@@ -164,26 +160,24 @@ class QuickMenuFragment : DialogFragment() {
             }
         }
 
-        spinner.setSelection(valArray.indexOf(lineSpacing.toString()) )
+        binding.spinnerQuickMenuLineSpacing.setSelection(valArray.indexOf(lineSpacing.toString()) )
     }
 
-    private fun initialLetterSpacing(view: View) {
-        val spinner: Spinner = view.findViewById(R.id.spinner_quick_menu_letter_spacing)
-
-        val valArray = view.resources.getStringArray(R.array.letter_spacing_values)
+    private fun initialLetterSpacing() {
+        val valArray = resources.getStringArray(R.array.letter_spacing_values)
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
-                view.context,
+                requireContext(),
                 R.array.letter_spacing_entries,
                 android.R.layout.simple_spinner_item
         ).also { adapter ->
             // Specify the layout to use when the list of choices appears
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             // Apply the adapter to the spinner
-            spinner.adapter = adapter
+            binding.spinnerQuickMenuLetterSpacing.adapter = adapter
         }
-        spinner.onItemSelectedListener = object : OnItemSelectedListener {
+        binding.spinnerQuickMenuLetterSpacing.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
                 letterSpacing = valArray[position].toFloat()
@@ -196,25 +190,22 @@ class QuickMenuFragment : DialogFragment() {
             }
         }
 
-        spinner.setSelection(valArray.indexOf(letterSpacing.toString()) )
+        binding.spinnerQuickMenuLetterSpacing.setSelection(valArray.indexOf(letterSpacing.toString()) )
     }
 
-    private fun initialBookmarks(view: View) {
-        val addBookmark = view.findViewById<ImageButton>(R.id.imageView_quick_menu_addBookmark)
-        addBookmark.setOnClickListener {
+    private fun initialBookmarks() {
+        binding.imageViewQuickMenuAddBookmark.setOnClickListener {
             listener!!.onAddBookmark()
             dismiss()
         }
-        val listBookmark = view.findViewById<ImageButton>(R.id.imageView_quick_menu_listBookmark)
-        listBookmark.setOnClickListener {
+        binding.imageViewQuickMenuListBookmark.setOnClickListener {
             listener!!.onShowBookmarklist()
             dismiss()
         }
     }
 
-    private fun initialTextSize(view: View) {
-        textViewTextSIze = view.findViewById(R.id.textView_quick_menU_textSizeExample)
-        TextViewInitiator.initiateTextView(textViewTextSIze!!, getString(R.string.textSizeExampleText))
+    private fun initialTextSize() {
+        TextViewInitiator.initiateTextView(binding.textViewQuickMenUTextSizeExample, getString(R.string.textSizeExampleText))
 
         val defaultTextSize = requireContext().resources.getDimension(R.dimen.text_size)
 
@@ -233,7 +224,7 @@ class QuickMenuFragment : DialogFragment() {
         if ( letterSpacingString != null) letterSpacing = letterSpacingString.toFloat()
         val fontname = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.DEFAULT.name)!!
 
-        textViewTextSIze!!.textSize = textSize
+        binding.textViewQuickMenUTextSizeExample.textSize = textSize
 
         val selectedFont = if ( fontpath != null ) {
             val f = File(fontpath)
@@ -244,15 +235,13 @@ class QuickMenuFragment : DialogFragment() {
         } else {
             TypefaceRecord(fontname)
         }
-        textViewTextSIze!!.typeface = selectedFont.getTypeface()
+        binding.textViewQuickMenUTextSizeExample.typeface = selectedFont.getTypeface()
 
 
-        val decrease = view.findViewById<ImageButton>(R.id.imageView_quick_menU_textSizeDecrease)
-        decrease.setOnClickListener {
+        binding.imageViewQuickMenUTextSizeDecrease.setOnClickListener {
             decreaseTextSize()
         }
-        val increase = view.findViewById<ImageButton>(R.id.imageView_quick_menU_textSizeIncrease)
-        increase.setOnClickListener {
+        binding.imageViewQuickMenUTextSizeIncrease.setOnClickListener {
             increaseTextSize()
         }
     }
@@ -281,13 +270,13 @@ class QuickMenuFragment : DialogFragment() {
 
     private fun decreaseTextSize() {
         textSize = max(PrefsHelper.textSizeMin, textSize - textSizeStep)
-        textViewTextSIze!!.textSize = textSize
+        binding.textViewQuickMenUTextSizeExample.textSize = textSize
         listener!!.onChangeTextSize(textSize)
     }
 
     private fun increaseTextSize() {
         textSize = min(PrefsHelper.textSizeMax, textSize + textSizeStep)
-        textViewTextSIze!!.textSize = textSize
+        binding.textViewQuickMenUTextSizeExample.textSize = textSize
         listener!!.onChangeTextSize(textSize)
     }
 

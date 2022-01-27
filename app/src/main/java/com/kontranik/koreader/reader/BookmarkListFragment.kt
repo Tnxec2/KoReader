@@ -8,31 +8,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.AdapterView.OnItemLongClickListener
-import android.widget.ImageButton
-import android.widget.ListView
-import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.database.BookmarkService
 import com.kontranik.koreader.database.BookmarksDatabaseAdapter
+import com.kontranik.koreader.databinding.FragmentBookmarklistBinding
 import com.kontranik.koreader.model.Bookmark
 import com.kontranik.koreader.utils.BookmarkListAdapter
 
 
 class BookmarkListFragment : DialogFragment() {
 
+    private lateinit var binding: FragmentBookmarklistBinding
+
     private var listener: BookmarkListDialogListener? = null
     private var service: BookmarkService? = null
 
-    private var listView: ListView? = null
     private var bookmarkListAdapter: BookmarkListAdapter? = null
     private var bookmarkList: MutableList<Bookmark> = mutableListOf()
 
     private var longClickedItemIndex: Int? = null
 
     var path: String? = null
-    private var statusText: TextView? = null
 
     // 1. Defines the listener interface with a method passing back data result.
     interface BookmarkListDialogListener {
@@ -47,7 +45,8 @@ class BookmarkListFragment : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_bookmarklist, container)
+        binding = FragmentBookmarklistBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
@@ -56,27 +55,22 @@ class BookmarkListFragment : DialogFragment() {
         listener = activity as BookmarkListDialogListener?
         service = BookmarkService(BookmarksDatabaseAdapter(view.context))
 
-        val close = view.findViewById<ImageButton>(R.id.imageButton_bookmarklist_back)
-        close.setOnClickListener {
+        binding.imageButtonBookmarklistBack.setOnClickListener {
             dismiss()
         }
-        val add = view.findViewById<ImageButton>(R.id.imageButton_bookmarklist_addBookmark)
-        add.setOnClickListener {
+        binding.imageButtonBookmarklistAddBookmark.setOnClickListener {
             addBookmark()
         }
 
-        statusText = view.findViewById(R.id.textView_bookmarklist_status)
         path = requireArguments().getString(PATH)
 
         loadBookmarks(path!!)
 
-        listView = view.findViewById(R.id.listView_bookmarklist_bookmarks)
-
         bookmarkListAdapter = BookmarkListAdapter(view.context, R.layout.bookmarklist_item, bookmarkList)
-        listView!!.adapter = bookmarkListAdapter
-        registerForContextMenu(listView!!)
+        binding.listViewBookmarklistBookmarks.adapter = bookmarkListAdapter
+        registerForContextMenu(binding.listViewBookmarklistBookmarks)
 
-        listView!!.onItemLongClickListener = OnItemLongClickListener { parent, view, position, id ->
+        binding.listViewBookmarklistBookmarks.onItemLongClickListener = OnItemLongClickListener { parent, view, position, id ->
             longClickedItemIndex = position
             false
         }
@@ -84,7 +78,7 @@ class BookmarkListFragment : DialogFragment() {
         val itemListener = OnItemClickListener { parent, v, position, id ->
             open(position)
         }
-        listView!!.onItemClickListener = itemListener
+        binding.listViewBookmarklistBookmarks.onItemClickListener = itemListener
 
     }
 
@@ -105,10 +99,10 @@ class BookmarkListFragment : DialogFragment() {
         bookmarkList.clear()
         bookmarkList.addAll(service!!.getByPath(path).toMutableList())
         if ( bookmarkList.isEmpty() ) {
-            statusText!!.text = getString(R.string.no_bookmarks)
-            statusText!!.visibility = View.VISIBLE
+            binding.textViewBookmarklistStatus.text = getString(R.string.no_bookmarks)
+            binding.textViewBookmarklistStatus.visibility = View.VISIBLE
         } else {
-            statusText!!.visibility = View.INVISIBLE
+            binding.textViewBookmarklistStatus.visibility = View.INVISIBLE
         }
     }
 

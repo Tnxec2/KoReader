@@ -14,13 +14,13 @@ class FileHelper(private val appDir: String) {
     fun clearworkdir() {
         val workdir = getworkdir()
         val files = workdir.listFiles()
-        for (f in files) f.delete()
+        if (files != null)
+            for (f in files) f.delete()
     }
 
     @Throws(Exception::class)
     private fun getworkdir(): File {
-        val workdir: File
-        workdir = File(appDir, Constant.OUT_DIR)
+        val workdir = File(appDir, Constant.OUT_DIR)
         workdir.mkdir()
         if (!workdir.exists()) {
             throw Exception("workdir not exist")
@@ -47,7 +47,7 @@ class FileHelper(private val appDir: String) {
         get() {
             val workdir = getworkdir()
             val fileScheme = File(workdir, Constant.SCHEME_FILENAME)
-            var mapper = ObjectMapper()
+            val mapper = ObjectMapper()
             mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
             return mapper.readValue(fileScheme, FB2Scheme::class.java)
         }
@@ -58,7 +58,7 @@ class FileHelper(private val appDir: String) {
         val workdir = getworkdir()
         val fileScheme = File(workdir, Constant.SCHEME_FILENAME)
         try {
-            var mapper = ObjectMapper()
+            val mapper = ObjectMapper()
             mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
             mapper.writeValue(fileScheme, scheme)
         } catch (e: IOException) {
@@ -68,11 +68,11 @@ class FileHelper(private val appDir: String) {
 
     @Throws(Exception::class)
     fun getBinary(sourceName: String): BinaryData {
-        var sourceName = sourceName
-        if (sourceName.startsWith("#")) sourceName = sourceName.substring(1)
+        var tempName = sourceName
+        if (tempName.startsWith("#")) tempName = tempName.substring(1)
         val workdir = getworkdir()
-        val fileBin = File(workdir, Constant.PREFIX_BINARY + sourceName + ".json")
-        var mapper = ObjectMapper()
+        val fileBin = File(workdir, Constant.PREFIX_BINARY + tempName + ".json")
+        val mapper = ObjectMapper()
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         return mapper.readValue(fileBin, BinaryData::class.java)
     }
@@ -82,7 +82,7 @@ class FileHelper(private val appDir: String) {
         if (data == null) return
         val workdir = getworkdir()
         val fileBin = File(workdir, Constant.PREFIX_BINARY + data.name + ".json")
-        var mapper = ObjectMapper()
+        val mapper = ObjectMapper()
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         mapper.writeValue(fileBin, data)
         // System.out.println(fileBin.getAbsolutePath());

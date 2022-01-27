@@ -23,13 +23,10 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
     private var pageLoader: PageLoader = PageLoader(pageView, this)
 
     init {
-        loadBook()
-    }
-
-    private fun loadBook() {
         ebookHelper = getHelper(context, fileLocation)
         if ( ebookHelper != null) ebookHelper!!.readBook()
     }
+
 
     fun getPageBody(page: Int): String? {
         val aSection = ebookHelper?.getPage(page) ?: return null
@@ -138,10 +135,8 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
     }
 
     fun getCurSection(): Int {
-        if ( curPage == null ) return  0
-        var curSection = curPage!!.endBookPosition.section
-        //curSection++
-        return curSection
+        return if (curPage == null) 0
+        else curPage!!.endBookPosition.section
     }
 
     fun getCurTextPage(): Int {
@@ -162,8 +157,8 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
             if (contentUri.endsWith(".epub", true)) {
                 return EpubHelper(context, contentUri)
             } else if (
-                    contentUri.endsWith(".fb2", ignoreCase = true)
-                    || contentUri.endsWith(".fb2.zip", ignoreCase = true)
+                contentUri.endsWith(".fb2", ignoreCase = true)
+                || contentUri.endsWith(".fb2.zip", ignoreCase = true)
             ) {
                 return FB2Helper(context, contentUri)
             }

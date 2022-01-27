@@ -89,6 +89,6 @@ class BookStatusService(var adapter: BookStatusDatabaseAdapter) {
     }
 
     companion object {
-        private val TAG = "BookStatusService"
+        private const val TAG = "BookStatusService"
     }
 }

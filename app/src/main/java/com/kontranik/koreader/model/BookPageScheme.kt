@@ -17,15 +17,14 @@ class BookPageScheme {
     fun getBookPositionForPage(page: Int): BookPosition {
         var fullSectionPages = 0
         var section = 0
-        var sectionPages = 0;
-        var offset = 0;
+        var sectionPages: Int
         for (i in 0 .. sectionCount) {
             section = i
             sectionPages = scheme[i]!!.countTextPages
             if ( page <= fullSectionPages + sectionPages ) break
             fullSectionPages += sectionPages
         }
-        offset = ( page - fullSectionPages) * CHAR_PER_PAGE
+        val offset: Int = ( page - fullSectionPages) * CHAR_PER_PAGE
 
         return BookPosition(section, offset)
     }

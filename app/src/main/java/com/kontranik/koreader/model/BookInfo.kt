@@ -36,15 +36,19 @@ class BookInfo(
         for ( a in authorsString.split(", ")) {
             val namen = a.split(" ")
 
-            if ( namen.size == 3) {
-                lastname = namen[2]
-                middlename = namen[1]
-                firstname = namen[0]
-            } else if ( namen.size == 2) {
-                lastname = namen[1]
-                firstname = namen[0]
-            } else if ( namen.size == 1) {
-                firstname = namen[0]
+            when (namen.size) {
+                3 -> {
+                    lastname = namen[2]
+                    middlename = namen[1]
+                    firstname = namen[0]
+                }
+                2 -> {
+                    lastname = namen[1]
+                    firstname = namen[0]
+                }
+                1 -> {
+                    firstname = namen[0]
+                }
             }
             val author = Author(firstname, middlename, lastname)
 

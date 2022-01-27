@@ -1,23 +1,21 @@
 package com.kontranik.koreader.reader
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
-import android.widget.ImageButton
-import android.widget.ListView
-import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
+import com.kontranik.koreader.databinding.FragmentGotoMenuBinding
 import kotlin.math.max
 import kotlin.math.min
 
 
 class GotoMenuFragment : DialogFragment() {
+    private lateinit var binding: FragmentGotoMenuBinding
 
     private var listener: GotoMenuDialogListener? = null
 
@@ -28,9 +26,6 @@ class GotoMenuFragment : DialogFragment() {
     private var maxpage: Int = 0
 
     private var aSections: Array<String>? = null
-
-    private var textViewPage: TextView? = null
-    private var sectionListView: ListView? = null
 
     // 1. Defines the listener interface with a method passing back data result.
     interface GotoMenuDialogListener {
@@ -45,7 +40,8 @@ class GotoMenuFragment : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_goto_menu, container)
+        binding = FragmentGotoMenuBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
@@ -61,13 +57,11 @@ class GotoMenuFragment : DialogFragment() {
 
         aSections = requireArguments().getStringArray(SECTIONLIST)
 
-        val close = view.findViewById<ImageButton>(R.id.imageButton_gotomenu_close)
-        close.setOnClickListener {
+        binding.imageButtonGotomenuClose.setOnClickListener {
             dismiss()
         }
 
-        val save = view.findViewById<ImageButton>(R.id.imageButton_gotomenu_save)
-        save.setOnClickListener {
+        binding.imageButtonGotomenuSave.setOnClickListener {
             gotoPage()
         }
 
@@ -76,34 +70,30 @@ class GotoMenuFragment : DialogFragment() {
     }
 
     private fun initialGotoPage(view: View) {
-        textViewPage = view.findViewById(R.id.textView_goto_menu_page)
         updatePageText()
 
-        val decrease = view.findViewById<ImageButton>(R.id.imageView_goto_menu_page_left)
-        decrease.setOnClickListener {
+        binding.imageViewGotoMenuPageLeft.setOnClickListener {
             decreasePage()
         }
-        val increase = view.findViewById<ImageButton>(R.id.imageView_goto_menu_page_right)
-        increase.setOnClickListener {
+        binding.imageViewGotoMenuPageRight.setOnClickListener {
             increasePage()
         }
     }
 
     private fun initialGotoList(view: View) {
-        sectionListView = view.findViewById(R.id.goto_menu_sectionlist)
         if ( aSections == null || aSections!!.isEmpty()) {
-            sectionListView!!.visibility = View.GONE
+            binding.gotoMenuSectionlist.visibility = View.GONE
         } else {
             val adapter: ArrayAdapter<String> = ArrayAdapter<String>(view.context,
                     android.R.layout.simple_list_item_1, aSections!!)
-            sectionListView!!.setAdapter(adapter)
+            binding.gotoMenuSectionlist.adapter = adapter
         }
-        sectionListView!!.setOnItemClickListener(
-                OnItemClickListener { parent, v, position, id ->
-            // val selectedItem: String = aSections!!.get(position)
-            gotoSection(position)
-        })
-        sectionListView!!.setSelection(section)
+        binding.gotoMenuSectionlist.onItemClickListener =
+            OnItemClickListener { parent, v, position, id ->
+                // val selectedItem: String = aSections!!.get(position)
+                gotoSection(position)
+            }
+        binding.gotoMenuSectionlist.setSelection(section)
     }
 
     private fun gotoPage() {
@@ -134,7 +124,7 @@ class GotoMenuFragment : DialogFragment() {
     }
 
     private fun updatePageText() {
-        textViewPage!!.text = (page).toString()
+        binding.textViewGotoMenuPage.text = (page).toString()
     }
 
     companion object {

@@ -46,31 +46,31 @@
         android:id="@+id/tv_infotext_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="left"
+        android:gravity="start"
         android:text="" />
 
-    <Space
+    <androidx.legacy.widget.Space
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1" />
 
     <TextView
         android:id="@+id/tv_infotext_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="right"
+        android:gravity="end"
         android:text=""
     />
-        <Space
+        <androidx.legacy.widget.Space
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1" />
 
     <TextView
             android:id="@+id/tv_infotext_systemstatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="right"
+            android:gravity="end"
             android:text=""
             android:layout_marginStart="16dp"
             />

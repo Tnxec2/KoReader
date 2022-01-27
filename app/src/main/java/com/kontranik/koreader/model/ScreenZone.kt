@@ -16,15 +16,15 @@ enum class ScreenZone {
 
     companion object {
         fun zone(point: Point, width: Int, height: Int): ScreenZone {
-            if ( isLeft(point.x, width) && isTop(point.y, height)) return TopLeft
-            else if ( isCenter(point.x, width) && isTop(point.y, height)) return TopCenter
-            else if ( isRight(point.x, width) && isTop(point.y, height)) return TopRight
-            else if ( isLeft(point.x, width) && isMiddle(point.y, height)) return MiddleLeft
-            else if ( isCenter(point.x, width) && isMiddle(point.y, height)) return MiddleCenter
-            else if ( isRight(point.x, width) && isMiddle(point.y, height)) return MiddleRight
-            else if ( isLeft(point.x, width) && isBottom(point.y, height)) return BottomLeft
-            else if ( isCenter(point.x, width) && isBottom(point.y, height)) return BottomCenter
-            else return BottomRight
+            return if ( isLeft(point.x, width) && isTop(point.y, height)) TopLeft
+            else if ( isCenter(point.x, width) && isTop(point.y, height)) TopCenter
+            else if ( isRight(point.x, width) && isTop(point.y, height)) TopRight
+            else if ( isLeft(point.x, width) && isMiddle(point.y, height)) MiddleLeft
+            else if ( isCenter(point.x, width) && isMiddle(point.y, height)) MiddleCenter
+            else if ( isRight(point.x, width) && isMiddle(point.y, height)) MiddleRight
+            else if ( isLeft(point.x, width) && isBottom(point.y, height)) BottomLeft
+            else if ( isCenter(point.x, width) && isBottom(point.y, height)) BottomCenter
+            else BottomRight
         }
 
         private fun isLeft(x: Int, width: Int): Boolean {

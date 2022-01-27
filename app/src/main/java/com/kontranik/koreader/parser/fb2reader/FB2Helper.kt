@@ -66,10 +66,10 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
             if ( textsize != null ) return textsize
         }
         val aSection = getPage(pageIndex)
-        if ( aSection != null) {
-            return getSizeOfHtmlText(aSection)
+        return if ( aSection != null) {
+            getSizeOfHtmlText(aSection)
         } else {
-            return null
+            null
         }
     }
 
@@ -94,26 +94,25 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         val tempReader = FB2Reader(context.filesDir.absolutePath, contentUri)
         val fileInputStream = context.contentResolver.openInputStream(Uri.parse(contentUri)) ?: return null
         val tempScheme = tempReader.readScheme(fileInputStream)
-        if (tempScheme != null) {
+        return if (tempScheme != null) {
             val t = tempScheme.description.titleInfo.booktitle
             val coverImage = tempScheme.cover
-            var coverBitmap: Bitmap?
-            coverBitmap = getCoverbitmap(coverImage?.contentsArray)
-            return BookInfo(
-                    title = t,
-                    cover = coverBitmap,
-                    authors = getAuthors(tempScheme).toMutableList(),
-                    path = contentUri,
-                    filename = contentUri,
-                    annotation = tempScheme.description.titleInfo.annotation.toString()
+            val coverBitmap: Bitmap? = getCoverbitmap(coverImage?.contentsArray)
+            BookInfo(
+                title = t,
+                cover = coverBitmap,
+                authors = getAuthors(tempScheme).toMutableList(),
+                path = contentUri,
+                filename = contentUri,
+                annotation = tempScheme.description.titleInfo.annotation.toString()
             )
         } else {
-            return null
+            null
         }
     }
 
     private fun getcoverbitmap(): Bitmap? {
-        return getCoverbitmap(fb2Reader?.fb2Scheme?.cover?.contentsArray)
+        return getCoverbitmap(fb2Reader.fb2Scheme?.cover?.contentsArray)
     }
 
     private fun getCoverbitmap(coverImage: ByteArray?): Bitmap? {
@@ -128,15 +127,14 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         }
     }
 
-    override fun getCoverPage(): String? {
+    override fun getCoverPage(): String {
         return fb2Reader.fb2Scheme!!.description.titleInfo.coverpage.toString()
     }
 
     companion object {
         fun getSizeOfHtmlText(htmlText: String): Int {
             val document = Jsoup.parse(htmlText)
-            val r2 = document.body().wholeText().length
-            return r2
+            return document.body().wholeText().length
         }
     }
 }

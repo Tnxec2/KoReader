@@ -5,15 +5,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
-import it.sephiroth.android.library.imagezoom.ImageViewTouch
+import com.kontranik.koreader.databinding.FragmentImageviewerBinding
 import it.sephiroth.android.library.imagezoom.ImageViewTouchBase
 
 
 class ImageViewerFragment : DialogFragment() {
+
+    private lateinit var binding: FragmentImageviewerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,25 +23,24 @@ class ImageViewerFragment : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_imageviewer, container)
+        binding = FragmentImageviewerBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val close = view.findViewById<ImageView>(R.id.imageView_imageviewer_close)
-        close.setOnClickListener {
+        binding.imageViewImageviewerClose.setOnClickListener {
             dismiss()
         }
 
-        val touchImageView: ImageViewTouch = view.findViewById(R.id.imageviewtouch_imageviewer)
-        touchImageView.displayType = ImageViewTouchBase.DisplayType.FIT_TO_SCREEN
+        binding.imageviewtouchImageviewer.displayType = ImageViewTouchBase.DisplayType.FIT_TO_SCREEN
 
         val barray = requireArguments().getByteArray(ImageByteArray)
         if (barray == null) {
             dismiss()
         } else {
-            touchImageView.setImageBitmap(
+            binding.imageviewtouchImageviewer.setImageBitmap(
                     BitmapFactory.decodeByteArray(barray, 0, barray.size)
             )
         }

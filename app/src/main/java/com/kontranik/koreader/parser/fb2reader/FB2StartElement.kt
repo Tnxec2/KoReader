@@ -10,10 +10,11 @@ import org.xml.sax.Attributes
 object FB2StartElement {
     @Throws(Exception::class)
     fun startElement(
-            eName: String,
-            fel: FB2Elements,
-            attrs: Attributes,
-            `object`: FB2ParserObject) {
+        eName: String,
+        fel: FB2Elements,
+        attrs: Attributes,
+        `object`: FB2ParserObject
+    ) {
         when (fel) {
             FB2Elements.SECTION, FB2Elements.BODY -> gotNewSection(eName, fel, attrs, `object`)
             FB2Elements.BINARY -> startBinarys(`object`, attrs)
@@ -31,9 +32,10 @@ object FB2StartElement {
             `object`.myParseText = true
         }
         if (!`object`.isSection
-                && !`object`.isAnnotation
-                && !`object`.isCoverpage
-                && !`object`.isHistory) return
+            && !`object`.isAnnotation
+            && !`object`.isCoverpage
+            && !`object`.isHistory
+        ) return
         if (`object`.isSection && `object`.onlyscheme) return
         var result = ""
         val deep = if (`object`.isSection) `object`.mySection!!.deep!! else 0
@@ -107,10 +109,20 @@ object FB2StartElement {
     @Throws(Exception::class)
     private fun gotNewSection(fB2ParserObject: FB2ParserObject) {
         if (fB2ParserObject.mySection != null) {
-            fB2ParserObject.fileHelper.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
+            fB2ParserObject.fileHelper.writeSection(
+                fB2ParserObject.mySection,
+                fB2ParserObject.fb2scheme
+            )
             fB2ParserObject.isSection = true
-            val parentid = if (fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.orderid else null
-            fB2ParserObject.mySection = FB2Section(fB2ParserObject.sectionid, fB2ParserObject.mySection!!.id, fB2ParserObject.mySection!!.typ, fB2ParserObject.sectionDeep, parentid)
+            val parentid =
+                if (fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.orderid else null
+            fB2ParserObject.mySection = FB2Section(
+                fB2ParserObject.sectionid,
+                fB2ParserObject.mySection!!.id,
+                fB2ParserObject.mySection!!.typ,
+                fB2ParserObject.sectionDeep,
+                parentid
+            )
             fB2ParserObject.fb2scheme.sections.add(fB2ParserObject.mySection!!)
             // System.out.printf("New Section Id: " + object.sectionid + ", deep: " + object.sectionDeep + ", Name: " + el.elName + "\n");
             fB2ParserObject.sectionid++
@@ -119,17 +131,32 @@ object FB2StartElement {
     }
 
     @Throws(Exception::class)
-    private fun gotNewSection(eName: String, el: FB2Elements, attrs: Attributes, fB2ParserObject: FB2ParserObject) {
+    private fun gotNewSection(
+        eName: String,
+        el: FB2Elements,
+        attrs: Attributes,
+        fB2ParserObject: FB2ParserObject
+    ) {
         if (!fB2ParserObject.onlyscheme && fB2ParserObject.isSection) {
-            fB2ParserObject.fileHelper.writeSection(fB2ParserObject.mySection, fB2ParserObject.fb2scheme)
+            fB2ParserObject.fileHelper.writeSection(
+                fB2ParserObject.mySection,
+                fB2ParserObject.fb2scheme
+            )
         }
         if (attrs.getValue("notes") != null) {
             fB2ParserObject.isNotes = true
             fB2ParserObject.isSection = true
         } else {
             fB2ParserObject.isSection = true
-            val parentid = if (fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.orderid else null
-            fB2ParserObject.mySection = FB2Section(fB2ParserObject.sectionid, attrs.getValue("id"), el, fB2ParserObject.sectionDeep, parentid)
+            val parentid =
+                if (fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.orderid else null
+            fB2ParserObject.mySection = FB2Section(
+                fB2ParserObject.sectionid,
+                attrs.getValue("id"),
+                el,
+                fB2ParserObject.sectionDeep,
+                parentid
+            )
             fB2ParserObject.fb2scheme.sections.add(fB2ParserObject.mySection!!)
             // System.out.printf("New Section Id: " + object.sectionid + ", deep: " + object.sectionDeep + ", Name: " + el.elName + "\n");
             fB2ParserObject.sectionid++
@@ -137,26 +164,52 @@ object FB2StartElement {
         }
     }
 
-    private fun startElementDescription(el: FB2Elements, attrs: Attributes, fB2ParserObject: FB2ParserObject) {
+    private fun startElementDescription(
+        el: FB2Elements,
+        attrs: Attributes,
+        fB2ParserObject: FB2ParserObject
+    ) {
         when (el) {
             FB2Elements.TITLEINFO -> fB2ParserObject.isDescriptionTitleInfo = true
             FB2Elements.DOCUMENTINFO -> fB2ParserObject.isDescriptionDocumentInfo = true
             FB2Elements.PUBLISHINFO -> fB2ParserObject.isDescriptionPublishInfo = true
             FB2Elements.CUSTOMINFO -> fB2ParserObject.isDescriptionCustomInfo = true
             FB2Elements.AUTHOR -> {
-                if (fB2ParserObject.isDescriptionTitleInfo) fB2ParserObject.fb2scheme.description.titleInfo.authors.add(Author())
-                if (fB2ParserObject.isDescriptionDocumentInfo) fB2ParserObject.fb2scheme.description.documentInfo.authors.add(Author())
+                if (fB2ParserObject.isDescriptionTitleInfo) fB2ParserObject.fb2scheme.description.titleInfo.authors.add(
+                    Author()
+                )
+                if (fB2ParserObject.isDescriptionDocumentInfo) fB2ParserObject.fb2scheme.description.documentInfo.authors.add(
+                    Author()
+                )
                 fB2ParserObject.isAuthor = true
             }
             FB2Elements.TRANSLATOR -> {
-                if (fB2ParserObject.isDescriptionTitleInfo) fB2ParserObject.fb2scheme.description.titleInfo.translators.add(Author())
+                if (fB2ParserObject.isDescriptionTitleInfo)
+                    fB2ParserObject.fb2scheme.description.titleInfo.translators.add(
+                        Author()
+                    )
                 fB2ParserObject.isTranslator = true
             }
-            FB2Elements.BOOKTITLE, FB2Elements.FIRSTNAME, FB2Elements.MIDDLENAME, FB2Elements.LASTNAME, FB2Elements.NICKNAME, FB2Elements.HOMEPAGE, FB2Elements.EMAIL,
-            FB2Elements.GENRE, FB2Elements.BOOKNAME, FB2Elements.PUBLISHER, FB2Elements.city, FB2Elements.YEAR, FB2Elements.ISBN, FB2Elements.KEYWORDS, FB2Elements.VERSION -> fB2ParserObject.myParseText = true
+            FB2Elements.BOOKTITLE,
+            FB2Elements.FIRSTNAME,
+            FB2Elements.MIDDLENAME,
+            FB2Elements.LASTNAME,
+            FB2Elements.NICKNAME,
+            FB2Elements.HOMEPAGE,
+            FB2Elements.EMAIL,
+            FB2Elements.GENRE,
+            FB2Elements.BOOKNAME,
+            FB2Elements.PUBLISHER,
+            FB2Elements.city,
+            FB2Elements.YEAR,
+            FB2Elements.ISBN,
+            FB2Elements.KEYWORDS,
+            FB2Elements.VERSION -> fB2ParserObject.myParseText = true
             FB2Elements.SEQUENCE -> if (fB2ParserObject.isDescriptionTitleInfo) {
-                fB2ParserObject.fb2scheme.description.titleInfo.sequenceName = attrs.getValue("name")
-                fB2ParserObject.fb2scheme.description.titleInfo.sequenceNumber = attrs.getValue("number")
+                fB2ParserObject.fb2scheme.description.titleInfo.sequenceName =
+                    attrs.getValue("name")
+                fB2ParserObject.fb2scheme.description.titleInfo.sequenceNumber =
+                    attrs.getValue("number")
             }
             FB2Elements.DATE -> if (fB2ParserObject.isDescriptionTitleInfo) {
                 fB2ParserObject.fb2scheme.description.titleInfo.date = attrs.getValue("value")
@@ -176,7 +229,9 @@ object FB2StartElement {
         }
         `object`.isBinary = true
         val id = attrs.getValue("id")
-        if (!`object`.onlyscheme || `object`.fb2scheme.cover == null && `object`.fb2scheme.description.titleInfo.coverImageSrc == id) {
+        if ( !`object`.onlyscheme
+            || `object`.fb2scheme.cover == null
+            && `object`.fb2scheme.description.titleInfo.coverImageSrc == id) {
             `object`.myBinaryData = BinaryData(id, attrs.getValue("content-type"))
             `object`.myParseText = true
         }

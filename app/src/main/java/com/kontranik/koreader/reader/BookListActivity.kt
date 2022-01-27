@@ -11,6 +11,8 @@ import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
 import com.kontranik.koreader.database.BookStatusDatabaseAdapter
 import com.kontranik.koreader.database.BookStatusService
+import com.kontranik.koreader.databinding.ActivityBookListBinding
+import com.kontranik.koreader.databinding.ActivityReaderMainBinding
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.utils.BookListAdapter
@@ -19,21 +21,23 @@ import com.kontranik.koreader.utils.PrefsHelper
 
 class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterClickListener {
 
-    private var listView: RecyclerView? = null
+    private lateinit var binding: ActivityBookListBinding
+
     private var bookInfoList: MutableList<BookInfo> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_book_list)
+
+        binding = ActivityBookListBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         val close = findViewById<ImageButton>(R.id.imageButton_booklist_back)
         close.setOnClickListener {
             finish()
         }
 
-        listView = findViewById(R.id.reciclerView_booklist_list)
-
-        listView!!.adapter = BookListAdapter(this, bookInfoList, this)
+        binding.reciclerViewBooklistList.adapter = BookListAdapter(this, bookInfoList, this)
 
         loadBooklist()
     }
@@ -69,7 +73,7 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
                 val bookservice = BookStatusService(BookStatusDatabaseAdapter(this))
                 val books = bookservice.getLastOpened(LAST_OPENED_COUNT)
                 bookInfoList.clear()
-                listView!!.adapter = null
+                binding.reciclerViewBooklistList.adapter = null
 
                 for ( bookstatus in books) {
                     if ( bookstatus.path != null) {
@@ -89,7 +93,7 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
 
                     }
                 }
-                listView!!.adapter = BookListAdapter(this, bookInfoList, this)
+                binding.reciclerViewBooklistList.adapter = BookListAdapter(this, bookInfoList, this)
             }
             else -> {}
         }

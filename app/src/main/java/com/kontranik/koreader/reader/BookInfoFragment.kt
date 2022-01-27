@@ -5,16 +5,15 @@ import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
+import com.kontranik.koreader.databinding.FragmentBookinfoBinding
 import com.kontranik.koreader.model.Book
-import com.kontranik.koreader.model.BookInfo
 
 class BookInfoFragment : DialogFragment() {
+
+    private lateinit var binding: FragmentBookinfoBinding
 
     private var listener: BookInfoListener? = null
 
@@ -30,7 +29,8 @@ class BookInfoFragment : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_bookinfo, container)
+        binding = FragmentBookinfoBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
@@ -39,28 +39,20 @@ class BookInfoFragment : DialogFragment() {
         val bookPath = requireArguments().getString(BOOK_PATH, null)
         if ( bookPath == null) dismiss()
 
-        val close = view.findViewById<ImageButton>(R.id.imageButton_bookinfo_close)
-        close.setOnClickListener {
+        binding.imageButtonBookinfoClose.setOnClickListener {
             dismiss()
         }
 
-        val read = view.findViewById<ImageButton>(R.id.imageButton_bookinfo_read)
-        read.setOnClickListener {
+        binding.imageButtonBookinfoRead.setOnClickListener {
             if ( listener != null) {
-                listener!!.onBookInfoFragmentReadBook(bookPath!!)
+                listener?.onBookInfoFragmentReadBook(bookPath!!)
                 dismiss()
             }
         }
 
         if ( listener == null) {
-            read.visibility = View.GONE
+            binding.imageButtonBookinfoRead.visibility = View.GONE
         }
-
-        val titleView = view.findViewById<TextView>(R.id.textView_bookinfo_title)
-        val booktitleView = view.findViewById<TextView>(R.id.textView_bookinfo_booktitle)
-        val annotationView = view.findViewById<TextView>(R.id.textView_bookinfo_annotation)
-        val autorsView = view.findViewById<TextView>(R.id.textView_bookinfo_autors)
-        val coverView = view.findViewById<ImageView>(R.id.imageView_bookinfo_cover)
 
         val ebookHelper = Book.getHelper(requireContext(), bookPath!!)
 
@@ -70,16 +62,16 @@ class BookInfoFragment : DialogFragment() {
 
         if ( bookInfo == null ) dismiss()
 
-        titleView.text = bookInfo!!.title
+        binding.textViewBookinfoTitle.text = bookInfo!!.title
 
         if ( bookInfo.cover != null) {
-            coverView.setImageBitmap(bookInfo.cover)
+            binding.imageViewBookinfoCover.setImageBitmap(bookInfo.cover)
         } else {
-            coverView.visibility = View.GONE
+            binding.imageViewBookinfoCover.visibility = View.GONE
         }
-        booktitleView.text = bookInfo.title
-        autorsView.text = bookInfo.authorsAsString()
-        annotationView.text = Html.fromHtml(bookInfo.annotation)
+        binding.textViewBookinfoBooktitle.text = bookInfo.title
+        binding.textViewBookinfoAutors.text = bookInfo.authorsAsString()
+        binding.textViewBookinfoAnnotation.text = Html.fromHtml(bookInfo.annotation)
 
     }
 
@@ -97,8 +89,6 @@ class BookInfoFragment : DialogFragment() {
             frag.arguments = args
             return frag
         }
-
-
     }
 
 }

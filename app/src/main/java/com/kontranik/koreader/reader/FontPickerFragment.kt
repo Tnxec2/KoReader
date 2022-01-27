@@ -17,6 +17,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kontranik.koreader.R
+import com.kontranik.koreader.databinding.FragmentFontMenuBinding
 import com.kontranik.koreader.utils.FontPickerListItemAdapter
 import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.typefacefactory.FontManager
@@ -28,6 +29,8 @@ import java.util.*
 class FontPickerFragment :
         DialogFragment(),
         FontPickerListItemAdapter.FontPickerListAdapterClickListener {
+
+    private lateinit var binding: FragmentFontMenuBinding
 
     private var listener: FontPickerDialogListener? = null
 
@@ -58,8 +61,8 @@ class FontPickerFragment :
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-
-        return inflater.inflate(R.layout.fragment_font_menu, container, false)
+        binding = FragmentFontMenuBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
@@ -117,9 +120,7 @@ class FontPickerFragment :
             return
         }
 
-        val fontListView = mView!!.findViewById<RecyclerView>(R.id.reciclerView_font_list)
-
-        fontListView.adapter = FontPickerListItemAdapter(
+        binding.reciclerViewFontList.adapter = FontPickerListItemAdapter(
                 mView!!.context,
                 // textSize,
                 fontList,
@@ -136,7 +137,7 @@ class FontPickerFragment :
                 pos = i
             }
         }
-        if ( pos < fontList.size) fontListView.scrollToPosition(pos)
+        if ( pos < fontList.size) binding.reciclerViewFontList.scrollToPosition(pos)
 
         AdapterView.OnItemClickListener { parent, v, position, id ->
             selectedFont = fontList[position]

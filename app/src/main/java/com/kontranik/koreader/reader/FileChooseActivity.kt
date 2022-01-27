@@ -1,7 +1,6 @@
 package com.kontranik.koreader.reader
 
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
@@ -9,27 +8,25 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
+import com.kontranik.koreader.databinding.ActivityFilechooseBinding
 import com.kontranik.koreader.utils.*
-import java.util.*
 
 
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
 class FileChooseActivity : AppCompatActivity(),
         FileListAdapter.FileListAdapterClickListener,
         BookInfoFragment.BookInfoListener{
+    
+    private lateinit var binding: ActivityFilechooseBinding
 
     private var externalPaths = mutableSetOf<String>()
 
-    private var listView: RecyclerView? = null
     private var fileItemList: MutableList<FileItem> = ArrayList()
 
     private var selectedDocumentFileUriString: String? = null
@@ -40,35 +37,30 @@ class FileChooseActivity : AppCompatActivity(),
 
     private var pathsPosition: HashMap<String, Int> = hashMapOf()
 
-    private var addStorage: ImageButton? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_filechoose)
+        
+        binding = ActivityFilechooseBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val close = findViewById<ImageButton>(R.id.imageButton_filechoose_close)
-        close.setOnClickListener {
+        binding.imageButtonFilechooseClose.setOnClickListener {
             finish()
         }
 
-        val back = findViewById<ImageButton>(R.id.imageButton_filechoose_back)
-        back.setOnClickListener {
+        binding.imageButtonFilechooseBack.setOnClickListener {
             goBack()
         }
 
-        val storage = findViewById<ImageButton>(R.id.imageButton_filechoose_goto_storage)
-        storage.setOnClickListener {
+        binding.imageButtonFilechooseGotoStorage.setOnClickListener {
             storageList()
         }
 
-        addStorage = findViewById<ImageButton>(R.id.imageButton_filechoose_add_storage)
-        addStorage!!.setOnClickListener {
+        binding.imageButtonFilechooseAddStorage.setOnClickListener {
             storageAdd()
         }
-        addStorage!!.visibility = View.GONE
+        binding.imageButtonFilechooseAddStorage.visibility = View.GONE
 
-        listView = findViewById(R.id.reciclerView_files)
-        listView!!.adapter = FileListAdapter(this, fileItemList, this)
+        binding.reciclerViewFiles.adapter = FileListAdapter(this, fileItemList, this)
 
         settings = getSharedPreferences(PREFS_FILE, MODE_PRIVATE)
         loadPrefs()
@@ -104,7 +96,7 @@ class FileChooseActivity : AppCompatActivity(),
                 for (pos in 0 until fileItemList.size) {
                     val uriString = fileItemList[pos].uriString
                     if (uriString == lastPaht!!) {
-                        (listView!!.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
+                        (binding.reciclerViewFiles.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
                         break
                     }
                 }
@@ -113,7 +105,7 @@ class FileChooseActivity : AppCompatActivity(),
     }
 
     private fun getFileList(fileItem: FileItem) {
-        addStorage!!.visibility = View.GONE
+        binding.imageButtonFilechooseAddStorage.visibility = View.GONE
         selectedDocumentFileUriString = fileItem.uriString
         getFileList(fileItem.uriString)
     }
@@ -124,16 +116,16 @@ class FileChooseActivity : AppCompatActivity(),
             return
         } else {
             fileItemList.clear()
-            listView!!.adapter = null
+            binding.reciclerViewFiles.adapter = null
             // val fl = FileHelper.getFileList(applicationContext, documentFile)
 
             val fl = FileHelper.getFileListDC(applicationContext, documentFilePath)
             fileItemList.addAll(fl)
-            listView!!.adapter = FileListAdapter(this, fileItemList, this)
+            binding.reciclerViewFiles.adapter = FileListAdapter(this, fileItemList, this)
 
             if (pathsPosition.containsKey(documentFilePath)) {
-               //listView!!.scrollToPosition(pathsPosition[documentFilePath]!!)
-                (listView!!.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pathsPosition[documentFilePath]!!, 0)
+               //binding.reciclerViewFiles.scrollToPosition(pathsPosition[documentFilePath]!!)
+                (binding.reciclerViewFiles.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pathsPosition[documentFilePath]!!, 0)
             }
         }
     }
@@ -173,7 +165,7 @@ class FileChooseActivity : AppCompatActivity(),
             return
         }
         fileItemList.clear()
-        listView!!.adapter = null
+        binding.reciclerViewFiles.adapter = null
 
         for ( path in externalPaths ) {
 
@@ -191,9 +183,9 @@ class FileChooseActivity : AppCompatActivity(),
         }
         fileItemList.sortBy { it.name }
 
-        listView!!.adapter = FileListAdapter(this, fileItemList, this)
+        binding.reciclerViewFiles.adapter = FileListAdapter(this, fileItemList, this)
 
-        addStorage!!.visibility = View.VISIBLE
+        binding.imageButtonFilechooseAddStorage.visibility = View.VISIBLE
     }
 
     override fun onFilelistItemClickListener(position: Int) {
@@ -206,7 +198,7 @@ class FileChooseActivity : AppCompatActivity(),
         }
 
         if (selectedFileItem.isDir) {
-            listView!!.layoutManager as LinearLayoutManager
+            binding.reciclerViewFiles.layoutManager as LinearLayoutManager
             if ( selectedFileItem.isRoot ) {
                 if ( externalPaths.contains(selectedFileItem.uriString) )
                     getFileList(selectedFileItem)

@@ -32,21 +32,25 @@ class DatabaseHelper(val context: Context?) : SQLiteOpenHelper(
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
 
-        if ( oldVersion < 2) {
-            db.execSQL("ALTER TABLE " + BookmarksHelper.TABLE + " ADD COLUMN " +
-                    BookmarksHelper.COLUMN_CREATE_DATE + " NUMBER;")
-            db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
-                    BookStatusHelper.COLUMN_LAST_OPEN_TIME + " NUMBER;")
-        } else if ( oldVersion < 3) {
-            db.execSQL("ALTER TABLE " + BookmarksHelper.TABLE + " ADD COLUMN " +
-                    BookmarksHelper.COLUMN_POSITION_OFFSET + " NUMBER;")
-            db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
-                    BookStatusHelper.COLUMN_POSITION_OFFSET + " NUMBER;")
-        } else if ( oldVersion < 4) {
-            db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
-                    BookStatusHelper.COLUMN_TITLE + " TEXT;")
-            db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
-                    BookStatusHelper.COLUMN_AUTHOR + " TEXT;")
+        when {
+            oldVersion < 2 -> {
+                db.execSQL("ALTER TABLE " + BookmarksHelper.TABLE + " ADD COLUMN " +
+                        BookmarksHelper.COLUMN_CREATE_DATE + " NUMBER;")
+                db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
+                        BookStatusHelper.COLUMN_LAST_OPEN_TIME + " NUMBER;")
+            }
+            oldVersion < 3 -> {
+                db.execSQL("ALTER TABLE " + BookmarksHelper.TABLE + " ADD COLUMN " +
+                        BookmarksHelper.COLUMN_POSITION_OFFSET + " NUMBER;")
+                db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
+                        BookStatusHelper.COLUMN_POSITION_OFFSET + " NUMBER;")
+            }
+            oldVersion < 4 -> {
+                db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
+                        BookStatusHelper.COLUMN_TITLE + " TEXT;")
+                db.execSQL("ALTER TABLE " + BookStatusHelper.TABLE + " ADD COLUMN " +
+                        BookStatusHelper.COLUMN_AUTHOR + " TEXT;")
+            }
         }
     }
 

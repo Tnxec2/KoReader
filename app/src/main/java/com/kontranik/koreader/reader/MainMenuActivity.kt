@@ -1,39 +1,36 @@
 package com.kontranik.koreader.reader
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import com.kontranik.koreader.R
+import androidx.appcompat.app.AppCompatActivity
 import com.kontranik.koreader.ReaderActivity
+import com.kontranik.koreader.databinding.ActivityMainMenuBinding
 import com.kontranik.koreader.utils.PrefsHelper
 
 class MainMenuActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainMenuBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main_menu)
+        binding = ActivityMainMenuBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val close = findViewById<ImageButton>(R.id.imageButton_main_menu_back)
-        close.setOnClickListener {
+        binding.imageButtonMainMenuBack.setOnClickListener {
             finish()
         }
 
-        val openFile = findViewById<LinearLayout>(R.id.ll_main_menu_open_file)
-        openFile.setOnClickListener {
+        binding.llMainMenuOpenFile.setOnClickListener {
             openFile()
         }
 
-        val lastOpenedLayout = findViewById<LinearLayout>(R.id.ll_main_menu_last_opened)
-        lastOpenedLayout.setOnClickListener {
+        binding.llMainMenuLastOpened.setOnClickListener {
             openLastOpened()
         }
 
-        val settings = findViewById<LinearLayout>(R.id.ll_main_menu_settings)
-        settings.setOnClickListener {
+        binding.llMainMenuSettings.setOnClickListener {
             settings()
         }
 
@@ -44,15 +41,15 @@ class MainMenuActivity : AppCompatActivity() {
             bookPath = prefs.getString(PrefsHelper.PREF_BOOK_PATH, null)
         }
 
-        val bookinfo = findViewById<ImageButton>(R.id.imageButton_mainmenu_bookinfo)
-        bookinfo.setOnClickListener {
+        binding.imageButtonMainmenuBookinfo.setOnClickListener {
             openBookInfo(bookPath)
         }
-        if ( bookPath == null) bookinfo.visibility = View.GONE
+        if ( bookPath == null) binding.imageButtonMainmenuBookinfo.visibility = View.GONE
 
     }
 
     private fun openFile() {
+        Log.d("MainMenu", "openFile...")
         val intent = Intent(this, FileChooseActivity::class.java)
         startActivityForResult(intent, REQUEST_ACCESS_TYPE_OPENFILE)
     }

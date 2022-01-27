@@ -10,13 +10,14 @@ import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
+import com.kontranik.koreader.databinding.FragmentFloattextviewBinding
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
 
 
 class FloatTextViewFragment : DialogFragment() {
 
-    private var textView: TextView? = null
+    private lateinit var binding: FragmentFloattextviewBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,14 +26,14 @@ class FloatTextViewFragment : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_floattextview, container)
+        binding = FragmentFloattextviewBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val close = view.findViewById<ImageButton>(R.id.imageButton_floattextview_close)
-        close.setOnClickListener {
+        binding.imageButtonFloattextviewClose.setOnClickListener {
             dismiss()
         }
 
@@ -50,13 +51,12 @@ class FloatTextViewFragment : DialogFragment() {
             TypefaceRecord(fontname)
         }
 
-        textView = view.findViewById(R.id.textView_floattextview_content)
-
         val html = requireArguments().getString(CONTENT, "no Content")
-        textView!!.text = Html.fromHtml(html)
-
-        textView!!.textSize = textSize
-        textView!!.typeface = selectedFont.getTypeface()
+        with (binding.textViewFloattextviewContent) {
+            text = Html.fromHtml(html)
+            setTextSize(textSize)
+            typeface = selectedFont.getTypeface()
+        }
     }
 
 

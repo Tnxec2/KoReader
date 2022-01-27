@@ -58,7 +58,13 @@ class FB2Parser(appDir: String, private var uri: String, private var fileInputSt
 
             zis.close()
         } else if (uri.toLowerCase(Locale.getDefault()).endsWith(".fb2")) {
-            saxParser.parse(fileInputStream, this)
+            try {
+                saxParser.parse(fileInputStream, this)
+            } catch (e: java.lang.Exception) {
+
+            }
+
+
         }
         fB2ParserObject.fb2scheme.path = uri
         if (!fB2ParserObject.onlyscheme) {
