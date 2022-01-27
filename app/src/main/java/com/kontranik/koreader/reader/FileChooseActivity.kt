@@ -29,13 +29,12 @@ class FileChooseActivity : AppCompatActivity(),
 
     private var fileItemList: MutableList<FileItem> = ArrayList()
 
+    private var oldSelectedDocumentFileUriString: String? = null
     private var selectedDocumentFileUriString: String? = null
     private var lastPaht: String? = null
 
     private var settings: SharedPreferences? = null
     private var prefEditor: SharedPreferences.Editor? = null
-
-    private var pathsPosition: HashMap<String, Int> = hashMapOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,6 +105,7 @@ class FileChooseActivity : AppCompatActivity(),
 
     private fun getFileList(fileItem: FileItem) {
         binding.imageButtonFilechooseAddStorage.visibility = View.GONE
+        oldSelectedDocumentFileUriString = selectedDocumentFileUriString
         selectedDocumentFileUriString = fileItem.uriString
         getFileList(fileItem.uriString)
     }
@@ -117,17 +117,20 @@ class FileChooseActivity : AppCompatActivity(),
         } else {
             fileItemList.clear()
             binding.reciclerViewFiles.adapter = null
-            // val fl = FileHelper.getFileList(applicationContext, documentFile)
 
             val fl = FileHelper.getFileListDC(applicationContext, documentFilePath)
             fileItemList.addAll(fl)
             binding.reciclerViewFiles.adapter = FileListAdapter(this, fileItemList, this)
 
-            if (pathsPosition.containsKey(documentFilePath)) {
-               //binding.reciclerViewFiles.scrollToPosition(pathsPosition[documentFilePath]!!)
-                (binding.reciclerViewFiles.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pathsPosition[documentFilePath]!!, 0)
-            }
+            (binding.reciclerViewFiles.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(getPositionInFileItemList(oldSelectedDocumentFileUriString), 0)
         }
+    }
+
+    private fun getPositionInFileItemList(path: String?): Int {
+        if (path == null) return 0
+        val position = fileItemList.indexOfFirst { it.isDir && it.uriString.equals(path) }
+        return if (position > 0) position
+        else 0
     }
 
     private fun loadPrefs() {
@@ -190,12 +193,6 @@ class FileChooseActivity : AppCompatActivity(),
 
     override fun onFilelistItemClickListener(position: Int) {
         val selectedFileItem = fileItemList[position]
-
-        if ( position > 0) {
-            if ( selectedDocumentFileUriString != null)
-                pathsPosition.remove(selectedFileItem.uriString)
-                pathsPosition[selectedDocumentFileUriString!!] = position
-        }
 
         if (selectedFileItem.isDir) {
             binding.reciclerViewFiles.layoutManager as LinearLayoutManager
