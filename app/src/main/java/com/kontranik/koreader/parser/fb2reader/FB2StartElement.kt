@@ -89,6 +89,8 @@ object FB2StartElement {
                 result = " <a href=\"$href\" $linktype >$cl"
             }
             FB2Elements.IMAGE -> if (href != null) result = "<img src=\"$href\">"
+            FB2Elements.TABLE -> result = "<p><tt>"
+            FB2Elements.TH -> result = "<strong>"
             else -> {
             }
         }

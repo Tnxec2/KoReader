@@ -1,5 +1,4 @@
 package com.kontranik.koreader.parser.fb2reader.model
-
 enum class FB2Elements(var elName: String) {
     A("a"),
     ANNOTATION("annotation"),
@@ -48,6 +47,10 @@ enum class FB2Elements(var elName: String) {
     SUB("sub"),
     SUBTITLE("subtitle"),
     SUP("sup"),
+    TABLE("table"),
+    TD("td"),
+    TH("th"),
+    TR("tr"),
     TEXTAUTHOR("text-author"),
     TITLE("title"),
     TITLEINFO("title-info"),
@@ -55,6 +58,7 @@ enum class FB2Elements(var elName: String) {
     V("v"),
     VERSION("version"),
     YEAR("year");
+
 
     companion object {
         fun fromString(name: String?): FB2Elements? {
@@ -67,3 +71,4 @@ enum class FB2Elements(var elName: String) {
         }
     }
 }
+

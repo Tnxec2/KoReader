@@ -106,6 +106,9 @@ object FB2EndElement {
             }
             FB2Elements.IMAGE -> {
             }
+            FB2Elements.TABLE -> result = "</tt></p>"
+            FB2Elements.TH -> result = "</strong><br/>"
+            FB2Elements.TR -> result = "<br/>"
             else -> Logger.getLogger("FB2ENDELEMENT")
                 .log(Level.INFO, "Other EndElement: " + fel.elName)
         }

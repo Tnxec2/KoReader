@@ -88,7 +88,7 @@ class FB2Parser(appDir: String, private var uri: String, private var fileInputSt
         val eName = if ("" == localName) qName else localName
         val fel = FB2Elements.fromString(eName.toLowerCase(Locale.getDefault()))
         if (fel == null) {
-            println(eName)
+            println("StartElement: " + eName)
             return
         }
         try {
