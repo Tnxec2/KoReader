@@ -51,9 +51,9 @@ class TextSizePreference(context: Context, attrs: AttributeSet) : Preference(con
 
         val defaultTextSize = context.resources.getDimension(R.dimen.text_size)
 
-        textSize = sharedPreferences.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
-        fontpath = sharedPreferences.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
-        fontname = sharedPreferences.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.DEFAULT.name)!!
+        textSize = sharedPreferences!!.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
+        fontpath = sharedPreferences!!.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
+        fontname = sharedPreferences!!.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.DEFAULT.name)!!
 
         val selectedFont = if ( fontpath != null)
             TypefaceRecord(fontname, File(fontpath!!))
@@ -87,7 +87,7 @@ class TextSizePreference(context: Context, attrs: AttributeSet) : Preference(con
 
     private fun updateTextSize() {
         textViewFontName!!.textSize = textSize
-        val editor = sharedPreferences.edit()
+        val editor = sharedPreferences!!.edit()
         editor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
         editor.apply()
     }

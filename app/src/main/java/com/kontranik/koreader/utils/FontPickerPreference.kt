@@ -50,8 +50,8 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
         // val defaultTextSize = context.resources.getDimension(R.dimen.text_size)
         // var textSize: Float = sharedPreferences.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
 
-        fontpath = sharedPreferences.getString(getFontPathPref(), null)
-        fontname = sharedPreferences.getString(getFontNamePref(), TypefaceRecord.DEFAULT.name)!!
+        fontpath = sharedPreferences!!.getString(getFontPathPref(), null)
+        fontname = sharedPreferences!!.getString(getFontNamePref(), TypefaceRecord.DEFAULT.name)!!
 
         selectedFont = if ( fontpath != null)
             TypefaceRecord(fontname, File(fontpath!!))
@@ -77,7 +77,7 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
         if ( font != null ) {
             selectedFont = font
             textViewFontName!!.text = font.name
-            val editor = sharedPreferences.edit()
+            val editor = sharedPreferences!!.edit()
 
             editor.putString(getFontPathPref(), selectedFont.file?.absolutePath)
             editor.putString(getFontNamePref(), selectedFont.name)

@@ -123,7 +123,7 @@ class SettingsActivity : AppCompatActivity(),
             }
         }
 
-        override fun onDisplayPreferenceDialog(preference: Preference?) {
+        override fun onDisplayPreferenceDialog(preference: Preference) {
             if (preference is ColorPreference) {
                 preference.showDialog(this, 0)
             } else if ( preference is ImagePickerPreference) {
@@ -151,13 +151,15 @@ class SettingsActivity : AppCompatActivity(),
     class ColorTheme5SettingsFragment : ColorThemeGeneralSettingsFragment(5) {  }
 
     override fun onPreferenceStartFragment(
-            caller: PreferenceFragmentCompat?,
-            pref: Preference?): Boolean {
+        caller: PreferenceFragmentCompat,
+        pref: Preference
+    ): Boolean {
+
         // Instantiate the new Fragment
-        val args = pref!!.extras
+        val args = pref.extras
         val fragment = supportFragmentManager.fragmentFactory.instantiate(
                 classLoader,
-                pref.fragment)
+                pref.fragment!!)
         fragment.arguments = args
         fragment.setTargetFragment(caller, 0)
         // Replace the existing Fragment with the new Fragment

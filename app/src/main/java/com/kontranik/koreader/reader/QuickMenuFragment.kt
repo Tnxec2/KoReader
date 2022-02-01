@@ -104,7 +104,7 @@ class QuickMenuFragment : DialogFragment() {
 
     private fun initialTheming() {
 
-        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
 
         colorTheme = prefs.getString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT) ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
 
@@ -215,7 +215,7 @@ class QuickMenuFragment : DialogFragment() {
         requireContext().resources.getValue(R.dimen.letter_spacing, typedValue, true)
         val defaultLetterSpacing = typedValue.float
 
-        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
         textSize = prefs.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
         val lineSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, defaultLineSpacing.toString() )
@@ -254,7 +254,7 @@ class QuickMenuFragment : DialogFragment() {
     }
 
     private fun save() {
-        val prefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit()
+        val prefEditor = PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
         prefEditor.putString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, colorTheme)
         prefEditor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
         prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, lineSpacing.toString())
