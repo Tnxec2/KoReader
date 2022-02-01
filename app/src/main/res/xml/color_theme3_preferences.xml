@@ -31,7 +31,7 @@
         <com.rarepebble.colorpicker.ColorPreference
             app:key="colorInfoTheme3"
             app:title="color_infotext"
-            android:defaultValue="@string/color_theme1_foregroud_default"
+            android:defaultValue="@string/color_theme3_foregroud_default"
             app:colorpicker_showAlpha="false"
             app:iconSpaceReserved="false"
             app:colorpicker_selectNoneButtonText="@string/default_color"
