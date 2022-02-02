@@ -5,7 +5,7 @@
             app:key="tapZoneDoubleClickTopLeft"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="PagePrev"
             app:title="@string/tapzone_top_left"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
@@ -21,7 +21,7 @@
             app:key="tapZoneDoubleClickTopRight"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="PageNext"
             app:title="@string/tapzone_top_right"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
@@ -29,7 +29,7 @@
             app:key="tapZoneDoubleClickMiddleLeft"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="PagePrev"
             app:title="@string/tapzone_middle_left"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
@@ -45,7 +45,7 @@
             app:key="tapZoneDoubleClickMiddleRight"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="PageNext"
             app:title="@string/tapzone_middle_right"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
@@ -54,7 +54,7 @@
             app:key="tapZoneDoubleClickBottomLeft"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="PagePrev"
             app:title="@string/tapzone_bottom_left"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
@@ -62,7 +62,7 @@
             app:key="tapZoneDoubleClickBottomCenter"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="GoTo"
             app:title="@string/tapzone_bottom_center"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
@@ -70,7 +70,7 @@
             app:key="tapZoneDoubleClickBottomRight"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="PageNext"
             app:iconSpaceReserved="false"
             app:title="@string/tapzone_bottom_right"
             app:useSimpleSummaryProvider="true" />

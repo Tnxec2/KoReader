@@ -30,7 +30,7 @@
             app:key="tapZoneOneClickMiddleLeft"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="PrevPage"
             app:title="@string/tapzone_middle_left"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
@@ -46,7 +46,7 @@
             app:key="tapZoneOneClickMiddleRight"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="PageNext"
             app:title="@string/tapzone_middle_right"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
@@ -63,7 +63,7 @@
             app:key="tapZoneOneClickBottomCenter"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="GoTo"
             app:title="@string/tapzone_bottom_center"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
