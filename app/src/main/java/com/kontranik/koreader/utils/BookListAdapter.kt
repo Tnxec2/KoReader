@@ -2,6 +2,7 @@ package com.kontranik.koreader.utils
 
 import android.content.Context
 import android.os.AsyncTask
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,9 +39,10 @@ class BookListAdapter(
         holder.authorView.text = bookInfo.authorsAsString()
         holder.pathView.text = URLDecoder.decode(bookInfo.path)
         if (bookInfo.cover != null) {
-            holder.imageView.setImageBitmap(ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100 ))
+            holder.imageView.setImageBitmap(bookInfo.cover!!)
         } else {
-            holder.imageView.setImageBitmap(ImageUtils.getBitmap(context, ImageEnum.Ebook))
+            bookInfo.cover = ImageUtils.getBitmap(context, ImageEnum.Ebook)
+            holder.imageView.setImageBitmap(bookInfo.cover)
             val asyncTask = ReadBookInfoAsync(this)
             asyncTask.execute(position)
         }
@@ -66,27 +68,31 @@ class BookListAdapter(
 
         var position = 0
         override fun doInBackground(vararg params: Int?): BookInfo? {
-            var bookInfo: BookInfo? = null
+            var result: BookInfo? = null
             if (params.isNotEmpty() && params.first() != null) {
-                val position = params.first()!!
-                bookInfo = adapter.books[position]
-                val contentUriPath = bookInfo.path
+                position = params.first()!!
+                if ( position >= adapter.books.size ) return null
+                result = adapter.books[position]
+                val contentUriPath = result.path
 
+                val mContext = adapter.context
+                var bookInfo: BookInfo? = null
                 if (contentUriPath.endsWith(".epub", ignoreCase = true)) {
-                    bookInfo = EpubHelper(adapter.context, contentUriPath).getBookInfoTemporary(contentUriPath)
+                    bookInfo = EpubHelper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
                 } else if (contentUriPath.endsWith(".fb2", ignoreCase = true)
-                        || contentUriPath.endsWith(".fb2.zip", ignoreCase = true)) {
-                    bookInfo = FB2Helper(adapter.context, contentUriPath).getBookInfoTemporary(contentUriPath)
+                    || contentUriPath.endsWith(".fb2.zip", ignoreCase = true)) {
+                    bookInfo = FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
                 }
-                if ( bookInfo != null) {
-                    if (bookInfo.cover != null) {
-                        bookInfo.cover = ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100)
-                    } else {
-                        bookInfo.cover = ImageUtils.getBitmap(adapter.context, ImageEnum.Ebook)
-                    }
+
+                if ( bookInfo?.cover != null) {
+                    result.cover = ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100)
+                } else {
+                    result.cover =
+                        ImageUtils.getBitmap(adapter.context, ImageEnum.Ebook)
                 }
+
             }
-            return bookInfo
+            return result
         }
 
         override fun onPostExecute(result: BookInfo?) {

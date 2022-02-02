@@ -82,6 +82,7 @@ class FileListAdapter(
                 val contentUriPath = result.uriString
                 if ( contentUriPath != null) {
                     val mContext = adapter.context
+
                     if (contentUriPath.endsWith(".epub", ignoreCase = true)) {
                         result.bookInfo = EpubHelper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
                     } else if (contentUriPath.endsWith(".fb2", ignoreCase = true)
@@ -97,8 +98,6 @@ class FileListAdapter(
                         } else {
                             result.bookInfo!!.cover = getBitmap(adapter.context, ImageEnum.Ebook)
                         }
-
-
                     }
                 }
             }

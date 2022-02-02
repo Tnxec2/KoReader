@@ -37,9 +37,9 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
             finish()
         }
 
+        loadBooklist()
         binding.reciclerViewBooklistList.adapter = BookListAdapter(this, bookInfoList, this)
 
-        loadBooklist()
     }
 
     private fun openBook(bookInfo: BookInfo) {
@@ -72,8 +72,6 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
             BOOKLIST_TYP_LAST_OPENED -> {
                 val bookservice = BookStatusService(BookStatusDatabaseAdapter(this))
                 val books = bookservice.getLastOpened(LAST_OPENED_COUNT)
-                bookInfoList.clear()
-                binding.reciclerViewBooklistList.adapter = null
 
                 for ( bookstatus in books) {
                     if ( bookstatus.path != null) {
@@ -93,7 +91,6 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
 
                     }
                 }
-                binding.reciclerViewBooklistList.adapter = BookListAdapter(this, bookInfoList, this)
             }
             else -> {}
         }
