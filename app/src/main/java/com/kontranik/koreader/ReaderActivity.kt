@@ -334,7 +334,10 @@ class ReaderActivity :
         binding.textViewPageview.textSize = prefsHelper.textSize
         binding.textViewPageview.typeface = prefsHelper.font.getTypeface()
 
-        binding.textViewPageview.setLineSpacing(binding.textViewPageview.lineSpacingMultiplier, prefsHelper.lineSpacing)
+        binding.textViewPageview.setLineSpacing(
+            binding.textViewPageview.lineSpacingMultiplier,
+            prefsHelper.lineSpacing
+        )
         binding.textViewPageview.letterSpacing = prefsHelper.letterSpacing
 
         if (book != null) updateView(book!!.getCur(recalc = true))
@@ -472,11 +475,13 @@ class ReaderActivity :
 
         var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + prefsHelper.colorTheme, 0)
         prefsHelper.colorBack =
-            if (co != 0) "#" + Integer.toHexString(co) else prefsHelper.colorBackDefault
+            if (co != 0) "#" + Integer.toHexString(co)
+            else resources.getString(PrefsHelper.colorBackgroundDefaultArray[prefsHelper.colorTheme.toInt()-1])
 
         co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + prefsHelper.colorTheme, 0)
         prefsHelper.colorText =
-            if (co != 0) "#" + Integer.toHexString(co) else prefsHelper.colorTextDefault
+            if (co != 0) "#" + Integer.toHexString(co)
+            else resources.getString(PrefsHelper.colorForegroundDefaultArray[prefsHelper.colorTheme.toInt()-1])
 
         co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LINKTEXT + prefsHelper.colorTheme, 0)
         prefsHelper.colorLinkText =
@@ -589,7 +594,8 @@ class ReaderActivity :
             }
         })
 
-        binding.textViewPageview.setOnTouchListener(object : OnSwipeTouchListener(this@ReaderActivity) {
+        binding.textViewPageview.setOnTouchListener(object :
+            OnSwipeTouchListener(this@ReaderActivity) {
             override fun onClick(point: Point) {
                 super.onClick(point)
 
@@ -667,8 +673,10 @@ class ReaderActivity :
     private fun updateSizeInfo() {
         val fw = binding.textViewPageview.measuredWidth
         val fh = binding.textViewPageview.measuredHeight
-        val w = binding.textViewPageview.measuredWidth - binding.textViewPageview.paddingLeft - binding.textViewPageview.paddingRight
-        val h = binding.textViewPageview.measuredHeight - binding.textViewPageview.paddingTop - binding.textViewPageview.paddingBottom
+        val w =
+            binding.textViewPageview.measuredWidth - binding.textViewPageview.paddingLeft - binding.textViewPageview.paddingRight
+        val h =
+            binding.textViewPageview.measuredHeight - binding.textViewPageview.paddingTop - binding.textViewPageview.paddingBottom
 
         // Toast.makeText(this, "$w x $h", Toast.LENGTH_SHORT).show()
 
@@ -801,7 +809,7 @@ class ReaderActivity :
         letterSpacing: Float,
         colorTheme: String
     ) {
-        Log.d(TAG, "onFinishQuickMenuDialog. TextSize: $textSize")
+        Log.d(TAG, "onFinishQuickMenuDialog. TextSize: $textSize, lineSpacing: $lineSpacing, letterSpacing: $letterSpacing, colorTheme: $colorTheme")
 
         if (textSize != prefsHelper.textSize
             || lineSpacing != prefsHelper.lineSpacing
@@ -813,32 +821,42 @@ class ReaderActivity :
             prefsHelper.letterSpacing = letterSpacing
             prefsHelper.colorTheme = colorTheme
             binding.textViewPageview.textSize = textSize
-            binding.textViewPageview.setLineSpacing(binding.textViewPageview.lineSpacingExtra, lineSpacing)
+            binding.textViewPageview.setLineSpacing(
+                binding.textViewPageview.lineSpacingExtra,
+                lineSpacing
+            )
 
             loadColorThemeSettings()
             setColorTheme()
-            savePrefs()
         }
     }
 
-    override fun onChangeColorTheme(colorTheme: String) {
+    override fun onChangeColorTheme(colorTheme: String, colorThemeIndex: Int) {
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + colorTheme, 0)
         val colorBack =
-            if (co != 0) "#" + Integer.toHexString(co) else prefsHelper.colorBackDefault
+            if (co != 0) "#" + Integer.toHexString(co)
+            else resources.getString(
+                PrefsHelper.colorBackgroundDefaultArray[colorThemeIndex]
+            )
 
         co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + colorTheme, 0)
         val colorText =
-            if (co != 0) "#" + Integer.toHexString(co) else prefsHelper.colorTextDefault
+            if (co != 0) "#" + Integer.toHexString(co)
+            else resources.getString(
+                PrefsHelper.colorForegroundDefaultArray[colorThemeIndex]
+            )
 
         co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LINKTEXT + colorTheme, 0)
         val colorLinkText =
-            if (co != 0) "#" + Integer.toHexString(co) else prefsHelper.colorLinkTextDefault
+            if (co != 0) "#" + Integer.toHexString(co)
+            else prefsHelper.colorLinkTextDefault
 
         co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_INFOTEXT + colorTheme, 0)
         val colorInfoText =
-            if (co != 0) "#" + Integer.toHexString(co) else prefsHelper.colorTextDefault
+            if (co != 0) "#" + Integer.toHexString(co)
+            else prefsHelper.colorTextDefault
 
         val showBackgroundImage =
             prefs.getBoolean(PrefsHelper.PREF_KEY_SHOW_BACKGROUND_IMAGE + colorTheme, false)
@@ -847,7 +865,9 @@ class ReaderActivity :
         val backgroundImageTiledRepeat =
             prefs.getBoolean(PrefsHelper.PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT + colorTheme, false)
 
-        if (showBackgroundImage && backgroundImageUri != null && backgroundImageUri != "") {
+        if (showBackgroundImage
+            && backgroundImageUri != null
+            && backgroundImageUri != "") {
             binding.textViewHolder.setBackgroundColor(Color.TRANSPARENT)
             try {
                 val uri = Uri.parse(backgroundImageUri)
@@ -881,28 +901,32 @@ class ReaderActivity :
         var sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_TOP + colorTheme, null)
         try {
             marginTop =
-                if (sMargin != null) Integer.parseInt(sMargin) else prefsHelper.marginDefault
+                if (sMargin != null) Integer.parseInt(sMargin)
+                else prefsHelper.marginDefault
         } catch (e: Exception) {
 
         }
         sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_BOTTOM + colorTheme, null)
         try {
             marginBottom =
-                if (sMargin != null) Integer.parseInt(sMargin) else prefsHelper.marginDefault
+                if (sMargin != null) Integer.parseInt(sMargin)
+                else prefsHelper.marginDefault
         } catch (e: Exception) {
 
         }
         sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_LEFT + colorTheme, null)
         try {
             marginLeft =
-                if (sMargin != null) Integer.parseInt(sMargin) else prefsHelper.marginDefault
+                if (sMargin != null) Integer.parseInt(sMargin)
+                else prefsHelper.marginDefault
         } catch (e: Exception) {
 
         }
         sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_RIGHT + colorTheme, null)
         try {
             marginRight =
-                if (sMargin != null) Integer.parseInt(sMargin) else prefsHelper.marginDefault
+                if (sMargin != null) Integer.parseInt(sMargin)
+                else prefsHelper.marginDefault
         } catch (e: Exception) {
 
         }
@@ -912,7 +936,12 @@ class ReaderActivity :
         val marginBottomPixel = (marginBottom * density).toInt()
         val marginLeftPixel = (marginLeft * density).toInt()
         val marginRightPixel = (marginRight * density).toInt()
-        binding.textViewPageview.setPadding(marginLeftPixel, marginTopPixel, marginRightPixel, marginBottomPixel)
+        binding.textViewPageview.setPadding(
+            marginLeftPixel,
+            marginTopPixel,
+            marginRightPixel,
+            marginBottomPixel
+        )
 
     }
 
@@ -923,7 +952,10 @@ class ReaderActivity :
 
     override fun onChangeLineSpacing(lineSpacing: Float) {
         if (binding.textViewPageview.lineSpacingMultiplier == lineSpacing) return
-        binding.textViewPageview.setLineSpacing(binding.textViewPageview.lineSpacingExtra, lineSpacing)
+        binding.textViewPageview.setLineSpacing(
+            binding.textViewPageview.lineSpacingExtra,
+            lineSpacing
+        )
         Log.d(TAG, "onChangeLineSpacing: getCurPage")
         updateView(book!!.getCur(recalc = false))
     }
@@ -937,7 +969,10 @@ class ReaderActivity :
 
     override fun onCancelQuickMenu() {
         binding.textViewPageview.textSize = prefsHelper.textSize
-        binding.textViewPageview.setLineSpacing(binding.textViewPageview.lineSpacingExtra, prefsHelper.lineSpacing)
+        binding.textViewPageview.setLineSpacing(
+            binding.textViewPageview.lineSpacingExtra,
+            prefsHelper.lineSpacing
+        )
         binding.textViewPageview.letterSpacing = prefsHelper.letterSpacing
         setColorTheme()
     }
@@ -1051,7 +1086,12 @@ class ReaderActivity :
         val marginBottomPixel = (prefsHelper.marginBottom * density).toInt()
         val marginLeftPixel = (prefsHelper.marginLeft * density).toInt()
         val marginRightPixel = (prefsHelper.marginRight * density).toInt()
-        binding.textViewPageview.setPadding(marginLeftPixel, marginTopPixel, marginRightPixel, marginBottomPixel)
+        binding.textViewPageview.setPadding(
+            marginLeftPixel,
+            marginTopPixel,
+            marginRightPixel,
+            marginBottomPixel
+        )
 
         try {
             val window: Window = window

@@ -262,5 +262,19 @@ class PrefsHelper(val context: Context) {
         const val PREF_KEY_TAP_LONG_BOTTOM_CENTER = "tapZoneLongClickBottomCenter"
         const val PREF_KEY_TAP_LONG_BOTTOM_RIGHT = "tapZoneOneClickBottomRight"
 
+        val colorBackgroundDefaultArray = arrayListOf(
+            R.string.color_theme1_backgroud_default,
+            R.string.color_theme2_backgroud_default,
+            R.string.color_theme3_backgroud_default,
+            R.string.color_theme4_backgroud_default,
+            R.string.color_theme5_backgroud_default,
+        )
+        val colorForegroundDefaultArray = arrayListOf(
+            R.string.color_theme1_foregroud_default,
+            R.string.color_theme2_foregroud_default,
+            R.string.color_theme3_foregroud_default,
+            R.string.color_theme4_foregroud_default,
+            R.string.color_theme5_foregroud_default,
+        )
     }
 }

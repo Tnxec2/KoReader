@@ -52,7 +52,7 @@ class QuickMenuFragment : DialogFragment() {
         fun onCancelQuickMenu()
         fun onAddBookmark(): Boolean
         fun onShowBookmarklist()
-        fun onChangeColorTheme(colorTheme: String)
+        fun onChangeColorTheme(colorTheme: String, colorThemeIndex: Int)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,7 +106,10 @@ class QuickMenuFragment : DialogFragment() {
 
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
 
-        colorTheme = prefs.getString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT) ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
+        colorTheme = prefs.getString(
+            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME,
+            PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT)
+            ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
 
         val valArray = resources.getStringArray(R.array.selected_theme_values)
         val entryArray = resources.getStringArray(R.array.selected_theme_entries)
@@ -121,7 +124,7 @@ class QuickMenuFragment : DialogFragment() {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
                 colorTheme = valArray[position]
-                listener!!.onChangeColorTheme(colorTheme)
+                listener!!.onChangeColorTheme(colorTheme, position)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
