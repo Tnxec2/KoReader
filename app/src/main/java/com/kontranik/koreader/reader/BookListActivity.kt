@@ -2,18 +2,15 @@ package com.kontranik.koreader.reader
 
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Bundle
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
-import com.kontranik.koreader.database.BookStatusDatabaseAdapter
-import com.kontranik.koreader.database.BookStatusService
+import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.databinding.ActivityBookListBinding
-import com.kontranik.koreader.databinding.ActivityReaderMainBinding
-import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.utils.BookListAdapter
 import com.kontranik.koreader.utils.FileHelper
@@ -25,12 +22,16 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
 
     private var bookInfoList: MutableList<BookInfo> = mutableListOf()
 
+    private lateinit var mBookStatusViewModel: BookStatusViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityBookListBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        mBookStatusViewModel = ViewModelProvider(this).get(BookStatusViewModel::class.java)
 
         val close = findViewById<ImageButton>(R.id.imageButton_booklist_back)
         close.setOnClickListener {
@@ -40,6 +41,28 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
         loadBooklist()
         binding.reciclerViewBooklistList.adapter = BookListAdapter(this, bookInfoList, this)
 
+        mBookStatusViewModel.lastOpenedBooks.observe(this, Observer {
+            if (it != null) {
+                for (bookstatus in it) {
+                    if (bookstatus.path != null) {
+                        if (!FileHelper.contentFileExist(applicationContext, bookstatus.path)) {
+                            mBookStatusViewModel.delete(bookstatus.id!!)
+                        }
+
+                        val bookInfo = BookInfo(
+                            title = bookstatus.title,
+                            cover = null,
+                            authors = mutableListOf(),
+                            filename = bookstatus.path!!,
+                            path = bookstatus.path!!,
+                            annotation = ""
+                        )
+                        bookInfoList.add(bookInfo)
+
+                    }
+                }
+            }
+        })
     }
 
     private fun openBook(bookInfo: BookInfo) {
@@ -70,27 +93,7 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
         }
         when (typ) {
             BOOKLIST_TYP_LAST_OPENED -> {
-                val bookservice = BookStatusService(BookStatusDatabaseAdapter(this))
-                val books = bookservice.getLastOpened(LAST_OPENED_COUNT)
-
-                for ( bookstatus in books) {
-                    if ( bookstatus.path != null) {
-                        if ( ! FileHelper.contentFileExist(applicationContext, bookstatus.path) ){
-                            bookservice.delete(bookstatus.id!!)
-                        }
-
-                        val bookInfo = BookInfo(
-                                title = bookstatus.title,
-                                cover = null,
-                                authors = mutableListOf(),
-                                filename = bookstatus.path!!,
-                                path = bookstatus.path!!,
-                                annotation = ""
-                        )
-                        bookInfoList.add(bookInfo)
-
-                    }
-                }
+                mBookStatusViewModel.loadLastOpened(LAST_OPENED_COUNT)
             }
             else -> {}
         }

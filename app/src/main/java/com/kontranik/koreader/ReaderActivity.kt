@@ -22,12 +22,11 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
-import com.kontranik.koreader.database.BookStatusDatabaseAdapter
-import com.kontranik.koreader.database.BookStatusService
-import com.kontranik.koreader.database.BookmarkService
-import com.kontranik.koreader.database.BookmarksDatabaseAdapter
+import com.kontranik.koreader.database.BookStatusViewModel
+import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.databinding.ActivityReaderMainBinding
 import com.kontranik.koreader.model.*
 import com.kontranik.koreader.reader.*
@@ -65,7 +64,8 @@ class ReaderActivity :
     private var height: Int = 100
     private var fullheight: Int = 100
 
-    private lateinit var bookStatusService: BookStatusService
+    private lateinit var mBookStatusViewModel: BookStatusViewModel
+    private lateinit var mBookmarksViewModel: BookmarksViewModel
 
     private var backButtonPressedTime = Date().time
 
@@ -81,7 +81,10 @@ class ReaderActivity :
         val view = binding.root
         setContentView(view)
 
-        bookStatusService = BookStatusService(BookStatusDatabaseAdapter(this))
+        mBookStatusViewModel = ViewModelProvider(this).get(BookStatusViewModel::class.java)
+        mBookmarksViewModel = ViewModelProvider(this).get(BookmarksViewModel::class.java)
+
+        mBookStatusViewModel.cleanup(this)
 
         // nachputzen falsche prefs
         // linespace und LetterSpace  pref muss string sein - float ist falsch
@@ -119,6 +122,18 @@ class ReaderActivity :
             updateSizeInfo()
         }
 
+        mBookStatusViewModel.savedBookStatus.observe(this, androidx.lifecycle.Observer {
+            if (book != null) {
+                val startPosition: BookPosition = if (it == null) {
+                    BookPosition()
+                } else {
+                    BookPosition(it.position_section, it.position_offset)
+                }
+                book!!.curPage = Page(null, startPosition, BookPosition())
+                Log.d(TAG, "onWindowFocusChanged: getCurPage")
+                updateView(book!!.getCur(recalc = true))
+            }
+        })
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -134,10 +149,6 @@ class ReaderActivity :
                     if (book == null || book!!.fileLocation != prefsHelper.bookPath) {
                         loadBook()
                         loadPositionForBook()
-                    }
-                    if (book != null) {
-                        Log.d(TAG, "onWindowFocusChanged: getCurPage")
-                        updateView(book!!.getCur(recalc = true))
                     }
                 } catch (e: Exception) {
                     Log.e("tag", e.stackTraceToString())
@@ -178,7 +189,7 @@ class ReaderActivity :
         Toast.makeText(this, resources.getString(R.string.loading_book), Toast.LENGTH_SHORT).show()
         book = Book(applicationContext, prefsHelper.bookPath!!, binding.textViewPageview)
         if (book != null) {
-            bookStatusService.updateLastOpenTime(book!!)
+            mBookStatusViewModel.updateLastOpenTime(book!!)
         } else {
             Toast.makeText(
                 this,
@@ -255,13 +266,12 @@ class ReaderActivity :
 
     private fun loadPositionForBook() {
         if (book == null) return
-        val startPosition = bookStatusService.getPosition(prefsHelper.bookPath) ?: BookPosition()
-        book!!.curPage = Page(null, startPosition, BookPosition())
+        if ( prefsHelper.bookPath != null) mBookStatusViewModel.loadBookStatus(prefsHelper.bookPath!!)
     }
 
     private fun savePositionForBook() {
         if (prefsHelper.bookPath != null && book != null && book!!.curPage != null) {
-            bookStatusService.savePosition(book!!)
+            mBookStatusViewModel.savePosition(book!!)
         }
     }
 
@@ -572,6 +582,9 @@ class ReaderActivity :
             }
             "GoTo" -> {
                 openGotoMenu()
+            }
+            "Bookmarks" -> {
+                onShowBookmarklist()
             }
             "None" -> {
             }
@@ -977,22 +990,14 @@ class ReaderActivity :
         setColorTheme()
     }
 
-    override fun onAddBookmark(): Boolean {
-        val bookmarkService = BookmarkService(BookmarksDatabaseAdapter(this))
+    override fun onAddBookmark() {
         val bookmark = Bookmark(
             path = prefsHelper.bookPath!!,
             text = binding.textViewPageview.text.toString().substring(0, 100),
             position_section = book!!.curPage!!.startBookPosition.section,
             position_offset = book!!.curPage!!.startBookPosition.offSet,
         )
-
-        return if (bookmarkService.addBookmark(bookmark)) {
-            Toast.makeText(this, resources.getString(R.string.bookmark_saved), Toast.LENGTH_SHORT)
-                .show()
-            true
-        } else {
-            false
-        }
+        mBookmarksViewModel.insert(bookmark)
     }
 
     override fun onShowBookmarklist() {

@@ -4,11 +4,18 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../layout/custom_preview.xml" value="0.24010416666666667" />
+        <entry key="app/src/main/res/drawable/list_divider.xml" value="0.2005" />
+        <entry key="app/src/main/res/layout/activity_book_list.xml" value="0.18611111111111112" />
+        <entry key="app/src/main/res/layout/activity_filechoose.xml" value="0.18611111111111112" />
         <entry key="app/src/main/res/layout/activity_main_menu.xml" value="0.21302083333333333" />
         <entry key="app/src/main/res/layout/activity_reader_main.xml" value="0.21302083333333333" />
+        <entry key="app/src/main/res/layout/bookmarklist_item.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_bookinfo.xml" value="0.3645833333333333" />
+        <entry key="app/src/main/res/layout/fragment_bookmarklist.xml" value="0.18611111111111112" />
+        <entry key="app/src/main/res/layout/fragment_font_menu.xml" value="0.18611111111111112" />
         <entry key="app/src/main/res/layout/fragment_goto_menu.xml" value="0.21302083333333333" />
         <entry key="app/src/main/res/layout/fragment_imageviewer.xml" value="0.21302083333333333" />
+        <entry key="app/src/main/res/layout/preference_font_name.xml" value="0.3645833333333333" />
         <entry key="app/src/main/res/xml/color_theme1_preferences.xml" value="0.3614583333333333" />
         <entry key="app/src/main/res/xml/color_theme2_preferences.xml" value="0.3614583333333333" />
         <entry key="app/src/main/res/xml/color_theme3_preferences.xml" value="0.3614583333333333" />
@@ -17,6 +24,7 @@
         <entry key="app/src/main/res/xml/tapzone_double_preferences.xml" value="0.24270833333333333" />
         <entry key="app/src/main/res/xml/tapzone_long_preferences.xml" value="0.24270833333333333" />
         <entry key="app/src/main/res/xml/tapzone_one_preferences.xml" value="0.16927083333333334" />
+        <entry key="app/src/main/res/xml/text_preferences.xml" value="0.3645833333333333" />
       </map>
     </option>
   </component>

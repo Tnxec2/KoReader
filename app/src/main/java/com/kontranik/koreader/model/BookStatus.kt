@@ -1,15 +1,23 @@
 package com.kontranik.koreader.model
 
+import androidx.annotation.NonNull
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.kontranik.koreader.database.BookStatusHelper
 import java.util.*
 
+@Entity(tableName = BookStatusHelper.TABLE)
 class BookStatus(
-        var id: Long? = null,
-        var path: String? = null,
-        var title: String? = null,
-        var authors: String? = null,
-        var position_section: Int = 0,
-        var position_offset: Int = 0,
-        var lastOpenTime: Long? = null
+    @PrimaryKey(autoGenerate = true)
+    @NonNull
+    @ColumnInfo(name = BookStatusHelper.COLUMN_ID) var id: Long? = null,
+    @ColumnInfo(name = BookStatusHelper.COLUMN_PATH) var path: String? = null,
+    @ColumnInfo(name = BookStatusHelper.COLUMN_TITLE) var title: String? = null,
+    @ColumnInfo(name = BookStatusHelper.COLUMN_AUTHOR) var authors: String? = null,
+    @ColumnInfo(name = BookStatusHelper.COLUMN_POSITION_PAGE) var position_section: Int = 0,
+    @ColumnInfo(name = BookStatusHelper.COLUMN_POSITION_OFFSET) var position_offset: Int = 0,
+    @ColumnInfo(name = BookStatusHelper.COLUMN_LAST_OPEN_TIME) var lastOpenTime: Long? = null
 ) {
     constructor(book: Book) : this(
         id = null,

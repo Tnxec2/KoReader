@@ -50,7 +50,7 @@ class QuickMenuFragment : DialogFragment() {
         fun onChangeLineSpacing(lineSpacing: Float)
         fun onChangeLetterSpacing(letterSpacing: Float)
         fun onCancelQuickMenu()
-        fun onAddBookmark(): Boolean
+        fun onAddBookmark()
         fun onShowBookmarklist()
         fun onChangeColorTheme(colorTheme: String, colorThemeIndex: Int)
     }

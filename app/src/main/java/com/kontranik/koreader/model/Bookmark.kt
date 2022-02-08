@@ -1,15 +1,23 @@
 package com.kontranik.koreader.model
 
+import androidx.annotation.NonNull
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.kontranik.koreader.database.BookmarksHelper
 import java.util.*
 
+@Entity(tableName = BookmarksHelper.TABLE)
 class Bookmark(
-        var id: Long? = null,
-        var path: String,
-        var text: String? = null,
-        var sort: String? = null,
-        var position_section: Int = 0,
-        var position_offset: Int = 0,
-        var createDate: Long? = null
+    @PrimaryKey(autoGenerate = true)
+    @NonNull
+    @ColumnInfo(name = BookmarksHelper.COLUMN_ID) var id: Long? = null,
+    @ColumnInfo(name = BookmarksHelper.COLUMN_PATH) var path: String,
+    @ColumnInfo(name = BookmarksHelper.COLUMN_TEXT) var text: String? = null,
+    @ColumnInfo(name = BookmarksHelper.COLUMN_SORT) var sort: String? = null,
+    @ColumnInfo(name = BookmarksHelper.COLUMN_POSITION_PAGE) var position_section: Int = 0,
+    @ColumnInfo(name = BookmarksHelper.COLUMN_POSITION_OFFSET) var position_offset: Int = 0,
+    @ColumnInfo(name = BookmarksHelper.COLUMN_CREATE_DATE) var createDate: Long? = null
 ) {
 
     init {

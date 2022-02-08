@@ -10,9 +10,10 @@ import android.widget.AdapterView.OnItemClickListener
 import android.widget.AdapterView.OnItemLongClickListener
 import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.kontranik.koreader.R
-import com.kontranik.koreader.database.BookmarkService
-import com.kontranik.koreader.database.BookmarksDatabaseAdapter
+import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.databinding.FragmentBookmarklistBinding
 import com.kontranik.koreader.model.Bookmark
 import com.kontranik.koreader.utils.BookmarkListAdapter
@@ -23,19 +24,19 @@ class BookmarkListFragment : DialogFragment() {
     private lateinit var binding: FragmentBookmarklistBinding
 
     private var listener: BookmarkListDialogListener? = null
-    private var service: BookmarkService? = null
+    private lateinit var mBookmarksViewModel: BookmarksViewModel
 
     private var bookmarkListAdapter: BookmarkListAdapter? = null
     private var bookmarkList: MutableList<Bookmark> = mutableListOf()
 
     private var longClickedItemIndex: Int? = null
 
-    var path: String? = null
+    private var path: String? = null
 
     // 1. Defines the listener interface with a method passing back data result.
     interface BookmarkListDialogListener {
         fun onSelectBookmark(bookmark: Bookmark)
-        fun onAddBookmark(): Boolean
+        fun onAddBookmark()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +54,7 @@ class BookmarkListFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         listener = activity as BookmarkListDialogListener?
-        service = BookmarkService(BookmarksDatabaseAdapter(view.context))
+        mBookmarksViewModel = ViewModelProvider(this)[BookmarksViewModel::class.java]
 
         binding.imageButtonBookmarklistBack.setOnClickListener {
             dismiss()
@@ -63,8 +64,6 @@ class BookmarkListFragment : DialogFragment() {
         }
 
         path = requireArguments().getString(PATH)
-
-        loadBookmarks(path!!)
 
         bookmarkListAdapter = BookmarkListAdapter(view.context, R.layout.bookmarklist_item, bookmarkList)
         binding.listViewBookmarklistBookmarks.adapter = bookmarkListAdapter
@@ -80,30 +79,25 @@ class BookmarkListFragment : DialogFragment() {
         }
         binding.listViewBookmarklistBookmarks.onItemClickListener = itemListener
 
+        mBookmarksViewModel.mAllBookmarks.observe(viewLifecycleOwner, Observer {
+            if (it != null) {
+                bookmarkList.clear()
+                bookmarkList.addAll(it.toMutableList ())
+                if (bookmarkList.isEmpty()) {
+                    binding.textViewBookmarklistStatus.text = getString(R.string.no_bookmarks)
+                    binding.textViewBookmarklistStatus.visibility = View.VISIBLE
+                } else {
+                    binding.textViewBookmarklistStatus.visibility = View.INVISIBLE
+                }
+            }
+            bookmarkListAdapter!!.notifyDataSetChanged()
+        })
+
+        if (path != null) mBookmarksViewModel.loadBookmarks(path!!)
     }
 
     private fun addBookmark() {
-        val result = listener!!.onAddBookmark()
-        if ( result ) {
-            refreshBookmarks()
-        }
-    }
-
-    private fun refreshBookmarks() {
-        loadBookmarks(path!!)
-        // fire the event
-        bookmarkListAdapter!!.notifyDataSetChanged()
-    }
-
-    private fun loadBookmarks(path: String) {
-        bookmarkList.clear()
-        bookmarkList.addAll(service!!.getByPath(path).toMutableList())
-        if ( bookmarkList.isEmpty() ) {
-            binding.textViewBookmarklistStatus.text = getString(R.string.no_bookmarks)
-            binding.textViewBookmarklistStatus.visibility = View.VISIBLE
-        } else {
-            binding.textViewBookmarklistStatus.visibility = View.INVISIBLE
-        }
+        listener!!.onAddBookmark()
     }
 
     override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenuInfo?) {
@@ -122,8 +116,9 @@ class BookmarkListFragment : DialogFragment() {
     }
 
     private fun delete(position: Int) {
-        service!!.deleteBookmark(bookmarkList[position])
-        refreshBookmarks()
+        mBookmarksViewModel.delete(bookmarkList[position])
+        bookmarkList.removeAt(position)
+        bookmarkListAdapter?.notifyDataSetChanged()
     }
 
     private fun open(position: Int) {
