@@ -37,21 +37,21 @@ open class FontsHelper(var context: Context) {
         val typefaceBold = if ( fontPath != null)
             Typeface.createFromFile(fontPath)
         else
-            Typeface.create(fontName, Typeface.NORMAL)
+            Typeface.create(fontName, Typeface.BOLD)
 
         fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_ITALIC, null)
         fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_ITALIC, TypefaceRecord.DEFAULT.name)!!
         val typefaceItalic = if ( fontPath != null)
             Typeface.createFromFile(fontPath)
         else
-            Typeface.create(fontName, Typeface.NORMAL)
+            Typeface.create(fontName, Typeface.ITALIC)
 
         fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_BOLDITALIC, null)
         fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_BOLDITALIC, TypefaceRecord.DEFAULT.name)!!
         val typefaceBoldItalic = if ( fontPath != null)
             Typeface.createFromFile(fontPath)
         else
-            Typeface.create(fontName, Typeface.NORMAL)
+            Typeface.create(fontName, Typeface.BOLD_ITALIC)
 
         fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_MONOSPACE, null)
         fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_MONOSPACE, TypefaceRecord.MONO)!!
@@ -97,8 +97,6 @@ open class FontsHelper(var context: Context) {
                 spannable.setSpan(TypefaceSpan(bookFonts.typefaceItalic), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             else
                 spannable.setSpan(TypefaceSpan(bookFonts.typefaceNormal), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-
         }
         return spannable
     }

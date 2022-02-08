@@ -3,6 +3,7 @@ package com.kontranik.koreader.utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.AttributeSet
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.preference.Preference
 import androidx.preference.PreferenceManager
@@ -62,15 +63,24 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
         // textViewFontName!!.textSize = textSize
         textViewFontName!!.text = fontname
 
-        textViewFontName!!.setOnClickListener {
-            val fragment = FontPickerFragment.newInstance(selectedFont)
-            fragment.setCallBack(this)
-            val a = context as SettingsActivity
-            a.supportFragmentManager.beginTransaction()
-                    .replace(R.id.settings_container, fragment)
-                    .addToBackStack(null)
-                    .commit()
+        val imageViewOpenSelectList = holder.findViewById(R.id.imageView_preference_font_openselectlist) as ImageView
+        imageViewOpenSelectList.setOnClickListener {
+            showFontPickerDialog(selectedFont)
         }
+
+        textViewFontName!!.setOnClickListener {
+            showFontPickerDialog(selectedFont)
+        }
+    }
+
+    private fun showFontPickerDialog(selectedFont: TypefaceRecord) {
+        val fragment = FontPickerFragment.newInstance(selectedFont)
+        fragment.setCallBack(this)
+        val a = context as SettingsActivity
+        a.supportFragmentManager.beginTransaction()
+            .replace(R.id.settings_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onSaveFontPickerDialog(font: TypefaceRecord?) {

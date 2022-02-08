@@ -147,6 +147,7 @@
     <string name="tapzones_activity_quick_menu">quick menu</string>
     <string name="tapzones_activity_main_menu">main menu</string>
     <string name="tapzones_activity_goto">go to…</string>
+    <string name="tapzones_activity_bookmarks">bookmarks</string>
 
     <string name="line_spacing">Line Spacing</string>
     <string name="letter_spacing">Letter Spacing</string>

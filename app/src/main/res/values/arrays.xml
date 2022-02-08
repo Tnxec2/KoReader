@@ -61,6 +61,7 @@
         <item>@string/tapzones_activity_quick_menu</item>
         <item>@string/tapzones_activity_main_menu</item>
         <item>@string/tapzones_activity_goto</item>
+        <item>@string/tapzones_activity_bookmarks</item>
     </string-array>
 
     <string-array name="tapzonen_values">
@@ -70,6 +71,7 @@
         <item>QuickMenu</item>
         <item>MainMenu</item>
         <item>GoTo</item>
+        <item>Bookmarks</item>
     </string-array>
 
     <string-array name="line_spacing_entries">

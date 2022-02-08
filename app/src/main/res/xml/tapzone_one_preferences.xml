@@ -13,7 +13,7 @@
             app:key="tapZoneOneClickTopCenter"
             app:entries="@array/tapzonen_entries"
             app:entryValues="@array/tapzonen_values"
-            app:defaultValue="None"
+            app:defaultValue="Bookmarks"
             app:title="@string/tapzone_top_center"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />

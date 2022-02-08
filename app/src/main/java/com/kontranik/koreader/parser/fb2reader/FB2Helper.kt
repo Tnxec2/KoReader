@@ -11,6 +11,7 @@ import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme
 import com.kontranik.koreader.utils.ImageUtils
 import org.jsoup.Jsoup
+import java.io.FileNotFoundException
 import kotlin.math.ceil
 
 class FB2Helper(private val context: Context, private val contentUri: String) : EbookHelper {
@@ -23,19 +24,24 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
     override var pageScheme: BookPageScheme = BookPageScheme()
 
     override fun readBook() {
-        val fileInputStream = context.contentResolver.openInputStream(Uri.parse(this.contentUri)) ?: return
-        fb2Reader.readBook(contentUri, fileInputStream)
-        if ( fb2Reader.fb2Scheme != null) {
-            bookInfo = BookInfo(
+        try {
+            val fileInputStream =
+                context.contentResolver.openInputStream(Uri.parse(this.contentUri)) ?: return
+            fb2Reader.readBook(contentUri, fileInputStream)
+            if (fb2Reader.fb2Scheme != null) {
+                bookInfo = BookInfo(
                     title = fb2Reader.fb2Scheme!!.description.titleInfo.booktitle,
                     cover = getcoverbitmap(),
                     authors = getAuthors(fb2Reader.fb2Scheme!!).toMutableList(),
                     path = contentUri,
                     filename = contentUri,
                     annotation = fb2Reader.fb2Scheme!!.description.titleInfo.annotation.toString()
-            )
+                )
+            }
+            calculateScheme()
+        }  catch (e: FileNotFoundException) {
+
         }
-        calculateScheme()
     }
 
     private fun calculateScheme() {

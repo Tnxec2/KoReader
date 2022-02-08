@@ -130,4 +130,5 @@
     <string name="marginBottom">Rand unten</string>
     <string name="marginRight">Rand rechts</string>
     <string name="marginLeft">Rand links</string>
+    <string name="tapzones_activity_bookmarks">Lesezeichen</string>
 </resources>
