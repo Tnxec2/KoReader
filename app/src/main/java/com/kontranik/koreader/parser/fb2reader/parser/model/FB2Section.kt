@@ -1,7 +1,6 @@
-package com.kontranik.koreader.parser.fb2reader.model
+package com.kontranik.koreader.parser.fb2reader.parser.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.jsoup.Jsoup
 
 class FB2Section(
     @JsonProperty("orderid") val orderid: Int,

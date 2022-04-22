@@ -38,23 +38,22 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
             finish()
         }
 
-        loadBooklist()
         binding.reciclerViewBooklistList.adapter = BookListAdapter(this, bookInfoList, this)
 
         mBookStatusViewModel.lastOpenedBooks.observe(this, Observer {
             if (it != null) {
-                for (bookstatus in it) {
-                    if (bookstatus.path != null) {
-                        if (!FileHelper.contentFileExist(applicationContext, bookstatus.path)) {
-                            mBookStatusViewModel.delete(bookstatus.id!!)
+                for (bookStatus in it) {
+                    if (bookStatus.path != null) {
+                        if (!FileHelper.contentFileExist(applicationContext, bookStatus.path)) {
+                            mBookStatusViewModel.delete(bookStatus.id!!)
                         }
 
                         val bookInfo = BookInfo(
-                            title = bookstatus.title,
+                            title = bookStatus.title,
                             cover = null,
                             authors = mutableListOf(),
-                            filename = bookstatus.path!!,
-                            path = bookstatus.path!!,
+                            filename = bookStatus.path!!,
+                            path = bookStatus.path!!,
                             annotation = ""
                         )
                         bookInfoList.add(bookInfo)
@@ -63,6 +62,8 @@ class BookListActivity : AppCompatActivity(), BookListAdapter.BookListAdapterCli
                 }
             }
         })
+
+        loadBooklist()
     }
 
     private fun openBook(bookInfo: BookInfo) {

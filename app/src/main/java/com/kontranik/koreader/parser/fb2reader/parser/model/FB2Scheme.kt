@@ -1,4 +1,4 @@
-package com.kontranik.koreader.parser.fb2reader.model
+package com.kontranik.koreader.parser.fb2reader.parser.model
 
 class FB2Scheme {
 

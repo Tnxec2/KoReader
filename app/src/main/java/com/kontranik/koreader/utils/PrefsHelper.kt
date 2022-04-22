@@ -24,7 +24,7 @@ class PrefsHelper(val context: Context) {
 
     var defaultTextSize: Float = 0f
     var textSize: Float = 0f
-    val fontDefault: TypefaceRecord = TypefaceRecord.DEFAULT
+    private val fontDefault: TypefaceRecord = TypefaceRecord.DEFAULT
     var font: TypefaceRecord = fontDefault
 
     var defaultLineSpacing: Float = 1.0f
@@ -67,13 +67,13 @@ class PrefsHelper(val context: Context) {
      *  Color
      */
     var colorTheme: String = PREF_COLOR_SELECTED_THEME_DEFAULT
-    val colorBackDefault: String = context.resources.getString(R.string.color_theme1_backgroud_default)
-    var colorBack: String? = colorBackDefault
+    private val colorBackDefault: String = context.resources.getString(R.string.color_theme1_backgroud_default)
+    var colorBack: String = colorBackDefault
     val colorTextDefault: String = context.resources.getString(R.string.color_theme1_foregroud_default)
-    var colorText: String? = colorTextDefault
+    var colorText: String = colorTextDefault
     val colorLinkTextDefault: String = context.resources.getString(R.string.color_theme1_linktext_default)
-    var colorLinkText: String? = colorLinkTextDefault
-    var colorInfoText: String? = colorTextDefault
+    var colorLinkText: String = colorLinkTextDefault
+    var colorInfoText: String = colorTextDefault
     var showBackgroundImage: Boolean = false
     var backgroundImageUri: String? = null
     var backgroundImageTiledRepeat: Boolean = false
@@ -162,7 +162,7 @@ class PrefsHelper(val context: Context) {
         setThemeByName(interfaceTheme)
     }
 
-    fun setThemeByName(mTheme: String?) {
+    private fun setThemeByName(mTheme: String?) {
         when ( mTheme) {
             "Light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             "Dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
@@ -275,6 +275,20 @@ class PrefsHelper(val context: Context) {
             R.string.color_theme3_foregroud_default,
             R.string.color_theme4_foregroud_default,
             R.string.color_theme5_foregroud_default,
+        )
+        val colorInfotextDefaultArray = arrayListOf(
+            R.string.color_theme1_foregroud_default,
+            R.string.color_theme2_foregroud_default,
+            R.string.color_theme3_foregroud_default,
+            R.string.color_theme4_foregroud_default,
+            R.string.color_theme5_foregroud_default,
+        )
+        val colorLinkDefaultArray = arrayListOf(
+            R.string.color_theme1_linktext_default,
+            R.string.color_theme2_linktext_default,
+            R.string.color_theme3_linktext_default,
+            R.string.color_theme4_linktext_default,
+            R.string.color_theme5_linktext_default,
         )
     }
 }

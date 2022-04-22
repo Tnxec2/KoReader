@@ -12,8 +12,6 @@ class BookPageScheme {
         const val MAX_PAGE_PER_SECTION = 50
     }
 
-    fun getLastSheme() = scheme[sectionCount]
-
     fun getBookPositionForPage(page: Int): BookPosition {
         var fullSectionPages = 0
         var section = 0

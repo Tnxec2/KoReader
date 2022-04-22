@@ -103,16 +103,13 @@ class SettingsActivity : AppCompatActivity(),
         var preference: Preference? = null
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            if ( themeId == 1)
-                setPreferencesFromResource(R.xml.color_theme1_preferences, rootKey)
-            else if ( themeId == 2)
-                setPreferencesFromResource(R.xml.color_theme2_preferences, rootKey)
-            else if ( themeId == 3)
-                setPreferencesFromResource(R.xml.color_theme3_preferences, rootKey)
-            else if ( themeId == 4)
-                setPreferencesFromResource(R.xml.color_theme4_preferences, rootKey)
-            else if ( themeId == 5)
-                setPreferencesFromResource(R.xml.color_theme5_preferences, rootKey)
+            when (themeId) {
+                1 -> setPreferencesFromResource(R.xml.color_theme1_preferences, rootKey)
+                2 -> setPreferencesFromResource(R.xml.color_theme2_preferences, rootKey)
+                3 -> setPreferencesFromResource(R.xml.color_theme3_preferences, rootKey)
+                4 -> setPreferencesFromResource(R.xml.color_theme4_preferences, rootKey)
+                5 -> setPreferencesFromResource(R.xml.color_theme5_preferences, rootKey)
+            }
         }
 
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -124,18 +121,22 @@ class SettingsActivity : AppCompatActivity(),
         }
 
         override fun onDisplayPreferenceDialog(preference: Preference) {
-            if (preference is ColorPreference) {
-                preference.showDialog(this, 0)
-            } else if ( preference is ImagePickerPreference) {
-                val intent = Intent()
-                intent.type = "image/*"
-                intent.action = Intent.ACTION_OPEN_DOCUMENT
-                intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            when (preference) {
+                is ColorPreference -> {
+                    preference.showDialog(this, 0)
+                }
+                is ImagePickerPreference -> {
+                    val intent = Intent()
+                    intent.type = "image/*"
+                    intent.action = Intent.ACTION_OPEN_DOCUMENT
+                    intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
-                startActivityForResult(Intent.createChooser(intent, "Select backgroud image"), ImagePickerPreference.PICK_IMAGE)
-            } else {
-                super.onDisplayPreferenceDialog(preference)
+                    startActivityForResult(Intent.createChooser(intent, "Select backgroud image"), ImagePickerPreference.PICK_IMAGE)
+                }
+                else -> {
+                    super.onDisplayPreferenceDialog(preference)
+                }
             }
         }
     }

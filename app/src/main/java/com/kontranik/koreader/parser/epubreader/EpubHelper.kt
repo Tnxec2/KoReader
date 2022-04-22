@@ -3,7 +3,6 @@ package com.kontranik.koreader.parser.epubreader
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import android.text.Html
 import com.kontranik.koreader.model.Author
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme

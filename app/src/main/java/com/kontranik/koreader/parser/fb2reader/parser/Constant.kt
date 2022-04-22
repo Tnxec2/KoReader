@@ -1,4 +1,4 @@
-package com.kontranik.koreader.parser.fb2reader
+package com.kontranik.koreader.parser.fb2reader.parser
 
 object Constant {
     const val OUT_DIR = "ebookcontent"

@@ -39,11 +39,14 @@ object FontManager {
             if ( file.isDirectory ) {
                 fonts.putAll(addFonts(file, showSystemFonts, showNotoFonts))
             } else if ( file.canRead() ) {
-                val fontname = file.name.substringBeforeLast('.')
+                val extension = file.extension.lowercase()
+                if ( extension == "ttf" || extension == "otf") {
+                    val fontname = file.name.substringBeforeLast('.')
                         .replace("_", " ")
                         .replace("-", " ")
-                if (!showNotoFonts && fontname.startsWith("noto", ignoreCase = true) ) continue
-                fonts[fontname] = file
+                    if (!showNotoFonts && fontname.startsWith("noto", ignoreCase = true)) continue
+                    fonts[fontname] = file
+                }
             }
         }
         return fonts

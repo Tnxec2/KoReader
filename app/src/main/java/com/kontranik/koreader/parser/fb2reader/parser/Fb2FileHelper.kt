@@ -1,11 +1,12 @@
-package com.kontranik.koreader.parser.fb2reader
+package com.kontranik.koreader.parser.fb2reader.parser
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.kontranik.koreader.parser.fb2reader.model.BinaryData
-import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme
-import com.kontranik.koreader.parser.fb2reader.model.FB2Section
+import com.kontranik.koreader.parser.fb2reader.FB2Helper
+import com.kontranik.koreader.parser.fb2reader.parser.model.BinaryData
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Scheme
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Section
 import java.io.*
 
 class FileHelper(private val appDir: String) {
@@ -98,7 +99,8 @@ class FileHelper(private val appDir: String) {
         writer.append(mySection.text.toString())
         writer.append(Constant.HTML_NACHSPAN)
         writer.close()
-        fB2Scheme.sections[mySection.orderid].textsize = FB2Helper.getSizeOfHtmlText(mySection.text.toString())
+        fB2Scheme.sections[mySection.orderid].textsize =
+            FB2Helper.getSizeOfHtmlText(mySection.text.toString())
         mySection.text = StringBuffer()
     }
 }

@@ -1,6 +1,7 @@
 package com.kontranik.koreader.reader
 
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,12 +37,13 @@ class ImageViewerFragment : DialogFragment() {
 
         binding.imageviewtouchImageviewer.displayType = ImageViewTouchBase.DisplayType.FIT_TO_SCREEN
 
-        val barray = requireArguments().getByteArray(ImageByteArray)
-        if (barray == null) {
+        val byteArray = requireArguments().getByteArray(ImageByteArray)
+        if (byteArray == null) {
             dismiss()
         } else {
+            binding.imageviewtouchImageviewer.setBackgroundColor(Color.WHITE)
             binding.imageviewtouchImageviewer.setImageBitmap(
-                    BitmapFactory.decodeByteArray(barray, 0, barray.size)
+                    BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
             )
         }
     }

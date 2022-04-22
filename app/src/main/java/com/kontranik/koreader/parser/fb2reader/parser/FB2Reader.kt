@@ -1,6 +1,6 @@
-package com.kontranik.koreader.parser.fb2reader
+package com.kontranik.koreader.parser.fb2reader.parser
 
-import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Scheme
 import java.io.InputStream
 import java.util.logging.Level
 import java.util.logging.Logger

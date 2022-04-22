@@ -1,7 +1,7 @@
-package com.kontranik.koreader.parser.fb2reader
+package com.kontranik.koreader.parser.fb2reader.parser
 
-import com.kontranik.koreader.parser.fb2reader.model.FB2Elements
-import com.kontranik.koreader.parser.fb2reader.model.FB2ParserObject
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Elements
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2ParserObject
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.math.min

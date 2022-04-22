@@ -1,9 +1,9 @@
-package com.kontranik.koreader.parser.fb2reader
+package com.kontranik.koreader.parser.fb2reader.parser
 
 import android.util.Log
-import com.kontranik.koreader.parser.fb2reader.model.FB2Elements
-import com.kontranik.koreader.parser.fb2reader.model.FB2ParserObject
-import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Elements
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2ParserObject
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Scheme
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 import org.xml.sax.helpers.DefaultHandler
@@ -88,7 +88,7 @@ class FB2Parser(appDir: String, private var uri: String, private var fileInputSt
         val eName = if ("" == localName) qName else localName
         val fel = FB2Elements.fromString(eName.toLowerCase(Locale.getDefault()))
         if (fel == null) {
-            println("StartElement: " + eName)
+            Log.d("PARSER","StartElement: $eName")
             return
         }
         try {
@@ -103,7 +103,7 @@ class FB2Parser(appDir: String, private var uri: String, private var fileInputSt
         val eName = if ("" == localName) qName else localName
         val fel = FB2Elements.fromString(eName.toLowerCase(Locale.getDefault()))
         if (fel == null) {
-            println("EndElement: $eName")
+            Log.d("PARSER", "EndElement: $eName")
             return
         }
         try {

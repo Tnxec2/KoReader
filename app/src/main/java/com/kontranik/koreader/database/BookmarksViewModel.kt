@@ -6,9 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.kontranik.koreader.database.repository.BookmarksRepository
-import com.kontranik.koreader.model.BookStatus
 import com.kontranik.koreader.model.Bookmark
-import java.io.File
 
 class BookmarksViewModel(application: Application) : AndroidViewModel(application) {
     private val mRepository: BookmarksRepository = BookmarksRepository(application)

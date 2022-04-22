@@ -3,6 +3,7 @@ package com.kontranik.koreader.reader
 import android.Manifest
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Environment
 import android.view.LayoutInflater
@@ -15,7 +16,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.RecyclerView
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentFontMenuBinding
 import com.kontranik.koreader.utils.FontPickerListItemAdapter
@@ -104,9 +104,17 @@ class FontPickerFragment :
             val collectedFonts: MutableList<TypefaceRecord> = mutableListOf()
             if ( fonts != null) {
                 for (fontName in fonts.keys) {
-                    collectedFonts.add(TypefaceRecord(
-                            name = fontName,
-                            file = fonts[fontName]!!))
+                    try {
+                        Typeface.createFromFile(fonts[fontName])
+                        collectedFonts.add(
+                            TypefaceRecord(
+                                name = fontName,
+                                file = fonts[fontName]!!
+                            )
+                        )
+                    } catch (e: Exception) {
+
+                    }
                 }
             }
             collectedFonts.sortBy { it.name }

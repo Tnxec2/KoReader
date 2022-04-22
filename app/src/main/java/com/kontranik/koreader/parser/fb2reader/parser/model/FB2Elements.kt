@@ -1,4 +1,4 @@
-package com.kontranik.koreader.parser.fb2reader.model
+package com.kontranik.koreader.parser.fb2reader.parser.model
 enum class FB2Elements(var elName: String) {
     A("a"),
     ANNOTATION("annotation"),

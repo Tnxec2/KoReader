@@ -1,7 +1,7 @@
-package com.kontranik.koreader.parser.fb2reader
+package com.kontranik.koreader.parser.fb2reader.parser
 
 import com.kontranik.koreader.model.BookPageScheme
-import com.kontranik.koreader.parser.fb2reader.model.*
+import com.kontranik.koreader.parser.fb2reader.parser.model.*
 import org.xml.sax.Attributes
 
 /**

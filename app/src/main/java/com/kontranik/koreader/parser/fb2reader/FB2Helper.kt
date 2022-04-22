@@ -8,7 +8,8 @@ import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme
 import com.kontranik.koreader.model.BookSchemeItem
 import com.kontranik.koreader.parser.EbookHelper
-import com.kontranik.koreader.parser.fb2reader.model.FB2Scheme
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Scheme
+import com.kontranik.koreader.parser.fb2reader.parser.FB2Reader
 import com.kontranik.koreader.utils.ImageUtils
 import org.jsoup.Jsoup
 import java.io.FileNotFoundException

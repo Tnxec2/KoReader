@@ -1,6 +1,6 @@
-package com.kontranik.koreader.parser.fb2reader.model
+package com.kontranik.koreader.parser.fb2reader.parser.model
 
-import com.kontranik.koreader.parser.fb2reader.FileHelper
+import com.kontranik.koreader.parser.fb2reader.parser.FileHelper
 
 class FB2ParserObject(val fileHelper: FileHelper) {
     var fb2scheme = FB2Scheme()
