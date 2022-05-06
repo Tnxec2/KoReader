@@ -26,7 +26,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     var pageViewSettings: MutableLiveData<PageViewSettings> = MutableLiveData(
         PageViewSettings(
             textSize = prefsHelper.textSize,
-            lineSpacing = prefsHelper.lineSpacing,
+            lineSpacingMultiplier = prefsHelper.lineSpacingMultiplier,
             letterSpacing = prefsHelper.letterSpacing,
             typeFace = prefsHelper.font.getTypeface(),
             marginTop = prefsHelper.marginTop,
@@ -214,23 +214,23 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
 
     fun finishQuickMenuSettings(
         textSize: Float,
-        lineSpacing: Float,
+        lineSpacingMultiplier: Float,
         letterSpacing: Float,
         colorTheme: String
     ) {
         if (textSize != prefsHelper.textSize
-            || lineSpacing != prefsHelper.lineSpacing
+            || lineSpacingMultiplier != prefsHelper.lineSpacingMultiplier
             || letterSpacing != prefsHelper.letterSpacing
             || colorTheme != prefsHelper.colorTheme
         ) {
             prefsHelper.textSize = textSize
-            prefsHelper.lineSpacing = lineSpacing
+            prefsHelper.lineSpacingMultiplier = lineSpacingMultiplier
             prefsHelper.letterSpacing = letterSpacing
             prefsHelper.colorTheme = colorTheme
 
             pageViewSettings.value = pageViewSettings.value?.also { it ->
                 it.textSize = prefsHelper.textSize
-                it.lineSpacing = prefsHelper.lineSpacing
+                it.lineSpacingMultiplier = prefsHelper.lineSpacingMultiplier
                 it.letterSpacing = prefsHelper.letterSpacing
             }
 
@@ -248,9 +248,9 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
         prefsHelper.textSize =
             prefs.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, prefsHelper.defaultTextSize)
 
-        val lineSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, null)
-        if (lineSpacingString != null) prefsHelper.lineSpacing = lineSpacingString.toFloat()
-        else prefsHelper.lineSpacing = prefsHelper.defaultLineSpacing
+        val lineSpacingMultiplierString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, null)
+        if (lineSpacingMultiplierString != null) prefsHelper.lineSpacingMultiplier = lineSpacingMultiplierString.toFloat()
+        else prefsHelper.lineSpacingMultiplier = prefsHelper.defaultLineSpacingMultiplier
 
         val letterSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, null)
         if (letterSpacingString != null) prefsHelper.letterSpacing = letterSpacingString.toFloat()
@@ -305,7 +305,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
 
         pageViewSettings.value = pageViewSettings.value?.also { it ->
             it.textSize = prefsHelper.textSize
-            it.lineSpacing = prefsHelper.lineSpacing
+            it.lineSpacingMultiplier = prefsHelper.lineSpacingMultiplier
             it.letterSpacing = prefsHelper.letterSpacing
             it.typeFace = prefsHelper.font.getTypeface()
             it.marginTop = prefsHelper.marginTop
@@ -521,7 +521,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     fun resetQuickSettings() {
         pageViewSettings.value = pageViewSettings.value?.also {
             it.textSize = prefsHelper.textSize
-            it.lineSpacing = prefsHelper.lineSpacing
+            it.lineSpacingMultiplier = prefsHelper.lineSpacingMultiplier
             it.letterSpacing = prefsHelper.letterSpacing
         }
 

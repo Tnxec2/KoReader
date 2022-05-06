@@ -450,12 +450,12 @@ class ReaderActivity :
 
     override fun onFinishQuickMenuDialog(
         textSize: Float,
-        lineSpacing: Float,
+        lineSpacingMultiplier: Float,
         letterSpacing: Float,
         colorTheme: String
     ) {
         mReaderActivityViewModel.finishQuickMenuSettings(
-            textSize, lineSpacing, letterSpacing, colorTheme
+            textSize, lineSpacingMultiplier, letterSpacing, colorTheme
         )
     }
 
@@ -578,11 +578,11 @@ class ReaderActivity :
         mReaderActivityViewModel.reloadCurrentPage()
     }
 
-    override fun onChangeLineSpacing(lineSpacing: Float) {
-        if (binding.textViewPageview.lineSpacingMultiplier == lineSpacing) return
+    override fun onChangeLineSpacing(lineSpacingMultiplier: Float) {
+        if (binding.textViewPageview.lineSpacingMultiplier == lineSpacingMultiplier) return
         binding.textViewPageview.setLineSpacing(
             binding.textViewPageview.lineSpacingExtra,
-            lineSpacing
+            lineSpacingMultiplier
         )
         mReaderActivityViewModel.reloadCurrentPage()
     }
@@ -651,7 +651,7 @@ class ReaderActivity :
         binding.textViewPageview.typeface = pageViewSettings.typeFace
         binding.textViewPageview.setLineSpacing(
             binding.textViewPageview.lineSpacingExtra,
-            pageViewSettings.lineSpacing
+            pageViewSettings.lineSpacingMultiplier
         )
         val density = this.resources.displayMetrics.density
         val marginTopPixel = (pageViewSettings.marginTop * density).toInt()

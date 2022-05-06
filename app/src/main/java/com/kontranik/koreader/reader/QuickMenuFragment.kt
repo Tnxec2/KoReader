@@ -36,7 +36,7 @@ class QuickMenuFragment : DialogFragment() {
     private var textSize: Float = 0F
     private val textSizeStep: Float = 1F
 
-    private var lineSpacing: Float = 1f
+    private var lineSpacingMultiplier: Float = 1f
     private var letterSpacing: Float = 0.05f
 
     private var colorTheme: String = PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
@@ -45,9 +45,9 @@ class QuickMenuFragment : DialogFragment() {
 
     // 1. Defines the listener interface with a method passing back data result.
     interface QuickMenuDialogListener {
-        fun onFinishQuickMenuDialog(textSize: Float, lineSpacing: Float, letterSpacing: Float, colorTheme: String)
+        fun onFinishQuickMenuDialog(textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorTheme: String)
         fun onChangeTextSize(textSize: Float)
-        fun onChangeLineSpacing(lineSpacing: Float)
+        fun onChangeLineSpacing(lineSpacingMultiplier: Float)
         fun onChangeLetterSpacing(letterSpacing: Float)
         fun onCancelQuickMenu()
         fun onAddBookmark()
@@ -153,8 +153,8 @@ class QuickMenuFragment : DialogFragment() {
         binding.spinnerQuickMenuLineSpacing.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
-                lineSpacing = valArray[position].toFloat()
-                listener!!.onChangeLineSpacing(lineSpacing)
+                lineSpacingMultiplier = valArray[position].toFloat()
+                listener!!.onChangeLineSpacing(lineSpacingMultiplier)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -163,7 +163,7 @@ class QuickMenuFragment : DialogFragment() {
             }
         }
 
-        binding.spinnerQuickMenuLineSpacing.setSelection(valArray.indexOf(lineSpacing.toString()) )
+        binding.spinnerQuickMenuLineSpacing.setSelection(valArray.indexOf(lineSpacingMultiplier.toString()) )
     }
 
     private fun initialLetterSpacing() {
@@ -214,15 +214,15 @@ class QuickMenuFragment : DialogFragment() {
 
         val typedValue = TypedValue()
         requireContext().resources.getValue(R.dimen.line_spacing, typedValue, true)
-        val defaultLineSpacing = typedValue.float
+        val defaultLineSpacingMultiplier = typedValue.float
         requireContext().resources.getValue(R.dimen.letter_spacing, typedValue, true)
         val defaultLetterSpacing = typedValue.float
 
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
         textSize = prefs.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
-        val lineSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, defaultLineSpacing.toString() )
-        if ( lineSpacingString != null) lineSpacing = lineSpacingString.toFloat()
+        val lineSpacingMultiplierString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, defaultLineSpacingMultiplier.toString() )
+        if ( lineSpacingMultiplierString != null) lineSpacingMultiplier = lineSpacingMultiplierString.toFloat()
         val letterSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, defaultLetterSpacing.toString() )
         if ( letterSpacingString != null) letterSpacing = letterSpacingString.toFloat()
         val fontname = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.DEFAULT.name)!!
@@ -260,12 +260,12 @@ class QuickMenuFragment : DialogFragment() {
         val prefEditor = PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
         prefEditor.putString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, colorTheme)
         prefEditor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
-        prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, lineSpacing.toString())
+        prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, lineSpacingMultiplier.toString())
         prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, letterSpacing.toString())
         prefEditor.apply()
 
         // Return Data back to activity through the implemented listener
-        listener!!.onFinishQuickMenuDialog(textSize, lineSpacing, letterSpacing, colorTheme)
+        listener!!.onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorTheme)
 
         // Close the dialog and return back to the parent activity
         dismiss()
@@ -286,8 +286,6 @@ class QuickMenuFragment : DialogFragment() {
     companion object {
         const val THEME = "theme"
         const val TEXTSIZE = "textSize"
-        const val LINESPACING = "lineSpacing"
-        const val LETTERSPACING = "letterSpacing"
         const val FONTPATH = "fontpath"
         const val FONTNAME = "fontname"
     }

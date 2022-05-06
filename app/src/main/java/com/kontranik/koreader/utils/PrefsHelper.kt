@@ -27,8 +27,8 @@ class PrefsHelper(val context: Context) {
     private val fontDefault: TypefaceRecord = TypefaceRecord.DEFAULT
     var font: TypefaceRecord = fontDefault
 
-    var defaultLineSpacing: Float = 1.0f
-    var lineSpacing: Float = defaultLineSpacing
+    var defaultLineSpacingMultiplier: Float = 1.0f
+    var lineSpacingMultiplier: Float = defaultLineSpacingMultiplier
     var defaultLetterSpacing: Float = 0.1f
     var letterSpacing: Float = defaultLetterSpacing
 
@@ -37,10 +37,10 @@ class PrefsHelper(val context: Context) {
 
         val typedValue = TypedValue()
         context.resources.getValue(R.dimen.line_spacing, typedValue, true)
-        defaultLineSpacing = typedValue.float
+        defaultLineSpacingMultiplier = typedValue.float
 
         textSize = defaultTextSize
-        lineSpacing = defaultLineSpacing
+        lineSpacingMultiplier = defaultLineSpacingMultiplier
     }
 
     /*

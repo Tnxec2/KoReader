@@ -5,7 +5,7 @@ import com.kontranik.koreader.utils.PrefsHelper
 
 class PageViewSettings(
     var textSize: Float,
-    var lineSpacing: Float,
+    var lineSpacingMultiplier: Float,
     var letterSpacing: Float,
     var typeFace: Typeface,
     var marginTop: Int,
