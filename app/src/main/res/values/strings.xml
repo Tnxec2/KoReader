@@ -48,7 +48,8 @@
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="open">Open</string>
     <string name="delete">Delete</string>
-    <string name="readbook">Read Book</string>
+    <string name="readbook">Read book</string>
+    <string name="deletebook">Delete book file</string>
     <string name="note">Note</string>
     <string name="bookinfo">Info</string>
     <string name="toc">Table of content</string>
@@ -170,5 +171,8 @@
     <string name="marginRight">Margin Right</string>
     <string name="marginLeft">Margin Left</string>
     <string name="default_margin_value" translatable="false">16</string>
+    <string name="title_delete_book">Delete book</string>
+    <string name="sure_delete_book">Are you sure to delete this book</string>
+    <string name="ok_delete_book">Delete</string>
 
 </resources>

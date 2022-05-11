@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
 import java.util.*
 
+const val LAST_OPENED_COUNT = 10
 
 class BookStatusViewModel(application: Application) : AndroidViewModel(application) {
     private val mRepository: BookStatusRepository = BookStatusRepository(application)
@@ -58,15 +59,7 @@ class BookStatusViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    private val countLastOpened = MutableLiveData<Int>()
-    val lastOpenedBooks: LiveData<List<BookStatus>> = Transformations.switchMap(
-        countLastOpened,
-        ::getLastOpened
-    )
-
-    private fun getLastOpened(count: Int) = mRepository.getLastOpened(count)
-
-    fun loadLastOpened(lastOpenedCount: Int) = apply { this.countLastOpened.value = lastOpenedCount }
+    val lastOpenedBooks: LiveData<List<BookStatus>> = mRepository.getLastOpened(LAST_OPENED_COUNT)
 
     fun delete(id: Long) {
         mRepository.delete(id)
@@ -98,6 +91,16 @@ class BookStatusViewModel(application: Application) : AndroidViewModel(applicati
             }
 
             Log.d("BookStatusCleanup", "cleanup: finish. deleted: $countDeleted")
+        }
+    }
+
+    fun deleteByPath(bookUri: String) {
+        viewModelScope.launch {
+            val bookStatus = mRepository.getBookStatusByPath(bookUri)
+
+            if (bookStatus?.id == null) {
+                delete(bookStatus!!.id!!)
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.kontranik.koreader.utils
+package com.kontranik.koreader.ui.adapters
 
 
 import android.content.Context

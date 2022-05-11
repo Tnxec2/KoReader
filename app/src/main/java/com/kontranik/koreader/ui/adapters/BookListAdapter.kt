@@ -1,24 +1,28 @@
-package com.kontranik.koreader.utils
+package com.kontranik.koreader.ui.adapters
 
 import android.content.Context
+import android.net.Uri
 import android.os.AsyncTask
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.RecyclerView
 import com.kontranik.koreader.R
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.parser.epubreader.EpubHelper
 import com.kontranik.koreader.parser.fb2reader.FB2Helper
+import com.kontranik.koreader.utils.ImageEnum
+import com.kontranik.koreader.utils.ImageUtils
 import java.net.URLDecoder
 
 class BookListAdapter(
         val context: Context,
         private val books: MutableList<BookInfo>,
-        private val bookListAdapterClickListener: BookListAdapterClickListener) :
+        private val bookListAdapterClickListener: BookListAdapterClickListener
+) :
         RecyclerView.Adapter<BookListAdapter.ViewHolder>() {
 
     private val inflater = LayoutInflater.from(context)
@@ -76,19 +80,28 @@ class BookListAdapter(
                 val contentUriPath = result.path
 
                 val mContext = adapter.context
-                var bookInfo: BookInfo? = null
-                if (contentUriPath.endsWith(".epub", ignoreCase = true)) {
-                    bookInfo = EpubHelper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
-                } else if (contentUriPath.endsWith(".fb2", ignoreCase = true)
-                    || contentUriPath.endsWith(".fb2.zip", ignoreCase = true)) {
-                    bookInfo = FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
-                }
+                val uri = Uri.parse(contentUriPath)
+                val doc = DocumentFile.fromSingleUri(mContext, uri)
+                if (doc != null) {
+                    var bookInfo: BookInfo? = null
+                    if (contentUriPath.endsWith(".epub", ignoreCase = true)) {
+                        bookInfo = EpubHelper(
+                            mContext,
+                            contentUriPath
+                        ).getBookInfoTemporary(contentUriPath)
+                    } else if (contentUriPath.endsWith(".fb2", ignoreCase = true)
+                        || contentUriPath.endsWith(".fb2.zip", ignoreCase = true)
+                    ) {
+                        bookInfo =
+                            FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
+                    }
 
-                if ( bookInfo?.cover != null) {
-                    result.cover = ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100)
-                } else {
-                    result.cover =
-                        ImageUtils.getBitmap(adapter.context, ImageEnum.Ebook)
+                    if (bookInfo?.cover != null) {
+                        result.cover = ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100)
+                    } else {
+                        result.cover =
+                            ImageUtils.getBitmap(adapter.context, ImageEnum.Ebook)
+                    }
                 }
 
             }

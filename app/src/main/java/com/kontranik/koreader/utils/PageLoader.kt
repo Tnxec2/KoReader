@@ -1,28 +1,28 @@
 package com.kontranik.koreader.utils
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.kontranik.koreader.model.*
 import kotlin.math.max
-import kotlin.math.min
 
 class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
 
-    constructor(private val pageView: TextView, private val book: Book) : PageSplitterHtml(pageView){
+    constructor(context: Context, private val book: Book) : PageSplitterHtml(context){
 
-    fun getPage(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page? {
+    fun getPage(pageView: TextView, bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page? {
         Log.d(TAG, "getPage:  $bookPosition , revers = $revers, recalc = $recalc")
 
         var restultPage: Page?
         if ( pages.isEmpty() || recalc || !isCurrentSectionLoaded(bookPosition)) {
-            loadPages(bookPosition.section, recalc)
+            loadPages(pageView, bookPosition.section, recalc)
         }
 
          restultPage = findPage(bookPosition.offSet)
 
-         if ( restultPage == null) restultPage = section(bookPosition, restultPage, revers, recalc)
+         if ( restultPage == null) restultPage = section(pageView, bookPosition, restultPage, revers, recalc)
 
         return restultPage
     }
@@ -31,7 +31,7 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
             (bookPosition.section >= pages.first().startBookPosition.section
                     && bookPosition.section <= pages.last().endBookPosition.section)
 
-    private fun section(bookPosition: BookPosition, page: Page?, revers: Boolean, recalc: Boolean): Page? {
+    private fun section(pageView: TextView, bookPosition: BookPosition, page: Page?, revers: Boolean, recalc: Boolean): Page? {
         var resultPage = page
         var section = bookPosition.section
         while (resultPage == null) {
@@ -41,7 +41,7 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
             section = max(0, section)
 //            section = min(book.getPageScheme()!!.sectionCount, section)
             if (section >= 0 && section <= book.getPageScheme()!!.sectionCount) {
-                loadPages(section, recalc)
+                loadPages(pageView, section, recalc)
                 resultPage = if (pages.isEmpty()) null else {
                     if (!revers) pages.first() else pages.last()
                 }
@@ -75,11 +75,11 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         return null
     }
 
-    private fun loadPages(section: Int, recalc: Boolean) {
+    private fun loadPages(pageView: TextView, section: Int, recalc: Boolean) {
         if (section >= 0 && section <= book.getPageScheme()!!.sectionCount) {
             val html = book.getPageBody(section)
             if ( html != null) {
-                splitPages(book, section, html, reloadFonts = recalc)
+                splitPages(pageView, book, section, html, reloadFonts = recalc)
             }
         }
     }

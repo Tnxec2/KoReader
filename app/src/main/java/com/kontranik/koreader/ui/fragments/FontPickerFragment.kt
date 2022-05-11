@@ -1,4 +1,4 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.ui.fragments
 
 import android.Manifest
 import android.content.SharedPreferences
@@ -13,12 +13,13 @@ import android.widget.AdapterView
 import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.core.app.ActivityCompat
+import androidx.core.app.DialogCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentFontMenuBinding
-import com.kontranik.koreader.utils.FontPickerListItemAdapter
+import com.kontranik.koreader.ui.adapters.FontPickerListItemAdapter
 import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.typefacefactory.FontManager
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
@@ -178,6 +179,7 @@ class FontPickerFragment :
         return true
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
         when (requestCode) {
             READ_STORAGE_PERMISSION_REQUEST_CODE -> {

@@ -1,4 +1,4 @@
-package com.kontranik.koreader.utils
+package com.kontranik.koreader.ui.adapters
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.preference.PreferenceManager
+import com.kontranik.koreader.utils.PrefsHelper
 
 class ColoredArrayAdapter(
     context: Context,

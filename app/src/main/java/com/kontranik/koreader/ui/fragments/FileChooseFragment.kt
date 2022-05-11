@@ -1,29 +1,39 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.ui.fragments
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.Nullable
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
+import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.kontranik.koreader.ReaderActivity
-import com.kontranik.koreader.databinding.ActivityFilechooseBinding
-import com.kontranik.koreader.utils.*
+import com.kontranik.koreader.R
+import com.kontranik.koreader.ReaderActivityViewModel
+import com.kontranik.koreader.databinding.FragmentFilechooseBinding
+import com.kontranik.koreader.utils.FileHelper
+import com.kontranik.koreader.utils.FileItem
+import com.kontranik.koreader.ui.adapters.FileListAdapter
+import com.kontranik.koreader.utils.ImageEnum
 
 
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-class FileChooseActivity : AppCompatActivity(),
+class FileChooseFragment : DialogFragment(),
         FileListAdapter.FileListAdapterClickListener,
         BookInfoFragment.BookInfoListener{
     
-    private lateinit var binding: ActivityFilechooseBinding
+    private lateinit var binding: FragmentFilechooseBinding
+    private lateinit var mReaderActivityViewModel: ReaderActivityViewModel
 
     private var externalPaths = mutableSetOf<String>()
 
@@ -38,12 +48,22 @@ class FileChooseActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        binding = ActivityFilechooseBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View {
+        binding = FragmentFilechooseBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        mReaderActivityViewModel = ViewModelProvider(requireActivity())[ReaderActivityViewModel::class.java]
 
         binding.imageButtonFilechooseClose.setOnClickListener {
-            finish()
+            dismiss()
         }
 
         binding.imageButtonFilechooseBack.setOnClickListener {
@@ -59,25 +79,25 @@ class FileChooseActivity : AppCompatActivity(),
         }
         binding.imageButtonFilechooseAddStorage.visibility = View.GONE
 
-        binding.reciclerViewFiles.adapter = FileListAdapter(this, fileItemList, this)
+        binding.reciclerViewFiles.adapter = FileListAdapter(requireContext(), fileItemList, this)
 
-        settings = getSharedPreferences(PREFS_FILE, MODE_PRIVATE)
+        settings = requireActivity()
+            .getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
         loadPrefs()
         loadPath()
     }
 
-    private fun openBook(fileItem: FileItem) {
-        openBook(fileItem.uriString)
+    private fun openBook(uriString: String) {
+        savePrefs(uriString)
+        mReaderActivityViewModel.setBookPath(requireContext(), uriString)
+        dismiss()
     }
 
-    private fun openBook(uriString: String?) {
-        if ( uriString == null) return
-        savePrefs(uriString)
-        val data = Intent()
-        data.putExtra(ReaderActivity.PREF_TYPE, ReaderActivity.PREF_TYPE_OPEN_BOOK)
-        data.putExtra(PrefsHelper.PREF_BOOK_PATH, uriString)
-        setResult(RESULT_OK, data)
-        finish()
+    private fun deleteBook(uriString: String?) {
+        if ( mReaderActivityViewModel.deleteBook(uriString)) {
+            fileItemList.removeAll { it.uriString == uriString }
+            binding.reciclerViewFiles.adapter?.notifyDataSetChanged()
+        }
     }
 
     private  fun goBack() {
@@ -118,11 +138,12 @@ class FileChooseActivity : AppCompatActivity(),
             fileItemList.clear()
             binding.reciclerViewFiles.adapter = null
 
-            val fl = FileHelper.getFileListDC(applicationContext, documentFilePath)
+            val fl = FileHelper.getFileListDC(requireContext(), documentFilePath)
             fileItemList.addAll(fl)
-            binding.reciclerViewFiles.adapter = FileListAdapter(this, fileItemList, this)
+            binding.reciclerViewFiles.adapter = FileListAdapter(requireContext(), fileItemList, this)
 
-            (binding.reciclerViewFiles.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(getPositionInFileItemList(oldSelectedDocumentFileUriString), 0)
+            (binding.reciclerViewFiles.layoutManager as LinearLayoutManager)
+                .scrollToPositionWithOffset(getPositionInFileItemList(oldSelectedDocumentFileUriString), 0)
         }
     }
 
@@ -174,7 +195,7 @@ class FileChooseActivity : AppCompatActivity(),
 
             val directoryUri = Uri.parse(path)
                     ?: throw IllegalArgumentException("Must pass URI of directory to open")
-            val documentsTree = DocumentFile.fromTreeUri(application, directoryUri)
+            val documentsTree = DocumentFile.fromTreeUri(requireContext(), directoryUri)
             if ( documentsTree == null || ! documentsTree.isDirectory || ! documentsTree.canRead() ) {
                 externalPaths.remove(path)
             } else {
@@ -186,7 +207,7 @@ class FileChooseActivity : AppCompatActivity(),
         }
         fileItemList.sortBy { it.name }
 
-        binding.reciclerViewFiles.adapter = FileListAdapter(this, fileItemList, this)
+        binding.reciclerViewFiles.adapter = FileListAdapter(requireContext(), fileItemList, this)
 
         binding.imageButtonFilechooseAddStorage.visibility = View.VISIBLE
     }
@@ -216,12 +237,16 @@ class FileChooseActivity : AppCompatActivity(),
         if ( bookUri != null) {
             val bookInfoFragment = BookInfoFragment.newInstance(bookUri)
             bookInfoFragment.setListener(this)
-            bookInfoFragment.show(supportFragmentManager, "fragment_bookinfo")
+            bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
         }
     }
 
     override fun onBookInfoFragmentReadBook(bookUri: String) {
         openBook(bookUri)
+    }
+
+    override fun onBookInfoFragmentDeleteBook(bookUri: String) {
+        deleteBook(bookUri)
     }
 
     private fun storageAdd() {
@@ -232,8 +257,9 @@ class FileChooseActivity : AppCompatActivity(),
      * Fires an intent to spin up the "file chooser" UI and select an image.
      */
     private fun performFileSearch() {
-        Toast.makeText(applicationContext, "Select directory or storage from dialog, and grant access", Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), "Select directory or storage from dialog, and grant access", Toast.LENGTH_LONG).show()
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        intent.flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION   // write permission to remove book
         startActivityForResult(intent, OPEN_DIRECTORY_REQUEST_CODE)
     }
 
@@ -242,7 +268,7 @@ class FileChooseActivity : AppCompatActivity(),
         if (requestCode == OPEN_DIRECTORY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val directoryUri = data?.data ?: return
 
-            contentResolver.takePersistableUriPermission(
+            requireActivity().contentResolver.takePersistableUriPermission(
                     directoryUri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
             )

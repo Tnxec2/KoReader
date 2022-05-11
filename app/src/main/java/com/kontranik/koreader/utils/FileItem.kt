@@ -1,10 +1,6 @@
 package com.kontranik.koreader.utils
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.documentfile.provider.DocumentFile
 import com.kontranik.koreader.model.BookInfo
-import java.util.*
 
 class FileItem(
         var image: ImageEnum,

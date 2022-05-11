@@ -1,22 +1,21 @@
 package com.kontranik.koreader.utils
 
+import android.content.Context
 import android.text.*
 import android.text.style.QuoteSpan
-import android.util.Log
 import android.widget.TextView
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookPosition
 import com.kontranik.koreader.model.Page
 
-
-open class PageSplitterHtml(private val textView: TextView) : FontsHelper(textView.context) {
+open class PageSplitterHtml(context: Context) : FontsHelper(context) {
 
     var pages: MutableList<Page> = mutableListOf()
 
     private var content: SpannableStringBuilder = SpannableStringBuilder()
     private var staticLayout: StaticLayout? = null
 
-    fun splitPages(book: Book, section: Int, html: String, reloadFonts: Boolean) {
+    fun splitPages(textView: TextView, book: Book, section: Int, html: String, reloadFonts: Boolean) {
         if ( reloadFonts ) loadFonts()
 
         val pageWidth: Int = textView.measuredWidth - textView.paddingLeft - textView.paddingRight
@@ -32,7 +31,7 @@ open class PageSplitterHtml(private val textView: TextView) : FontsHelper(textVi
             SpannableStringBuilder(Html.fromHtml(html, CustomImageGetter(book, pageWidth, pageHeight), null))
         }
 
-        postformatContent()
+        postformatContent(textView)
 
         staticLayout = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             StaticLayout.Builder.obtain(content, 0, content.length, paint, pageWidth)
@@ -70,8 +69,8 @@ open class PageSplitterHtml(private val textView: TextView) : FontsHelper(textVi
         }
     }
 
-    private fun postformatContent() {
-        formatQuotes()
+    private fun postformatContent(textView: TextView) {
+        formatQuotes(textView)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
             content = SpannableStringBuilder(replaceStyledSpans(content, content.length))
             content = SpannableStringBuilder(replaceTypefaces(content))
@@ -96,7 +95,7 @@ open class PageSplitterHtml(private val textView: TextView) : FontsHelper(textVi
         }
     }*/
 
-    private fun formatQuotes() {
+    private fun formatQuotes(textView: TextView) {
         val quoteColor = textView.currentTextColor
         val newQuoteSpan = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
             QuoteSpan(quoteColor, 5, 10)

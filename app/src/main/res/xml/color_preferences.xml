@@ -15,35 +15,35 @@
         app:key="color_theme1_preference"
         app:title="@string/color_theme1_header"
         app:iconSpaceReserved="false"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorTheme1SettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorTheme1SettingsFragment"
         />
 
     <Preference
         app:key="color_theme2_preference"
         app:title="@string/color_theme2_header"
         app:iconSpaceReserved="false"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorTheme2SettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorTheme2SettingsFragment"
         />
 
     <Preference
         app:key="color_theme3_preference"
         app:title="@string/color_theme3_header"
         app:iconSpaceReserved="false"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorTheme3SettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorTheme3SettingsFragment"
         />
 
     <Preference
         app:key="color_theme4_preference"
         app:title="@string/color_theme4_header"
         app:iconSpaceReserved="false"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorTheme4SettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorTheme4SettingsFragment"
         />
 
     <Preference
         app:key="color_theme5_preference"
         app:title="@string/color_theme5_header"
         app:iconSpaceReserved="false"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorTheme5SettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorTheme5SettingsFragment"
         />
 
 </PreferenceScreen>

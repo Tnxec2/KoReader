@@ -1,21 +1,24 @@
-package com.kontranik.koreader.utils
+package com.kontranik.koreader.ui.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.AttributeSet
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.preference.Preference
+import androidx.preference.DialogPreference
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceViewHolder
 import com.kontranik.koreader.R
-import com.kontranik.koreader.reader.FontPickerFragment
-import com.kontranik.koreader.reader.SettingsActivity
+import com.kontranik.koreader.ReaderActivity
+import com.kontranik.koreader.ui.fragments.FontPickerFragment
+import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
 
 
-class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs), FontPickerFragment.FontPickerDialogListener {
+class FontPickerPreference(context: Context, attrs: AttributeSet) :
+    DialogPreference(context, attrs),
+    FontPickerFragment.FontPickerDialogListener {
 
     private var selectedFont: TypefaceRecord = TypefaceRecord.DEFAULT
 
@@ -76,11 +79,8 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) : Preference(c
     private fun showFontPickerDialog(selectedFont: TypefaceRecord) {
         val fragment = FontPickerFragment.newInstance(selectedFont)
         fragment.setCallBack(this)
-        val a = context as SettingsActivity
-        a.supportFragmentManager.beginTransaction()
-            .replace(R.id.settings_container, fragment)
-            .addToBackStack(null)
-            .commit()
+        val a = context as ReaderActivity
+        fragment.show(a.supportFragmentManager, "fragment_font_picker")
     }
 
     override fun onSaveFontPickerDialog(font: TypefaceRecord?) {

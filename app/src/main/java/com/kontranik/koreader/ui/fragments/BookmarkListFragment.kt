@@ -1,4 +1,4 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.ui.fragments
 
 import android.os.Bundle
 import android.view.ContextMenu
@@ -16,7 +16,7 @@ import com.kontranik.koreader.R
 import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.databinding.FragmentBookmarklistBinding
 import com.kontranik.koreader.model.Bookmark
-import com.kontranik.koreader.utils.BookmarkListAdapter
+import com.kontranik.koreader.ui.adapters.BookmarkListAdapter
 
 
 class BookmarkListFragment : DialogFragment() {
@@ -54,7 +54,7 @@ class BookmarkListFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         listener = activity as BookmarkListDialogListener?
-        mBookmarksViewModel = ViewModelProvider(this)[BookmarksViewModel::class.java]
+        mBookmarksViewModel = ViewModelProvider(requireActivity())[BookmarksViewModel::class.java]
 
         binding.imageButtonBookmarklistBack.setOnClickListener {
             dismiss()
@@ -79,10 +79,10 @@ class BookmarkListFragment : DialogFragment() {
         }
         binding.listViewBookmarklistBookmarks.onItemClickListener = itemListener
 
-        mBookmarksViewModel.mAllBookmarks.observe(viewLifecycleOwner, Observer {
+        mBookmarksViewModel.mAllBookmarks.observe(viewLifecycleOwner) {
             if (it != null) {
                 bookmarkList.clear()
-                bookmarkList.addAll(it.toMutableList ())
+                bookmarkList.addAll(it.toMutableList())
                 if (bookmarkList.isEmpty()) {
                     binding.textViewBookmarklistStatus.text = getString(R.string.no_bookmarks)
                     binding.textViewBookmarklistStatus.visibility = View.VISIBLE
@@ -91,7 +91,7 @@ class BookmarkListFragment : DialogFragment() {
                 }
             }
             bookmarkListAdapter!!.notifyDataSetChanged()
-        })
+        }
 
         if (path != null) mBookmarksViewModel.loadBookmarks(path!!)
     }

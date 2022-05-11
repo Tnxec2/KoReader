@@ -1,4 +1,4 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.ui.fragments
 
 import android.content.SharedPreferences
 import android.graphics.Typeface
@@ -17,7 +17,7 @@ import androidx.preference.PreferenceManager
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
 import com.kontranik.koreader.databinding.FragmentQuickMenuBinding
-import com.kontranik.koreader.utils.ColoredArrayAdapter
+import com.kontranik.koreader.ui.adapters.ColoredArrayAdapter
 import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.TextViewInitiator
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord

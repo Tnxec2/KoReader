@@ -1,4 +1,4 @@
-package com.kontranik.koreader.utils
+package com.kontranik.koreader.ui.preferences
 
 import android.content.Context
 import android.content.Intent
@@ -13,10 +13,12 @@ import androidx.preference.DialogPreference
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceViewHolder
 import com.kontranik.koreader.R
+import com.kontranik.koreader.utils.PrefsHelper
 import java.lang.Exception
 
 
-class ImagePickerPreference(context: Context, attrs: AttributeSet) : DialogPreference(context, attrs) {
+class ImagePickerPreference(context: Context, attrs: AttributeSet) :
+    DialogPreference(context, attrs) {
 
     val themeId = attrs.getAttributeValue(null, "themeid")
 

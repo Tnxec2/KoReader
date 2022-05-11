@@ -2,15 +2,21 @@ package com.kontranik.koreader
 
 import android.app.Activity
 import android.app.Application
+import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Point
+import android.net.Uri
 import android.os.BatteryManager
+import android.util.Log
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.model.*
+import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
@@ -20,7 +26,7 @@ import java.util.*
 class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     var prefsHelper: PrefsHelper = PrefsHelper(app.applicationContext)
 
-    var book: MutableLiveData<Book> = MutableLiveData()
+    var book: MutableLiveData<Book?> = MutableLiveData()
 
     var pageViewContent: MutableLiveData<CharSequence?> = MutableLiveData()
     var pageViewSettings: MutableLiveData<PageViewSettings> = MutableLiveData(
@@ -57,19 +63,33 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     private var height: Int = 100
     private var fullheight: Int = 100
 
-    fun loadBook(textViewPageView: TextView) {
-        book.value = Book(app, prefsHelper.bookPath!!, textViewPageView)
+    fun loadBook(context: Context) {
+        if (!FileHelper.contentFileExist(app.applicationContext, prefsHelper.bookPath)) {
+            Toast.makeText(
+                context,
+                app.resources.getString(R.string.can_not_load_book, prefsHelper.bookPath),
+                Toast.LENGTH_LONG
+            ).show()
+            //openMainMenu()
+            return
+        }
+        Toast.makeText(
+            context,
+            app.resources.getString(R.string.loading_book),
+            Toast.LENGTH_SHORT
+        ).show()
+        book.value = Book(app, prefsHelper.bookPath!!)
     }
 
-    fun pageNext(): Boolean {
+    fun pageNext(pageView: TextView): Boolean {
         if (book.value == null ) return false
-        updateView(book.value?.getNext())
+        updateView(book.value?.getNext(pageView))
         return true
     }
 
-    fun pagePrev(): Boolean {
+    fun pagePrev(pageView: TextView): Boolean {
         if (book.value == null) return false
-        updateView(book.value!!.getPrev())
+        updateView(book.value!!.getPrev(pageView))
         return true
     }
 
@@ -99,40 +119,44 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
         )
     }
 
-    fun goToBookmark(bookmark: Bookmark) {
-        goToPage(Page(null, BookPosition(bookmark), BookPosition()))
+    fun goToBookmark(pageView: TextView, bookmark: Bookmark) {
+        goToPage(pageView, Page(null, BookPosition(bookmark), BookPosition()))
     }
 
-    fun goToSection(section: Int) {
+    fun goToSection(pageView: TextView, section: Int) {
         goToPage(
+            pageView,
             Page(null, BookPosition(section = section), BookPosition())
         )
     }
 
-    fun goToPage(page: Int) {
-        goToPage(Page(
+    fun goToPage(pageView: TextView, page: Int) {
+        goToPage(
+            pageView,
+            Page(
             null,
             book.value!!.ebookHelper!!.pageScheme.getBookPositionForPage(page),
             BookPosition()
         ))
     }
 
-    fun goToPage(page: Page) {
+    private fun goToPage(pageView: TextView, page: Page) {
         book.value?.curPage = page
-        recalcCurrentPage()
+        recalcCurrentPage(pageView)
     }
 
-    fun reloadCurrentPage() {
+    fun reloadCurrentPage(pageView: TextView) {
         if (book.value != null)
-            updateView(book.value?.getCur(recalc = false))
+            updateView(book.value?.getCur(pageView, recalc = false))
     }
 
-    fun recalcCurrentPage() {
+    fun recalcCurrentPage(pageView: TextView) {
         if (book.value != null)
-            updateView(book.value?.getCur(recalc = true))
+            updateView(book.value?.getCur(pageView, recalc = true))
     }
 
     private fun updateView(page: Page?) {
+        Log.d("updateView", "page")
         if (page != null) {
             book.value?.curPage = Page(page)
             pageViewContent.value = page.content
@@ -178,7 +202,8 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
             app.resources.getString(R.string.page_info_text_time, strTime, batLevel)
     }
 
-    fun goToPositionByBookStatus(bookStatus: BookStatus?) {
+    fun goToPositionByBookStatus(pageView: TextView, bookStatus: BookStatus?) {
+        Log.d("goToPositionByBookStatu", "load")
         if (book.value != null) {
             val startPosition: BookPosition = if (bookStatus == null) {
                 BookPosition()
@@ -186,7 +211,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
                 BookPosition(bookStatus.position_section, bookStatus.position_offset)
             }
             book.value!!.curPage = Page(null, startPosition, BookPosition())
-            updateView(book.value!!.getCur(recalc = true))
+            updateView(book.value!!.getCur(pageView, recalc = true))
         }
     }
 
@@ -198,13 +223,19 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
         prefsHelper.decreaseScreenBrghtness(activity, point, fullwidth)
     }
 
-    fun updateSizeInfo(fw: Int, fh: Int, w: Int, h: Int ) {
+    fun updateSizeInfo(pageView: TextView) {
+        val fw = pageView.measuredWidth
+        val fh = pageView.measuredHeight
+        val w =
+            pageView.measuredWidth - pageView.paddingLeft - pageView.paddingRight
+        val h =
+            pageView.measuredHeight - pageView.paddingTop - pageView.paddingBottom
         if (w != width || h != height) {
             fullwidth = fw
             fullheight = fh
             width = w
             height = h
-            recalcCurrentPage()
+            recalcCurrentPage(pageView)
         }
     }
 
@@ -518,6 +549,16 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
         prefEditor.apply()
     }
 
+    private fun removePathFromPrefs() {
+        val settings = app.getSharedPreferences(
+            ReaderActivity.PREFS_FILE,
+            AppCompatActivity.MODE_PRIVATE
+        )
+        val prefEditor = settings.edit()
+        prefEditor.remove(PrefsHelper.PREF_BOOK_PATH)
+        prefEditor.apply()
+    }
+
     fun resetQuickSettings() {
         pageViewSettings.value = pageViewSettings.value?.also {
             it.textSize = prefsHelper.textSize
@@ -536,5 +577,28 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
         )
     }
 
+    fun setBookPath(context: Context, uriString: String) {
+        prefsHelper.bookPath = uriString
+        savePrefs()
+        loadBook(context)
+    }
 
+    fun deleteBook(uriString: String?): Boolean {
+        val uri = Uri.parse(uriString)
+        val doc = DocumentFile.fromSingleUri(app.applicationContext, uri)
+        if (doc != null) {
+            if (doc.delete()) {
+                if (uriString == prefsHelper.bookPath) {
+                    prefsHelper.bookPath = null
+                    book.value = null
+                    removePathFromPrefs()
+                }
+                return true
+            } else {
+                Toast.makeText(app.applicationContext, "Can't delete book", Toast.LENGTH_LONG)
+                    .show()
+            }
+        }
+        return false
+    }
 }

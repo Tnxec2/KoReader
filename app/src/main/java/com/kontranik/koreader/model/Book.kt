@@ -16,11 +16,11 @@ import org.jsoup.nodes.Element
 import org.jsoup.parser.Tag
 
 
-class Book(private var context: Context, var fileLocation: String, pageView: TextView) {
+class Book(private var context: Context, var fileLocation: String) {
 
     var curPage: Page? = Page(null, BookPosition())
     internal var ebookHelper: EbookHelper? = null
-    private var pageLoader: PageLoader = PageLoader(pageView, this)
+    private var pageLoader: PageLoader = PageLoader(context, this)
 
     init {
         ebookHelper = getHelper(context, fileLocation)
@@ -107,20 +107,20 @@ class Book(private var context: Context, var fileLocation: String, pageView: Tex
         return null
     }
 
-    fun getCur(recalc: Boolean): Page? {
-        return pageLoader.getPage(BookPosition(curPage!!.startBookPosition), false, recalc)
+    fun getCur(pageView: TextView, recalc: Boolean): Page? {
+        return pageLoader.getPage(pageView, BookPosition(curPage!!.startBookPosition), false, recalc)
     }
 
-    fun getNext(): Page? {
+    fun getNext(pageView: TextView): Page? {
         val bookPosition =  BookPosition(curPage!!.endBookPosition)
         bookPosition.offSet = bookPosition.offSet + 1
-        return pageLoader.getPage(BookPosition(bookPosition), revers = false, recalc = false)
+        return pageLoader.getPage(pageView, BookPosition(bookPosition), revers = false, recalc = false)
     }
 
-    fun getPrev(): Page? {
+    fun getPrev(pageView: TextView): Page? {
         val bookPosition =  BookPosition(curPage!!.startBookPosition)
         bookPosition.offSet = bookPosition.offSet - 1
-        return pageLoader.getPage(BookPosition(bookPosition), revers = true, recalc = false)
+        return pageLoader.getPage(pageView, BookPosition(bookPosition), revers = true, recalc = false)
     }
 
     fun getPageScheme(): BookPageScheme? {

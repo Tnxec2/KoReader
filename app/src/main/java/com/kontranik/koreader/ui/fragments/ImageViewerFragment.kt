@@ -1,4 +1,4 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.ui.fragments
 
 import android.graphics.BitmapFactory
 import android.graphics.Color

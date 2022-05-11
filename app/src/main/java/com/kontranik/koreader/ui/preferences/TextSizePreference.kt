@@ -1,4 +1,4 @@
-package com.kontranik.koreader.utils
+package com.kontranik.koreader.ui.preferences
 
 import android.Manifest
 import android.content.Context
@@ -13,8 +13,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceViewHolder
 import com.kontranik.koreader.R
-import com.kontranik.koreader.reader.FontPickerFragment
-import com.kontranik.koreader.reader.SettingsActivity
+import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
 import kotlin.math.max

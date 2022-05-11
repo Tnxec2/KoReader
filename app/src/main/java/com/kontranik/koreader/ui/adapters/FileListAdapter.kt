@@ -1,4 +1,4 @@
-package com.kontranik.koreader.utils
+package com.kontranik.koreader.ui.adapters
 
 import android.content.Context
 import android.os.AsyncTask
@@ -12,13 +12,17 @@ import com.kontranik.koreader.R
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.parser.epubreader.EpubHelper
 import com.kontranik.koreader.parser.fb2reader.FB2Helper
+import com.kontranik.koreader.utils.FileItem
+import com.kontranik.koreader.utils.ImageEnum
+import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.ImageUtils.getBitmap
 
 
 class FileListAdapter(
-        val context: Context,
-        private val fileItems: MutableList<FileItem>,
-        private val fileListAdapterClickListener: FileListAdapterClickListener) : RecyclerView.Adapter<FileListAdapter.ViewHolder>() {
+    val context: Context,
+    private val fileItems: MutableList<FileItem>,
+    private val fileListAdapterClickListener: FileListAdapterClickListener
+) : RecyclerView.Adapter<FileListAdapter.ViewHolder>() {
 
     private val inflater = LayoutInflater.from(context)
 
@@ -94,7 +98,8 @@ class FileListAdapter(
 
                     if ( result.bookInfo != null) {
                         if (result.bookInfo!!.cover != null) {
-                            result.bookInfo!!.cover = ImageUtils.scaleBitmap(result.bookInfo!!.cover!!, 50, 100)
+                            result.bookInfo!!.cover =
+                                ImageUtils.scaleBitmap(result.bookInfo!!.cover!!, 50, 100)
                         } else {
                             result.bookInfo!!.cover = getBitmap(adapter.context, ImageEnum.Ebook)
                         }

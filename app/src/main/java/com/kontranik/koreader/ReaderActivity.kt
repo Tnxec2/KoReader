@@ -30,7 +30,7 @@ import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.databinding.ActivityReaderMainBinding
 import com.kontranik.koreader.model.*
-import com.kontranik.koreader.reader.*
+import com.kontranik.koreader.ui.fragments.*
 import com.kontranik.koreader.utils.*
 import java.io.ByteArrayOutputStream
 
@@ -109,7 +109,7 @@ class ReaderActivity :
         }
 
         mBookStatusViewModel.savedBookStatus.observe(this) {
-            mReaderActivityViewModel.goToPositionByBookStatus(it)
+            mReaderActivityViewModel.goToPositionByBookStatus(binding.textViewPageview, it)
         }
 
         mReaderActivityViewModel.book.observe(this) {
@@ -151,7 +151,7 @@ class ReaderActivity :
                 val floatTextViewFragment: FloatTextViewFragment =
                     FloatTextViewFragment.newInstance(
                         it,
-                        binding.textViewPageview.textSize,
+                        mReaderActivityViewModel.prefsHelper.textSize,
                         mReaderActivityViewModel.prefsHelper.font
                     )
                 floatTextViewFragment.show(supportFragmentManager, "fragment_floattextview")
@@ -168,7 +168,7 @@ class ReaderActivity :
                 try {
                     if (mReaderActivityViewModel.book.value == null
                         || mReaderActivityViewModel.book.value!!.fileLocation != mReaderActivityViewModel.prefsHelper.bookPath) {
-                        loadBook()
+                        mReaderActivityViewModel.loadBook(binding.textViewPageview.context)
                     }
                 } catch (e: Exception) {
                     Log.e("tag", e.stackTraceToString())
@@ -194,30 +194,6 @@ class ReaderActivity :
                 resources.getString(R.string.press_again_to_exit),
                 Toast.LENGTH_SHORT
             ).show()
-        }
-    }
-
-    private fun loadBook() {
-        if (!FileHelper.contentFileExist(applicationContext, mReaderActivityViewModel.prefsHelper.bookPath)) {
-            Toast.makeText(
-                this,
-                resources.getString(R.string.can_not_load_book, mReaderActivityViewModel.prefsHelper.bookPath),
-                Toast.LENGTH_LONG
-            ).show()
-            openMainMenu()
-        }
-        Toast.makeText(this, resources.getString(R.string.loading_book), Toast.LENGTH_SHORT).show()
-        mReaderActivityViewModel.loadBook(binding.textViewPageview)
-
-    }
-
-    private fun openBookFromIntent(data: Intent) {
-        Log.d(TAG, "openBookFromIntent")
-        if (data.hasExtra(PrefsHelper.PREF_BOOK_PATH)) {
-            mReaderActivityViewModel.prefsHelper.bookPath = data.getStringExtra(PrefsHelper.PREF_BOOK_PATH)
-            mReaderActivityViewModel.savePrefs()
-            startProgress()
-            loadBook()
         }
     }
 
@@ -362,12 +338,28 @@ class ReaderActivity :
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+            KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_DOWN -> {
                 doPageNext()
                 return true
             }
-            KeyEvent.KEYCODE_VOLUME_UP -> {
+            KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_UP -> {
                 doPagePrev()
+                return true
+            }
+            KeyEvent.KEYCODE_M -> {
+                openMainMenu()
+                return true
+            }
+            KeyEvent.KEYCODE_Q -> {
+                openQuickMenu()
+                return true
+            }
+            KeyEvent.KEYCODE_G -> {
+                openGotoMenu()
+                return true
+            }
+            KeyEvent.KEYCODE_B -> {
+                onShowBookmarklist()
                 return true
             }
         }
@@ -375,23 +367,16 @@ class ReaderActivity :
     }
 
     private fun updateSizeInfo() {
-        val fw = binding.textViewPageview.measuredWidth
-        val fh = binding.textViewPageview.measuredHeight
-        val w =
-            binding.textViewPageview.measuredWidth - binding.textViewPageview.paddingLeft - binding.textViewPageview.paddingRight
-        val h =
-            binding.textViewPageview.measuredHeight - binding.textViewPageview.paddingTop - binding.textViewPageview.paddingBottom
-
-        mReaderActivityViewModel.updateSizeInfo(fw, fh, w, h)
+        mReaderActivityViewModel.updateSizeInfo( binding.textViewPageview)
     }
 
     private fun doPageNext() {
-        if (mReaderActivityViewModel.pageNext())
+        if (mReaderActivityViewModel.pageNext(binding.textViewPageview))
             savePositionForBook()
     }
 
     private fun doPagePrev() {
-        if (mReaderActivityViewModel.pagePrev())
+        if (mReaderActivityViewModel.pagePrev(binding.textViewPageview))
             savePositionForBook()
     }
 
@@ -424,8 +409,8 @@ class ReaderActivity :
     }
 
     private fun openMainMenu() {
-        val intent = Intent(this, MainMenuActivity::class.java)
-        resultLauncherMainMenu.launch(intent)
+        val mainMenuFragment = MainMenuFragment()
+        mainMenuFragment.show(supportFragmentManager, "fragment_main_menu")
     }
 
     private var resultLauncherMainMenu = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -434,7 +419,6 @@ class ReaderActivity :
 
             if (intentData != null && intentData.hasExtra(PREF_TYPE)) {
                 when (intentData.getIntExtra(PREF_TYPE, 0)) {
-                    PREF_TYPE_OPEN_BOOK -> openBookFromIntent(intentData)
                     PREF_TYPE_SETTINGS -> {
                         mReaderActivityViewModel.loadSettings(this@ReaderActivity)
                     }
@@ -575,7 +559,7 @@ class ReaderActivity :
 
     override fun onChangeTextSize(textSize: Float) {
         binding.textViewPageview.textSize = textSize
-        mReaderActivityViewModel.reloadCurrentPage()
+        mReaderActivityViewModel.reloadCurrentPage(binding.textViewPageview)
     }
 
     override fun onChangeLineSpacing(lineSpacingMultiplier: Float) {
@@ -584,13 +568,13 @@ class ReaderActivity :
             binding.textViewPageview.lineSpacingExtra,
             lineSpacingMultiplier
         )
-        mReaderActivityViewModel.reloadCurrentPage()
+        mReaderActivityViewModel.reloadCurrentPage(binding.textViewPageview)
     }
 
     override fun onChangeLetterSpacing(letterSpacing: Float) {
         if (binding.textViewPageview.letterSpacing == letterSpacing) return
         binding.textViewPageview.letterSpacing = letterSpacing
-        mReaderActivityViewModel.reloadCurrentPage()
+        mReaderActivityViewModel.reloadCurrentPage(binding.textViewPageview)
     }
 
     override fun onCancelQuickMenu() {
@@ -613,7 +597,7 @@ class ReaderActivity :
 
     override fun onSelectBookmark(bookmark: Bookmark) {
         if ( mReaderActivityViewModel.isBookmarkOnCurrentPage(bookmark)) return
-        mReaderActivityViewModel.goToBookmark(bookmark)
+        mReaderActivityViewModel.goToBookmark(binding.textViewPageview, bookmark)
         savePositionForBook()
     }
 
@@ -632,17 +616,13 @@ class ReaderActivity :
     }
 
     override fun onFinishGotoMenuDialogPage(page: Int) {
-        mReaderActivityViewModel.goToPage(page)
+        mReaderActivityViewModel.goToPage(binding.textViewPageview, page)
         savePositionForBook()
     }
 
     override fun onFinishGotoMenuDialogSection(section: Int) {
-        mReaderActivityViewModel.goToSection(section)
+        mReaderActivityViewModel.goToSection(binding.textViewPageview, section)
         savePositionForBook()
-    }
-
-    private fun startProgress() {
-        binding.textViewPageview.text = resources.getString(R.string.loading_book)
     }
 
     private fun setPageView(pageViewSettings: PageViewSettings) {
@@ -664,7 +644,7 @@ class ReaderActivity :
             marginRightPixel,
             marginBottomPixel
         )
-        mReaderActivityViewModel.recalcCurrentPage()
+        mReaderActivityViewModel.recalcCurrentPage(binding.textViewPageview)
     }
 
     private fun setColorTheme(colorSettings: PageViewColorSettings) {
@@ -735,7 +715,6 @@ class ReaderActivity :
         private const val TAG = "ReaderActivity"
         internal const val PREFS_FILE = "MainActivitySettings"
 
-        const val REQUEST_ACCESS_QUICK_MENU = 2
         const val PREF_TYPE = "ReturnType"
         const val PREF_TYPE_OPEN_BOOK = 121
         const val PREF_TYPE_SETTINGS = 122

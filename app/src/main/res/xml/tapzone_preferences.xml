@@ -8,19 +8,19 @@
         app:key="tapzone_one_preference"
         app:title="@string/tapzones_one_click_header"
         app:iconSpaceReserved="false"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$TapZoneOneSettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$TapZoneOneSettingsFragment"
         />
     <Preference
         app:key="tapzone_double_preference"
         app:title="@string/tapzones_double_click_header"
         app:iconSpaceReserved="false"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$TapZoneDoubleSettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$TapZoneDoubleSettingsFragment"
         />
     <Preference
         app:key="tapzone_long_preference"
         app:title="@string/tapzones_long_click_header"
         app:iconSpaceReserved="false"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$TapZoneLongSettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$TapZoneLongSettingsFragment"
         />
     </PreferenceCategory>
 </PreferenceScreen>

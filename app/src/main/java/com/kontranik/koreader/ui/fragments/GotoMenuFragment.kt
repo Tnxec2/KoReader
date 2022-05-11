@@ -1,4 +1,4 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.ui.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -65,11 +65,11 @@ class GotoMenuFragment : DialogFragment() {
             gotoPage()
         }
 
-        initialGotoPage(view)
+        initialGotoPage()
         initialGotoList(view)
     }
 
-    private fun initialGotoPage(view: View) {
+    private fun initialGotoPage() {
         updatePageText()
 
         binding.imageViewGotoMenuPageLeft.setOnClickListener {

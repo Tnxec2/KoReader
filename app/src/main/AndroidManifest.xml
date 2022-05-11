@@ -14,23 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.Fullscreen"
         >
-        <activity
-            android:name=".reader.SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:theme="@style/AppDialogTheme.NoActionBar">
-
-        </activity>
-        <activity
-            android:name=".reader.MainMenuActivity"
-            android:theme="@style/AppDialogTheme.NoActionBar" />
-        <activity
-            android:name=".reader.FileChooseActivity"
-            android:theme="@style/AppDialogTheme.NoActionBar" />
-        <activity
-            android:name=".reader.BookListActivity"
-            android:theme="@style/AppDialogTheme.NoActionBar" />
         <activity android:name=".ReaderActivity"
-                    android:configChanges="orientation|screenSize"
+                android:configChanges="orientation|screenSize"
+                android:exported="true"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

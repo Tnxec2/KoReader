@@ -118,7 +118,7 @@
     <string name="font_select_help">lege individuelle Schriftarten im Ordner: internal_storage/Android/data/com.kontranik.koreader/files/fonts/</string>
     <string name="font_select_title">Schriftartauswahl</string>
     <string name="no_page_content">kein Inhalt</string>
-    <string name="loading_book">Buch laden...</string>
+    <string name="loading_book">Buch laden…</string>
     <string name="can_not_load_book">kann das Buch %1$s nicht laden</string>
     <string name="press_again_to_exit">Klicke noch mal zum Beenden</string>
     <string name="open_book">Buch öffnen</string>
@@ -131,4 +131,8 @@
     <string name="marginRight">Rand rechts</string>
     <string name="marginLeft">Rand links</string>
     <string name="tapzones_activity_bookmarks">Lesezeichen</string>
+    <string name="deletebook">Buchdatei löschen</string>
+    <string name="title_delete_book">Buchdatei löschen</string>
+    <string name="sure_delete_book">Wollen Sie wirklich dieses Buch löschen</string>
+    <string name="ok_delete_book">Löschen</string>
 </resources>

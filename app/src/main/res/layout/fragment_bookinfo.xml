@@ -29,7 +29,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
-
+        <ImageButton
+            android:id="@+id/imageButton_bookinfo_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_baseline_delete_24"
+            android:contentDescription="@string/deletebook" />
         <ImageButton
             android:id="@+id/imageButton_bookinfo_read"
             android:layout_width="wrap_content"

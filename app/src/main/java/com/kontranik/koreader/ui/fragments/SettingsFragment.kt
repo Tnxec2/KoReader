@@ -1,56 +1,71 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.ui.fragments
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.annotation.Nullable
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.kontranik.koreader.R
-import com.kontranik.koreader.ReaderActivity
-import com.kontranik.koreader.databinding.ActivitySettingsBinding
-import com.kontranik.koreader.utils.ImagePickerPreference
+import com.kontranik.koreader.ReaderActivityViewModel
+import com.kontranik.koreader.databinding.FragmentSettingsBinding
+import com.kontranik.koreader.ui.preferences.ImagePickerPreference
 import com.rarepebble.colorpicker.ColorPreference
 
 
-class SettingsActivity : AppCompatActivity(),
+class SettingsFragment : DialogFragment(),
         PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
-    private lateinit var binding: ActivitySettingsBinding
+    private lateinit var binding: FragmentSettingsBinding
 
+    private lateinit var mReaderActivityViewModel: ReaderActivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivitySettingsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
+    }
 
-        binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_close_24))
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View {
+        binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        mReaderActivityViewModel = ViewModelProvider(requireActivity())[ReaderActivityViewModel::class.java]
+
+        binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_close_24))
 
         binding.imageButtonSettingsBack.setOnClickListener {
-            if (!supportFragmentManager.popBackStackImmediate()) {
-                val data = Intent()
-                data.putExtra(ReaderActivity.PREF_TYPE, ReaderActivity.PREF_TYPE_SETTINGS)
-                setResult(RESULT_OK, data)
-                finish()
+            if (childFragmentManager.backStackEntryCount == 0) {
+                mReaderActivityViewModel.loadSettings(requireActivity())
+                dismiss()
+            } else {
+                childFragmentManager.popBackStack()
             }
         }
 
         if (savedInstanceState == null) {
-            supportFragmentManager.addOnBackStackChangedListener {
-                if (supportFragmentManager.backStackEntryCount == 0) {
-                    binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_close_24))
+            childFragmentManager.addOnBackStackChangedListener {
+                if (childFragmentManager.backStackEntryCount == 0) {
+                    binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_close_24))
                 } else {
-                    binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_arrow_back_24))
+                    binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_arrow_back_24))
                 }
             }
-            supportFragmentManager
+            childFragmentManager
                     .beginTransaction()
-                    .replace(R.id.settings_container, RootSettingsFragment())
+                    .add(binding.settingsContainer.id, RootSettingsFragment())
                     .commit()
         }
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-
     }
 
     class RootSettingsFragment : PreferenceFragmentCompat() {
@@ -98,8 +113,8 @@ class SettingsActivity : AppCompatActivity(),
         }
     }
 
-    open class ColorThemeGeneralSettingsFragment(val themeId: Int) : PreferenceFragmentCompat() {
-        var imageUri = ""
+    open class ColorThemeGeneralSettingsFragment(private val themeId: Int) : PreferenceFragmentCompat() {
+        private var imageUri = ""
         var preference: Preference? = null
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -112,9 +127,10 @@ class SettingsActivity : AppCompatActivity(),
             }
         }
 
+        @Deprecated("Deprecated in Java")
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             super.onActivityResult(requestCode, resultCode, data)
-            if (resultCode == RESULT_OK && requestCode == ImagePickerPreference.PICK_IMAGE) {
+            if (resultCode == Activity.RESULT_OK && requestCode == ImagePickerPreference.PICK_IMAGE) {
                 imageUri = data!!.data.toString()
                 findPreference<ImagePickerPreference>("backgroundImageTheme$themeId")?.setImageUri(imageUri)
             }
@@ -158,16 +174,23 @@ class SettingsActivity : AppCompatActivity(),
 
         // Instantiate the new Fragment
         val args = pref.extras
-        val fragment = supportFragmentManager.fragmentFactory.instantiate(
-                classLoader,
-                pref.fragment!!)
+        val fragment = parentFragmentManager
+            .fragmentFactory
+            .instantiate(
+            requireActivity().classLoader,
+            pref.fragment!!
+        )
         fragment.arguments = args
         fragment.setTargetFragment(caller, 0)
+
+
         // Replace the existing Fragment with the new Fragment
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, fragment)
-                .addToBackStack(null)
-                .commit()
+
+        childFragmentManager.beginTransaction()
+            .replace(binding.settingsContainer.id, fragment)
+            .addToBackStack(pref.key)
+            .commit()
+
         return true
     }
 }

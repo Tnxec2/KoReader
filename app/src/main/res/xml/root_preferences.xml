@@ -4,25 +4,25 @@
         app:key="interface_preference"
         app:title="@string/interface_header"
         app:icon="@drawable/ic_iconmonstr_eye_3"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$InterfaceSettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$InterfaceSettingsFragment"
         />
 
     <Preference
         app:key="color_preference"
         app:title="@string/color_theme_header"
         app:icon="@drawable/ic_iconmonstr_paintbrush_10"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$ColorSettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorSettingsFragment"
         />
     <Preference
         app:key="text_preference"
         app:title="@string/text_header"
         app:icon="@drawable/ic_iconmonstr_text_3"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$TextSettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$TextSettingsFragment"
         />
     <Preference
         app:key="tapzones_preference"
         app:title="@string/tapzones_header"
         app:icon="@drawable/ic_iconmonstr_cursor_31"
-        app:fragment="com.kontranik.koreader.reader.SettingsActivity$TapZonesSettingsFragment"
+        app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$TapZonesSettingsFragment"
         />
 </PreferenceScreen>

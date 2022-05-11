@@ -1,4 +1,4 @@
-package com.kontranik.koreader.reader
+package com.kontranik.koreader.ui.fragments
 
 import android.os.Bundle
 import android.text.Html
@@ -52,8 +52,8 @@ class FloatTextViewFragment : DialogFragment() {
         val html = requireArguments().getString(CONTENT, "no Content")
         with (binding.textViewFloattextviewContent) {
             text = Html.fromHtml(html)
-            setTextSize(textSize)
             typeface = selectedFont.getTypeface()
+            this.textSize = textSize
         }
     }
 

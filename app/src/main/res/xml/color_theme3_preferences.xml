@@ -46,7 +46,7 @@
             app:iconSpaceReserved="false"
             />
 
-        <com.kontranik.koreader.utils.ImagePickerPreference
+        <com.kontranik.koreader.ui.preferences.ImagePickerPreference
             app:key="backgroundImageTheme3"
             app:title="@string/color_theme_selected_image"
             android:defaultValue="test"
