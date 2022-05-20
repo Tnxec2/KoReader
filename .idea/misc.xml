@@ -22,6 +22,10 @@
         <entry key="app/src/main/res/layout/preference_font_name.xml" value="0.3645833333333333" />
         <entry key="app/src/main/res/layout/preference_image_picker.xml" value="0.21487179487179486" />
         <entry key="app/src/main/res/layout/preference_text_size.xml" value="0.19739583333333333" />
+        <entry key="app/src/main/res/layout/preference_theme_name.xml" value="0.3609375" />
+        <entry key="app/src/main/res/menu/menu_file_item_clicked.xml" value="2.357142857142857" />
+        <entry key="app/src/main/res/menu/text_selected_menu_custom.xml" value="0.3609375" />
+        <entry key="app/src/main/res/xml/color_preferences.xml" value="0.1" />
         <entry key="app/src/main/res/xml/color_theme1_preferences.xml" value="0.3614583333333333" />
         <entry key="app/src/main/res/xml/color_theme2_preferences.xml" value="0.3614583333333333" />
         <entry key="app/src/main/res/xml/color_theme3_preferences.xml" value="0.3614583333333333" />

@@ -11,39 +11,40 @@
         app:icon="@drawable/ic_iconmonstr_paintbrush_10"
         app:useSimpleSummaryProvider="true" />
 
-    <Preference
+    <com.kontranik.koreader.ui.preferences.ThemeNamePreference
         app:key="color_theme1_preference"
-        app:title="@string/color_theme1_header"
+        colorTheme="1"
+        android:title="@string/color_theme1_header"
         app:iconSpaceReserved="false"
         app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorTheme1SettingsFragment"
         />
 
-    <Preference
+    <com.kontranik.koreader.ui.preferences.ThemeNamePreference
         app:key="color_theme2_preference"
-        app:title="@string/color_theme2_header"
+        colorTheme="2"
+        android:title="@string/color_theme2_header"
         app:iconSpaceReserved="false"
         app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorTheme2SettingsFragment"
         />
-
-    <Preference
+    <com.kontranik.koreader.ui.preferences.ThemeNamePreference
         app:key="color_theme3_preference"
-        app:title="@string/color_theme3_header"
+        colorTheme="3"
+        android:title="@string/color_theme3_header"
         app:iconSpaceReserved="false"
         app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorTheme3SettingsFragment"
         />
-
-    <Preference
+    <com.kontranik.koreader.ui.preferences.ThemeNamePreference
         app:key="color_theme4_preference"
-        app:title="@string/color_theme4_header"
+        colorTheme="4"
+        android:title="@string/color_theme4_header"
         app:iconSpaceReserved="false"
         app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorTheme4SettingsFragment"
         />
-
-    <Preference
+    <com.kontranik.koreader.ui.preferences.ThemeNamePreference
         app:key="color_theme5_preference"
-        app:title="@string/color_theme5_header"
+        colorTheme="5"
+        android:title="@string/color_theme5_header"
         app:iconSpaceReserved="false"
         app:fragment="com.kontranik.koreader.ui.fragments.SettingsFragment$ColorTheme5SettingsFragment"
         />
-
 </PreferenceScreen>

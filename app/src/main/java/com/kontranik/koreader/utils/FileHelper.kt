@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 
 object FileHelper {
 
@@ -17,8 +18,8 @@ object FileHelper {
     fun getFileListDC(context: Context, documentFilePath: String): List<FileItem> {
         val mUri = Uri.parse(documentFilePath)
         val resolver: ContentResolver = context.contentResolver
-        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(mUri,
-                DocumentsContract.getDocumentId(mUri))
+        val uriId = DocumentsContract.getDocumentId(mUri)
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(mUri, uriId)
         val resultF: ArrayList<Triple<Uri, String, String>> = ArrayList()
 
         var c: Cursor? = null
@@ -61,7 +62,18 @@ object FileHelper {
         // val p = if ( documentFile?.parentFile != null ) documentFile.parentFile!!.uri.pathSegments.last() else ""
         //val u: String? = if ( documentFile?.parentFile != null ) documentFile.parentFile!!.uri.toString() else null
 
-        resultFiles.add(FileItem(ImageEnum.Parent, BACKDIR, getPath(pUri), pUri.toString(), isDir = true, isRoot = isRoot, null))
+
+        resultFiles.add(
+            FileItem(
+                image = ImageEnum.Parent,
+                name = BACKDIR,
+                path = Uri.decode(documentFilePath.split("/").last()).toString(),
+                uriString = pUri.toString(),
+                isDir = true,
+                isRoot = isRoot,
+                bookInfo = null,
+                isStorage = false)
+        )
         val dirs: MutableList<FileItem> = mutableListOf()
         val files: MutableList<FileItem> = mutableListOf()
 
@@ -128,7 +140,8 @@ object FileHelper {
             val cursor: Cursor? = context.contentResolver.query(uri, null, null, null, null)
             try {
                 if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if ( nameIndex >= 0) result = cursor.getString(nameIndex)
                 }
             } finally {
                 cursor?.close()

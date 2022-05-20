@@ -174,5 +174,10 @@
     <string name="title_delete_book">Delete book</string>
     <string name="sure_delete_book">Are you sure to delete this book</string>
     <string name="ok_delete_book">Delete</string>
-
+    <string name="title_delete_storage">Delete storage</string>
+    <string name="sure_delete_storage">Are you sure to delete this storage</string>
+    <string name="ok_delete_storage">Delete</string>
+    <string name="title_select_storage">Select storage</string>
+    <string name="sure_select_storage">Select storage in next dialog and grand access</string>
+    <string name="ok_select_storage">OK</string>
 </resources>

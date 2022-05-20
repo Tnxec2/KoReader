@@ -3,10 +3,12 @@ package com.kontranik.koreader.ui.adapters
 import android.content.Context
 import android.os.AsyncTask
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.kontranik.koreader.R
 import com.kontranik.koreader.model.BookInfo
@@ -27,7 +29,8 @@ class FileListAdapter(
     private val inflater = LayoutInflater.from(context)
 
     interface FileListAdapterClickListener {
-        fun onFilelistItemClickListener(position: Int)
+        fun onFilelistItemDelete(position: Int, item: FileItem)
+        fun onFilelistItemClick(position: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -42,8 +45,8 @@ class FileListAdapter(
         holder.descView.text = ""
         holder.imageView.setImageBitmap(getBitmap(context, fileItem.image))
         holder.pathView.text = fileItem.path
-        if ( ! fileItem.isDir ) {
-            if ( fileItem.bookInfo == null ) {
+        if (!fileItem.isDir) {
+            if (fileItem.bookInfo == null) {
                 val asyncTask = ReadBookInfoAsync(this)
                 asyncTask.execute(position)
             } else {
@@ -58,11 +61,30 @@ class FileListAdapter(
         }
 
         holder.itemView.setOnClickListener {
-            fileListAdapterClickListener.onFilelistItemClickListener(position)
+            fileListAdapterClickListener.onFilelistItemClick(position)
+        }
+
+        if ( fileItem.isStorage ) {
+            holder.itemView.setOnLongClickListener {
+                val popup = PopupMenu(context, holder.nameView)
+                popup.inflate(R.menu.menu_file_item_clicked)
+                popup.setOnMenuItemClickListener { item: MenuItem? ->
+                    if (item != null) {
+                        when (item.itemId) {
+                            R.id.itemDelete -> {
+                                fileListAdapterClickListener.onFilelistItemDelete(position, fileItem)
+                            }
+                        }
+                    }
+                    false
+                }
+                popup.show()
+                true
+            }
         }
     }
 
-    override fun getItemCount(): Int {
+        override fun getItemCount(): Int {
         return fileItems.size
     }
 

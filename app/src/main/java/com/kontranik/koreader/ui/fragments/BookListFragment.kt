@@ -78,9 +78,9 @@ class BookListFragment :
 
     private fun savePrefs(uriString: String?) {
         val settings: SharedPreferences? = requireActivity()
-            .getSharedPreferences(FileChooseFragment.PREFS_FILE, Context.MODE_PRIVATE)
+            .getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
         val prefEditor = settings!!.edit()
-        if ( uriString != null) prefEditor!!.putString(FileChooseFragment.PREF_LAST_PATH, uriString)
+        if ( uriString != null) prefEditor!!.putString(PREF_LAST_PATH, uriString)
         prefEditor.apply()
     }
 

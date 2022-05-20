@@ -9,7 +9,8 @@ class FileItem(
         var uriString: String?,
         var isDir: Boolean,
         var isRoot: Boolean,
-        var bookInfo: BookInfo? = null
+        var bookInfo: BookInfo? = null,
+        var isStorage: Boolean = false
         ) {
 
 }

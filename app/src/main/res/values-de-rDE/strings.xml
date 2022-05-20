@@ -3,7 +3,7 @@
     <string name="app_name">KoRe</string>
     <string name="select_thisfolder">Diesen Ordner auswählen</string>
     <string name="cancel">Abbrechen</string>
-    <string name="no_storage_found">Kein Speichermedium gefunden</string>
+    <string name="no_storage_found">Kein Speicherort gefunden</string>
     <string name="swipe_left">Nach links wischen</string>
     <string name="swipe_right">Nach rechts wischen</string>
     <string name="swipe_up">Nach oben wischen</string>
@@ -135,4 +135,10 @@
     <string name="title_delete_book">Buchdatei löschen</string>
     <string name="sure_delete_book">Wollen Sie wirklich dieses Buch löschen</string>
     <string name="ok_delete_book">Löschen</string>
+    <string name="title_delete_storage">Speicherort löschen</string>
+    <string name="sure_delete_storage">Wollen Sie wirklich diesen Speicherort löschen</string>
+    <string name="ok_delete_storage">Löschen</string>
+    <string name="title_select_storage">Auswahl Speicherort</string>
+    <string name="sure_select_storage">Wählen Sie in dem nächsten Dialog einen Speicherort aus und erlauben Sie Zugriff drauf</string>
+    <string name="ok_select_storage">OK</string>
 </resources>
