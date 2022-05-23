@@ -46,9 +46,10 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
     }
 
     private fun calculateScheme() {
-        if ( fb2Reader.fb2Scheme != null && getContentSize() == 0  ) return
+        if ( fb2Reader.fb2Scheme == null ) return
         pageScheme = BookPageScheme()
         pageScheme.sectionCount = getContentSize()
+        if ( pageScheme.sectionCount == 0) return
         for( pageIndex in 0 .. pageScheme.sectionCount) {
             val textSize = getPageTextSize(pageIndex)
             if ( textSize != null) {
@@ -81,7 +82,7 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
     }
 
     override fun getContentSize(): Int {
-        return fb2Reader.fb2Scheme!!.sections.size
+        return if (fb2Reader.fb2Scheme == null) 0 else fb2Reader.fb2Scheme!!.sections.size
     }
 
     override fun getPage(page: Int): String? {
@@ -134,8 +135,8 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         }
     }
 
-    override fun getCoverPage(): String {
-        return fb2Reader.fb2Scheme!!.description.titleInfo.coverpage.toString()
+    override fun getCoverPage(): String? {
+        return if (fb2Reader.fb2Scheme == null) null else fb2Reader.fb2Scheme!!.description.titleInfo.coverpage.toString()
     }
 
     companion object {

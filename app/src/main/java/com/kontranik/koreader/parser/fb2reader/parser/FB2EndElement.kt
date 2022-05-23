@@ -73,7 +73,7 @@ object FB2EndElement {
             && !fB2ParserObject.isHistory) return
         if (fB2ParserObject.isSection && fB2ParserObject.onlyscheme) return
         var result = ""
-        val deep = if (fB2ParserObject.isSection) fB2ParserObject.mySection!!.deep!! else 0
+        val deep = if (fB2ParserObject.isSection && fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.deep!! else 0
         when (fel) {
             FB2Elements.EMPTYLINE, FB2Elements.V -> result = "<br/>"
             FB2Elements.P, FB2Elements.STANZA -> result =
@@ -123,7 +123,7 @@ object FB2EndElement {
                 fB2ParserObject.fb2scheme.description.documentInfo.history.append(result)
             }
             fB2ParserObject.isSection -> {
-                fB2ParserObject.mySection!!.text.append(result)
+                fB2ParserObject.mySection?.text?.append(result)
             }
             else -> {
                 Logger.getLogger("FB2ENDELEMENT")
