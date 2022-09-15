@@ -97,7 +97,7 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
                 val uriString = fileItemList.value!![pos].uriString
                 if (uriString == lastPath.value!!) {
                     //(binding.reciclerViewFiles.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
-                    break
+                    oldSelectedDocumentFileUriString.value = uriString
                 }
             }
         }
@@ -159,7 +159,7 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
 
     fun getPositionInFileItemList(): Int {
         if (oldSelectedDocumentFileUriString.value == null) return 0
-        val position = fileItemList.value!!.indexOfFirst { it.isDir && it.uriString.equals(oldSelectedDocumentFileUriString.value) }
+        val position = fileItemList.value!!.indexOfFirst { it.uriString.equals(oldSelectedDocumentFileUriString.value) }
         return if (position > 0) position
         else 0
     }
