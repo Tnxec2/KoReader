@@ -78,7 +78,7 @@ class FileChooseFragment : DialogFragment(),
         mFileChooseFragmentViewModel.fileItemList.observe(this) {
             binding.reciclerViewFiles.adapter = FileListAdapter(requireContext(), it, this)
         }
-        mFileChooseFragmentViewModel.oldSelectedDocumentFileUriString.observe(this) {
+        mFileChooseFragmentViewModel.scrollToDocumentFileUriString.observe(this) {
             (binding.reciclerViewFiles.layoutManager as LinearLayoutManager)
                 .scrollToPositionWithOffset(
                     mFileChooseFragmentViewModel.

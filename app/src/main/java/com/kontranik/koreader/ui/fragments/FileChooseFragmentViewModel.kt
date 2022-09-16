@@ -19,7 +19,7 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
 
     val fileItemList = MutableLiveData(mutableListOf<FileItem>())
 
-    val oldSelectedDocumentFileUriString = MutableLiveData<String?>()
+    val scrollToDocumentFileUriString = MutableLiveData<String?>()
     val selectedDocumentFileUriString = MutableLiveData<String?>()
     val lastPath = MutableLiveData<String?>()
 
@@ -97,7 +97,7 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
                 val uriString = fileItemList.value!![pos].uriString
                 if (uriString == lastPath.value!!) {
                     //(binding.reciclerViewFiles.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
-                    oldSelectedDocumentFileUriString.value = uriString
+                    scrollToDocumentFileUriString.value = uriString
                 }
             }
         }
@@ -142,9 +142,9 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
 
     private fun getFileList(fileItem: FileItem) {
         isVisibleImageButtonFilechooseAddStorage.value = false
-        oldSelectedDocumentFileUriString.value = selectedDocumentFileUriString.value
-        selectedDocumentFileUriString.value = fileItem.uriString
         getFileList(fileItem.uriString)
+        scrollToDocumentFileUriString.value = selectedDocumentFileUriString.value
+        selectedDocumentFileUriString.value = fileItem.uriString
     }
 
     private fun getFileList(documentFilePath: String?) {
@@ -158,8 +158,8 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
     }
 
     fun getPositionInFileItemList(): Int {
-        if (oldSelectedDocumentFileUriString.value == null) return 0
-        val position = fileItemList.value!!.indexOfFirst { it.uriString.equals(oldSelectedDocumentFileUriString.value) }
+        if (scrollToDocumentFileUriString.value == null) return 0
+        val position = fileItemList.value!!.indexOfFirst { it.uriString.equals(scrollToDocumentFileUriString.value) }
         return if (position > 0) position
         else 0
     }
