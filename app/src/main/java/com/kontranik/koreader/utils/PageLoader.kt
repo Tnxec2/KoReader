@@ -46,10 +46,12 @@ class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     if (!revers) pages.first() else pages.last()
                 }
             } else {
-                if (section <= 0 && revers) {
-                    resultPage = pages.first()
-                } else if (!revers && section >= book.getPageScheme()!!.sectionCount) {
-                    resultPage = pages.last()
+                if (pages.isNotEmpty()) {
+                    if (section <= 0 && revers) {
+                        resultPage = pages.first()
+                    } else if (!revers && section >= book.getPageScheme()!!.sectionCount) {
+                        resultPage = pages.last()
+                    }
                 }
             }
         }

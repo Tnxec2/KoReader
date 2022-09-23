@@ -22,6 +22,7 @@ import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.min
 
 class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     var prefsHelper: PrefsHelper = PrefsHelper(app.applicationContext)
@@ -175,16 +176,17 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
             infoTextLeft.value =
                 app.getString(
                     R.string.page_info_text_left,
-                    curTextPage,
+                    min(curTextPage, book.value!!.getPageScheme()!!.countTextPages),
                     book.value!!.getPageScheme()!!.countTextPages,
                     if (book.value!!.getPageScheme()!!.countTextPages == 0) 0
-                    else curTextPage * 100 / book.value!!.getPageScheme()!!.countTextPages
+                    else min(curTextPage * 100 / book.value!!.getPageScheme()!!.countTextPages, 100)
                 )
 
             infoTextRight.value =
                 app.getString(
                     R.string.page_info_text_right,
                     curSection,
+                    book.value!!.getPageScheme()!!.sectionCountWithOutNotes,
                     book.value!!.getPageScheme()!!.sectionCount
                 )
         } else {

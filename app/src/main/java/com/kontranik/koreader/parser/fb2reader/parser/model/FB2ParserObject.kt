@@ -23,6 +23,7 @@ class FB2ParserObject(val fileHelper: FileHelper) {
     var isHistory = false
     var isSection = false
     var isNotes = false
+    var isComments = false
     var onlyscheme = false
     var isSupNote = false
     var isTitle = false
@@ -52,7 +53,7 @@ class FB2ParserObject(val fileHelper: FileHelper) {
                 ", isTranslator=" + isTranslator +
                 ", isHistory=" + isHistory +
                 ", isSection=" + isSection +
-                ", isNotes=" + isNotes +
+                ", isNotes=" + isNotes  +
                 ", onlyscheme=" + onlyscheme +
                 ", isSupNote=" + isSupNote +
                 ", isTitle=" + isTitle +

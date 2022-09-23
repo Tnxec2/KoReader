@@ -135,7 +135,8 @@ class Book(private var context: Context, var fileLocation: String) {
     fun getCurTextPage(): Int {
         var curTextPage = 0
         for (i in 0 until curPage!!.endBookPosition.section) {
-            curTextPage += getPageScheme()!!.scheme[i]!!.countTextPages
+            if (getPageScheme()?.scheme?.get(i) != null)
+                curTextPage += getPageScheme()!!.scheme[i]!!.countTextPages
         }
         curTextPage += ( curPage!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
         return curTextPage

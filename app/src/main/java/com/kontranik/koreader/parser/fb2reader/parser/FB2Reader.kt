@@ -31,7 +31,6 @@ class FB2Reader internal constructor(private val appDir: String,
             fb2Scheme = FB2Parser(appDir, contentUri!!, fileInputStream!!).parseBook()
         } catch (e: Exception) {
             e.printStackTrace()
-            Logger.getLogger("FB2READER").log(Level.INFO, e.message)
             return null
         }
         return fb2Scheme

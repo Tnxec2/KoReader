@@ -51,8 +51,10 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
         if ( epubBook != null && getContentSize() == 0   ) return
         pageScheme = BookPageScheme()
         pageScheme.sectionCount = getContentSize()-1
+        pageScheme.sectionCountWithOutNotes = pageScheme.sectionCount
         for( pageIndex in 0 .. getContentSize()) {
             val aSection = getPage(pageIndex)
+
             if ( aSection != null) {
                 val textSize = getPageTextSize(aSection)
                 val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()

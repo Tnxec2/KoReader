@@ -10,6 +10,8 @@ import com.kontranik.koreader.model.BookSchemeItem
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Scheme
 import com.kontranik.koreader.parser.fb2reader.parser.FB2Reader
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Elements
+import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Section
 import com.kontranik.koreader.utils.ImageUtils
 import org.jsoup.Jsoup
 import java.io.FileNotFoundException
@@ -51,11 +53,15 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         pageScheme.sectionCount = getContentSize()
         if ( pageScheme.sectionCount == 0) return
         for( pageIndex in 0 .. pageScheme.sectionCount) {
+            if (pageIndex > 0 && ( fb2Reader.fb2Scheme!!.sections[pageIndex-1].isNote
+                        || fb2Reader.fb2Scheme!!.sections[pageIndex-1].isComment)) continue
+            pageScheme.sectionCountWithOutNotes += 1
             val textSize = getPageTextSize(pageIndex)
-            if ( textSize != null) {
+            if (textSize != null) {
                 val pages = ceil(textSize.toDouble() / BookPageScheme.CHAR_PER_PAGE).toInt()
                 pageScheme.scheme[pageIndex] = BookSchemeItem(
-                        textSize = textSize, countTextPages = pages)
+                    textSize = textSize, countTextPages = pages
+                )
                 pageScheme.textSize += textSize
                 pageScheme.countTextPages += pages
             }
@@ -64,8 +70,13 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
         pageScheme.sections.add("(0) Cover")
         fb2Reader.fb2Scheme!!.sections.forEachIndexed { index, it ->
             val title = it.title ?: it.orderid.toString()
-            pageScheme.sections.add("(${index + 1}) $title")
+            pageScheme.sections.add("(${index + 1})${getNotes(it)} $title")
         }
+    }
+
+    private fun getNotes(it: FB2Section): String {
+        return if (it.typ != FB2Elements.BODY && it.isNote)  "\uD83D\uDCDD"  // 📝
+            else if (it.typ != FB2Elements.BODY && it.isComment)  "\uD83D\uDDE8️" else "" // 🗨️
     }
 
     private fun getPageTextSize(pageIndex: Int): Int? {

@@ -91,11 +91,12 @@ class FB2Parser(appDir: String, private var uri: String, private var fileInputSt
             Log.d("PARSER","StartElement: $eName")
             return
         }
-        try {
+        FB2StartElement.startElement(eName, fel, attrs, fB2ParserObject)
+        /*try {
             FB2StartElement.startElement(eName, fel, attrs, fB2ParserObject)
         } catch (e: Exception) {
             throw SAXException(e)
-        }
+        }*/
     }
 
     @Throws(SAXException::class)

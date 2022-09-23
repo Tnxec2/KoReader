@@ -3,6 +3,7 @@ package com.kontranik.koreader.parser.fb2reader.parser
 import com.kontranik.koreader.model.BookPageScheme
 import com.kontranik.koreader.parser.fb2reader.parser.model.*
 import org.xml.sax.Attributes
+import kotlin.math.min
 
 /**
  * FB2StartElement
@@ -27,21 +28,21 @@ object FB2StartElement {
     }
 
     @Throws(Exception::class)
-    private fun parseStartElement(fel: FB2Elements, attrs: Attributes, `object`: FB2ParserObject) {
+    private fun parseStartElement(fel: FB2Elements, attrs: Attributes, fB2ParserObject: FB2ParserObject) {
         if (fel == FB2Elements.TITLE) {
-            `object`.myParseText = true
+            fB2ParserObject.myParseText = true
         }
-        if (!`object`.isSection
-            && !`object`.isAnnotation
-            && !`object`.isCoverpage
-            && !`object`.isHistory
+        if (!fB2ParserObject.isSection
+            && !fB2ParserObject.isAnnotation
+            && !fB2ParserObject.isCoverpage
+            && !fB2ParserObject.isHistory
         ) return
-        if (`object`.isSection && `object`.onlyscheme) return
+        if (fB2ParserObject.isSection && fB2ParserObject.onlyscheme) return
         var result = ""
-        val deep = if (`object`.isSection) `object`.mySection!!.deep!! else 0
-        if (`object`.isSection) {
-            if (`object`.mySection!!.text.length > BookPageScheme.CHAR_PER_PAGE * BookPageScheme.MAX_PAGE_PER_SECTION) {
-                gotNewSection(`object`)
+        val deep = if (fB2ParserObject.isSection && fB2ParserObject.mySection?.deep != null) fB2ParserObject.mySection!!.deep!! else 0
+        if (fB2ParserObject.isSection) {
+            if (fB2ParserObject.mySection!!.text.length > BookPageScheme.CHAR_PER_PAGE * BookPageScheme.MAX_PAGE_PER_SECTION) {
+                gotNewSection(fB2ParserObject)
             }
         }
         var href: String? = null
@@ -56,15 +57,15 @@ object FB2StartElement {
         when (fel) {
             FB2Elements.EMPTYLINE -> {
             }
-            FB2Elements.P, FB2Elements.STANZA -> if (!`object`.isTitle) result = "<p>"
+            FB2Elements.P, FB2Elements.STANZA -> if (!fB2ParserObject.isTitle) result = "<p>"
             FB2Elements.CITE -> result = "<cite>"
             FB2Elements.TITLE -> {
-                `object`.isTitle = true
-                val d = Math.min(deep, FB2ParserObject.maxHeader)
+                fB2ParserObject.isTitle = true
+                val d = min(deep, FB2ParserObject.maxHeader)
                 result = "<H" + (d + 1) + ">"
             }
             FB2Elements.SUBTITLE -> {
-                val s = Math.min(deep + 1, FB2ParserObject.maxHeader)
+                val s = min(deep + 1, FB2ParserObject.maxHeader)
                 result = "<H" + (s + 1) + ">"
             }
             FB2Elements.STRONG -> result = "<strong>"
@@ -73,18 +74,18 @@ object FB2StartElement {
             FB2Elements.SUB -> result = "<sub>"
             FB2Elements.SUP -> result = "<sup>"
             FB2Elements.CODE -> {
-                `object`.isCode = true
+                fB2ParserObject.isCode = true
                 result = "<pre><code>"
             }
             FB2Elements.EPIGRAPH -> result = "<blockquote>"
             FB2Elements.A -> if (href != null) {
                 var cl = ""
                 var linktype = ""
-                `object`.isSupNote = false
+                fB2ParserObject.isSupNote = false
                 if ("note" == attrs.getValue("type")) {
                     cl = "<sup>"
                     linktype = "class=\"note\""
-                    `object`.isSupNote = true
+                    fB2ParserObject.isSupNote = true
                 }
                 result = " <a href=\"$href\" $linktype >$cl"
             }
@@ -94,17 +95,17 @@ object FB2StartElement {
             else -> {
             }
         }
-        if (`object`.isAnnotation) {
-            `object`.fb2scheme.description.titleInfo.annotation.append(result)
-        } else if (`object`.isCoverpage) {
-            `object`.fb2scheme.description.titleInfo.coverpage.append(result)
+        if (fB2ParserObject.isAnnotation) {
+            fB2ParserObject.fb2scheme.description.titleInfo.annotation.append(result)
+        } else if (fB2ParserObject.isCoverpage) {
+            fB2ParserObject.fb2scheme.description.titleInfo.coverpage.append(result)
             if (fel == FB2Elements.IMAGE && href != null) {
-                `object`.fb2scheme.description.titleInfo.coverImageSrc = href
+                fB2ParserObject.fb2scheme.description.titleInfo.coverImageSrc = href
             }
-        } else if (`object`.isHistory) {
-            `object`.fb2scheme.description.documentInfo.history.append(result)
-        } else if (`object`.isSection) {
-            `object`.mySection!!.text.append(result)
+        } else if (fB2ParserObject.isHistory) {
+            fB2ParserObject.fb2scheme.description.documentInfo.history.append(result)
+        } else if (fB2ParserObject.isSection) {
+            fB2ParserObject.mySection!!.text.append(result)
         }
     }
 
@@ -123,7 +124,8 @@ object FB2StartElement {
                 fB2ParserObject.mySection!!.id,
                 fB2ParserObject.mySection!!.typ,
                 fB2ParserObject.sectionDeep,
-                parentid
+                parentid,
+                isNote = fB2ParserObject.isNotes
             )
             fB2ParserObject.fb2scheme.sections.add(fB2ParserObject.mySection!!)
             // System.out.printf("New Section Id: " + object.sectionid + ", deep: " + object.sectionDeep + ", Name: " + el.elName + "\n");
@@ -145,25 +147,25 @@ object FB2StartElement {
                 fB2ParserObject.fb2scheme
             )
         }
-        if (attrs.getValue("notes") != null) {
-            fB2ParserObject.isNotes = true
-            fB2ParserObject.isSection = true
-        } else {
-            fB2ParserObject.isSection = true
-            val parentid =
-                if (fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.orderid else null
-            fB2ParserObject.mySection = FB2Section(
-                fB2ParserObject.sectionid,
-                attrs.getValue("id"),
-                el,
-                fB2ParserObject.sectionDeep,
-                parentid
-            )
-            fB2ParserObject.fb2scheme.sections.add(fB2ParserObject.mySection!!)
-            // System.out.printf("New Section Id: " + object.sectionid + ", deep: " + object.sectionDeep + ", Name: " + el.elName + "\n");
-            fB2ParserObject.sectionid++
-            fB2ParserObject.sectionDeep++
-        }
+        val aName = attrs.getValue("name")
+        if (el == FB2Elements.BODY) fB2ParserObject.isNotes = ("notes" == aName)
+        if (el == FB2Elements.BODY) fB2ParserObject.isComments = ("comments" == aName)
+
+        fB2ParserObject.isSection = true
+        val parentid = if (fB2ParserObject.mySection != null) fB2ParserObject.mySection!!.orderid else null
+        fB2ParserObject.mySection = FB2Section(
+            fB2ParserObject.sectionid,
+            attrs.getValue("id"),
+            el,
+            fB2ParserObject.sectionDeep,
+            parentid,
+            isNote = fB2ParserObject.isNotes,
+            isComment = fB2ParserObject.isComments
+        )
+        fB2ParserObject.fb2scheme.sections.add(fB2ParserObject.mySection!!)
+        // System.out.printf("New Section Id: " + object.sectionid + ", deep: " + object.sectionDeep + ", Name: " + el.elName + "\n");
+        fB2ParserObject.sectionid++
+        fB2ParserObject.sectionDeep++
     }
 
     private fun startElementDescription(

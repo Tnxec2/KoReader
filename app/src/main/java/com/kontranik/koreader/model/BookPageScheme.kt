@@ -2,6 +2,7 @@ package com.kontranik.koreader.model
 
 class BookPageScheme {
     var sectionCount: Int = 0
+    var sectionCountWithOutNotes: Int = 0
     var textSize: Int = 0
     var countTextPages: Int = 0
     var sections: MutableList<String> = mutableListOf()
