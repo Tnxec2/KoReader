@@ -161,18 +161,19 @@ class ReaderActivity :
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        //Here you can get the size of pageView!
         Log.d(TAG, "onWindowFocusChanged")
+
+        //Here you can get the size of pageView!
+        Log.d(TAG, "onWindowFocusChanged hasFocus")
         if (mReaderActivityViewModel.prefsHelper.bookPath != null) {
-            runOnUiThread {
-                try {
-                    if (mReaderActivityViewModel.book.value == null
-                        || mReaderActivityViewModel.book.value!!.fileLocation != mReaderActivityViewModel.prefsHelper.bookPath) {
-                        mReaderActivityViewModel.loadBook(binding.textViewPageview.context)
-                    }
-                } catch (e: Exception) {
-                    Log.e("tag", e.stackTraceToString())
+            try {
+                if (mReaderActivityViewModel.book.value == null
+                    || mReaderActivityViewModel.book.value!!.fileLocation != mReaderActivityViewModel.prefsHelper.bookPath
+                ) {
+                    mReaderActivityViewModel.loadBook(binding.textViewPageview.context)
                 }
+            } catch (e: Exception) {
+                Log.e("tag", e.stackTraceToString())
             }
         } else {
             Toast.makeText(
@@ -404,7 +405,7 @@ class ReaderActivity :
             byteArrayStream.toByteArray()
         }
         val imageViewerFragment: ImageViewerFragment =
-            ImageViewerFragment.newInstance(b)
+            ImageViewerFragment.newInstance(b, mReaderActivityViewModel.prefsHelper.isDarkMode())
         imageViewerFragment.show(supportFragmentManager, "fragment_imageviewfragment")
     }
 
@@ -515,7 +516,7 @@ class ReaderActivity :
             marginTop =
                 if (sMargin != null) Integer.parseInt(sMargin)
                 else mReaderActivityViewModel.prefsHelper.marginDefault
-        } catch (e: Exception) {
+        } catch (_: Exception) {
 
         }
         sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_BOTTOM + colorTheme, null)
@@ -523,7 +524,7 @@ class ReaderActivity :
             marginBottom =
                 if (sMargin != null) Integer.parseInt(sMargin)
                 else mReaderActivityViewModel.prefsHelper.marginDefault
-        } catch (e: Exception) {
+        } catch (_: Exception) {
 
         }
         sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_LEFT + colorTheme, null)
@@ -531,7 +532,7 @@ class ReaderActivity :
             marginLeft =
                 if (sMargin != null) Integer.parseInt(sMargin)
                 else mReaderActivityViewModel.prefsHelper.marginDefault
-        } catch (e: Exception) {
+        } catch (_: Exception) {
 
         }
         sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_RIGHT + colorTheme, null)
@@ -539,7 +540,7 @@ class ReaderActivity :
             marginRight =
                 if (sMargin != null) Integer.parseInt(sMargin)
                 else mReaderActivityViewModel.prefsHelper.marginDefault
-        } catch (e: Exception) {
+        } catch (_: Exception) {
 
         }
 

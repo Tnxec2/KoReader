@@ -1,9 +1,12 @@
 package com.kontranik.koreader.utils
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.graphics.Color
 import android.text.*
 import android.text.style.QuoteSpan
 import android.widget.TextView
+import androidx.preference.PreferenceManager
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookPosition
 import com.kontranik.koreader.model.Page
@@ -16,6 +19,7 @@ open class PageSplitterHtml(context: Context) : FontsHelper(context) {
     private var staticLayout: StaticLayout? = null
 
     fun splitPages(textView: TextView, book: Book, section: Int, html: String, reloadFonts: Boolean) {
+        if (textView.measuredWidth <= 0) return
         if ( reloadFonts ) loadFonts()
 
         val pageWidth: Int = textView.measuredWidth - textView.paddingLeft - textView.paddingRight
@@ -24,11 +28,25 @@ open class PageSplitterHtml(context: Context) : FontsHelper(context) {
         val lineSpacingMultiplier: Float = textView.lineSpacingMultiplier
         val lineSpacingExtra: Float = textView.lineSpacingExtra
 
+        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val colorTheme = prefs.getString(
+            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME,
+            PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT)
+            ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
+
+
+        val colorThemeIndex = colorTheme.toInt()
+        val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + colorTheme, 0)
+        val colorText = Color.parseColor(
+            if (co != 0) "#" + Integer.toHexString(co)
+            else context.resources.getString(PrefsHelper.colorForegroundDefaultArray[colorThemeIndex-1])
+        )
+
         content = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             SpannableStringBuilder(Html.fromHtml(
-                    html, Html.FROM_HTML_MODE_LEGACY, CustomImageGetter(book, pageWidth, pageHeight), null))
+                    html, Html.FROM_HTML_MODE_LEGACY, CustomImageGetter(book, pageWidth, pageHeight, colorText), null))
         } else {
-            SpannableStringBuilder(Html.fromHtml(html, CustomImageGetter(book, pageWidth, pageHeight), null))
+            SpannableStringBuilder(Html.fromHtml(html, CustomImageGetter(book, pageWidth, pageHeight, colorText), null))
         }
 
         postformatContent(textView)

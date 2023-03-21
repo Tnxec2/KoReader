@@ -1,79 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/textViewHolder"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_main"
-    android:textColor="@color/foreground_main"
-    >
+    android:orientation="vertical"
+    android:background="@color/background_main">
 
     <TextView
         android:id="@+id/textView_pageview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="1"
+
         android:paddingStart="@dimen/padding_textview_left"
-        
         android:paddingTop="@dimen/padding_textview_top"
         android:paddingEnd="@dimen/padding_textview_right"
-        
         android:paddingBottom="@dimen/padding_textview_bottom"
-        android:text=""
-        android:textIsSelectable="true"
-        android:textColorLink="@color/foreground_sepia_link"
 
-        app:layout_constraintBottom_toTopOf="@+id/ll_infobereich"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text=""
+        android:textColorLink="@color/foreground_sepia_link"
+        android:textIsSelectable="true"
+
+        />
 
     <LinearLayout
         android:id="@+id/ll_infobereich"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        
-        
+
         android:paddingStart="@dimen/padding_textview_left"
         android:paddingEnd="@dimen/padding_textview_right"
         android:paddingBottom="2dp">
 
-    <TextView
-        android:id="@+id/tv_infotext_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="start"
-        android:text="" />
+        <TextView
+            android:id="@+id/tv_infotext_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:text="" />
 
-    <androidx.legacy.widget.Space
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1" />
-
-    <TextView
-        android:id="@+id/tv_infotext_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:text=""
-    />
         <androidx.legacy.widget.Space
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1" />
 
-    <TextView
-            android:id="@+id/tv_infotext_systemstatus"
+        <TextView
+            android:id="@+id/tv_infotext_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:text=""
+            android:text="" />
+
+        <androidx.legacy.widget.Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tv_infotext_systemstatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            />
+            android:gravity="end"
+            android:text="" />
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

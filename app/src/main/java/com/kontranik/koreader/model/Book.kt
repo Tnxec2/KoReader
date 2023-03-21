@@ -2,12 +2,15 @@ package com.kontranik.koreader.model
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.util.Log
+import android.view.WindowManager
 import android.widget.TextView
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.parser.epubreader.EpubHelper
 import com.kontranik.koreader.parser.fb2reader.FB2Helper
+import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.PageLoader
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Attributes
@@ -80,7 +83,7 @@ class Book(private var context: Context, var fileLocation: String) {
         return  null
     }
 
-    fun getImageBitmapDrawable(source: String): BitmapDrawable? {
+    fun getImageBitmapDrawable(source: String, colorTint: Int): BitmapDrawable? {
         if ( ebookHelper != null) {
             var s = source
             if ( s.startsWith("../")) {
@@ -89,7 +92,8 @@ class Book(private var context: Context, var fileLocation: String) {
             val resource = ebookHelper!!.getImageByHref(s)
             if (resource != null) {
                 val bitmap = BitmapFactory.decodeByteArray(resource, 0, resource.size)
-                return BitmapDrawable(context.resources, bitmap)
+                val inverted = ImageUtils.invertAndTint(bitmap, colorTint)
+                return BitmapDrawable(context.resources, inverted)
             }
         }
         return  null

@@ -30,7 +30,7 @@
             />
         <com.rarepebble.colorpicker.ColorPreference
             app:key="colorInfoTheme4"
-            app:title="color_infotext"
+            app:title="@string/color_infotext"
             android:defaultValue="@string/color_theme4_foregroud_default"
             app:colorpicker_showAlpha="false"
             app:iconSpaceReserved="false"

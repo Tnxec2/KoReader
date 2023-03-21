@@ -3,6 +3,7 @@ package com.kontranik.koreader.utils
 import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.graphics.Point
 import android.util.TypedValue
 import android.view.WindowManager
@@ -160,6 +161,18 @@ class PrefsHelper(val context: Context) {
 
     fun setThemeDefault() {
         setThemeByName(interfaceTheme)
+    }
+
+    fun isDarkMode(): Boolean {
+        return when ( interfaceTheme) {
+                "Light" -> false
+                "Dark" -> true
+                else -> when (context.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+                            Configuration.UI_MODE_NIGHT_YES -> true
+                            Configuration.UI_MODE_NIGHT_NO -> false
+                            else -> false
+                        }
+        }
     }
 
     private fun setThemeByName(mTheme: String?) {

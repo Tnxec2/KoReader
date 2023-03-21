@@ -1,15 +1,14 @@
 package com.kontranik.koreader.ui.fragments
 
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentImageviewerBinding
+import com.kontranik.koreader.utils.ImageUtils
 import it.sephiroth.android.library.imagezoom.ImageViewTouchBase
 
 
@@ -28,7 +27,7 @@ class ImageViewerFragment : DialogFragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.imageViewImageviewerClose.setOnClickListener {
@@ -41,20 +40,24 @@ class ImageViewerFragment : DialogFragment() {
         if (byteArray == null) {
             dismiss()
         } else {
-            binding.imageviewtouchImageviewer.setBackgroundColor(Color.WHITE)
-            binding.imageviewtouchImageviewer.setImageBitmap(
-                    BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-            )
+            val invertImage = requireArguments().getBoolean(InvertImageBoolean, false)
+
+            var bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+            if (invertImage) bitmap = ImageUtils.invertAndTint(bitmap, tintColor = null)
+            binding.imageviewtouchImageviewer.setImageBitmap(bitmap)
         }
     }
 
     companion object {
         const val ImageByteArray = "imagebytearray"
+        const val InvertImageBoolean = "invertImageBoolean"
 
-        fun newInstance(imagebytearray: ByteArray): ImageViewerFragment {
+        fun newInstance(imagebytearray: ByteArray, invertImage: Boolean?): ImageViewerFragment {
             val frag = ImageViewerFragment()
             val args = Bundle()
             args.putByteArray(ImageByteArray, imagebytearray)
+            args.putBoolean(InvertImageBoolean, invertImage == true)
+
             frag.arguments = args
 
             return frag

@@ -42,6 +42,32 @@ object ImageUtils {
         return bitmap
     }
 
+    @JvmStatic
+    fun invertAndTint(src: Bitmap, tintColor: Int?): Bitmap? {
+        val height = src.height
+        val width = src.width
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val paint = Paint()
+        val matrixGrayscale = ColorMatrix()
+        matrixGrayscale.setSaturation(0f)
+        val matrixInvert = ColorMatrix()
+        matrixInvert.set(
+            floatArrayOf(
+                -1.0f, 0.0f, 0.0f, 0.0f, 255.0f,
+                0.0f, -1.0f, 0.0f, 0.0f, 255.0f,
+                0.0f, 0.0f, -1.0f, 0.0f, 255.0f,
+                0.0f, 0.0f, 0.0f, 1.0f, 0.0f
+            )
+        )
+        matrixInvert.preConcat(matrixGrayscale)
+        val filter = ColorMatrixColorFilter(matrixInvert)
+        paint.colorFilter = filter
+        canvas.drawBitmap(src, 0f, 0f, paint)
+        tintColor?.let { canvas.drawColor(it, PorterDuff.Mode.MULTIPLY) }
+        return bitmap
+    }
+
     fun byteArrayToScaledBitmap(byteArray: ByteArray, width: Int, height: Int): Bitmap {
         val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
         return scaleBitmap(bitmap, width, height)

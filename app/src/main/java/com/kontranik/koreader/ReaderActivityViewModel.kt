@@ -1,5 +1,6 @@
 package com.kontranik.koreader
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
@@ -7,7 +8,9 @@ import android.content.SharedPreferences
 import android.graphics.Point
 import android.net.Uri
 import android.os.BatteryManager
+import android.os.Build
 import android.util.Log
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +26,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
+
 
 class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     var prefsHelper: PrefsHelper = PrefsHelper(app.applicationContext)
@@ -205,7 +209,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     }
 
     fun goToPositionByBookStatus(pageView: TextView, bookStatus: BookStatus?) {
-        Log.d("goToPositionByBookStatu", "load")
+        Log.d("goToPositionByBookStat.", "load")
         if (book.value != null) {
             val startPosition: BookPosition = if (bookStatus == null) {
                 BookPosition()

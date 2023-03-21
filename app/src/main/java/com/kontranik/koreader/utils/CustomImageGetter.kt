@@ -7,12 +7,15 @@ import com.kontranik.koreader.model.Book
 class CustomImageGetter(
         private val book: Book,
         private val pageWidth: Int,
-        private val pageHeight: Int
+        private val pageHeight: Int,
+        private val colorTint: Int,
 ): Html.ImageGetter {
 
     override fun getDrawable( source: String?): Drawable? {
         if ( source != null) {
-            val mImage = book.getImageBitmapDrawable(source)
+
+            val mImage = book.getImageBitmapDrawable(source, colorTint)
+
             if ( mImage != null) {
                 val mSize = ImageUtils.getScaledSize(
                         mImage.intrinsicWidth, mImage.intrinsicHeight,

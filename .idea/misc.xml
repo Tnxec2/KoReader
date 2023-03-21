@@ -1,47 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DesignSurface">
-    <option name="filePathToZoomLevelMap">
-      <map>
-        <entry key="../../../../layout/custom_preview.xml" value="0.24010416666666667" />
-        <entry key="app/src/main/res/drawable/ic_baseline_delete_24.xml" value="0.3005" />
-        <entry key="app/src/main/res/drawable/list_divider.xml" value="0.2005" />
-        <entry key="app/src/main/res/layout/activity_book_list.xml" value="0.18611111111111112" />
-        <entry key="app/src/main/res/layout/activity_filechoose.xml" value="0.18611111111111112" />
-        <entry key="app/src/main/res/layout/activity_main_menu.xml" value="0.21302083333333333" />
-        <entry key="app/src/main/res/layout/activity_reader_main.xml" value="0.21302083333333333" />
-        <entry key="app/src/main/res/layout/booklist_item.xml" value="0.3609375" />
-        <entry key="app/src/main/res/layout/bookmarklist_item.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/fragment_bookinfo.xml" value="0.3645833333333333" />
-        <entry key="app/src/main/res/layout/fragment_bookmarklist.xml" value="0.18611111111111112" />
-        <entry key="app/src/main/res/layout/fragment_floattextview.xml" value="0.3609375" />
-        <entry key="app/src/main/res/layout/fragment_font_menu.xml" value="0.18611111111111112" />
-        <entry key="app/src/main/res/layout/fragment_goto_menu.xml" value="0.21302083333333333" />
-        <entry key="app/src/main/res/layout/fragment_imageviewer.xml" value="0.21302083333333333" />
-        <entry key="app/src/main/res/layout/fragment_settings.xml" value="0.21487179487179486" />
-        <entry key="app/src/main/res/layout/preference_font_name.xml" value="0.3645833333333333" />
-        <entry key="app/src/main/res/layout/preference_image_picker.xml" value="0.21487179487179486" />
-        <entry key="app/src/main/res/layout/preference_text_size.xml" value="0.19739583333333333" />
-        <entry key="app/src/main/res/layout/preference_theme_name.xml" value="0.3609375" />
-        <entry key="app/src/main/res/menu/menu_file_item_clicked.xml" value="2.357142857142857" />
-        <entry key="app/src/main/res/menu/text_selected_menu_custom.xml" value="0.3609375" />
-        <entry key="app/src/main/res/xml/color_preferences.xml" value="0.1" />
-        <entry key="app/src/main/res/xml/color_theme1_preferences.xml" value="0.3614583333333333" />
-        <entry key="app/src/main/res/xml/color_theme2_preferences.xml" value="0.3614583333333333" />
-        <entry key="app/src/main/res/xml/color_theme3_preferences.xml" value="0.3614583333333333" />
-        <entry key="app/src/main/res/xml/color_theme4_preferences.xml" value="0.3614583333333333" />
-        <entry key="app/src/main/res/xml/color_theme5_preferences.xml" value="0.3614583333333333" />
-        <entry key="app/src/main/res/xml/interface_preferences.xml" value="0.21487179487179486" />
-        <entry key="app/src/main/res/xml/root_preferences.xml" value="0.1" />
-        <entry key="app/src/main/res/xml/tapzone_double_preferences.xml" value="0.24270833333333333" />
-        <entry key="app/src/main/res/xml/tapzone_long_preferences.xml" value="0.24270833333333333" />
-        <entry key="app/src/main/res/xml/tapzone_one_preferences.xml" value="0.16927083333333334" />
-        <entry key="app/src/main/res/xml/tapzone_preferences.xml" value="0.21487179487179486" />
-        <entry key="app/src/main/res/xml/text_preferences.xml" value="0.1" />
-      </map>
-    </option>
-  </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
