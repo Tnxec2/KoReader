@@ -9,12 +9,13 @@ class CustomImageGetter(
         private val pageWidth: Int,
         private val pageHeight: Int,
         private val colorTint: Int,
+        private val invertAndTint: Boolean
 ): Html.ImageGetter {
 
     override fun getDrawable( source: String?): Drawable? {
         if ( source != null) {
 
-            val mImage = book.getImageBitmapDrawable(source, colorTint)
+            val mImage = book.getImageBitmapDrawable(source, colorTint, invertAndTint)
 
             if ( mImage != null) {
                 val mSize = ImageUtils.getScaledSize(

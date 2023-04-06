@@ -1,5 +1,6 @@
 package com.kontranik.koreader.ui.fragments
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,6 +16,9 @@ import it.sephiroth.android.library.imagezoom.ImageViewTouchBase
 class ImageViewerFragment : DialogFragment() {
 
     private lateinit var binding: FragmentImageviewerBinding
+
+    private var bitmap: Bitmap? = null
+    private var invertImage: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,17 +38,29 @@ class ImageViewerFragment : DialogFragment() {
             dismiss()
         }
 
+        binding.imageViewImageviewerToggleInvert.setOnClickListener {
+            invertImage = !invertImage
+            updateImage()
+        }
+
         binding.imageviewtouchImageviewer.displayType = ImageViewTouchBase.DisplayType.FIT_TO_SCREEN
 
         val byteArray = requireArguments().getByteArray(ImageByteArray)
         if (byteArray == null) {
             dismiss()
         } else {
-            val invertImage = requireArguments().getBoolean(InvertImageBoolean, false)
+            bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+            invertImage = requireArguments().getBoolean(InvertImageBoolean, false)
+            updateImage()
+        }
+    }
 
-            var bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-            if (invertImage) bitmap = ImageUtils.invertAndTint(bitmap, tintColor = null)
-            binding.imageviewtouchImageviewer.setImageBitmap(bitmap)
+    private fun updateImage() {
+        if (bitmap != null) {
+            if (invertImage)
+                binding.imageviewtouchImageviewer.setImageBitmap(ImageUtils.invertAndTint(bitmap!!, tintColor = null))
+            else
+                binding.imageviewtouchImageviewer.setImageBitmap(bitmap)
         }
     }
 

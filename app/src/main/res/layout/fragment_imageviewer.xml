@@ -15,6 +15,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
+        android:id="@+id/imageView_imageviewer_toggle_invert"
+        android:layout_width="48sp"
+        android:layout_height="48sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_baseline_compare_24"
+        android:contentDescription="@string/toggle_invert"
+        android:clickable="true"
+        android:focusable="true"
+        />
+    <ImageView
         android:id="@+id/imageView_imageviewer_close"
         android:layout_width="48sp"
         android:layout_height="48sp"

@@ -180,4 +180,5 @@
     <string name="title_select_storage">Select storage</string>
     <string name="sure_select_storage">Select storage in next dialog and grand access</string>
     <string name="ok_select_storage">OK</string>
+    <string name="toggle_invert">Toggle Invert</string>
 </resources>

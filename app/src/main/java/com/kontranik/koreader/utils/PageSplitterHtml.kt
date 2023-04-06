@@ -44,9 +44,9 @@ open class PageSplitterHtml(context: Context) : FontsHelper(context) {
 
         content = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             SpannableStringBuilder(Html.fromHtml(
-                    html, Html.FROM_HTML_MODE_LEGACY, CustomImageGetter(book, pageWidth, pageHeight, colorText), null))
+                    html, Html.FROM_HTML_MODE_LEGACY, CustomImageGetter(book, pageWidth, pageHeight, colorText, section > 0), null))
         } else {
-            SpannableStringBuilder(Html.fromHtml(html, CustomImageGetter(book, pageWidth, pageHeight, colorText), null))
+            SpannableStringBuilder(Html.fromHtml(html, CustomImageGetter(book, pageWidth, pageHeight, colorText, section > 0), null))
         }
 
         postformatContent(textView)

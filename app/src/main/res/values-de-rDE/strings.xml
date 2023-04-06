@@ -141,4 +141,5 @@
     <string name="title_select_storage">Auswahl Speicherort</string>
     <string name="sure_select_storage">Wählen Sie in dem nächsten Dialog einen Speicherort aus und erlauben Sie Zugriff drauf</string>
     <string name="ok_select_storage">OK</string>
+    <string name="toggle_invert">Invertierung umschalten</string>
 </resources>
