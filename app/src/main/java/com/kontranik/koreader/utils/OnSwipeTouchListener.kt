@@ -25,10 +25,8 @@ internal open class OnSwipeTouchListener(c: Context?) :
             return true
         }
 
-        override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-            if ( e!= null) {
-                onClick(Point(e.x.toInt(), e.y.toInt()))
-            }
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+            onClick(Point(e.x.toInt(), e.y.toInt()))
             return super.onSingleTapConfirmed(e)
         }
 

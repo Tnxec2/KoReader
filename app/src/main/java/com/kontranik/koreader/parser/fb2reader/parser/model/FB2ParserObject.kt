@@ -1,8 +1,8 @@
 package com.kontranik.koreader.parser.fb2reader.parser.model
 
-import com.kontranik.koreader.parser.fb2reader.parser.FileHelper
+import com.kontranik.koreader.parser.fb2reader.parser.Fb2FileHelper
 
-class FB2ParserObject(val fileHelper: FileHelper) {
+class FB2ParserObject(val fileHelper: Fb2FileHelper) {
     var fb2scheme = FB2Scheme()
     var mySection: FB2Section? = null
     var sectionid: Int = 0

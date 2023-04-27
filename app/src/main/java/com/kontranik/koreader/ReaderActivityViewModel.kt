@@ -1,27 +1,31 @@
 package com.kontranik.koreader
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.graphics.Point
 import android.net.Uri
 import android.os.BatteryManager
-import android.os.Build
+import android.text.style.ImageSpan
 import android.util.Log
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
+import com.kontranik.koreader.database.repository.BookStatusRepository
 import com.kontranik.koreader.model.*
 import com.kontranik.koreader.utils.FileHelper
+import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
+import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,6 +33,7 @@ import kotlin.math.min
 
 
 class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
+    private val mRepository: BookStatusRepository = BookStatusRepository(app)
     var prefsHelper: PrefsHelper = PrefsHelper(app.applicationContext)
 
     var book: MutableLiveData<Book?> = MutableLiveData()
@@ -69,21 +74,27 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     private var fullheight: Int = 100
 
     fun loadBook(context: Context) {
-        if (!FileHelper.contentFileExist(app.applicationContext, prefsHelper.bookPath)) {
-            Toast.makeText(
-                context,
-                app.resources.getString(R.string.can_not_load_book, prefsHelper.bookPath),
-                Toast.LENGTH_LONG
-            ).show()
-            //openMainMenu()
-            return
+        try {
+            if (book.value == null || book.value!!.fileLocation != prefsHelper.bookPath ) {
+                if (!FileHelper.contentFileExist(app.applicationContext, prefsHelper.bookPath)) {
+                    Toast.makeText(
+                        context,
+                        app.resources.getString(R.string.can_not_load_book, prefsHelper.bookPath),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return
+                }
+                Toast.makeText(
+                    context,
+                    app.resources.getString(R.string.loading_book),
+                    Toast.LENGTH_SHORT
+                ).show()
+                book.value = Book(app, prefsHelper.bookPath!!)
+            }
+        } catch (e: Exception) {
+            Log.e("tag", e.stackTraceToString())
         }
-        Toast.makeText(
-            context,
-            app.resources.getString(R.string.loading_book),
-            Toast.LENGTH_SHORT
-        ).show()
-        book.value = Book(app, prefsHelper.bookPath!!)
+
     }
 
     fun pageNext(pageView: TextView): Boolean {
@@ -111,7 +122,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
         )
     }
 
-    fun isBookmarkOnCurrentPage(bookmark: Bookmark): Boolean {
+    private fun isBookmarkOnCurrentPage(bookmark: Bookmark): Boolean {
         if ( book.value?.curPage == null ) return false
         return (
                 bookmark.position_section >= book.value!!.curPage!!.startBookPosition.section
@@ -125,6 +136,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     }
 
     fun goToBookmark(pageView: TextView, bookmark: Bookmark) {
+        if ( isBookmarkOnCurrentPage(bookmark)) return
         goToPage(pageView, Page(null, BookPosition(bookmark), BookPosition()))
     }
 
@@ -148,6 +160,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     private fun goToPage(pageView: TextView, page: Page) {
         book.value?.curPage = page
         recalcCurrentPage(pageView)
+        savePositionForBook()
     }
 
     fun reloadCurrentPage(pageView: TextView) {
@@ -358,7 +371,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
             ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
         loadColorThemeSettings()
 
-        prefsHelper.tapDoubleAction = hashMapOf(
+        prefsHelper.tapDoubleAction = EnumMap( hashMapOf(
             ScreenZone.TopLeft to prefs.getString(
                 PrefsHelper.PREF_KEY_TAP_DOUBLE_TOP_LEFT,
                 prefsHelper.tapZoneDoubleTopLeft
@@ -395,9 +408,9 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
                 PrefsHelper.PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT,
                 prefsHelper.tapZoneDoubleBottomRight
             ),
-        )
+        ))
 
-        prefsHelper.tapOneAction = hashMapOf(
+        prefsHelper.tapOneAction = EnumMap(hashMapOf(
             ScreenZone.TopLeft to prefs.getString(
                 PrefsHelper.PREF_KEY_TAP_ONE_TOP_LEFT,
                 prefsHelper.tapZoneOneTopLeft
@@ -434,8 +447,8 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
                 PrefsHelper.PREF_KEY_TAP_ONE_BOTTOM_RIGHT,
                 prefsHelper.tapZoneOneBottomRight
             ),
-        )
-        prefsHelper.tapLongAction = hashMapOf(
+        ))
+        prefsHelper.tapLongAction = EnumMap(hashMapOf(
             ScreenZone.TopLeft to prefs.getString(
                 PrefsHelper.PREF_KEY_TAP_LONG_TOP_LEFT,
                 prefsHelper.tapZoneLongTopLeft
@@ -472,7 +485,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
                 PrefsHelper.PREF_KEY_TAP_LONG_BOTTOM_RIGHT,
                 prefsHelper.tapZoneLongBottomRight
             ),
-        )
+        ))
 
         prefsHelper.setOrientation(activity)
         prefsHelper.setThemeDefault()
@@ -606,5 +619,51 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
             }
         }
         return false
+    }
+
+    fun goToNextPage(textView: TextView) {
+        if (pageNext(textView)) savePositionForBook()
+    }
+
+    fun doPagePrev(textView: TextView) {
+        if (pagePrev(textView)) savePositionForBook()
+    }
+
+    private fun savePositionForBook() {
+        if (prefsHelper.bookPath != null
+            && book.value?.curPage != null) {
+            savePosition()
+        }
+    }
+
+    private fun savePosition() {
+        viewModelScope.launch {
+            val bookStatus = mRepository.getBookStatusByPath(book.value!!.fileLocation)
+
+            if (bookStatus == null) {
+                Log.d("savePosition", "bookstatus is null")
+                mRepository.insert(BookStatus(book.value!!))
+            } else {
+                Log.d(
+                    "savePosition",
+                    bookStatus.position_section.toString() + " " + bookStatus.position_offset
+                )
+                val bookPosition =
+                    if (book.value!!.curPage == null) BookPosition() else BookPosition(book.value!!.curPage!!.startBookPosition)
+                bookStatus.updatePosition(bookPosition)
+                mRepository.update(bookStatus)
+            }
+        }
+    }
+
+    fun getImageByteArray(imageSpan: ImageSpan): ByteArray? {
+        return if (imageSpan.source != null) {
+            book.value?.getImageByteArray(imageSpan.source!!)
+        } else {
+            val bitmap = ImageUtils.drawableToBitmap(imageSpan.drawable)
+            val byteArrayStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayStream)
+            byteArrayStream.toByteArray()
+        }
     }
 }

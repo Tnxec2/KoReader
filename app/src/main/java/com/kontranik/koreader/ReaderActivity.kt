@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.*
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Shader
@@ -32,7 +31,6 @@ import com.kontranik.koreader.databinding.ActivityReaderMainBinding
 import com.kontranik.koreader.model.*
 import com.kontranik.koreader.ui.fragments.*
 import com.kontranik.koreader.utils.*
-import java.io.ByteArrayOutputStream
 
 import java.io.InputStream
 import java.util.*
@@ -61,7 +59,7 @@ class ReaderActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
 
         binding = ActivityReaderMainBinding.inflate(layoutInflater)
         val view = binding.root
@@ -166,15 +164,7 @@ class ReaderActivity :
         //Here you can get the size of pageView!
         Log.d(TAG, "onWindowFocusChanged hasFocus")
         if (mReaderActivityViewModel.prefsHelper.bookPath != null) {
-            try {
-                if (mReaderActivityViewModel.book.value == null
-                    || mReaderActivityViewModel.book.value!!.fileLocation != mReaderActivityViewModel.prefsHelper.bookPath
-                ) {
-                    mReaderActivityViewModel.loadBook(binding.textViewPageview.context)
-                }
-            } catch (e: Exception) {
-                Log.e("tag", e.stackTraceToString())
-            }
+            mReaderActivityViewModel.loadBook(binding.textViewPageview.context)
         } else {
             Toast.makeText(
                 applicationContext,
@@ -202,13 +192,6 @@ class ReaderActivity :
         if (mReaderActivityViewModel.book.value == null) return
         if ( mReaderActivityViewModel.prefsHelper.bookPath != null)
             mBookStatusViewModel.loadBookStatus(mReaderActivityViewModel.prefsHelper.bookPath!!)
-    }
-
-    private fun savePositionForBook() {
-        if (mReaderActivityViewModel.prefsHelper.bookPath != null
-            && mReaderActivityViewModel.book.value?.curPage != null) {
-            mBookStatusViewModel.savePosition(mReaderActivityViewModel.book.value!!)
-        }
     }
 
     override fun onStop() {
@@ -239,10 +222,10 @@ class ReaderActivity :
         if (tapAction == null) return
         when (tapAction) {
             "PagePrev" -> {
-                doPagePrev()
+                mReaderActivityViewModel.doPagePrev(binding.textViewPageview)
             }
             "PageNext" -> {
-                doPageNext()
+                mReaderActivityViewModel.goToNextPage(binding.textViewPageview)
             }
             "QuickMenu" -> {
                 openQuickMenu()
@@ -256,7 +239,7 @@ class ReaderActivity :
             "Bookmarks" -> {
                 onShowBookmarklist()
             }
-            "None" -> {
+            else -> {
             }
         }
     }
@@ -297,12 +280,12 @@ class ReaderActivity :
 
             override fun onSwipeLeft() {
                 super.onSwipeLeft()
-                doPageNext()
+                mReaderActivityViewModel.goToNextPage(binding.textViewPageview)
             }
 
             override fun onSwipeRight() {
                 super.onSwipeRight()
-                doPagePrev()
+                mReaderActivityViewModel.doPagePrev(binding.textViewPageview)
             }
 
             override fun onSlideUp(point: Point) {
@@ -340,11 +323,11 @@ class ReaderActivity :
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_DOWN -> {
-                doPageNext()
+                mReaderActivityViewModel.goToNextPage(binding.textViewPageview)
                 return true
             }
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_UP -> {
-                doPagePrev()
+                mReaderActivityViewModel.doPagePrev(binding.textViewPageview)
                 return true
             }
             KeyEvent.KEYCODE_M -> {
@@ -371,16 +354,6 @@ class ReaderActivity :
         mReaderActivityViewModel.updateSizeInfo( binding.textViewPageview)
     }
 
-    private fun doPageNext() {
-        if (mReaderActivityViewModel.pageNext(binding.textViewPageview))
-            savePositionForBook()
-    }
-
-    private fun doPagePrev() {
-        if (mReaderActivityViewModel.pagePrev(binding.textViewPageview))
-            savePositionForBook()
-    }
-
     private fun getClickedOffset(point: Point): Int {
         // check if Link or image clicked
         var x = point.x
@@ -396,14 +369,7 @@ class ReaderActivity :
     }
 
     private fun showImage(imageSpan: ImageSpan) {
-        val b: ByteArray = if (imageSpan.source != null) {
-            mReaderActivityViewModel.book.value!!.getImageByteArray(imageSpan.source!!) ?: return
-        } else {
-            val bitmap = ImageUtils.drawableToBitmap(imageSpan.drawable)
-            val byteArrayStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayStream)
-            byteArrayStream.toByteArray()
-        }
+        val b: ByteArray = mReaderActivityViewModel.getImageByteArray(imageSpan) ?: return
         val imageViewerFragment: ImageViewerFragment =
             ImageViewerFragment.newInstance(b, mReaderActivityViewModel.prefsHelper.isDarkMode())
         imageViewerFragment.show(supportFragmentManager, "fragment_imageviewfragment")
@@ -597,9 +563,7 @@ class ReaderActivity :
     }
 
     override fun onSelectBookmark(bookmark: Bookmark) {
-        if ( mReaderActivityViewModel.isBookmarkOnCurrentPage(bookmark)) return
         mReaderActivityViewModel.goToBookmark(binding.textViewPageview, bookmark)
-        savePositionForBook()
     }
 
     private fun openGotoMenu() {
@@ -618,12 +582,10 @@ class ReaderActivity :
 
     override fun onFinishGotoMenuDialogPage(page: Int) {
         mReaderActivityViewModel.goToPage(binding.textViewPageview, page)
-        savePositionForBook()
     }
 
     override fun onFinishGotoMenuDialogSection(section: Int) {
         mReaderActivityViewModel.goToSection(binding.textViewPageview, section)
-        savePositionForBook()
     }
 
     private fun setPageView(pageViewSettings: PageViewSettings) {
@@ -702,6 +664,7 @@ class ReaderActivity :
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val lFlags = window.decorView.systemUiVisibility
+
                 window.decorView.systemUiVisibility =
                     if (pIsDark) (lFlags and (View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR).inv()) else
                         (lFlags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)

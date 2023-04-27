@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.kontranik.koreader.R
 import com.kontranik.koreader.model.ScreenZone
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
+import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -117,9 +118,9 @@ class PrefsHelper(val context: Context) {
     val tapZoneLongBottomCenter: String = "None"
     val tapZoneLongBottomRight: String = "None"
 
-    var tapOneAction: HashMap<ScreenZone, String?> = hashMapOf()
-    var tapDoubleAction: HashMap<ScreenZone, String?> = hashMapOf()
-    var tapLongAction: HashMap<ScreenZone, String?> = hashMapOf()
+    var tapOneAction: EnumMap<ScreenZone, String?> = EnumMap(ScreenZone::class.java)
+    var tapDoubleAction: EnumMap<ScreenZone, String?> = EnumMap(ScreenZone::class.java)
+    var tapLongAction: EnumMap<ScreenZone, String?> = EnumMap(ScreenZone::class.java)
 
     private val screenBrightnessLevelMin: Float = 0.01F
     private val screenBrightnessLevelMax: Float = 1F

@@ -20,7 +20,7 @@ class FB2Parser(appDir: String, private var uri: String, private var fileInputSt
     // private DefaultHandler handler = this;
     // Inhalt mit dem Default-Parser parsen
     private var saxParser: SAXParser = SAXParserFactory.newInstance().newSAXParser()
-    private var fB2ParserObject = FB2ParserObject(FileHelper(appDir))
+    private var fB2ParserObject = FB2ParserObject(Fb2FileHelper(appDir))
 
     @Throws(Exception::class)
     fun parseBook(): FB2Scheme {

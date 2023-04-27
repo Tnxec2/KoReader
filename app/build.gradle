@@ -3,15 +3,16 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 32
+    namespace 'com.kontranik.koreader'
+    compileSdkVersion 33
     buildToolsVersion "29.0.2"
     defaultConfig {
         vectorDrawables.useSupportLibrary = true
         applicationId "com.kontranik.koreader"
         minSdkVersion 21
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode 9
-        versionName "1.2.7"
+        versionName "1.2.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", "KoRe-" + versionName )
     }
@@ -26,16 +27,16 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = 11
+        targetCompatibility = 11
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    def lifecycleVersion = '2.4.0'
-    def roomVersion = '2.4.1'
+    def lifecycleVersion = '2.6.1'
+    def roomVersion = '2.5.1'
 
     // Room components
     implementation "androidx.room:room-runtime:$roomVersion"

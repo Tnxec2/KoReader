@@ -42,7 +42,7 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
                 )
             }
             calculateScheme()
-        }  catch (e: FileNotFoundException) {
+        }  catch (_: FileNotFoundException) {
 
         }
     }

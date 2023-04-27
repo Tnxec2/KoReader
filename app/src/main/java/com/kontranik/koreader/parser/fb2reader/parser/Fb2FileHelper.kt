@@ -9,7 +9,7 @@ import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Scheme
 import com.kontranik.koreader.parser.fb2reader.parser.model.FB2Section
 import java.io.*
 
-class FileHelper(private val appDir: String) {
+class Fb2FileHelper(private val appDir: String) {
 
     @Throws(Exception::class)
     fun clearworkdir() {

@@ -17,7 +17,7 @@ class FB2Reader internal constructor(private val appDir: String,
     fun readBook(contentUri: String?, fileInputStream: InputStream?): FB2Scheme? {
         if (contentUri != null) {
             try {
-                val schemeFile = FileHelper(appDir).scheme
+                val schemeFile = Fb2FileHelper(appDir).scheme
                 if (contentUri == schemeFile.path) {
                     fb2Scheme = schemeFile
                     return schemeFile
@@ -55,7 +55,7 @@ class FB2Reader internal constructor(private val appDir: String,
             if (coverSrc != null) {
                 if (coverSrc.startsWith("#")) coverSrc = coverSrc.substring(1)
                 return try {
-                    val binaryData = FileHelper(appDir).getBinary(coverSrc)
+                    val binaryData = Fb2FileHelper(appDir).getBinary(coverSrc)
                     binaryData.contentsArray
                 } catch (e: Exception) {
                     null
@@ -66,7 +66,7 @@ class FB2Reader internal constructor(private val appDir: String,
 
     fun getSectionHtml(orderId: Int): String? {
         return if (orderId < 0 || orderId > fb2Scheme!!.sections.size) null else try {
-            FileHelper(appDir).getSectionText(orderId)
+            Fb2FileHelper(appDir).getSectionText(orderId)
         } catch (e: Exception) {
             null
         }
@@ -87,7 +87,7 @@ class FB2Reader internal constructor(private val appDir: String,
         var name = binaryname
         if (name.startsWith("#")) name = name.substring(1)
         return try {
-            val binaryData = FileHelper(appDir).getBinary(name)
+            val binaryData = Fb2FileHelper(appDir).getBinary(name)
             binaryData.contentsArray
         } catch (e: Exception) {
             null

@@ -3,14 +3,11 @@ package com.kontranik.koreader.ui.fragments
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.annotation.Nullable
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,7 +17,7 @@ import com.kontranik.koreader.databinding.FragmentFilechooseBinding
 import com.kontranik.koreader.ui.adapters.FileListAdapter
 import com.kontranik.koreader.utils.FileItem
 
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+
 class FileChooseFragment : DialogFragment(),
         FileListAdapter.FileListAdapterClickListener,
         BookInfoFragment.BookInfoListener{
@@ -40,7 +37,7 @@ class FileChooseFragment : DialogFragment(),
         return binding.root
     }
 
-    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         mReaderActivityViewModel = ViewModelProvider(requireActivity())[ReaderActivityViewModel::class.java]
@@ -103,8 +100,8 @@ class FileChooseFragment : DialogFragment(),
         mFileChooseFragmentViewModel.onFilelistItemClick(position)
     }
 
-    override fun onFilelistItemDelete(position: Int, fileItem: FileItem) {
-        if( fileItem.isStorage )
+    override fun onFilelistItemDelete(position: Int, item: FileItem) {
+        if( item.isStorage )
             confirmDeleteStorage(position)
     }
 

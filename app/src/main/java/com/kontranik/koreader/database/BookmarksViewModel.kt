@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.switchMap
 import com.kontranik.koreader.database.repository.BookmarksRepository
 import com.kontranik.koreader.model.Bookmark
 
@@ -16,10 +16,8 @@ class BookmarksViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     private val path = MutableLiveData<String>()
-    var mAllBookmarks: LiveData<List<Bookmark>> = Transformations.switchMap(
-        path,
-        ::getLiveDataBookmarksByPath
-    )
+    var mAllBookmarks: LiveData<List<Bookmark>> = path.switchMap { getLiveDataBookmarksByPath(it)}
+
 
     private fun getLiveDataBookmarksByPath(path: String) = mRepository.getByPath(path)
 

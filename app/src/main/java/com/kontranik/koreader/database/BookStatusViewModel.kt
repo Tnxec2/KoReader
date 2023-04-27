@@ -30,34 +30,12 @@ class BookStatusViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private val path = MutableLiveData<String>()
-    val savedBookStatus: LiveData<BookStatus?> = Transformations.switchMap(
-        path,
-        ::getLiveDataBookStatusByPath
-    )
+    val savedBookStatus: LiveData<BookStatus?> = path.switchMap { getLiveDataBookStatusByPath(it) }
+
 
     private fun getLiveDataBookStatusByPath(path: String) = mRepository.getLiveDataBookStatusByPath(path)
 
     fun loadBookStatus(path: String) = apply { this.path.value = path }
-
-    fun savePosition(book: Book) {
-        viewModelScope.launch {
-            val bookStatus = mRepository.getBookStatusByPath(book.fileLocation)
-
-            if (bookStatus == null) {
-                Log.d("savePosition", "bookstatus is null")
-                mRepository.insert(BookStatus(book))
-            } else {
-                Log.d(
-                    "savePosition",
-                    bookStatus.position_section.toString() + " " + bookStatus.position_offset
-                )
-                val bookPosition =
-                    if (book.curPage == null) BookPosition() else BookPosition(book.curPage!!.startBookPosition)
-                bookStatus.updatePosition(bookPosition)
-                mRepository.update(bookStatus)
-            }
-        }
-    }
 
     val lastOpenedBooks: LiveData<List<BookStatus>> = mRepository.getLastOpened(LAST_OPENED_COUNT)
 
