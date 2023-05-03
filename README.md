@@ -20,3 +20,19 @@ Android Ebook Reader
 - Font selection
 - Text: size, line- and letter- spacing
 - Tap Zones
+
+# Screenshots
+
+## Open book dialog
+![Open book dialog](img/open_dialog.jpg)
+## Book info dialog
+![Book info dialog](img/book_info.jpg)
+
+## Title page with cover
+![Title page](img/titlepage.jpg)
+
+## Dark theme
+![Dark theme](img/dark_theme.jpg)
+
+## Quick settings
+![Quick settings](img/quicksettings.jpg)
