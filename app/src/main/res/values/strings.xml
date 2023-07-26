@@ -171,6 +171,7 @@
     <string name="marginRight">Margin Right</string>
     <string name="marginLeft">Margin Left</string>
     <string name="default_margin_value" translatable="false">16</string>
+
     <string name="title_delete_book">Delete book</string>
     <string name="sure_delete_book">Are you sure to delete this book</string>
     <string name="ok_delete_book">Delete</string>
@@ -181,4 +182,5 @@
     <string name="sure_select_storage">Select storage in next dialog and grand access</string>
     <string name="ok_select_storage">OK</string>
     <string name="toggle_invert">Toggle Invert</string>
+    <string name="color_theme">Color theme</string>
 </resources>

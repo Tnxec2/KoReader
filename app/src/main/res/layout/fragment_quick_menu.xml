@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/activity_padding"
-    android:layout_gravity="center_vertical"
-    tools:layout_editor_absoluteX="16dp"
+    android:layout_gravity="bottom"
     android:background="@color/background_main_dialog"
     android:textColor="@color/foreground_main_dialog"
-
     >
 
     <LinearLayout
@@ -24,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Color theme"></TextView>
+            android:text="@string/color_theme" />
 
         <Spinner
             android:id="@+id/spinner_quick_menu_themes"
@@ -59,7 +56,7 @@
             android:id="@+id/textView_quick_menU_textSizeExample"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="center_horizontal|center_vertical"
             android:text="@string/example_abcabc" />
@@ -81,7 +78,7 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:text="@string/line_spacing" />
@@ -101,7 +98,7 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:text="@string/letter_spacing" />
@@ -162,7 +159,7 @@
             app:srcCompat="@drawable/ic_iconmonstr_book_info"
             android:contentDescription="@string/bookinfo" />
 
-        <Space
+        <androidx.legacy.widget.Space
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1" />

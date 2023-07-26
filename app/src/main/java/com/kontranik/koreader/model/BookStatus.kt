@@ -1,6 +1,5 @@
 package com.kontranik.koreader.model
 
-import androidx.annotation.NonNull
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -10,7 +9,6 @@ import java.util.*
 @Entity(tableName = BookStatusHelper.TABLE)
 class BookStatus(
     @PrimaryKey(autoGenerate = true)
-    @NonNull
     @ColumnInfo(name = BookStatusHelper.COLUMN_ID) var id: Long? = null,
     @ColumnInfo(name = BookStatusHelper.COLUMN_PATH) var path: String? = null,
     @ColumnInfo(name = BookStatusHelper.COLUMN_TITLE) var title: String? = null,
