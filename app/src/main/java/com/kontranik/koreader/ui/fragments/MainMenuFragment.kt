@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
@@ -63,23 +62,15 @@ class MainMenuFragment : DialogFragment() {
 
     }
 
-    private var resultLauncherMainMenu = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val intentData: Intent? = result.data
-
-            if (intentData != null && intentData.hasExtra(ReaderActivity.PREF_TYPE)) {
-                when (intentData.getIntExtra(ReaderActivity.PREF_TYPE, 0)) {
-                    ReaderActivity.PREF_TYPE_OPEN_BOOK -> {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-
     private fun openFile() {
         val fragment = FileChooseFragment()
         fragment.show(requireActivity().supportFragmentManager, "fragment_open_file")
+
+        requireActivity().supportFragmentManager.setFragmentResultListener("open_file", this) { key, _ ->
+            if (key == "open_file") {
+                dismiss()
+            }
+        }
     }
 
     private fun settings() {

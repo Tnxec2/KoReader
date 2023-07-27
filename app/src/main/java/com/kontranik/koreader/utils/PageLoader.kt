@@ -1,14 +1,14 @@
 package com.kontranik.koreader.utils
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import android.widget.TextView
-import androidx.annotation.RequiresApi
-import com.kontranik.koreader.model.*
+import com.kontranik.koreader.model.Book
+import com.kontranik.koreader.model.BookPosition
+import com.kontranik.koreader.model.Page
 import kotlin.math.max
 
-class PageLoader @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+class PageLoader
 
     constructor(context: Context, private val book: Book) : PageSplitterHtml(context){
 

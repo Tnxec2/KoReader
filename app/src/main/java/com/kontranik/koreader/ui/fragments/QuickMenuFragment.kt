@@ -1,19 +1,19 @@
 package com.kontranik.koreader.ui.fragments
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
-import androidx.annotation.Nullable
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
 import com.kontranik.koreader.databinding.FragmentQuickMenuBinding
@@ -26,11 +26,11 @@ import kotlin.math.max
 import kotlin.math.min
 
 
-class QuickMenuFragment : DialogFragment() {
+class QuickMenuFragment : BottomSheetDialogFragment() {
 
     private lateinit var binding: FragmentQuickMenuBinding
 
-    private var listener: QuickMenuDialogListener? = null
+    private var mListener: QuickMenuDialogListener? = null
 
     // textSize
     private var textSize: Float = 0F
@@ -43,21 +43,18 @@ class QuickMenuFragment : DialogFragment() {
 
     private val typeFace: Typeface = TypefaceRecord.DEFAULT.getTypeface()
 
+    private var saved = false
+
     // 1. Defines the listener interface with a method passing back data result.
     interface QuickMenuDialogListener {
         fun onFinishQuickMenuDialog(textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorTheme: String)
-        fun onChangeTextSize(textSize: Float)
-        fun onChangeLineSpacing(lineSpacingMultiplier: Float)
-        fun onChangeLetterSpacing(letterSpacing: Float)
-        fun onCancelQuickMenu()
-        fun onAddBookmark()
-        fun onShowBookmarklist()
-        fun onChangeColorTheme(colorTheme: String, colorThemeIndex: Int)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
+        fun onChangeTextSizeQuickMenuDialog(textSize: Float)
+        fun onChangeLineSpacingQuickMenuDialog(lineSpacingMultiplier: Float)
+        fun onChangeLetterSpacingQuickMenuDialog(letterSpacing: Float)
+        fun onCancelQuickMenuDialog()
+        fun onAddBookmarkQuickMenuDialog()
+        fun onShowBookmarklistQuickMenuDialog()
+        fun onChangeColorThemeQuickMenuDialog(colorTheme: String, colorThemeIndex: Int)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -66,13 +63,10 @@ class QuickMenuFragment : DialogFragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.d("QuickMenuFragment", view.context.theme.toString())
-
         binding.imageButtonQuickmenuBack.setOnClickListener {
-            listener!!.onCancelQuickMenu()
             dismiss()
         }
 
@@ -97,9 +91,25 @@ class QuickMenuFragment : DialogFragment() {
         initialLineSpacing()
         initialLetterSpacing()
         initialBookmarks()
+    }
 
-        listener = activity as QuickMenuDialogListener
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is QuickMenuDialogListener) {
+            mListener = context as QuickMenuDialogListener
+        } else {
+            throw RuntimeException(
+                context.toString()
+                        + " must implement QuickMenuDialogListener"
+            )
+        }
+    }
 
+    override fun onDetach() {
+        super.onDetach()
+
+        if (!saved) mListener?.onCancelQuickMenuDialog()
+        mListener = null
     }
 
     private fun initialTheming() {
@@ -124,7 +134,7 @@ class QuickMenuFragment : DialogFragment() {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
                 colorTheme = valArray[position]
-                listener!!.onChangeColorTheme(colorTheme, position)
+                mListener!!.onChangeColorThemeQuickMenuDialog(colorTheme, position)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -154,7 +164,7 @@ class QuickMenuFragment : DialogFragment() {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
                 lineSpacingMultiplier = valArray[position].toFloat()
-                listener!!.onChangeLineSpacing(lineSpacingMultiplier)
+                mListener!!.onChangeLineSpacingQuickMenuDialog(lineSpacingMultiplier)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -184,7 +194,7 @@ class QuickMenuFragment : DialogFragment() {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
                 letterSpacing = valArray[position].toFloat()
-                listener!!.onChangeLetterSpacing(letterSpacing)
+                mListener!!.onChangeLetterSpacingQuickMenuDialog(letterSpacing)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -198,11 +208,11 @@ class QuickMenuFragment : DialogFragment() {
 
     private fun initialBookmarks() {
         binding.imageViewQuickMenuAddBookmark.setOnClickListener {
-            listener!!.onAddBookmark()
+            mListener!!.onAddBookmarkQuickMenuDialog()
             dismiss()
         }
         binding.imageViewQuickMenuListBookmark.setOnClickListener {
-            listener!!.onShowBookmarklist()
+            mListener!!.onShowBookmarklistQuickMenuDialog()
             dismiss()
         }
     }
@@ -265,22 +275,23 @@ class QuickMenuFragment : DialogFragment() {
         prefEditor.apply()
 
         // Return Data back to activity through the implemented listener
-        listener!!.onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorTheme)
+        mListener!!.onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorTheme)
 
         // Close the dialog and return back to the parent activity
+        saved = true
         dismiss()
     }
 
     private fun decreaseTextSize() {
         textSize = max(PrefsHelper.textSizeMin, textSize - textSizeStep)
         binding.textViewQuickMenUTextSizeExample.textSize = textSize
-        listener!!.onChangeTextSize(textSize)
+        mListener!!.onChangeTextSizeQuickMenuDialog(textSize)
     }
 
     private fun increaseTextSize() {
         textSize = min(PrefsHelper.textSizeMax, textSize + textSizeStep)
         binding.textViewQuickMenUTextSizeExample.textSize = textSize
-        listener!!.onChangeTextSize(textSize)
+        mListener!!.onChangeTextSizeQuickMenuDialog(textSize)
     }
 
     companion object {

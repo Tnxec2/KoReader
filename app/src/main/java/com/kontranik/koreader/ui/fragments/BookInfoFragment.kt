@@ -1,13 +1,13 @@
 package com.kontranik.koreader.ui.fragments
 
 import android.app.AlertDialog
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.Nullable
+import androidx.core.text.HtmlCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
@@ -18,7 +18,7 @@ class BookInfoFragment : DialogFragment() {
 
     private lateinit var binding: FragmentBookinfoBinding
 
-    private var listener: BookInfoListener? = null
+    private var mListener: BookInfoListener? = null
 
     // 1. Defines the listener interface with a method passing back data result.
     interface BookInfoListener {
@@ -37,7 +37,7 @@ class BookInfoFragment : DialogFragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val bookPath = requireArguments().getString(BOOK_PATH, null)
@@ -48,8 +48,8 @@ class BookInfoFragment : DialogFragment() {
         }
 
         binding.imageButtonBookinfoRead.setOnClickListener {
-            if ( listener != null) {
-                listener?.onBookInfoFragmentReadBook(bookPath!!)
+            if ( mListener != null) {
+                mListener?.onBookInfoFragmentReadBook(bookPath!!)
                 dismiss()
             }
         }
@@ -67,8 +67,8 @@ class BookInfoFragment : DialogFragment() {
             .setPositiveButton(
                 getString(R.string.ok_delete_book)
             ) { dialogInterface, _ ->
-                if ( listener != null) {
-                    listener?.onBookInfoFragmentDeleteBook(bookPath)
+                if ( mListener != null) {
+                    mListener?.onBookInfoFragmentDeleteBook(bookPath)
                     dismiss()
                 }
                 dialogInterface.dismiss()
@@ -81,7 +81,7 @@ class BookInfoFragment : DialogFragment() {
             .show()
         }
 
-        if ( listener == null) {
+        if ( mListener == null) {
             binding.imageButtonBookinfoRead.visibility = View.GONE
             binding.imageButtonBookinfoDelete.visibility = View.GONE
         }
@@ -103,12 +103,27 @@ class BookInfoFragment : DialogFragment() {
         }
         binding.textViewBookinfoBooktitle.text = bookInfo.title
         binding.textViewBookinfoAutors.text = bookInfo.authorsAsString()
-        binding.textViewBookinfoAnnotation.text = Html.fromHtml(bookInfo.annotation)
+        binding.textViewBookinfoAnnotation.text = HtmlCompat.fromHtml(bookInfo.annotation, HtmlCompat.FROM_HTML_MODE_LEGACY)
     }
 
-    fun setListener(listener: BookInfoListener) {
-        this.listener  = listener
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is BookInfoListener) {
+            mListener = context
+        } else {
+            throw RuntimeException(
+                context.toString()
+                        + " must implement BookInfoListener"
+            )
+        }
     }
+
+    override fun onDetach() {
+        super.onDetach()
+        mListener = null
+    }
+
+
 
     companion object {
         private const val BOOK_PATH = "book_path"

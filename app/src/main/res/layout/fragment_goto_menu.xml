@@ -10,7 +10,6 @@
     tools:layout_editor_absoluteX="16dp"
     android:background="@color/background_main_dialog"
     android:textColor="@color/foreground_main_dialog"
-
     >
 
     <LinearLayout
@@ -24,25 +23,20 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:text="@string/go_to"
-            android:textSize="@dimen/text_size_dialog_title"
+            style="@style/TextAppearance.AppCompat.Title"
             />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/imageButton_gotomenu_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:contentDescription="@string/save"
             app:srcCompat="@drawable/ic_baseline_check_24" />
 
         <ImageButton
             android:id="@+id/imageButton_gotomenu_close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:contentDescription="@string/back"
             app:srcCompat="@drawable/ic_baseline_close_24" />
     </LinearLayout>
@@ -61,8 +55,8 @@
 
         <ImageButton
             android:id="@+id/imageView_goto_menu_page_left"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="bottom"
             android:clickable="true"
             app:srcCompat="@drawable/ic_baseline_arrow_left_24"
@@ -79,8 +73,8 @@
 
         <ImageButton
             android:id="@+id/imageView_goto_menu_page_right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="bottom"
             android:clickable="true"
             app:srcCompat="@drawable/ic_baseline_arrow_right_24"

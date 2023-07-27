@@ -1,12 +1,12 @@
 package com.kontranik.koreader.ui.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
-import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentGotoMenuBinding
@@ -17,7 +17,7 @@ import kotlin.math.min
 class GotoMenuFragment : DialogFragment() {
     private lateinit var binding: FragmentGotoMenuBinding
 
-    private var listener: GotoMenuDialogListener? = null
+    private var mListener: GotoMenuDialogListener? = null
 
     private var section: Int = 0
 
@@ -44,10 +44,8 @@ class GotoMenuFragment : DialogFragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        listener = activity as GotoMenuDialogListener?
 
         section = requireArguments().getInt(SECTION, section)
 
@@ -67,6 +65,24 @@ class GotoMenuFragment : DialogFragment() {
 
         initialGotoPage()
         initialGotoList(view)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is GotoMenuDialogListener) {
+            mListener = context
+        } else {
+            throw RuntimeException(
+                context.toString()
+                        + " must implement GotoMenuDialogListener"
+            )
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+
+        mListener = null
     }
 
     private fun initialGotoPage() {
@@ -89,7 +105,7 @@ class GotoMenuFragment : DialogFragment() {
             binding.gotoMenuSectionlist.adapter = adapter
         }
         binding.gotoMenuSectionlist.onItemClickListener =
-            OnItemClickListener { parent, v, position, id ->
+            OnItemClickListener { _, _, position, _ ->
                 // val selectedItem: String = aSections!!.get(position)
                 gotoSection(position)
             }
@@ -98,14 +114,14 @@ class GotoMenuFragment : DialogFragment() {
 
     private fun gotoPage() {
         if ( page != pageInitial)
-            listener!!.onFinishGotoMenuDialogPage(page)
+            mListener!!.onFinishGotoMenuDialogPage(page)
 
         // Close the dialog and return back to the parent activity
         dismiss()
     }
 
     private fun gotoSection(section: Int) {
-        listener!!.onFinishGotoMenuDialogSection(section)
+        mListener!!.onFinishGotoMenuDialogSection(section)
 
         // Close the dialog and return back to the parent activity
         dismiss()

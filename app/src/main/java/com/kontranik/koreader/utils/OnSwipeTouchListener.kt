@@ -17,6 +17,12 @@ internal open class OnSwipeTouchListener(c: Context?) :
         return gestureDetector.onTouchEvent(motionEvent)
     }
 
+    enum class TapType {
+        OneTap,
+        DoubleTap,
+        LongTap
+    }
+
     private inner class GestureListener : SimpleOnGestureListener() {
         private val SWIPE_THRESHOLD: Int = 100
         private val SWIPE_VELOCITY_THRESHOLD: Int = 100

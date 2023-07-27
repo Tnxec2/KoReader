@@ -4,15 +4,9 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.dao.BookStatusDao
-import com.kontranik.koreader.model.BookStatus
+import com.kontranik.koreader.database.model.BookStatus
 
-internal class BookStatusRepository(context: Context) {
-    private val mBookStatusDao: BookStatusDao
-
-    init {
-        val db: BooksRoomDatabase = BooksRoomDatabase.getDatabase(context)
-        mBookStatusDao = db.bookStatusDao()
-    }
+class BookStatusRepository(private val mBookStatusDao: BookStatusDao) {
 
     suspend fun allBookStatus(): List<BookStatus> {
         return mBookStatusDao.getAll()

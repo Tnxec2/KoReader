@@ -1,11 +1,10 @@
 package com.kontranik.koreader.ui.fragments
 
 import android.os.Bundle
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.Nullable
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.DialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentFloattextviewBinding
@@ -28,7 +27,7 @@ class FloatTextViewFragment : DialogFragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.imageButtonFloattextviewClose.setOnClickListener {
@@ -36,7 +35,7 @@ class FloatTextViewFragment : DialogFragment() {
         }
 
         val textSize = requireArguments().getFloat(QuickMenuFragment.TEXTSIZE)
-        val theme = requireArguments().getString(QuickMenuFragment.THEME)
+        // val theme = requireArguments().getString(QuickMenuFragment.THEME)
         val fontname = requireArguments().getString(QuickMenuFragment.FONTNAME, TypefaceRecord.SANSSERIF)
         val fontpath = requireArguments().getString(QuickMenuFragment.FONTPATH, null)
         val selectedFont = if ( fontpath != null ) {
@@ -51,7 +50,7 @@ class FloatTextViewFragment : DialogFragment() {
 
         val html = requireArguments().getString(CONTENT, "no Content")
         with (binding.textViewFloattextviewContent) {
-            text = Html.fromHtml(html)
+            text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
             typeface = selectedFont.getTypeface()
             this.textSize = textSize
         }

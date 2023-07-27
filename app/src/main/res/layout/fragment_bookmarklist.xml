@@ -17,21 +17,19 @@
 
         <TextView
             android:id="@+id/textView_bookmarklist_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/bookmarklist"
-            android:textSize="@dimen/text_size_dialog_title"
-            />
-
-        <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:text="@string/bookmarklist"
+            style="@style/TextAppearance.AppCompat.Title"
+            />
+
 
         <ImageButton
             android:id="@+id/imageButton_bookmarklist_addBookmark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="bottom"
             android:clickable="true"
             app:srcCompat="@drawable/ic_iconmonstr_bookmark_add"
@@ -40,8 +38,8 @@
 
         <ImageButton
             android:id="@+id/imageButton_bookmarklist_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_baseline_arrow_back_24"
             android:contentDescription="@string/back" />
 

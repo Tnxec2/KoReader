@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.Nullable
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
@@ -37,7 +39,7 @@ class SettingsFragment : DialogFragment(),
         return binding.root
     }
 
-    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         mReaderActivityViewModel = ViewModelProvider(requireActivity())[ReaderActivityViewModel::class.java]
@@ -127,11 +129,21 @@ class SettingsFragment : DialogFragment(),
             }
         }
 
-        @Deprecated("Deprecated in Java")
-        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-            super.onActivityResult(requestCode, resultCode, data)
-            if (resultCode == Activity.RESULT_OK && requestCode == ImagePickerPreference.PICK_IMAGE) {
-                imageUri = data!!.data.toString()
+//        @Deprecated("Deprecated in Java")
+//        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//            super.onActivityResult(requestCode, resultCode, data)
+//            if (resultCode == Activity.RESULT_OK && requestCode == ImagePickerPreference.PICK_IMAGE) {
+//                imageUri = data!!.data.toString()
+//                findPreference<ImagePickerPreference>("backgroundImageTheme$themeId")?.setImageUri(imageUri)
+//            }
+//        }
+
+        private val startForResultPickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val intent = result.data
+                // Handle the Intent
+                imageUri = intent.toString()
                 findPreference<ImagePickerPreference>("backgroundImageTheme$themeId")?.setImageUri(imageUri)
             }
         }
@@ -143,12 +155,15 @@ class SettingsFragment : DialogFragment(),
                 }
                 is ImagePickerPreference -> {
                     val intent = Intent()
-                    intent.type = "image/*"
-                    intent.action = Intent.ACTION_OPEN_DOCUMENT
-                    intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    with(intent) {
+                        type = "image/*"
+                        action = Intent.ACTION_OPEN_DOCUMENT
+                        addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
 
-                    startActivityForResult(Intent.createChooser(intent, "Select backgroud image"), ImagePickerPreference.PICK_IMAGE)
+                    //startActivityForResult(Intent.createChooser(intent, "Select backgroud image"), ImagePickerPreference.PICK_IMAGE)
+                    startForResultPickImage.launch(Intent.createChooser(intent, "Select backgroud image"))
                 }
                 else -> {
                     super.onDisplayPreferenceDialog(preference)
@@ -190,6 +205,7 @@ class SettingsFragment : DialogFragment(),
             .replace(binding.settingsContainer.id, fragment)
             .addToBackStack(pref.key)
             .commit()
+
 
         return true
     }

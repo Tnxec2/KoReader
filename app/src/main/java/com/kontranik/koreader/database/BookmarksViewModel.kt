@@ -1,15 +1,11 @@
 package com.kontranik.koreader.database
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.switchMap
+import androidx.lifecycle.*
 import com.kontranik.koreader.database.repository.BookmarksRepository
-import com.kontranik.koreader.model.Bookmark
+import com.kontranik.koreader.database.model.Bookmark
+import com.kontranik.koreader.database.repository.BookStatusRepository
 
-class BookmarksViewModel(application: Application) : AndroidViewModel(application) {
-    private val mRepository: BookmarksRepository = BookmarksRepository(application)
+class BookmarksViewModel(private val mRepository: BookmarksRepository) : ViewModel() {
 
     fun insert(bookmark: Bookmark) {
         mRepository.insert(bookmark)
@@ -28,4 +24,14 @@ class BookmarksViewModel(application: Application) : AndroidViewModel(applicatio
         mRepository.delete(bookmark.id!!)
     }
 
+}
+
+class BookmarksViewModelFactory(private val repository: BookmarksRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(BookmarksViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return BookmarksViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

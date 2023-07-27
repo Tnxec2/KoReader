@@ -3,7 +3,7 @@ package com.kontranik.koreader.database.dao
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.kontranik.koreader.database.BookStatusHelper
-import com.kontranik.koreader.model.BookStatus
+import com.kontranik.koreader.database.model.BookStatus
 
 @Dao
 interface BookStatusDao {

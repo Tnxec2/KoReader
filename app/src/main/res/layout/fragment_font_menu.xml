@@ -25,8 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/font_select_title"
-            android:textSize="@dimen/text_size_dialog_title"
-            android:textStyle="italic" />
+            style="@style/TextAppearance.AppCompat.Title" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/reciclerView_font_list"

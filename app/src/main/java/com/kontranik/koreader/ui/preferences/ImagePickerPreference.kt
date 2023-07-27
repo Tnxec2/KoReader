@@ -20,9 +20,9 @@ import java.lang.Exception
 class ImagePickerPreference(context: Context, attrs: AttributeSet) :
     DialogPreference(context, attrs) {
 
-    val themeId = attrs.getAttributeValue(null, "themeid")
+    private val themeId = attrs.getAttributeValue(null, "themeid")
 
-    var textViewImageUri: TextView? = null
+    private var textViewImageUri: TextView? = null
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
@@ -52,38 +52,31 @@ class ImagePickerPreference(context: Context, attrs: AttributeSet) :
         val uri = Uri.parse(imageUri)
         try {
             context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            if (uri != null) {
-                if (uri.scheme.equals("file")) {
-                    fileName = uri.lastPathSegment.toString()
+            uri?.let {
+                if (it.scheme.equals("file")) {
+                    fileName = it.lastPathSegment.toString()
                 } else {
                     var cursor: Cursor? = null
                     try {
-
-                        cursor = context.contentResolver.query(uri, arrayOf(
+                        cursor = context.contentResolver.query(it, arrayOf(
                                 MediaStore.Images.ImageColumns.DISPLAY_NAME
                         ), null, null, null)
                         if (cursor != null && cursor.moveToFirst()) {
-                            fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DISPLAY_NAME))
-
+                            val index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DISPLAY_NAME)
+                            if (index >= 0) fileName = cursor.getString(index)
                         }
                     } finally {
-                        if (cursor != null) {
-                            cursor.close()
-                        }
+                        cursor?.close()
                     }
                 }
             }
             textViewImageUri!!.text = fileName
-        } catch (e: Exception) {
+        } catch (_: Exception) {
 
         }
     }
 
     init {
         widgetLayoutResource = R.layout.preference_image_picker
-    }
-
-    companion object {
-        val PICK_IMAGE = 13463
     }
 }

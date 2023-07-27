@@ -1,6 +1,5 @@
 package com.kontranik.koreader
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.*
 import android.content.res.Configuration
@@ -11,24 +10,29 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.text.Spannable
 import android.text.style.ImageSpan
-import android.text.style.URLSpan
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
+import android.window.OnBackInvokedDispatcher
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.database.BookStatusViewModel
+import com.kontranik.koreader.database.BookStatusViewModelFactory
 import com.kontranik.koreader.database.BookmarksViewModel
+import com.kontranik.koreader.database.BookmarksViewModelFactory
+import com.kontranik.koreader.database.model.Bookmark
 import com.kontranik.koreader.databinding.ActivityReaderMainBinding
 import com.kontranik.koreader.model.*
+import com.kontranik.koreader.ui.components.BookReaderTextview.BookReaderTextviewListener
+import com.kontranik.koreader.ui.components.ReadInfoArea.ReadInfoAreaListener
 import com.kontranik.koreader.ui.fragments.*
 import com.kontranik.koreader.utils.*
 
@@ -40,7 +44,9 @@ class ReaderActivity :
     AppCompatActivity(),
     QuickMenuFragment.QuickMenuDialogListener,
     BookmarkListFragment.BookmarkListDialogListener,
-    GotoMenuFragment.GotoMenuDialogListener {
+    GotoMenuFragment.GotoMenuDialogListener,
+    ReadInfoAreaListener,
+    BookReaderTextviewListener {
 
     private lateinit var binding: ActivityReaderMainBinding
 
@@ -65,31 +71,28 @@ class ReaderActivity :
         val view = binding.root
         setContentView(view)
 
-        mBookStatusViewModel = ViewModelProvider(this)[BookStatusViewModel::class.java]
-        mBookmarksViewModel = ViewModelProvider(this)[BookmarksViewModel::class.java]
-        mReaderActivityViewModel = ViewModelProvider(this)[ReaderActivityViewModel::class.java]
+        mBookStatusViewModel = ViewModelProvider(this, BookStatusViewModelFactory((application as App).bookStatusRepository))[BookStatusViewModel::class.java]
+        mBookmarksViewModel = ViewModelProvider(this, BookmarksViewModelFactory((application as App).bookmarksRepository))[BookmarksViewModel::class.java]
+        mReaderActivityViewModel = ViewModelProvider(this, ReaderActivityViewModelFactory((application as App).bookStatusRepository))[ReaderActivityViewModel::class.java]
 
         mBookStatusViewModel.cleanup(this)
 
-        // nachputzen falsche prefs
-        // linespace und LetterSpace  pref muss string sein - float ist falsch
-        val mySPrefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val editor = mySPrefs.edit()
-        try {
-            if (mySPrefs.getFloat(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, -1f) != -1f) {
-                editor.remove(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING)
-                editor.apply()
+
+        if (Build.VERSION.SDK_INT >= 33) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT
+            ) {
+                exitOnBackPressed()
             }
-        } catch (e: ClassCastException) {
-            // its ok
-        }
-        try {
-            if (mySPrefs.getFloat(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, -1f) != -1f) {
-                editor.remove(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING)
-                editor.apply()
-            }
-        } catch (e: ClassCastException) {
-            // its ok
+        } else {
+            onBackPressedDispatcher.addCallback(
+                this,
+                object : OnBackPressedCallback(true) {
+                    override fun handleOnBackPressed() {
+                        exitOnBackPressed()
+                    }
+                }
+            )
         }
 
         TextViewInitiator.initiateTextView(binding.textViewPageview, "")
@@ -99,7 +102,8 @@ class ReaderActivity :
 
         registerReceiver(mTimeInfoReceiver, IntentFilter(Intent.ACTION_TIME_TICK))
 
-        setOnClickListener()
+        binding.readInfoArrea.setListener(this)
+        binding.textViewPageview.setListener(this)
 
         binding.textViewPageview.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             Log.d(TAG, "pageView layout changed")
@@ -117,7 +121,7 @@ class ReaderActivity :
             } else {
                 Toast.makeText(
                     this,
-                    resources.getString(R.string.can_not_load_book, mReaderActivityViewModel.prefsHelper.bookPath),
+                    resources.getString(R.string.can_not_load_book, PrefsHelper.bookPath),
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -128,20 +132,22 @@ class ReaderActivity :
         }
 
         mReaderActivityViewModel.pageViewSettings.observe(this) {
-            setPageView(it)
+            binding.textViewPageview.changeSettings(it)
+            mReaderActivityViewModel.recalcCurrentPage(binding.textViewPageview)
         }
+
         mReaderActivityViewModel.pageViewColorSettings.observe(this) {
             setColorTheme(it)
         }
 
         mReaderActivityViewModel.infoTextLeft.observe(this) {
-            binding.tvInfotextLeft.text = it
+            binding.readInfoArrea.setTextLeft(it)
         }
         mReaderActivityViewModel.infoTextRight.observe(this) {
-            binding.tvInfotextRight.text = it
+            binding.readInfoArrea.setTextRight(it)
         }
         mReaderActivityViewModel.infoTextSystemstatus.observe(this) {
-            binding.tvInfotextSystemstatus.text = it
+            binding.readInfoArrea.setTextMiddle(it)
         }
 
         mReaderActivityViewModel.note.observe(this) {
@@ -149,8 +155,8 @@ class ReaderActivity :
                 val floatTextViewFragment: FloatTextViewFragment =
                     FloatTextViewFragment.newInstance(
                         it,
-                        mReaderActivityViewModel.prefsHelper.textSize,
-                        mReaderActivityViewModel.prefsHelper.font
+                        PrefsHelper.textSize,
+                        PrefsHelper.font
                     )
                 floatTextViewFragment.show(supportFragmentManager, "fragment_floattextview")
             }
@@ -163,7 +169,7 @@ class ReaderActivity :
 
         //Here you can get the size of pageView!
         Log.d(TAG, "onWindowFocusChanged hasFocus")
-        if (mReaderActivityViewModel.prefsHelper.bookPath != null) {
+        if (PrefsHelper.bookPath != null) {
             mReaderActivityViewModel.loadBook(binding.textViewPageview.context)
         } else {
             Toast.makeText(
@@ -175,7 +181,8 @@ class ReaderActivity :
         }
     }
 
-    override fun onBackPressed() {
+
+    private fun exitOnBackPressed() {
         if (Date().time - backButtonPressedTime < 2000) {
             finish()
         } else {
@@ -190,8 +197,8 @@ class ReaderActivity :
 
     private fun loadPositionForBook() {
         if (mReaderActivityViewModel.book.value == null) return
-        if ( mReaderActivityViewModel.prefsHelper.bookPath != null)
-            mBookStatusViewModel.loadBookStatus(mReaderActivityViewModel.prefsHelper.bookPath!!)
+        if ( PrefsHelper.bookPath != null)
+            mBookStatusViewModel.loadBookStatus(PrefsHelper.bookPath!!)
     }
 
     override fun onStop() {
@@ -200,24 +207,8 @@ class ReaderActivity :
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mTimeInfoReceiver)
     }
 
-    private fun checkTap(point: Point, tap: Int) {
-        val zone = mReaderActivityViewModel.getZone(point)
-        // textViewInfoRight!!.text = resources.getString(R.string.click_in_zone, tap, zone)
-        Log.d(TAG, "Tap $tap in Zone $zone")
-        when (tap) {
-            1 -> { // double tap
-                doTapAction(mReaderActivityViewModel.prefsHelper.tapOneAction[zone])
-            }
-            2 -> { // double tap
-                doTapAction(mReaderActivityViewModel.prefsHelper.tapDoubleAction[zone])
-            }
-            3 -> { // long tap
-                doTapAction(mReaderActivityViewModel.prefsHelper.tapLongAction[zone])
-            }
-        }
-    }
 
-    private fun doTapAction(tapAction: String?) {
+    override fun onTabActionOnBookReaderTextview(tapAction: String?) {
         Log.d(TAG, "doTapAction: $tapAction")
         if (tapAction == null) return
         when (tapAction) {
@@ -237,87 +228,42 @@ class ReaderActivity :
                 openGotoMenu()
             }
             "Bookmarks" -> {
-                onShowBookmarklist()
+                onShowBookmarklistQuickMenuDialog()
             }
             else -> {
             }
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setOnClickListener() {
-        binding.llInfobereich.setOnTouchListener(object :
-            OnSwipeTouchListener(this@ReaderActivity) {
-            override fun onClick(point: Point) {
-                super.onClick(point)
-                openGotoMenu()
-            }
+    override fun onClickLinkOnBookReaderTextview(url: String) {
+        mReaderActivityViewModel.loadNote(url)
+    }
 
-            override fun onLongClick(point: Point) {
-                super.onLongClick(point)
-                openGotoMenu()
-            }
-        })
+    override fun onSwipeLeftOnBookReaderTextview() {
+        mReaderActivityViewModel.goToNextPage(binding.textViewPageview)
+    }
 
-        binding.textViewPageview.setOnTouchListener(object :
-            OnSwipeTouchListener(this@ReaderActivity) {
-            override fun onClick(point: Point) {
-                super.onClick(point)
+    override fun onSwipeRightOnBookReaderTextview() {
+        mReaderActivityViewModel.doPagePrev(binding.textViewPageview)
+    }
 
-                // Find the URL that was pressed
-                val off = getClickedOffset(point)
-                val spannable = binding.textViewPageview.text as Spannable
-                val link = spannable.getSpans(off, off, URLSpan::class.java)
-                if (link.isNotEmpty()) {
-                    // link clicked
-                    val url = link[0].url
-                    mReaderActivityViewModel.loadNote(url)
-                } else {
-                    // not a link, normal click
-                    checkTap(point, 1)
-                }
-            }
+    override fun onSlideUpOnBookReaderTextView(point: Point) {
+        mReaderActivityViewModel.increaseScreenBrghtness(this@ReaderActivity, point)
+    }
 
-            override fun onSwipeLeft() {
-                super.onSwipeLeft()
-                mReaderActivityViewModel.goToNextPage(binding.textViewPageview)
-            }
+    override fun onSlideDownOnBookReaderTextView(point: Point) {
+        mReaderActivityViewModel.decreaseScreenBrghtness(this@ReaderActivity, point)
+    }
 
-            override fun onSwipeRight() {
-                super.onSwipeRight()
-                mReaderActivityViewModel.doPagePrev(binding.textViewPageview)
-            }
+    override fun onClickImageOnBookReaderTextview(imageSpan: ImageSpan) {
+        showImage(imageSpan)
+    }
 
-            override fun onSlideUp(point: Point) {
-                super.onSlideUp(point)
-                mReaderActivityViewModel.increaseScreenBrghtness(this@ReaderActivity, point)
-            }
-
-            override fun onSlideDown(point: Point) {
-                super.onSlideDown(point)
-                mReaderActivityViewModel.decreaseScreenBrghtness(this@ReaderActivity, point)
-            }
-
-            override fun onDoubleClick(point: Point) {
-                //super.onDoubleClick(point)
-                checkTap(point, 2)
-            }
-
-            override fun onLongClick(point: Point) {
-                super.onLongClick(point)
-
-                // Find the Image that was pressed
-                val off = getClickedOffset(point)
-                val spannable = binding.textViewPageview.text as Spannable
-                val image = spannable.getSpans(off, off, ImageSpan::class.java)
-                if (image.isNotEmpty()) {
-                    showImage(image[0])
-                } else {
-                    checkTap(point, 3)
-                }
-            }
-
-        })
+    private fun showImage(imageSpan: ImageSpan) {
+        val b: ByteArray = mReaderActivityViewModel.getImageByteArray(imageSpan) ?: return
+        val imageViewerFragment: ImageViewerFragment =
+            ImageViewerFragment.newInstance(b, PrefsHelper.isDarkMode())
+        imageViewerFragment.show(supportFragmentManager, "fragment_imageviewfragment")
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -343,7 +289,7 @@ class ReaderActivity :
                 return true
             }
             KeyEvent.KEYCODE_B -> {
-                onShowBookmarklist()
+                onShowBookmarklistQuickMenuDialog()
                 return true
             }
         }
@@ -352,27 +298,6 @@ class ReaderActivity :
 
     private fun updateSizeInfo() {
         mReaderActivityViewModel.updateSizeInfo( binding.textViewPageview)
-    }
-
-    private fun getClickedOffset(point: Point): Int {
-        // check if Link or image clicked
-        var x = point.x
-        var y = point.y
-        x -= binding.textViewPageview.totalPaddingLeft
-        y -= binding.textViewPageview.totalPaddingTop
-        x += binding.textViewPageview.scrollX
-        y += binding.textViewPageview.scrollY
-        // Locate the clicked span
-        val layout = binding.textViewPageview.layout
-        val line = layout.getLineForVertical(y)
-        return layout.getOffsetForHorizontal(line, x.toFloat())
-    }
-
-    private fun showImage(imageSpan: ImageSpan) {
-        val b: ByteArray = mReaderActivityViewModel.getImageByteArray(imageSpan) ?: return
-        val imageViewerFragment: ImageViewerFragment =
-            ImageViewerFragment.newInstance(b, mReaderActivityViewModel.prefsHelper.isDarkMode())
-        imageViewerFragment.show(supportFragmentManager, "fragment_imageviewfragment")
     }
 
     private fun openMainMenu() {
@@ -410,7 +335,7 @@ class ReaderActivity :
         )
     }
 
-    override fun onChangeColorTheme(colorTheme: String, colorThemeIndex: Int) {
+    override fun onChangeColorThemeQuickMenuDialog(colorTheme: String, colorThemeIndex: Int) {
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + colorTheme, 0)
@@ -430,12 +355,12 @@ class ReaderActivity :
         co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LINKTEXT + colorTheme, 0)
         val colorLinkText =
             if (co != 0) "#" + Integer.toHexString(co)
-            else mReaderActivityViewModel.prefsHelper.colorLinkTextDefault
+            else PrefsHelper.colorLinkTextDefault
 
         co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_INFOTEXT + colorTheme, 0)
         val colorInfoText =
             if (co != 0) "#" + Integer.toHexString(co)
-            else mReaderActivityViewModel.prefsHelper.colorTextDefault
+            else PrefsHelper.colorTextDefault
 
         val showBackgroundImage =
             prefs.getBoolean(PrefsHelper.PREF_KEY_SHOW_BACKGROUND_IMAGE + colorTheme, false)
@@ -468,20 +393,18 @@ class ReaderActivity :
 
         binding.textViewPageview.setTextColor(Color.parseColor(colorText))
         binding.textViewPageview.setLinkTextColor(Color.parseColor(colorLinkText))
-        binding.tvInfotextLeft.setTextColor(Color.parseColor(colorInfoText))
-        binding.tvInfotextRight
-            .setTextColor(Color.parseColor(colorInfoText))
+        binding.readInfoArrea.changeStyle(Color.parseColor(colorInfoText))
 
-        var marginTop = mReaderActivityViewModel.prefsHelper.marginDefault
-        var marginBottom = mReaderActivityViewModel.prefsHelper.marginDefault
-        var marginLeft = mReaderActivityViewModel.prefsHelper.marginDefault
-        var marginRight = mReaderActivityViewModel.prefsHelper.marginDefault
+        var marginTop = PrefsHelper.marginDefault
+        var marginBottom = PrefsHelper.marginDefault
+        var marginLeft = PrefsHelper.marginDefault
+        var marginRight = PrefsHelper.marginDefault
 
         var sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_TOP + colorTheme, null)
         try {
             marginTop =
                 if (sMargin != null) Integer.parseInt(sMargin)
-                else mReaderActivityViewModel.prefsHelper.marginDefault
+                else PrefsHelper.marginDefault
         } catch (_: Exception) {
 
         }
@@ -489,7 +412,7 @@ class ReaderActivity :
         try {
             marginBottom =
                 if (sMargin != null) Integer.parseInt(sMargin)
-                else mReaderActivityViewModel.prefsHelper.marginDefault
+                else PrefsHelper.marginDefault
         } catch (_: Exception) {
 
         }
@@ -497,7 +420,7 @@ class ReaderActivity :
         try {
             marginLeft =
                 if (sMargin != null) Integer.parseInt(sMargin)
-                else mReaderActivityViewModel.prefsHelper.marginDefault
+                else PrefsHelper.marginDefault
         } catch (_: Exception) {
 
         }
@@ -505,7 +428,7 @@ class ReaderActivity :
         try {
             marginRight =
                 if (sMargin != null) Integer.parseInt(sMargin)
-                else mReaderActivityViewModel.prefsHelper.marginDefault
+                else PrefsHelper.marginDefault
         } catch (_: Exception) {
 
         }
@@ -524,12 +447,12 @@ class ReaderActivity :
 
     }
 
-    override fun onChangeTextSize(textSize: Float) {
+    override fun onChangeTextSizeQuickMenuDialog(textSize: Float) {
         binding.textViewPageview.textSize = textSize
         mReaderActivityViewModel.reloadCurrentPage(binding.textViewPageview)
     }
 
-    override fun onChangeLineSpacing(lineSpacingMultiplier: Float) {
+    override fun onChangeLineSpacingQuickMenuDialog(lineSpacingMultiplier: Float) {
         if (binding.textViewPageview.lineSpacingMultiplier == lineSpacingMultiplier) return
         binding.textViewPageview.setLineSpacing(
             binding.textViewPageview.lineSpacingExtra,
@@ -538,32 +461,40 @@ class ReaderActivity :
         mReaderActivityViewModel.reloadCurrentPage(binding.textViewPageview)
     }
 
-    override fun onChangeLetterSpacing(letterSpacing: Float) {
+    override fun onChangeLetterSpacingQuickMenuDialog(letterSpacing: Float) {
         if (binding.textViewPageview.letterSpacing == letterSpacing) return
         binding.textViewPageview.letterSpacing = letterSpacing
         mReaderActivityViewModel.reloadCurrentPage(binding.textViewPageview)
     }
 
-    override fun onCancelQuickMenu() {
+    override fun onCancelQuickMenuDialog() {
         mReaderActivityViewModel.resetQuickSettings()
     }
 
-    override fun onAddBookmark() {
+    override fun onAddBookmarkQuickMenuDialog() {
+        addBookmark()
+    }
+
+    private fun addBookmark() {
         mBookmarksViewModel.insert(
             mReaderActivityViewModel.getBookmarkForCurrentPosition(
                 binding.textViewPageview.text.toString().substring(0, 100)))
     }
 
-    override fun onShowBookmarklist() {
-        if (mReaderActivityViewModel.prefsHelper.bookPath == null) return
+    override fun onShowBookmarklistQuickMenuDialog() {
+        if (PrefsHelper.bookPath == null) return
         val bookmarkListFragment: BookmarkListFragment =
             BookmarkListFragment.newInstance(
-                mReaderActivityViewModel.prefsHelper.bookPath!!)
+                PrefsHelper.bookPath!!)
         bookmarkListFragment.show(supportFragmentManager, "fragment_bookmark_list")
     }
 
-    override fun onSelectBookmark(bookmark: Bookmark) {
+    override fun onSelectBookmarkBookmarkListFragment(bookmark: Bookmark) {
         mReaderActivityViewModel.goToBookmark(binding.textViewPageview, bookmark)
+    }
+
+    override fun onAddBookmarkBookmarkListFragment() {
+        addBookmark()
     }
 
     private fun openGotoMenu() {
@@ -586,28 +517,6 @@ class ReaderActivity :
 
     override fun onFinishGotoMenuDialogSection(section: Int) {
         mReaderActivityViewModel.goToSection(binding.textViewPageview, section)
-    }
-
-    private fun setPageView(pageViewSettings: PageViewSettings) {
-        binding.textViewPageview.textSize = pageViewSettings.textSize
-        binding.textViewPageview.letterSpacing = pageViewSettings.letterSpacing
-        binding.textViewPageview.typeface = pageViewSettings.typeFace
-        binding.textViewPageview.setLineSpacing(
-            binding.textViewPageview.lineSpacingExtra,
-            pageViewSettings.lineSpacingMultiplier
-        )
-        val density = this.resources.displayMetrics.density
-        val marginTopPixel = (pageViewSettings.marginTop * density).toInt()
-        val marginBottomPixel = (pageViewSettings.marginBottom * density).toInt()
-        val marginLeftPixel = (pageViewSettings.marginLeft * density).toInt()
-        val marginRightPixel = (pageViewSettings.marginRight * density).toInt()
-        binding.textViewPageview.setPadding(
-            marginLeftPixel,
-            marginTopPixel,
-            marginRightPixel,
-            marginBottomPixel
-        )
-        mReaderActivityViewModel.recalcCurrentPage(binding.textViewPageview)
     }
 
     private fun setColorTheme(colorSettings: PageViewColorSettings) {
@@ -638,9 +547,7 @@ class ReaderActivity :
 
         binding.textViewPageview.setTextColor(Color.parseColor(colorSettings.colorText))
         binding.textViewPageview.setLinkTextColor(Color.parseColor(colorSettings.colorLink))
-        binding.tvInfotextLeft.setTextColor(Color.parseColor(colorSettings.colorInfoText))
-        binding.tvInfotextRight.setTextColor(Color.parseColor(colorSettings.colorInfoText))
-        binding.tvInfotextSystemstatus.setTextColor(Color.parseColor(colorSettings.colorInfoText))
+        binding.readInfoArrea.changeStyle(Color.parseColor(colorSettings.colorInfoText))
 
         try {
             val window: Window = window
@@ -673,6 +580,14 @@ class ReaderActivity :
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    override fun onClickReadInfoArea() {
+        openGotoMenu()
+    }
+
+    override fun onLongClickReadInfoArea() {
+        openGotoMenu()
     }
 
     companion object {

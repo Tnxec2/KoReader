@@ -20,7 +20,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
             android:text="@string/color_theme" />
 
         <Spinner
@@ -44,8 +44,8 @@
 
         <ImageButton
             android:id="@+id/imageView_quick_menU_textSizeDecrease"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="bottom"
             android:clickable="true"
             app:srcCompat="@drawable/ic_a_small"
@@ -63,8 +63,8 @@
 
         <ImageButton
             android:id="@+id/imageView_quick_menU_textSizeIncrease"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:clickable="true"
             app:srcCompat="@drawable/ic_aa"
             android:contentDescription="@string/increase"
@@ -78,9 +78,9 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
             android:text="@string/line_spacing" />
 
         <Spinner
@@ -98,9 +98,9 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
             android:text="@string/letter_spacing" />
 
         <Spinner
@@ -118,15 +118,15 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
             android:text="@string/bookmarks" />
 
         <ImageButton
             android:id="@+id/imageView_quick_menu_addBookmark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="bottom"
             android:clickable="true"
             app:srcCompat="@drawable/ic_iconmonstr_bookmark_add"
@@ -135,8 +135,8 @@
 
         <ImageButton
             android:id="@+id/imageView_quick_menu_listBookmark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="bottom"
             android:clickable="true"
             app:srcCompat="@drawable/ic_iconmonstr_bookmark_list2"
@@ -154,8 +154,8 @@
 
         <ImageButton
             android:id="@+id/imageButton_quickmenu_bookinfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_iconmonstr_book_info"
             android:contentDescription="@string/bookinfo" />
 
@@ -166,15 +166,15 @@
 
         <ImageButton
             android:id="@+id/imageButton_quickmenu_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_baseline_check_24"
             android:contentDescription="@string/save" />
 
         <ImageButton
             android:id="@+id/imageButton_quickmenu_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_baseline_close_24"
             android:contentDescription="@string/back" />
 

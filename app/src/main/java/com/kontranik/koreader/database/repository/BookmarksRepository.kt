@@ -1,20 +1,12 @@
 package com.kontranik.koreader.database.repository
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import com.kontranik.koreader.database.BooksRoomDatabase
-
 import com.kontranik.koreader.database.dao.BookmarksDao
-import com.kontranik.koreader.model.Bookmark
+import com.kontranik.koreader.database.model.Bookmark
 
 
-internal class BookmarksRepository(context: Context) {
-    private val mBookmarksDao: BookmarksDao
-
-    init {
-        val db: BooksRoomDatabase = BooksRoomDatabase.getDatabase(context)
-        mBookmarksDao = db.bookmarksDao()
-    }
+class BookmarksRepository(private val mBookmarksDao: BookmarksDao) {
 
     fun insert(bookmark: Bookmark) {
         BooksRoomDatabase.databaseWriteExecutor.execute {

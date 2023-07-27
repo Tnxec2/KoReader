@@ -1,9 +1,11 @@
-package com.kontranik.koreader.model
+package com.kontranik.koreader.database.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.kontranik.koreader.database.BookStatusHelper
+import com.kontranik.koreader.model.Book
+import com.kontranik.koreader.model.BookPosition
 import java.util.*
 
 @Entity(tableName = BookStatusHelper.TABLE)

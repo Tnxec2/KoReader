@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.text.*
 import android.text.style.QuoteSpan
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookPosition
@@ -46,7 +47,8 @@ open class PageSplitterHtml(context: Context) : FontsHelper(context) {
             SpannableStringBuilder(Html.fromHtml(
                     html, Html.FROM_HTML_MODE_LEGACY, CustomImageGetter(book, pageWidth, pageHeight, colorText, section > 0), null))
         } else {
-            SpannableStringBuilder(Html.fromHtml(html, CustomImageGetter(book, pageWidth, pageHeight, colorText, section > 0), null))
+            SpannableStringBuilder(
+                HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_COMPACT, CustomImageGetter(book, pageWidth, pageHeight, colorText, section > 0), null))
         }
 
         postformatContent(textView)

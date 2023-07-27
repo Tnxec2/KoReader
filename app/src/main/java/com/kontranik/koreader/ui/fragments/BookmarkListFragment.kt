@@ -1,5 +1,6 @@
 package com.kontranik.koreader.ui.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.ContextMenu
 import android.view.ContextMenu.ContextMenuInfo
@@ -8,14 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.AdapterView.OnItemLongClickListener
-import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.kontranik.koreader.App
 import com.kontranik.koreader.R
 import com.kontranik.koreader.database.BookmarksViewModel
+import com.kontranik.koreader.database.BookmarksViewModelFactory
 import com.kontranik.koreader.databinding.FragmentBookmarklistBinding
-import com.kontranik.koreader.model.Bookmark
+import com.kontranik.koreader.database.model.Bookmark
 import com.kontranik.koreader.ui.adapters.BookmarkListAdapter
 
 
@@ -23,7 +24,7 @@ class BookmarkListFragment : DialogFragment() {
 
     private lateinit var binding: FragmentBookmarklistBinding
 
-    private var listener: BookmarkListDialogListener? = null
+    private var mListener: BookmarkListDialogListener? = null
     private lateinit var mBookmarksViewModel: BookmarksViewModel
 
     private var bookmarkListAdapter: BookmarkListAdapter? = null
@@ -35,8 +36,8 @@ class BookmarkListFragment : DialogFragment() {
 
     // 1. Defines the listener interface with a method passing back data result.
     interface BookmarkListDialogListener {
-        fun onSelectBookmark(bookmark: Bookmark)
-        fun onAddBookmark()
+        fun onSelectBookmarkBookmarkListFragment(bookmark: Bookmark)
+        fun onAddBookmarkBookmarkListFragment()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,11 +51,12 @@ class BookmarkListFragment : DialogFragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        listener = activity as BookmarkListDialogListener?
-        mBookmarksViewModel = ViewModelProvider(requireActivity())[BookmarksViewModel::class.java]
+        mBookmarksViewModel = ViewModelProvider(this,
+            BookmarksViewModelFactory((requireContext().applicationContext as App)
+            .bookmarksRepository))[BookmarksViewModel::class.java]
 
         binding.imageButtonBookmarklistBack.setOnClickListener {
             dismiss()
@@ -69,12 +71,12 @@ class BookmarkListFragment : DialogFragment() {
         binding.listViewBookmarklistBookmarks.adapter = bookmarkListAdapter
         registerForContextMenu(binding.listViewBookmarklistBookmarks)
 
-        binding.listViewBookmarklistBookmarks.onItemLongClickListener = OnItemLongClickListener { parent, view, position, id ->
+        binding.listViewBookmarklistBookmarks.onItemLongClickListener = OnItemLongClickListener { _, _, position, _ ->
             longClickedItemIndex = position
             false
         }
 
-        val itemListener = OnItemClickListener { parent, v, position, id ->
+        val itemListener = OnItemClickListener { _, _, position, _ ->
             open(position)
         }
         binding.listViewBookmarklistBookmarks.onItemClickListener = itemListener
@@ -96,8 +98,25 @@ class BookmarkListFragment : DialogFragment() {
         if (path != null) mBookmarksViewModel.loadBookmarks(path!!)
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is BookmarkListDialogListener) {
+            mListener = context
+        } else {
+            throw RuntimeException(
+                context.toString()
+                        + " must implement BookmarkListDialogListener"
+            )
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        mListener = null
+    }
+
     private fun addBookmark() {
-        listener!!.onAddBookmark()
+        mListener?.onAddBookmarkBookmarkListFragment()
     }
 
     override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenuInfo?) {
@@ -123,7 +142,7 @@ class BookmarkListFragment : DialogFragment() {
 
     private fun open(position: Int) {
         val selectedItem = bookmarkList[position]
-        listener!!.onSelectBookmark(selectedItem)
+        mListener?.onSelectBookmarkBookmarkListFragment(selectedItem)
         dismiss()
     }
 

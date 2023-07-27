@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import com.kontranik.koreader.R
-import com.kontranik.koreader.model.Bookmark
+import com.kontranik.koreader.database.model.Bookmark
 
 class BookmarkListAdapter(
         context: Context?,

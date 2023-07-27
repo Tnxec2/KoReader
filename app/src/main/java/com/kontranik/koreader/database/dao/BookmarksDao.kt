@@ -3,7 +3,7 @@ package com.kontranik.koreader.database.dao
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.kontranik.koreader.database.BookmarksHelper
-import com.kontranik.koreader.model.Bookmark
+import com.kontranik.koreader.database.model.Bookmark
 
 
 @Dao

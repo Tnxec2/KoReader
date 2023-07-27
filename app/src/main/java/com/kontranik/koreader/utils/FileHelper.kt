@@ -7,11 +7,10 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.util.Log
-import androidx.documentfile.provider.DocumentFile
 
 object FileHelper {
 
-    const val TAG = "FileHelper"
+    private const val TAG = "FileHelper"
 
     const val BACKDIR = ".."
 
@@ -50,7 +49,7 @@ object FileHelper {
         val index = documentFilePath.lastIndexOf("%2F")
         val index2 = documentFilePath.lastIndexOf("%3A")
         var isRoot = false
-        var parent: String = ""
+        var parent = ""
         if ( index > 0)  {
             parent = documentFilePath.substring(0, index)
         } else if ( index2 > 0 ) {
@@ -153,9 +152,9 @@ object FileHelper {
         return result
     }
 
-    fun getNameFromPath(path: String): String {
+    private fun getNameFromPath(path: String): String {
         var result: String = path
-        val cut = result!!.lastIndexOf('/')
+        val cut = result.lastIndexOf('/')
         if (cut != -1) {
             result = result.substring(cut + 1)
         }

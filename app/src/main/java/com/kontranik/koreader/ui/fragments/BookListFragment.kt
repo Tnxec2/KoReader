@@ -6,12 +6,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.Nullable
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
+import com.kontranik.koreader.App
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
+import com.kontranik.koreader.ReaderActivityViewModelFactory
 import com.kontranik.koreader.database.BookStatusViewModel
+import com.kontranik.koreader.database.BookStatusViewModelFactory
 import com.kontranik.koreader.databinding.FragmentBookListBinding
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.ui.adapters.BookListAdapter
@@ -41,11 +43,17 @@ class BookListFragment :
         return binding.root
     }
 
-    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mBookStatusViewModel = ViewModelProvider(requireActivity())[BookStatusViewModel::class.java]
-        mReaderActivityViewModel = ViewModelProvider(requireActivity())[ReaderActivityViewModel::class.java]
+        mBookStatusViewModel = ViewModelProvider(this,
+            BookStatusViewModelFactory((requireContext().applicationContext as App)
+                .bookStatusRepository))[BookStatusViewModel::class.java]
+
+        mReaderActivityViewModel = ViewModelProvider(this,
+            ReaderActivityViewModelFactory((requireContext().applicationContext as App)
+                .bookStatusRepository))[ReaderActivityViewModel::class.java]
+
 
         binding.imageButtonBooklistBack.setOnClickListener {
             dismiss()
@@ -93,7 +101,6 @@ class BookListFragment :
     private fun openBookInfo(bookPathUri: String?) {
         if ( bookPathUri != null) {
             val bookInfoFragment = BookInfoFragment.newInstance(bookPathUri)
-            bookInfoFragment.setListener(this)
             bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
         }
     }

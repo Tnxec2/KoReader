@@ -11,4 +11,8 @@
         <attr name="maxValue" format="integer|reference"/>
         <attr name="wrapSelectorWheel" format="boolean"/>
     </declare-styleable>
+
+    <declare-styleable name="ReadInfoArea">
+        <attr name="tempParam" format="boolean" />
+    </declare-styleable>
 </resources>

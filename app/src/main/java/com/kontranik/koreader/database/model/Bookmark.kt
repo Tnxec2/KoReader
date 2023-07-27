@@ -1,6 +1,5 @@
-package com.kontranik.koreader.model
+package com.kontranik.koreader.database.model
 
-import androidx.annotation.NonNull
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -10,7 +9,6 @@ import java.util.*
 @Entity(tableName = BookmarksHelper.TABLE)
 class Bookmark(
     @PrimaryKey(autoGenerate = true)
-    @NonNull
     @ColumnInfo(name = BookmarksHelper.COLUMN_ID) var id: Long? = null,
     @ColumnInfo(name = BookmarksHelper.COLUMN_PATH) var path: String,
     @ColumnInfo(name = BookmarksHelper.COLUMN_TEXT) var text: String? = null,

@@ -1,9 +1,7 @@
 package com.kontranik.koreader
 
 import android.app.Activity
-import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.net.Uri
@@ -14,52 +12,51 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.preference.PreferenceManager
+import com.kontranik.koreader.database.BookStatusViewModel
+import com.kontranik.koreader.database.model.BookStatus
+import com.kontranik.koreader.database.model.Bookmark
 import com.kontranik.koreader.database.repository.BookStatusRepository
 import com.kontranik.koreader.model.*
 import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.PrefsHelper
-import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
 
 
-class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
-    private val mRepository: BookStatusRepository = BookStatusRepository(app)
-    var prefsHelper: PrefsHelper = PrefsHelper(app.applicationContext)
+class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : ViewModel()  {
 
     var book: MutableLiveData<Book?> = MutableLiveData()
 
     var pageViewContent: MutableLiveData<CharSequence?> = MutableLiveData()
     var pageViewSettings: MutableLiveData<PageViewSettings> = MutableLiveData(
         PageViewSettings(
-            textSize = prefsHelper.textSize,
-            lineSpacingMultiplier = prefsHelper.lineSpacingMultiplier,
-            letterSpacing = prefsHelper.letterSpacing,
-            typeFace = prefsHelper.font.getTypeface(),
-            marginTop = prefsHelper.marginTop,
-            marginBottom = prefsHelper.marginBottom,
-            marginLeft = prefsHelper.marginLeft,
-            marginRight = prefsHelper.marginRight
+            textSize = PrefsHelper.textSize,
+            lineSpacingMultiplier = PrefsHelper.lineSpacingMultiplier,
+            letterSpacing = PrefsHelper.letterSpacing,
+            typeFace = PrefsHelper.font.getTypeface(),
+            marginTop = PrefsHelper.marginTop,
+            marginBottom = PrefsHelper.marginBottom,
+            marginLeft = PrefsHelper.marginLeft,
+            marginRight = PrefsHelper.marginRight
         )
     )
     var pageViewColorSettings: MutableLiveData<PageViewColorSettings> = MutableLiveData(
         PageViewColorSettings(
-            showBackgroundImage = prefsHelper.showBackgroundImage,
-            backgroundImageUri = prefsHelper.backgroundImageUri,
-            backgroundImageTiledRepeat = prefsHelper.backgroundImageTiledRepeat,
-            colorText = prefsHelper.colorText,
-            colorBack = prefsHelper.colorBack,
-            colorLink = prefsHelper.colorLinkText,
-            colorInfoText = prefsHelper.colorInfoText,
+            showBackgroundImage = PrefsHelper.showBackgroundImage,
+            backgroundImageUri = PrefsHelper.backgroundImageUri,
+            backgroundImageTiledRepeat = PrefsHelper.backgroundImageTiledRepeat,
+            colorText = PrefsHelper.colorText,
+            colorBack = PrefsHelper.colorBack,
+            colorLink = PrefsHelper.colorLinkText,
+            colorInfoText = PrefsHelper.colorInfoText,
         )
     )
     var infoTextLeft: MutableLiveData<CharSequence?> = MutableLiveData()
@@ -75,21 +72,21 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
 
     fun loadBook(context: Context) {
         try {
-            if (book.value == null || book.value!!.fileLocation != prefsHelper.bookPath ) {
-                if (!FileHelper.contentFileExist(app.applicationContext, prefsHelper.bookPath)) {
+            if (book.value == null || book.value!!.fileLocation != PrefsHelper.bookPath ) {
+                if (!FileHelper.contentFileExist(App.getContext(), PrefsHelper.bookPath)) {
                     Toast.makeText(
                         context,
-                        app.resources.getString(R.string.can_not_load_book, prefsHelper.bookPath),
+                        App.getContext().resources.getString(R.string.can_not_load_book, PrefsHelper.bookPath),
                         Toast.LENGTH_LONG
                     ).show()
                     return
                 }
                 Toast.makeText(
                     context,
-                    app.resources.getString(R.string.loading_book),
+                    App.getContext().resources.getString(R.string.loading_book),
                     Toast.LENGTH_SHORT
                 ).show()
-                book.value = Book(app, prefsHelper.bookPath!!)
+                book.value = Book(App.getContext(), PrefsHelper.bookPath!!)
             }
         } catch (e: Exception) {
             Log.e("tag", e.stackTraceToString())
@@ -115,7 +112,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
 
     fun getBookmarkForCurrentPosition(text: String): Bookmark {
         return Bookmark(
-            path = prefsHelper.bookPath!!,
+            path = PrefsHelper.bookPath!!,
             text = text,
             position_section = book.value!!.curPage!!.startBookPosition.section,
             position_offset = book.value!!.curPage!!.startBookPosition.offSet,
@@ -179,7 +176,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
             book.value?.curPage = Page(page)
             pageViewContent.value = page.content
         } else {
-            pageViewContent.value = app.getString(R.string.no_page_content)
+            pageViewContent.value = App.getContext().getString(R.string.no_page_content)
         }
         updateInfo()
     }
@@ -191,7 +188,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
             val curTextPage = book.value!!.getCurTextPage()
 
             infoTextLeft.value =
-                app.getString(
+                App.getContext().getString(
                     R.string.page_info_text_left,
                     min(curTextPage, book.value!!.getPageScheme()!!.countTextPages),
                     book.value!!.getPageScheme()!!.countTextPages,
@@ -200,25 +197,25 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
                 )
 
             infoTextRight.value =
-                app.getString(
+                App.getContext().getString(
                     R.string.page_info_text_right,
                     curSection,
                     book.value!!.getPageScheme()!!.sectionCountWithOutNotes,
                     book.value!!.getPageScheme()!!.sectionCount
                 )
         } else {
-            infoTextRight.value = app.getString(R.string.no_book)
+            infoTextRight.value = App.getContext().getString(R.string.no_book)
         }
         updateSystemStatus()
     }
 
     fun updateSystemStatus() {
         val simpleDateFormatTime = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val bm = app.getSystemService(AppCompatActivity.BATTERY_SERVICE) as BatteryManager
+        val bm = App.getContext().getSystemService(AppCompatActivity.BATTERY_SERVICE) as BatteryManager
         val batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         val strTime: String = simpleDateFormatTime.format(Date().time)
         infoTextSystemstatus.value =
-            app.resources.getString(R.string.page_info_text_time, strTime, batLevel)
+            App.getContext().resources.getString(R.string.page_info_text_time, strTime, batLevel)
     }
 
     fun goToPositionByBookStatus(pageView: TextView, bookStatus: BookStatus?) {
@@ -235,11 +232,11 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     }
 
     fun increaseScreenBrghtness(activity: Activity, point: Point) {
-        prefsHelper.increaseScreenBrghtness(activity, point, fullwidth)
+        PrefsHelper.increaseScreenBrghtness(activity, point, fullwidth)
     }
 
     fun decreaseScreenBrghtness(activity: Activity, point: Point) {
-        prefsHelper.decreaseScreenBrghtness(activity, point, fullwidth)
+        PrefsHelper.decreaseScreenBrghtness(activity, point, fullwidth)
     }
 
     fun updateSizeInfo(pageView: TextView) {
@@ -268,308 +265,76 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
         letterSpacing: Float,
         colorTheme: String
     ) {
-        if (textSize != prefsHelper.textSize
-            || lineSpacingMultiplier != prefsHelper.lineSpacingMultiplier
-            || letterSpacing != prefsHelper.letterSpacing
-            || colorTheme != prefsHelper.colorTheme
+        if (textSize != PrefsHelper.textSize
+            || lineSpacingMultiplier != PrefsHelper.lineSpacingMultiplier
+            || letterSpacing != PrefsHelper.letterSpacing
+            || colorTheme != PrefsHelper.colorTheme
         ) {
-            prefsHelper.textSize = textSize
-            prefsHelper.lineSpacingMultiplier = lineSpacingMultiplier
-            prefsHelper.letterSpacing = letterSpacing
-            prefsHelper.colorTheme = colorTheme
+            PrefsHelper.textSize = textSize
+            PrefsHelper.lineSpacingMultiplier = lineSpacingMultiplier
+            PrefsHelper.letterSpacing = letterSpacing
+            PrefsHelper.colorTheme = colorTheme
+
 
             pageViewSettings.value = pageViewSettings.value?.also { it ->
-                it.textSize = prefsHelper.textSize
-                it.lineSpacingMultiplier = prefsHelper.lineSpacingMultiplier
-                it.letterSpacing = prefsHelper.letterSpacing
+                it.textSize = PrefsHelper.textSize
+                it.lineSpacingMultiplier = PrefsHelper.lineSpacingMultiplier
+                it.letterSpacing = PrefsHelper.letterSpacing
             }
 
-            loadColorThemeSettings()
+            pageViewColorSettings.value = PrefsHelper.loadColorThemeSettings()
         }
     }
 
     fun loadSettings(activity: Activity) {
-        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(app)
-        prefsHelper.interfaceTheme = prefs.getString(PrefsHelper.PREF_KEY_THEME, "Auto")
-        prefsHelper.screenOrientation =
-            prefs.getString(PrefsHelper.PREF_KEY_ORIENTATION, "PortraitSensor")
-        prefsHelper.screenBrightness = prefs.getString(PrefsHelper.PREF_KEY_BRIGHTNESS, "Manual")
-
-        prefsHelper.textSize =
-            prefs.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, prefsHelper.defaultTextSize)
-
-        val lineSpacingMultiplierString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, null)
-        if (lineSpacingMultiplierString != null) prefsHelper.lineSpacingMultiplier = lineSpacingMultiplierString.toFloat()
-        else prefsHelper.lineSpacingMultiplier = prefsHelper.defaultLineSpacingMultiplier
-
-        val letterSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, null)
-        if (letterSpacingString != null) prefsHelper.letterSpacing = letterSpacingString.toFloat()
-        else prefsHelper.letterSpacing = prefsHelper.defaultLetterSpacing
-
-        if (prefs.contains(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL)) {
-            val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
-            if (fontpath != null) {
-                val fontFile = File(fontpath)
-                if (fontFile.isFile && fontFile.canRead()) {
-                    prefsHelper.font = TypefaceRecord(name = fontFile.name, file = fontFile)
-                }
-            }
-        } else if (prefs.contains(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL)) {
-            prefsHelper.font = TypefaceRecord(
-                name = prefs.getString(
-                    PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL,
-                    TypefaceRecord.SANSSERIF
-                )!!
-            )
-        }
-        var sMargin =
-            prefs.getString(PrefsHelper.PREF_KEY_MERGE_TOP + prefsHelper.colorTheme, null)
-        try {
-            prefsHelper.marginTop =
-                if (sMargin != null) Integer.parseInt(sMargin) else prefsHelper.marginDefault
-        } catch (e: Exception) {
-            prefsHelper.marginTop = prefsHelper.marginDefault
-        }
-        sMargin =
-            prefs.getString(PrefsHelper.PREF_KEY_MERGE_BOTTOM + prefsHelper.colorTheme, null)
-        try {
-            prefsHelper.marginBottom =
-                if (sMargin != null) Integer.parseInt(sMargin) else prefsHelper.marginDefault
-        } catch (e: Exception) {
-            prefsHelper.marginBottom = prefsHelper.marginDefault
-        }
-        sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_LEFT + prefsHelper.colorTheme, null)
-        try {
-            prefsHelper.marginLeft =
-                if (sMargin != null) Integer.parseInt(sMargin) else prefsHelper.marginDefault
-        } catch (e: Exception) {
-            prefsHelper.marginLeft = prefsHelper.marginDefault
-        }
-        sMargin = prefs.getString(PrefsHelper.PREF_KEY_MERGE_RIGHT + prefsHelper.colorTheme, null)
-        try {
-            prefsHelper.marginRight =
-                if (sMargin != null) Integer.parseInt(sMargin) else prefsHelper.marginDefault
-        } catch (e: Exception) {
-            prefsHelper.marginRight = prefsHelper.marginDefault
-        }
-
+        PrefsHelper.loadSettings(activity)
         pageViewSettings.value = pageViewSettings.value?.also { it ->
-            it.textSize = prefsHelper.textSize
-            it.lineSpacingMultiplier = prefsHelper.lineSpacingMultiplier
-            it.letterSpacing = prefsHelper.letterSpacing
-            it.typeFace = prefsHelper.font.getTypeface()
-            it.marginTop = prefsHelper.marginTop
-            it.marginBottom = prefsHelper.marginBottom
-            it.marginLeft = prefsHelper.marginLeft
-            it.marginRight = prefsHelper.marginRight
+            it.textSize = PrefsHelper.textSize
+            it.lineSpacingMultiplier = PrefsHelper.lineSpacingMultiplier
+            it.letterSpacing = PrefsHelper.letterSpacing
+            it.typeFace = PrefsHelper.font.getTypeface()
+            it.marginTop = PrefsHelper.marginTop
+            it.marginBottom = PrefsHelper.marginBottom
+            it.marginLeft = PrefsHelper.marginLeft
+            it.marginRight = PrefsHelper.marginRight
         }
 
-        prefsHelper.colorTheme = prefs.getString(
-            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME,
-            PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
-        )
-            ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
-        loadColorThemeSettings()
+        pageViewColorSettings.value = PrefsHelper.loadColorThemeSettings()
 
-        prefsHelper.tapDoubleAction = EnumMap( hashMapOf(
-            ScreenZone.TopLeft to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_DOUBLE_TOP_LEFT,
-                prefsHelper.tapZoneDoubleTopLeft
-            ),
-            ScreenZone.TopCenter to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_DOUBLE_TOP_CENTER,
-                prefsHelper.tapZoneDoubleTopCenter
-            ),
-            ScreenZone.TopRight to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_DOUBLE_TOP_RIGHT,
-                prefsHelper.tapZoneDoubleTopRight
-            ),
-            ScreenZone.MiddleLeft to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_DOUBLE_MIDDLE_LEFT,
-                prefsHelper.tapZoneDoubleMiddleLeft
-            ),
-            ScreenZone.MiddleCenter to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_DOUBLE_MIDDLE_CENTER,
-                prefsHelper.tapZoneDoubleMiddleCenter
-            ),
-            ScreenZone.MiddleRight to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_DOUBLE_MIDDLE_RIGHT,
-                prefsHelper.tapZoneDoubleMiddleRight
-            ),
-            ScreenZone.BottomLeft to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT,
-                prefsHelper.tapZoneDoubleBottomLeft
-            ),
-            ScreenZone.BottomCenter to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER,
-                prefsHelper.tapZoneDoubleBottomCenter
-            ),
-            ScreenZone.BottomRight to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT,
-                prefsHelper.tapZoneDoubleBottomRight
-            ),
-        ))
-
-        prefsHelper.tapOneAction = EnumMap(hashMapOf(
-            ScreenZone.TopLeft to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_ONE_TOP_LEFT,
-                prefsHelper.tapZoneOneTopLeft
-            ),
-            ScreenZone.TopCenter to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_ONE_TOP_CENTER,
-                prefsHelper.tapZoneOneTopCenter
-            ),
-            ScreenZone.TopRight to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_ONE_TOP_RIGHT,
-                prefsHelper.tapZoneOneTopRight
-            ),
-            ScreenZone.MiddleLeft to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_ONE_MIDDLE_LEFT,
-                prefsHelper.tapZoneOneMiddleLeft
-            ),
-            ScreenZone.MiddleCenter to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_ONE_MIDDLE_CENTER,
-                prefsHelper.tapZoneOneMiddleCenter
-            ),
-            ScreenZone.MiddleRight to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_ONE_MIDDLE_RIGHT,
-                prefsHelper.tapZoneOneMiddleRight
-            ),
-            ScreenZone.BottomLeft to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_ONE_BOTTOM_LEFT,
-                prefsHelper.tapZoneOneBottomLeft
-            ),
-            ScreenZone.BottomCenter to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_ONE_BOTTOM_CENTER,
-                prefsHelper.tapZoneOneBottomCenter
-            ),
-            ScreenZone.BottomRight to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_ONE_BOTTOM_RIGHT,
-                prefsHelper.tapZoneOneBottomRight
-            ),
-        ))
-        prefsHelper.tapLongAction = EnumMap(hashMapOf(
-            ScreenZone.TopLeft to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_LONG_TOP_LEFT,
-                prefsHelper.tapZoneLongTopLeft
-            ),
-            ScreenZone.TopCenter to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_LONG_TOP_CENTER,
-                prefsHelper.tapZoneLongTopCenter
-            ),
-            ScreenZone.TopRight to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_LONG_TOP_RIGHT,
-                prefsHelper.tapZoneLongTopRight
-            ),
-            ScreenZone.MiddleLeft to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_LONG_MIDDLE_LEFT,
-                prefsHelper.tapZoneLongMiddleLeft
-            ),
-            ScreenZone.MiddleCenter to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_LONG_MIDDLE_CENTER,
-                prefsHelper.tapZoneLongMiddleCenter
-            ),
-            ScreenZone.MiddleRight to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_LONG_MIDDLE_RIGHT,
-                prefsHelper.tapZoneLongMiddleRight
-            ),
-            ScreenZone.BottomLeft to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_LONG_BOTTOM_LEFT,
-                prefsHelper.tapZoneLongBottomLeft
-            ),
-            ScreenZone.BottomCenter to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_LONG_BOTTOM_CENTER,
-                prefsHelper.tapZoneLongBottomCenter
-            ),
-            ScreenZone.BottomRight to prefs.getString(
-                PrefsHelper.PREF_KEY_TAP_LONG_BOTTOM_RIGHT,
-                prefsHelper.tapZoneLongBottomRight
-            ),
-        ))
-
-        prefsHelper.setOrientation(activity)
-        prefsHelper.setThemeDefault()
-    }
-
-    private fun loadColorThemeSettings() {
-        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(app)
-
-        var co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + prefsHelper.colorTheme, 0)
-        prefsHelper.colorBack =
-            if (co != 0) "#" + Integer.toHexString(co)
-            else app.resources.getString(PrefsHelper.colorBackgroundDefaultArray[prefsHelper.colorTheme.toInt()-1])
-
-        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + prefsHelper.colorTheme, 0)
-        prefsHelper.colorText =
-            if (co != 0) "#" + Integer.toHexString(co)
-            else app.resources.getString(PrefsHelper.colorForegroundDefaultArray[prefsHelper.colorTheme.toInt()-1])
-
-        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_LINKTEXT + prefsHelper.colorTheme, 0)
-        prefsHelper.colorLinkText =
-            if (co != 0) "#" + Integer.toHexString(co)
-            else app.resources.getString(PrefsHelper.colorLinkDefaultArray[prefsHelper.colorTheme.toInt()-1])
-
-        co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_INFOTEXT + prefsHelper.colorTheme, 0)
-        prefsHelper.colorInfoText =
-            if (co != 0) "#" + Integer.toHexString(co)
-            else app.resources.getString(PrefsHelper.colorInfotextDefaultArray[prefsHelper.colorTheme.toInt()-1])
-
-        prefsHelper.showBackgroundImage = prefs.getBoolean(
-            PrefsHelper.PREF_KEY_SHOW_BACKGROUND_IMAGE + prefsHelper.colorTheme,
-            false
-        )
-        prefsHelper.backgroundImageUri = prefs.getString(
-            PrefsHelper.PREF_KEY_BACKGROUND_IMAGE_URI + prefsHelper.colorTheme,
-            null
-        )
-        prefsHelper.backgroundImageTiledRepeat = prefs.getBoolean(
-            PrefsHelper.PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT + prefsHelper.colorTheme,
-            false
-        )
-
-        pageViewColorSettings.value = PageViewColorSettings(
-            showBackgroundImage = prefsHelper.showBackgroundImage,
-            backgroundImageUri = prefsHelper.backgroundImageUri,
-            backgroundImageTiledRepeat = prefsHelper.backgroundImageTiledRepeat,
-            colorText = prefsHelper.colorText,
-            colorBack = prefsHelper.colorBack,
-            colorLink = prefsHelper.colorLinkText,
-            colorInfoText = prefsHelper.colorInfoText,
-        )
     }
 
     fun loadPrefs(activity: Activity) {
-        val settings = app.getSharedPreferences(
+        val settings = App.getContext().getSharedPreferences(
             ReaderActivity.PREFS_FILE,
             AppCompatActivity.MODE_PRIVATE
         )
 
         if (settings.contains(PrefsHelper.PREF_BOOK_PATH)) {
-            prefsHelper.bookPath = settings!!.getString(PrefsHelper.PREF_BOOK_PATH, null)
+            PrefsHelper.bookPath = settings!!.getString(PrefsHelper.PREF_BOOK_PATH, null)
         }
 
         if (settings.contains(PrefsHelper.PREF_SCREEN_BRIGHTNESS)) {
-            prefsHelper.screenBrightnessLevel = settings!!.getFloat(
+            PrefsHelper.screenBrightnessLevel = settings!!.getFloat(
                 PrefsHelper.PREF_SCREEN_BRIGHTNESS,
-                prefsHelper.systemScreenBrightnessLevel
+                PrefsHelper.systemScreenBrightnessLevel
             )
-            prefsHelper.setScreenBrightness(activity, prefsHelper.screenBrightnessLevel)
+            PrefsHelper.setScreenBrightness(activity, PrefsHelper.screenBrightnessLevel)
         }
     }
 
     fun savePrefs() {
-        val settings = app.getSharedPreferences(
+        val settings = App.getContext().getSharedPreferences(
             ReaderActivity.PREFS_FILE,
             AppCompatActivity.MODE_PRIVATE
         )
         val prefEditor = settings.edit()
-        prefEditor.putString(PrefsHelper.PREF_BOOK_PATH, prefsHelper.bookPath)
-        prefEditor.putFloat(PrefsHelper.PREF_SCREEN_BRIGHTNESS, prefsHelper.screenBrightnessLevel)
+        prefEditor.putString(PrefsHelper.PREF_BOOK_PATH, PrefsHelper.bookPath)
+        prefEditor.putFloat(PrefsHelper.PREF_SCREEN_BRIGHTNESS, PrefsHelper.screenBrightnessLevel)
         prefEditor.apply()
     }
 
     private fun removePathFromPrefs() {
-        val settings = app.getSharedPreferences(
+        val settings = App.getContext().getSharedPreferences(
             ReaderActivity.PREFS_FILE,
             AppCompatActivity.MODE_PRIVATE
         )
@@ -580,41 +345,41 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
 
     fun resetQuickSettings() {
         pageViewSettings.value = pageViewSettings.value?.also {
-            it.textSize = prefsHelper.textSize
-            it.lineSpacingMultiplier = prefsHelper.lineSpacingMultiplier
-            it.letterSpacing = prefsHelper.letterSpacing
+            it.textSize = PrefsHelper.textSize
+            it.lineSpacingMultiplier = PrefsHelper.lineSpacingMultiplier
+            it.letterSpacing = PrefsHelper.letterSpacing
         }
 
         pageViewColorSettings.value = PageViewColorSettings(
-            showBackgroundImage = prefsHelper.showBackgroundImage,
-            backgroundImageUri = prefsHelper.backgroundImageUri,
-            backgroundImageTiledRepeat = prefsHelper.backgroundImageTiledRepeat,
-            colorText = prefsHelper.colorText,
-            colorBack = prefsHelper.colorBack,
-            colorLink = prefsHelper.colorLinkText,
-            colorInfoText = prefsHelper.colorInfoText,
+            showBackgroundImage = PrefsHelper.showBackgroundImage,
+            backgroundImageUri = PrefsHelper.backgroundImageUri,
+            backgroundImageTiledRepeat = PrefsHelper.backgroundImageTiledRepeat,
+            colorText = PrefsHelper.colorText,
+            colorBack = PrefsHelper.colorBack,
+            colorLink = PrefsHelper.colorLinkText,
+            colorInfoText = PrefsHelper.colorInfoText,
         )
     }
 
     fun setBookPath(context: Context, uriString: String) {
-        prefsHelper.bookPath = uriString
+        PrefsHelper.bookPath = uriString
         savePrefs()
         loadBook(context)
     }
 
     fun deleteBook(uriString: String?): Boolean {
         val uri = Uri.parse(uriString)
-        val doc = DocumentFile.fromSingleUri(app.applicationContext, uri)
+        val doc = DocumentFile.fromSingleUri(App.getContext().applicationContext, uri)
         if (doc != null) {
             if (doc.delete()) {
-                if (uriString == prefsHelper.bookPath) {
-                    prefsHelper.bookPath = null
+                if (uriString == PrefsHelper.bookPath) {
+                    PrefsHelper.bookPath = null
                     book.value = null
                     removePathFromPrefs()
                 }
                 return true
             } else {
-                Toast.makeText(app.applicationContext, "Can't delete book", Toast.LENGTH_LONG)
+                Toast.makeText(App.getContext().applicationContext, "Can't delete book", Toast.LENGTH_LONG)
                     .show()
             }
         }
@@ -630,7 +395,7 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
     }
 
     private fun savePositionForBook() {
-        if (prefsHelper.bookPath != null
+        if (PrefsHelper.bookPath != null
             && book.value?.curPage != null) {
             savePosition()
         }
@@ -665,5 +430,15 @@ class ReaderActivityViewModel(val app: Application) : AndroidViewModel(app)  {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayStream)
             byteArrayStream.toByteArray()
         }
+    }
+}
+
+class ReaderActivityViewModelFactory(private val repository: BookStatusRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(ReaderActivityViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return ReaderActivityViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

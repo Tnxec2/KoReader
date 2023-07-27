@@ -3,11 +3,14 @@ package com.kontranik.koreader.ui.fragments
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -127,7 +130,6 @@ class FileChooseFragment : DialogFragment(),
     private fun openBookInfo(bookUri: String?) {
         if ( bookUri != null) {
             val bookInfoFragment = BookInfoFragment.newInstance(bookUri)
-            bookInfoFragment.setListener(this)
             bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
         }
     }
@@ -165,23 +167,22 @@ class FileChooseFragment : DialogFragment(),
             .show()
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         intent.flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION   // write permission to remove book
-        startActivityForResult(intent, OPEN_DIRECTORY_REQUEST_CODE)
+
+        startForResultPickFileToStorage.launch(Intent.createChooser(intent, "Select file storage"))
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == OPEN_DIRECTORY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val directoryUri = data?.data ?: return
-
-            requireActivity().contentResolver.takePersistableUriPermission(
-                    directoryUri,
+    private val startForResultPickFileToStorage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Handle the Intent
+            result.data?.data?.let {
+                requireActivity().contentResolver.takePersistableUriPermission(
+                    it,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-            mFileChooseFragmentViewModel.addStoragePath(directoryUri.toString())
+                )
+                mFileChooseFragmentViewModel.addStoragePath(it.toString())
+            }
         }
     }
 
-    companion object {
-        private const val OPEN_DIRECTORY_REQUEST_CODE = 0xf11e
-    }
 }

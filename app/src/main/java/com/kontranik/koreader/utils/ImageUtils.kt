@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.core.content.res.ResourcesCompat
 import com.kontranik.koreader.R
+import java.nio.ByteBuffer
 
 
 object ImageUtils {
@@ -32,14 +33,25 @@ object ImageUtils {
     fun getBitmap(c: Context, imageEnum: ImageEnum): Bitmap? {
 
         val d = when (imageEnum) {
-            ImageEnum.Parent -> ResourcesCompat.getDrawable(c.resources, R.drawable.ic_baseline_arrow_back_24, null)
-            ImageEnum.SD -> ResourcesCompat.getDrawable(c.resources, R.drawable.ic_baseline_sd_card_24, null)
-            ImageEnum.Dir ->ResourcesCompat.getDrawable(c.resources, R.drawable.ic_folder_black_24dp, null)
-            else ->  ResourcesCompat.getDrawable(c.resources, R.drawable.ic_book_black_24dp, null)
+            ImageEnum.Parent -> ResourcesCompat.getDrawable(
+                c.resources,
+                R.drawable.ic_baseline_arrow_back_24,
+                null
+            )
+            ImageEnum.SD -> ResourcesCompat.getDrawable(
+                c.resources,
+                R.drawable.ic_baseline_sd_card_24,
+                null
+            )
+            ImageEnum.Dir -> ResourcesCompat.getDrawable(
+                c.resources,
+                R.drawable.ic_folder_black_24dp,
+                null
+            )
+            else -> ResourcesCompat.getDrawable(c.resources, R.drawable.ic_book_black_24dp, null)
         }
 
-        val bitmap = drawableToBitmap(d!!)
-        return bitmap
+        return drawableToBitmap(d!!)
     }
 
     @JvmStatic
@@ -89,12 +101,12 @@ object ImageUtils {
             // landscape
             val ratio = width / maxWidth
             width = maxWidth.toFloat()
-            height = height / ratio
+            height /= ratio
         } else if (height > width) {
             // portrait
             val ratio = height / maxHeight
             height = maxHeight.toFloat()
-            width = width / ratio
+            width /= ratio
         } else {
             // square
             height = maxHeight.toFloat()
@@ -104,14 +116,23 @@ object ImageUtils {
         if ( width > maxWidth) {
             val ratio = width / maxWidth
             width = maxWidth.toFloat()
-            height = height / ratio
+            height /= ratio
         }
         if ( height > maxHeight) {
             val ratio = height / maxHeight
             height = maxHeight.toFloat()
-            width = width / ratio
+            width /= ratio
         }
 
         return Rect(0, 0, width.toInt(), height.toInt())
+    }
+
+    fun bitmapToByteArray(bitmap: Bitmap?): ByteArray? {
+        if (bitmap == null) return null
+
+        val size = bitmap.rowBytes * bitmap.height
+        val byteBuffer = ByteBuffer.allocate(size)
+        bitmap.copyPixelsToBuffer(byteBuffer)
+        return byteBuffer.array()
     }
 }

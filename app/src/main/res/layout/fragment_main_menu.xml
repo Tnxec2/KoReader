@@ -21,22 +21,18 @@
 
         <TextView
             android:id="@+id/textView_settings_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/main_menu"
-            android:gravity="center_vertical"
-            android:textSize="@dimen/text_size_dialog_title"
-            />
-
-        <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:text="@string/main_menu"
+            android:layout_gravity="center_vertical"
+            style="@style/TextAppearance.AppCompat.Title"
+            />
 
         <ImageButton
             android:id="@+id/imageButton_main_menu_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_baseline_close_24"
             android:contentDescription="@string/back" />
     </LinearLayout>
@@ -53,8 +49,8 @@
 
         <ImageView
             android:id="@+id/imageButton_main_menu_open_file"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginEnd="16dp"
             
             android:contentDescription="@string/openfile"
@@ -79,8 +75,8 @@
 
         <ImageView
             android:id="@+id/imageButton_main_menu_lastopened"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginEnd="16dp"
             
             android:contentDescription="@string/openfile"
@@ -105,8 +101,8 @@
 
         <ImageView
             android:id="@+id/imageButton_main_menu_settings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginEnd="16dp"
             
             android:contentDescription="@string/settings"
@@ -127,8 +123,8 @@
 
         <ImageButton
             android:id="@+id/imageButton_mainmenu_bookinfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_iconmonstr_book_info"
             android:contentDescription="@string/bookinfo" />
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -18,33 +17,29 @@
         <TextView
             android:id="@+id/textView_bookinfo_title"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
             android:text="@string/bookinfo"
-            android:textSize="@dimen/text_size_dialog_title"
+            style="@style/TextAppearance.AppCompat.Title"
             />
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
         <ImageButton
             android:id="@+id/imageButton_bookinfo_delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_baseline_delete_24"
             android:contentDescription="@string/deletebook" />
         <ImageButton
             android:id="@+id/imageButton_bookinfo_read"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_iconmonstr_book_opened"
             android:contentDescription="@string/readbook" />
         <ImageButton
             android:id="@+id/imageButton_bookinfo_close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_baseline_close_24"
             android:contentDescription="@string/back" />
     </LinearLayout>
@@ -65,7 +60,9 @@
                 android:layout_height="wrap_content"
                 android:paddingVertical="@dimen/activity_padding"
                 android:scaleType="fitStart"
-                android:adjustViewBounds="true"/>
+                android:adjustViewBounds="true"
+
+                />
 
         <TextView
             android:id="@+id/textView_bookinfo_booktitle"

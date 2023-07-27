@@ -11,9 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Toast
-import androidx.annotation.Nullable
 import androidx.core.app.ActivityCompat
-import androidx.core.app.DialogCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
@@ -33,7 +31,7 @@ class FontPickerFragment :
 
     private lateinit var binding: FragmentFontMenuBinding
 
-    private var listener: FontPickerDialogListener? = null
+    private var mListener: FontPickerDialogListener? = null
 
     private var fontList: MutableList<TypefaceRecord> = mutableListOf()
 
@@ -52,7 +50,7 @@ class FontPickerFragment :
     }
 
     fun setCallBack(listener: FontPickerDialogListener) {
-        this.listener = listener
+        this.mListener = listener
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,7 +64,7 @@ class FontPickerFragment :
         return binding.root
     }
 
-    override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(view.context)
@@ -84,7 +82,7 @@ class FontPickerFragment :
 
     private fun save() {
         // Return Data back to activity through the implemented listener
-        listener!!.onSaveFontPickerDialog(selectedFont)
+        mListener!!.onSaveFontPickerDialog(selectedFont)
 
         // Close the dialog and return back to the parent activity
         if ( !parentFragmentManager.popBackStackImmediate() ) {
@@ -113,7 +111,7 @@ class FontPickerFragment :
                                 file = fonts[fontName]!!
                             )
                         )
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
 
                     }
                 }
@@ -148,7 +146,7 @@ class FontPickerFragment :
         }
         if ( pos < fontList.size) binding.reciclerViewFontList.scrollToPosition(pos)
 
-        AdapterView.OnItemClickListener { parent, v, position, id ->
+        AdapterView.OnItemClickListener { _, _, position, _ ->
             selectedFont = fontList[position]
         }
     }

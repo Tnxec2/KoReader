@@ -1,13 +1,11 @@
 package com.kontranik.koreader.database
 
-import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.*
 import com.kontranik.koreader.database.repository.BookStatusRepository
 import com.kontranik.koreader.model.Book
-import com.kontranik.koreader.model.BookPosition
-import com.kontranik.koreader.model.BookStatus
+import com.kontranik.koreader.database.model.BookStatus
 import com.kontranik.koreader.utils.FileHelper
 import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
@@ -15,8 +13,7 @@ import java.util.*
 
 const val LAST_OPENED_COUNT = 10
 
-class BookStatusViewModel(application: Application) : AndroidViewModel(application) {
-    private val mRepository: BookStatusRepository = BookStatusRepository(application)
+class BookStatusViewModel(private val mRepository: BookStatusRepository) : ViewModel() {
 
     fun updateLastOpenTime(book: Book) {
         viewModelScope.launch {
@@ -80,5 +77,15 @@ class BookStatusViewModel(application: Application) : AndroidViewModel(applicati
                 delete(bookStatus!!.id!!)
             }
         }
+    }
+}
+
+class BookStatusViewModelFactory(private val repository: BookStatusRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(BookStatusViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return BookStatusViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

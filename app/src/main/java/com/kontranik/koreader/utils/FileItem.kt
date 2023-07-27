@@ -11,7 +11,5 @@ class FileItem(
         var isRoot: Boolean,
         var bookInfo: BookInfo? = null,
         var isStorage: Boolean = false
-        ) {
-
-}
+)
 

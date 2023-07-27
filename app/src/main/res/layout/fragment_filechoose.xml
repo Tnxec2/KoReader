@@ -17,43 +17,39 @@
 
         <TextView
             android:id="@+id/textView_filechoose_title"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="@string/choose_file"
-            android:gravity="center_vertical"
-            android:textSize="@dimen/text_size_dialog_title"
-            />
-
-        <androidx.legacy.widget.Space
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/choose_file"
+            android:layout_gravity="center_vertical"
+            style="@style/TextAppearance.AppCompat.Title"
+            />
 
         <ImageButton
             android:id="@+id/imageButton_filechoose_add_storage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_iconmonstr_folder_add"
             android:contentDescription="@string/go_to_storage" />
 
         <ImageButton
             android:id="@+id/imageButton_filechoose_goto_storage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_baseline_storage_24"
             android:contentDescription="@string/go_to_storage" />
 
         <ImageButton
             android:id="@+id/imageButton_filechoose_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_baseline_arrow_back_24"
             android:contentDescription="@string/back" />
 
         <ImageButton
             android:id="@+id/imageButton_filechoose_close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:srcCompat="@drawable/ic_baseline_close_24"
             android:contentDescription="@string/close" />
 

@@ -2,7 +2,6 @@ package com.kontranik.koreader.ui.preferences
 
 import android.Manifest
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.util.AttributeSet
 import android.widget.ImageButton
@@ -10,7 +9,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
-import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceViewHolder
 import com.kontranik.koreader.R
 import com.kontranik.koreader.utils.PrefsHelper
@@ -39,11 +37,10 @@ class TextSizePreference(context: Context, attrs: AttributeSet) : Preference(con
         super.onBindViewHolder(holder)
         holder.itemView.isClickable = false // disable parent click
 
-        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
         val permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(context, "Need read permisson for load fonts from storage", Toast.LENGTH_LONG)
+            Toast.makeText(context, "Need read permisson for load fonts from storage", Toast.LENGTH_LONG).show()
         }
 
         textViewFontName = holder.findViewById(R.id.textView_preference_text_sample) as TextView?
