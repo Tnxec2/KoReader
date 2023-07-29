@@ -15,23 +15,19 @@
 
         <TextView
             android:id="@+id/textView_settings_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/settings"
             android:layout_gravity="center_vertical"
             style="@style/TextAppearance.AppCompat.Title"
             />
 
-        <androidx.legacy.widget.Space
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
         <ImageButton
             android:id="@+id/imageButton_settings_back"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
-            app:srcCompat="@drawable/ic_baseline_close_24"
+            app:srcCompat="@drawable/ic_baseline_arrow_back_24"
             android:contentDescription="@string/back" />
 
     </LinearLayout>
@@ -39,5 +35,6 @@
     <FrameLayout
         android:id="@+id/settings_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 </LinearLayout>

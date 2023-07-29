@@ -161,10 +161,7 @@ class ReaderActivity :
         }
 
         supportFragmentManager.addOnBackStackChangedListener {
-            val fm: FragmentManager = supportFragmentManager
-            val backStackCount: Int = fm.backStackEntryCount
-            Log.d("STACK", backStackCount.toString())
-            if (backStackCount == 0) {
+            if (supportFragmentManager.backStackEntryCount == 0) {
                 binding.fragmentContainerView.visibility = View.GONE
             }
         }
@@ -179,26 +176,31 @@ class ReaderActivity :
         if (PrefsHelper.bookPath != null) {
             mReaderActivityViewModel.loadBook(binding.textViewPageview.context)
         } else {
-            Toast.makeText(
-                applicationContext,
-                resources.getString(R.string.open_book),
-                Toast.LENGTH_LONG
-            ).show()
-            openMainMenu()
+            if (supportFragmentManager.backStackEntryCount == 0) {
+                Toast.makeText(
+                    applicationContext,
+                    resources.getString(R.string.open_book),
+                    Toast.LENGTH_LONG
+                ).show()
+                openFile()
+            }
         }
     }
 
-
     private fun exitOnBackPressed() {
-        if (Date().time - backButtonPressedTime < 2000) {
-            finish()
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            if (Date().time - backButtonPressedTime < 2000) {
+                finish()
+            } else {
+                backButtonPressedTime = Date().time
+                Toast.makeText(
+                    this,
+                    resources.getString(R.string.press_again_to_exit),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         } else {
-            backButtonPressedTime = Date().time
-            Toast.makeText(
-                this,
-                resources.getString(R.string.press_again_to_exit),
-                Toast.LENGTH_SHORT
-            ).show()
+            supportFragmentManager.popBackStack()
         }
     }
 
@@ -308,15 +310,21 @@ class ReaderActivity :
     }
 
     private fun openMainMenu() {
-
         val mainMenuFragment = MainMenuFragment()
-        //mainMenuFragment.show(supportFragmentManager, "fragment_main_menu")
 
         binding.fragmentContainerView.visibility = View.VISIBLE
         supportFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
             .replace(R.id.fragment_container_view, mainMenuFragment, "fragment_main_menu")
             .addToBackStack("fragment_main_menu")
+            .commit()
+    }
+
+    private fun openFile() {
+        val fragment = FileChooseFragment()
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container_view, fragment, "fragment_open_file")
+            .addToBackStack("fragment_open_file")
             .commit()
     }
 

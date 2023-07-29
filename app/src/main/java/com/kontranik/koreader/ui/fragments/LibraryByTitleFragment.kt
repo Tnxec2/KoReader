@@ -55,6 +55,8 @@ class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibrar
 
         mLibraryViewModel.createNotificationChannel()
 
+        binding.textViewLibraryBooklistTitle.text = requireContext().resources.getString(R.string.books_by_title)
+
         binding.reciclerViewLibraryBooklistList.adapter = mAdapter
         binding.reciclerViewLibraryBooklistList.layoutManager = LinearLayoutManager(requireContext())
 
@@ -120,7 +122,7 @@ class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibrar
     }
 
     override fun onBookInfoFragmentReadBook(bookUri: String) {
-        mFileChooseFragmentViewModel.savePrefs(bookUri)
+        mFileChooseFragmentViewModel.savePrefsOpenedBook(bookUri)
         mReaderActivityViewModel.setBookPath(requireContext(), bookUri)
 
         requireActivity().supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)

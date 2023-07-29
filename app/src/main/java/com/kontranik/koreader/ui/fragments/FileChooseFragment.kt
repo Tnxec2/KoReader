@@ -23,16 +23,11 @@ import com.kontranik.koreader.utils.FileItem
 
 class FileChooseFragment : Fragment(),
         FileListAdapter.FileListAdapterClickListener,
-        BookInfoFragment.BookInfoListener{
+        BookInfoFragment.BookInfoListener {
     
     private lateinit var binding: FragmentFilechooseBinding
     private lateinit var mReaderActivityViewModel: ReaderActivityViewModel
     private lateinit var mFileChooseFragmentViewModel: FileChooseFragmentViewModel
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        //  setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -47,7 +42,6 @@ class FileChooseFragment : Fragment(),
         mFileChooseFragmentViewModel = ViewModelProvider(this)[FileChooseFragmentViewModel::class.java]
 
         binding.imageButtonFilechooseClose.setOnClickListener {
-
             requireActivity().supportFragmentManager.popBackStack()
         }
 
@@ -67,6 +61,7 @@ class FileChooseFragment : Fragment(),
         mFileChooseFragmentViewModel.showOpenBookInfo.observe(viewLifecycleOwner) {
             openBookInfo(it)
         }
+
         mFileChooseFragmentViewModel.removedItemIndex.observe(viewLifecycleOwner) {
             binding.reciclerViewFiles.adapter?.notifyItemRemoved(it)
         }
@@ -75,6 +70,8 @@ class FileChooseFragment : Fragment(),
         }
         mFileChooseFragmentViewModel.isVisibleImageButtonFilechooseAddStorage.observe(viewLifecycleOwner) {
             binding.imageButtonFilechooseAddStorage.visibility = if (it) View.VISIBLE else View.GONE
+            binding.imageButtonFilechooseBack.visibility = if (it) View.GONE else View.VISIBLE
+            binding.imageButtonFilechooseGotoStorage.visibility = if (it) View.GONE else View.VISIBLE
         }
         mFileChooseFragmentViewModel.fileItemList.observe(viewLifecycleOwner) {
             binding.reciclerViewFiles.adapter = FileListAdapter(requireContext(), it, this)
@@ -88,7 +85,7 @@ class FileChooseFragment : Fragment(),
     }
 
     private fun openBook(uriString: String) {
-        mFileChooseFragmentViewModel.savePrefs(uriString)
+        mFileChooseFragmentViewModel.savePrefsOpenedBook(uriString)
         mReaderActivityViewModel.setBookPath(requireContext(), uriString)
 
         requireActivity().supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
@@ -110,7 +107,7 @@ class FileChooseFragment : Fragment(),
     }
 
     private fun confirmDeleteStorage(position: Int) {
-        AlertDialog.Builder(binding.reciclerViewFiles.context)
+        AlertDialog.Builder(requireContext())
             .setTitle(getString(R.string.title_delete_storage))
             .setMessage(getString(R.string.sure_delete_storage))
             .setCancelable(false)
@@ -163,13 +160,13 @@ class FileChooseFragment : Fragment(),
      */
     private fun performFileSearchToAddStorage() {
         Toast.makeText(
-            binding.reciclerViewFiles.context,
+            requireContext(),
             "Select directory or storage from dialog, and grant access",
             Toast.LENGTH_LONG)
             .show()
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        intent.flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION   // write permission to remove book
 
+        intent.flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION   // write permission to remove book
         startForResultPickFileToStorage.launch(Intent.createChooser(intent, "Select file storage"))
     }
 

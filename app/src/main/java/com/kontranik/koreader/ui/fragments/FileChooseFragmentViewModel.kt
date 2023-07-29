@@ -66,14 +66,23 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
         }
     }
 
-    fun savePrefs(uriString: String?) {
+    fun savePrefsOpenedBook(uriString: String) {
         val settings = app
             .getSharedPreferences(
                 PREFS_FILE,
                 Context.MODE_PRIVATE)
         val prefEditor = settings.edit()
-        if ( uriString != null)
-            prefEditor!!.putString(PREF_LAST_PATH, uriString)
+        prefEditor!!.putString(PREF_LAST_PATH, uriString)
+        prefEditor.apply()
+    }
+
+    fun savePrefsExternalPaths() {
+        val settings = app
+            .getSharedPreferences(
+                PREFS_FILE,
+                Context.MODE_PRIVATE)
+        val prefEditor = settings.edit()
+
         if ( externalPaths.value != null)
             prefEditor.putStringSet(PREF_EXTERNAL_PATHS, externalPaths.value!!.toMutableSet())
         prefEditor.apply()
@@ -81,13 +90,14 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
 
 
     private fun loadPath() {
-        if ( selectedDocumentFileUriString.value == null
-            || externalPaths.value!!.isEmpty())
-                storageList()
+        if ( selectedDocumentFileUriString.value == null ) storageList()
 
         var lastPathIsInStorageList = false
-        externalPaths.value?.forEach {
-            if ( lastPath.value!!.contains(it)) lastPathIsInStorageList = true  }
+        if (lastPath.value != null) {
+            externalPaths.value?.forEach {
+                if (lastPath.value!!.contains(it)) lastPathIsInStorageList = true
+            }
+        }
         if (!lastPathIsInStorageList) storageList()
 
         getFileList(selectedDocumentFileUriString.value)
@@ -104,6 +114,8 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
     }
 
     fun storageList() {
+        isVisibleImageButtonFilechooseAddStorage.value = true
+
         if ( externalPaths.value == null || externalPaths.value!!.isEmpty() ) {
             showConfirmSelectStorageDialog.value = true
             return
@@ -137,7 +149,7 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
         fileList.sortBy { it.name }
         fileItemList.value = fileList
 
-        isVisibleImageButtonFilechooseAddStorage.value = true
+
     }
 
     private fun getFileList(fileItem: FileItem) {
@@ -174,13 +186,13 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
 
     fun deleteStorage(position: Int) {
         externalPaths.value!!.removeAt(position)
-        savePrefs(uriString = null)
+        savePrefsExternalPaths()
         storageList()
     }
 
     fun addStoragePath(uri: String) {
         externalPaths.value!!.add(uri)
-        savePrefs(uriString = null)
+        savePrefsExternalPaths()
         storageList()
     }
 

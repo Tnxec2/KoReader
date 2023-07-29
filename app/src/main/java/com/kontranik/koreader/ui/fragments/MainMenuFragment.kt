@@ -61,8 +61,7 @@ class MainMenuFragment : Fragment() {
     private fun openFile() {
         val fragment = FileChooseFragment()
 
-        requireActivity().supportFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
+        parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container_view, fragment, "fragment_open_file")
             .addToBackStack("fragment_open_file")
             .commit()
@@ -72,7 +71,6 @@ class MainMenuFragment : Fragment() {
         val fragment = SettingsFragment()
 
         requireActivity().supportFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
             .replace(R.id.fragment_container_view, fragment, "fragment_settings")
             .addToBackStack("fragment_settings")
             .commit()
@@ -82,7 +80,6 @@ class MainMenuFragment : Fragment() {
         val fragment = BookListFragment()
 
         requireActivity().supportFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
             .replace(R.id.fragment_container_view, fragment, "fragment_last_opened")
             .addToBackStack("fragment_last_opened")
             .commit()
@@ -92,7 +89,6 @@ class MainMenuFragment : Fragment() {
         val fragment = LibraryMainMenuFragment()
 
         requireActivity().supportFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
             .replace(R.id.fragment_container_view, fragment, "fragment_library")
             .addToBackStack("fragment_library")
             .commit()
