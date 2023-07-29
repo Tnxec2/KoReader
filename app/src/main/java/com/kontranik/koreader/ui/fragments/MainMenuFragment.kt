@@ -9,18 +9,19 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
 import com.kontranik.koreader.databinding.FragmentMainMenuBinding
 import com.kontranik.koreader.utils.PrefsHelper
 
-class MainMenuFragment : DialogFragment() {
+class MainMenuFragment : BottomSheetDialogFragment() {
 
     private lateinit var binding: FragmentMainMenuBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
+        // setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -32,9 +33,9 @@ class MainMenuFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.imageButtonMainMenuBack.setOnClickListener {
-            dismiss()
-        }
+//        binding.imageButtonMainMenuBack.setOnClickListener {
+//            dismiss()
+//        }
 
         binding.llMainMenuOpenFile.setOnClickListener {
             openFile()
@@ -42,6 +43,10 @@ class MainMenuFragment : DialogFragment() {
 
         binding.llMainMenuLastOpened.setOnClickListener {
             openLastOpened()
+        }
+
+        binding.llMainMenuLibrary.setOnClickListener {
+            openLibrary()
         }
 
         binding.llMainMenuSettings.setOnClickListener {
@@ -83,9 +88,15 @@ class MainMenuFragment : DialogFragment() {
         fragment.show(requireActivity().supportFragmentManager, "fragment_booklist")
     }
 
+    private fun openLibrary() {
+        val fragment = LibraryMainMenuFragment()
+        fragment.show(requireActivity().supportFragmentManager, "fragment_library")
+    }
+
     private fun openBookInfo(bookUri: String?) {
         if ( bookUri != null) {
             val bookInfoFragment: BookInfoFragment = BookInfoFragment.newInstance(bookUri)
+
             bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
         }
     }

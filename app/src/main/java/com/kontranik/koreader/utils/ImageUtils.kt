@@ -80,9 +80,13 @@ object ImageUtils {
         return bitmap
     }
 
-    fun byteArrayToScaledBitmap(byteArray: ByteArray, width: Int, height: Int): Bitmap {
-        val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-        return scaleBitmap(bitmap, width, height)
+    fun byteArrayToScaledBitmap(byteArray: ByteArray?, width: Int, height: Int): Bitmap? {
+        if ( byteArray != null) {
+            val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+            if (bitmap != null)
+                return scaleBitmap(bitmap, width, height)
+        }
+        return null
     }
 
     fun byteArrayToBitmap(byteArray: ByteArray): Bitmap {

@@ -14,6 +14,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.databinding.FragmentSettingsBinding
@@ -21,7 +22,7 @@ import com.kontranik.koreader.ui.preferences.ImagePickerPreference
 import com.rarepebble.colorpicker.ColorPreference
 
 
-class SettingsFragment : DialogFragment(),
+class SettingsFragment : BottomSheetDialogFragment(),
         PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     private lateinit var binding: FragmentSettingsBinding
@@ -30,7 +31,7 @@ class SettingsFragment : DialogFragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
+        // setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

@@ -109,7 +109,7 @@ object FileHelper {
         return resultFiles
     }
 
-    private fun getPath(uri: Uri): String {
+    fun getPath(uri: Uri): String {
         var path = uri.pathSegments.last()
         var iP = path.lastIndexOf("%3A")
         if ( iP > 0) path = path.substring(iP + 3)

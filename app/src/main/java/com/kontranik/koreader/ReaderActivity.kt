@@ -301,23 +301,29 @@ class ReaderActivity :
     }
 
     private fun openMainMenu() {
+
         val mainMenuFragment = MainMenuFragment()
-        mainMenuFragment.show(supportFragmentManager, "fragment_main_menu")
+        //mainMenuFragment.show(supportFragmentManager, "fragment_main_menu")
+
+        supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .add(R.id.fragment_container_view, mainMenuFragment, "fragment_main_menu")
+            .commit()
     }
 
-    private var resultLauncherMainMenu = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val intentData: Intent? = result.data
-
-            if (intentData != null && intentData.hasExtra(PREF_TYPE)) {
-                when (intentData.getIntExtra(PREF_TYPE, 0)) {
-                    PREF_TYPE_SETTINGS -> {
-                        mReaderActivityViewModel.loadSettings(this@ReaderActivity)
-                    }
-                }
-            }
-        }
-    }
+//    private var resultLauncherMainMenu = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//        if (result.resultCode == Activity.RESULT_OK) {
+//            val intentData: Intent? = result.data
+//
+//            if (intentData != null && intentData.hasExtra(PREF_TYPE)) {
+//                when (intentData.getIntExtra(PREF_TYPE, 0)) {
+//                    PREF_TYPE_SETTINGS -> {
+//                        mReaderActivityViewModel.loadSettings(this@ReaderActivity)
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private fun openQuickMenu() {
         val quickMenuFragment = QuickMenuFragment()

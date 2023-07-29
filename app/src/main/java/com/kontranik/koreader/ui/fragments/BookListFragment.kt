@@ -101,6 +101,7 @@ class BookListFragment :
     private fun openBookInfo(bookPathUri: String?) {
         if ( bookPathUri != null) {
             val bookInfoFragment = BookInfoFragment.newInstance(bookPathUri)
+            bookInfoFragment.setListener(this)
             bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
         }
     }

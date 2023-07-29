@@ -84,7 +84,6 @@ class FileChooseFragment : DialogFragment(),
                     mFileChooseFragmentViewModel.
                         getPositionInFileItemList(), 0)
         }
-
     }
 
     private fun openBook(uriString: String) {
@@ -130,6 +129,7 @@ class FileChooseFragment : DialogFragment(),
     private fun openBookInfo(bookUri: String?) {
         if ( bookUri != null) {
             val bookInfoFragment = BookInfoFragment.newInstance(bookUri)
+            bookInfoFragment.setListener(this)
             bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
         }
     }

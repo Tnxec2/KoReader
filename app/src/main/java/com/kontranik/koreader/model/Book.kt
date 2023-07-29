@@ -92,11 +92,13 @@ class Book(private var context: Context, var fileLocation: String) {
             val resource = ebookHelper!!.getImageByHref(s)
             if (resource != null) {
                 val bitmap = BitmapFactory.decodeByteArray(resource, 0, resource.size)
-                return if (invertAndTint) {
-                    val inverted = ImageUtils.invertAndTint(bitmap, colorTint)
-                    BitmapDrawable(context.resources, inverted)
-                } else {
-                    BitmapDrawable(context.resources, bitmap)
+                if (bitmap != null) {
+                    return if (invertAndTint) {
+                        val inverted = ImageUtils.invertAndTint(bitmap, colorTint)
+                        BitmapDrawable(context.resources, inverted)
+                    } else {
+                        BitmapDrawable(context.resources, bitmap)
+                    }
                 }
             }
         }

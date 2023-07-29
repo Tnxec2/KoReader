@@ -106,24 +106,14 @@ class BookInfoFragment : DialogFragment() {
         binding.textViewBookinfoAnnotation.text = HtmlCompat.fromHtml(bookInfo.annotation, HtmlCompat.FROM_HTML_MODE_LEGACY)
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is BookInfoListener) {
-            mListener = context
-        } else {
-            throw RuntimeException(
-                context.toString()
-                        + " must implement BookInfoListener"
-            )
-        }
+    fun setListener(listener: BookInfoListener) {
+        this.mListener = listener
     }
 
     override fun onDetach() {
         super.onDetach()
-        mListener = null
+        this.mListener = null
     }
-
-
 
     companion object {
         private const val BOOK_PATH = "book_path"

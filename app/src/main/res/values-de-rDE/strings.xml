@@ -143,4 +143,10 @@
     <string name="ok_select_storage">OK</string>
     <string name="toggle_invert">Invertierung umschalten</string>
     <string name="color_theme">Farb theme</string>
+    <string name="channel_name_library">KoRe Library Notification</string>
+    <string name="channel_description_library">Description fo Library Notification Channel</string>
+    <string name="library_delete_item_dialog_title">Delete library item</string>
+    <string name="library_delete_item_dialog_message">Are you sure to delete this library entry</string>
+    <string name="undo_delete_snackbar_message">Undo delete</string>
+    <string name="undo_delete_undo_action">Undo</string>
 </resources>

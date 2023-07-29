@@ -8,13 +8,14 @@ import android.view.ViewGroup
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentGotoMenuBinding
 import kotlin.math.max
 import kotlin.math.min
 
 
-class GotoMenuFragment : DialogFragment() {
+class GotoMenuFragment : BottomSheetDialogFragment() {
     private lateinit var binding: FragmentGotoMenuBinding
 
     private var mListener: GotoMenuDialogListener? = null
@@ -35,7 +36,7 @@ class GotoMenuFragment : DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
+        // setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
