@@ -14,6 +14,8 @@
     <dimen name="padding_textview_right_fullscreen">6dp</dimen>
     <dimen name="padding_textview_bottom_fullscreen">6dp</dimen>
 
+    <dimen name="icon_size">48sp</dimen>
+
     <dimen name="text_size">13sp</dimen>
     <item name="line_spacing" type="dimen" format="float">1.0</item>
     <item name="letter_spacing" type="dimen" format="float">0.05</item>

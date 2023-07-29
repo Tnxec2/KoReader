@@ -1,28 +1,19 @@
 package com.kontranik.koreader.ui.fragments
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.DialogFragment
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import androidx.fragment.app.Fragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivity
 import com.kontranik.koreader.databinding.FragmentMainMenuBinding
 import com.kontranik.koreader.utils.PrefsHelper
 
-class MainMenuFragment : BottomSheetDialogFragment() {
+class MainMenuFragment : Fragment() {
 
     private lateinit var binding: FragmentMainMenuBinding
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -33,9 +24,9 @@ class MainMenuFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        binding.imageButtonMainMenuBack.setOnClickListener {
-//            dismiss()
-//        }
+        binding.imageButtonMainMenuBack.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
 
         binding.llMainMenuOpenFile.setOnClickListener {
             openFile()
@@ -69,34 +60,47 @@ class MainMenuFragment : BottomSheetDialogFragment() {
 
     private fun openFile() {
         val fragment = FileChooseFragment()
-        fragment.show(requireActivity().supportFragmentManager, "fragment_open_file")
 
-        requireActivity().supportFragmentManager.setFragmentResultListener("open_file", this) { key, _ ->
-            if (key == "open_file") {
-                dismiss()
-            }
-        }
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.fragment_container_view, fragment, "fragment_open_file")
+            .addToBackStack("fragment_open_file")
+            .commit()
     }
 
     private fun settings() {
         val fragment = SettingsFragment()
-        fragment.show(requireActivity().supportFragmentManager, "fragment_settings")
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.fragment_container_view, fragment, "fragment_settings")
+            .addToBackStack("fragment_settings")
+            .commit()
     }
 
     private fun openLastOpened() {
         val fragment = BookListFragment()
-        fragment.show(requireActivity().supportFragmentManager, "fragment_booklist")
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.fragment_container_view, fragment, "fragment_last_opened")
+            .addToBackStack("fragment_last_opened")
+            .commit()
     }
 
     private fun openLibrary() {
         val fragment = LibraryMainMenuFragment()
-        fragment.show(requireActivity().supportFragmentManager, "fragment_library")
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.fragment_container_view, fragment, "fragment_library")
+            .addToBackStack("fragment_library")
+            .commit()
     }
 
     private fun openBookInfo(bookUri: String?) {
         if ( bookUri != null) {
             val bookInfoFragment: BookInfoFragment = BookInfoFragment.newInstance(bookUri)
-
             bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
         }
     }

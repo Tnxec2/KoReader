@@ -20,16 +20,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text=""
+            android:text="@string/last_opened"
             android:layout_gravity="center_vertical"
             style="@style/TextAppearance.AppCompat.Title"
             />
 
-
         <ImageButton
             android:id="@+id/imageButton_booklist_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_arrow_back_24"
             android:contentDescription="@string/back" />
 
@@ -39,8 +38,9 @@
         android:id="@+id/reciclerView_booklist_list"
         app:layoutManager="LinearLayoutManager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:divider="@drawable/list_divider"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:listitem="@layout/booklist_item"
         android:dividerHeight="4dp"/>
 
 </LinearLayout>

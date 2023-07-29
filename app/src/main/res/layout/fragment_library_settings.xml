@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="@dimen/activity_padding"
     android:background="@color/background_main_dialog"
@@ -19,29 +19,29 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Library scan"
+            android:text="@string/library_settings"
             android:layout_gravity="center_vertical"
             style="@style/TextAppearance.AppCompat.Title"
             />
 
         <ImageButton
             android:id="@+id/imageButton_library_settings_refresh"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/baseline_autorenew_24"
-            android:contentDescription="REfresh" />
+            android:contentDescription="@string/refresh" />
         <ImageButton
             android:id="@+id/imageButton_library_settings_add_scan_point"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_iconmonstr_folder_add"
-            android:contentDescription="add scan point" />
+            android:contentDescription="@string/add_scan_point" />
 
         <ImageButton
             android:id="@+id/imageButton_library_settings__close"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:srcCompat="@drawable/ic_baseline_close_24"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
+            app:srcCompat="@drawable/ic_baseline_arrow_back_24"
             android:contentDescription="@string/close" />
 
     </LinearLayout>
@@ -65,8 +65,8 @@
 
         <ImageButton
             android:id="@+id/imageButton_library_settings_clear_library"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/baseline_delete_forever_24"
             android:contentDescription="@string/clear_library" />
 

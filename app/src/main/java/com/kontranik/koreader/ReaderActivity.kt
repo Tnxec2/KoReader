@@ -1,6 +1,5 @@
 package com.kontranik.koreader
 
-import android.app.Activity
 import android.content.*
 import android.content.res.Configuration
 import android.graphics.Color
@@ -19,8 +18,8 @@ import android.view.WindowManager
 import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
@@ -35,7 +34,6 @@ import com.kontranik.koreader.ui.components.BookReaderTextview.BookReaderTextvie
 import com.kontranik.koreader.ui.components.ReadInfoArea.ReadInfoAreaListener
 import com.kontranik.koreader.ui.fragments.*
 import com.kontranik.koreader.utils.*
-
 import java.io.InputStream
 import java.util.*
 
@@ -159,6 +157,15 @@ class ReaderActivity :
                         PrefsHelper.font
                     )
                 floatTextViewFragment.show(supportFragmentManager, "fragment_floattextview")
+            }
+        }
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            val fm: FragmentManager = supportFragmentManager
+            val backStackCount: Int = fm.backStackEntryCount
+            Log.d("STACK", backStackCount.toString())
+            if (backStackCount == 0) {
+                binding.fragmentContainerView.visibility = View.GONE
             }
         }
     }
@@ -305,11 +312,15 @@ class ReaderActivity :
         val mainMenuFragment = MainMenuFragment()
         //mainMenuFragment.show(supportFragmentManager, "fragment_main_menu")
 
+        binding.fragmentContainerView.visibility = View.VISIBLE
         supportFragmentManager.beginTransaction()
             .setReorderingAllowed(true)
-            .add(R.id.fragment_container_view, mainMenuFragment, "fragment_main_menu")
+            .replace(R.id.fragment_container_view, mainMenuFragment, "fragment_main_menu")
+            .addToBackStack("fragment_main_menu")
             .commit()
     }
+
+
 
 //    private var resultLauncherMainMenu = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 //        if (result.resultCode == Activity.RESULT_OK) {
@@ -599,10 +610,6 @@ class ReaderActivity :
     companion object {
         private const val TAG = "ReaderActivity"
         internal const val PREFS_FILE = "MainActivitySettings"
-
-        const val PREF_TYPE = "ReturnType"
-        const val PREF_TYPE_OPEN_BOOK = 121
-        const val PREF_TYPE_SETTINGS = 122
     }
 
 }

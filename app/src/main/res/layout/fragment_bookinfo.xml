@@ -26,20 +26,20 @@
 
         <ImageButton
             android:id="@+id/imageButton_bookinfo_delete"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_delete_24"
             android:contentDescription="@string/deletebook" />
         <ImageButton
             android:id="@+id/imageButton_bookinfo_read"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_iconmonstr_book_opened"
             android:contentDescription="@string/readbook" />
         <ImageButton
             android:id="@+id/imageButton_bookinfo_close"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_close_24"
             android:contentDescription="@string/back" />
     </LinearLayout>

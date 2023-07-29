@@ -11,25 +11,21 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.kontranik.koreader.App
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentLibrarySettingsBinding
 import com.kontranik.koreader.ui.adapters.LibraryScanPointListAdapter
 
-class LibrarySettingsFragment : DialogFragment(), LibraryScanPointListAdapter.LibraryScanPointListAdapterClickListener {
+class LibrarySettingsFragment : Fragment(), LibraryScanPointListAdapter.LibraryScanPointListAdapterClickListener {
 
     private lateinit var binding: FragmentLibrarySettingsBinding
 
     private lateinit var mLibraryViewModel: LibraryViewModel
 
-    var scanPointList: MutableList<String> = mutableListOf()
+    private var scanPointList: MutableList<String> = mutableListOf()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -50,7 +46,7 @@ class LibrarySettingsFragment : DialogFragment(), LibraryScanPointListAdapter.Li
         mLibraryViewModel.createNotificationChannel()
 
         binding.imageButtonLibrarySettingsClose.setOnClickListener {
-            dismiss()
+            requireActivity().supportFragmentManager.popBackStack()
         }
 
         binding.imageButtonLibrarySettingsRefresh.setOnClickListener {
@@ -70,7 +66,7 @@ class LibrarySettingsFragment : DialogFragment(), LibraryScanPointListAdapter.Li
         binding.reciclerViewLibrarySettingsScanPoints.adapter =
             LibraryScanPointListAdapter(requireContext(), scanPointList, this)
 
-        mLibraryViewModel.refreshInProgress.observe(this) {
+        mLibraryViewModel.refreshInProgress.observe(viewLifecycleOwner) {
             binding.imageButtonLibrarySettingsRefresh.visibility = if (it) View.GONE else View.VISIBLE
         }
     }
@@ -113,13 +109,14 @@ class LibrarySettingsFragment : DialogFragment(), LibraryScanPointListAdapter.Li
 
     private fun performRefreshLibrary() {
         AlertDialog.Builder(binding.reciclerViewLibrarySettingsScanPoints.context)
-            .setTitle("Refresh library")
-            .setMessage("are you sure to refresh the library?")
+            .setTitle(getString(R.string.refresh_library))
+            .setMessage(getString(R.string.are_you_sure_to_refresh_the_library))
             .setCancelable(false)
             .setPositiveButton(
-                "Refresh"
-            ) { dialogInterface, _ ->
-                Toast.makeText(binding.reciclerViewLibrarySettingsScanPoints.context, "Start refresh...", Toast.LENGTH_SHORT).show()
+                getString(R.string.refresh_ok_button)
+            ) { _, _ ->
+                Toast.makeText(binding.reciclerViewLibrarySettingsScanPoints.context,
+                    getString(R.string.start_refresh), Toast.LENGTH_SHORT).show()
                 mLibraryViewModel.readRecursive(requireContext(), scanPointList)
             }
             .setNegativeButton(
@@ -132,12 +129,12 @@ class LibrarySettingsFragment : DialogFragment(), LibraryScanPointListAdapter.Li
 
     private fun performClearLibrary() {
         AlertDialog.Builder(binding.reciclerViewLibrarySettingsScanPoints.context)
-            .setTitle("Clear library")
-            .setMessage("are you sure to clear the whole library?")
+            .setTitle(getString(R.string.clear_library_alert_title))
+            .setMessage(getString(R.string.are_you_sure_to_clear_the_whole_library))
             .setCancelable(false)
             .setPositiveButton(
-                "Clear"
-            ) { dialogInterface, _ ->
+                getString(R.string.clear_library_ok_button)
+            ) { _, _ ->
                 mLibraryViewModel.deleteAll()
             }
             .setNegativeButton(
@@ -150,11 +147,11 @@ class LibrarySettingsFragment : DialogFragment(), LibraryScanPointListAdapter.Li
 
     override fun onLibraryScanPointListItemDelete(position: Int, item: String) {
         AlertDialog.Builder(binding.reciclerViewLibrarySettingsScanPoints.context)
-            .setTitle("Delete scan point")
-            .setMessage("are you sure to delete this scan point")
+            .setTitle(getString(R.string.delete_scan_point))
+            .setMessage(getString(R.string.library_are_you_sure_to_delete_this_scan_point))
             .setCancelable(false)
             .setPositiveButton(
-                "Delete"
+                getString(R.string.delete_scan_point_ok_button)
             ) { dialogInterface, _ ->
                 deleteScanPoint(position)
                 dialogInterface.dismiss()

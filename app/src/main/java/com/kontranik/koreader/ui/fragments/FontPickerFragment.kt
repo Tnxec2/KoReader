@@ -84,10 +84,7 @@ class FontPickerFragment :
         // Return Data back to activity through the implemented listener
         mListener!!.onSaveFontPickerDialog(selectedFont)
 
-        // Close the dialog and return back to the parent activity
-        if ( !parentFragmentManager.popBackStackImmediate() ) {
-            dismiss()
-        }
+        dismiss()
     }
 
     private fun loadFonts() {

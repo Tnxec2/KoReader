@@ -4,18 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentLibraryMainBinding
 
-class LibraryMainMenuFragment : DialogFragment() {
+class LibraryMainMenuFragment : Fragment() {
 
     private lateinit var binding: FragmentLibraryMainBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -27,7 +23,7 @@ class LibraryMainMenuFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.imageButtonLibraryMainBack.setOnClickListener {
-            dismiss()
+            requireActivity().supportFragmentManager.popBackStack()
         }
 
         binding.llLibraryMainSettings.setOnClickListener {
@@ -41,13 +37,15 @@ class LibraryMainMenuFragment : DialogFragment() {
         binding.llLibraryMainByAuthor.setOnClickListener {
             openByAuthor()
         }
-
-
     }
 
     private fun openByTitle() {
         val fragment = LibraryByTitleFragment()
-        fragment.show(requireActivity().supportFragmentManager, "fragment_library_by_title")
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.fragment_container_view, fragment, "fragment_library_by_title")
+            .addToBackStack("fragment_library_by_title")
+            .commit()
     }
 
     private fun openByAuthor() {
@@ -64,7 +62,12 @@ class LibraryMainMenuFragment : DialogFragment() {
 
     private fun settings() {
         val fragment = LibrarySettingsFragment()
-        fragment.show(requireActivity().supportFragmentManager, "fragment_library_settings")
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.fragment_container_view, fragment, "fragment_library_settings")
+            .addToBackStack("fragment_library_settings")
+            .commit()
     }
 
 

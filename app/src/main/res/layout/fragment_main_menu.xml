@@ -2,7 +2,6 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:id="@+id/linearLayout_main_menu_holder"
     android:layout_width="match_parent"
@@ -12,7 +11,7 @@
     android:textColor="@color/foreground_main_dialog"
     >
 
-<!--    <LinearLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -29,11 +28,11 @@
 
         <ImageButton
             android:id="@+id/imageButton_main_menu_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_close_24"
             android:contentDescription="@string/back" />
-    </LinearLayout>-->
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ll_main_menu_open_file"
@@ -47,8 +46,8 @@
 
         <ImageView
             android:id="@+id/imageButton_main_menu_open_file"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:layout_marginEnd="16dp"
             
             android:contentDescription="@string/openfile"
@@ -74,8 +73,8 @@
 
         <ImageView
             android:id="@+id/imageButton_main_menu_lastopened"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:layout_marginEnd="16dp"
             
             android:contentDescription="@string/openfile"
@@ -100,8 +99,8 @@
 
         <ImageView
             android:id="@+id/imageButton_main_menu_library"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:layout_marginEnd="16dp"
 
             android:contentDescription="Library"
@@ -111,7 +110,7 @@
             android:id="@+id/textView_main_menu_library"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Library" />
+            android:text="@string/library" />
 
     </LinearLayout>
 
@@ -127,8 +126,8 @@
 
         <ImageView
             android:id="@+id/imageButton_main_menu_settings"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:layout_marginEnd="16dp"
             
             android:contentDescription="@string/settings"
@@ -155,8 +154,8 @@
 
         <ImageButton
             android:id="@+id/imageButton_mainmenu_bookinfo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_iconmonstr_book_info"
             android:contentDescription="@string/bookinfo" />
     </LinearLayout>

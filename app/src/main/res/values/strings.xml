@@ -156,7 +156,7 @@
     <string name="font_select_help">place custom fonts in folder: internal_storage/Android/data/com.kontranik.koreader/files/fonts/</string>
     <string name="font_select_title">Select font</string>
     <string name="no_page_content">no page content</string>
-    <string name="loading_book">loading Book...</string>
+    <string name="loading_book">loading Book…</string>
     <string name="can_not_load_book">can not load book %1$s</string>
     <string name="press_again_to_exit">Press again to exit</string>
     <string name="open_book">Open a book</string>
@@ -190,6 +190,24 @@
     <string name="undo_delete_snackbar_message">Undo delete</string>
     <string name="undo_delete_undo_action">Undo</string>
     <string name="clear_library">clear library</string>
+    <string name="add_scan_point">add scan point</string>
+    <string name="refresh">Refresh</string>
+    <string name="library_settings">Library settings</string>
+    <string name="refresh_library">Refresh library</string>
+    <string name="are_you_sure_to_refresh_the_library">are you sure to refresh the library?</string>
+    <string name="refresh_ok_button">Refresh</string>
+    <string name="start_refresh">Start refresh…</string>
+    <string name="clear_library_alert_title">Clear library</string>
+    <string name="are_you_sure_to_clear_the_whole_library">are you sure to clear the whole library?</string>
+    <string name="clear_library_ok_button">Clear</string>
+    <string name="delete_scan_point">Delete scan point</string>
+    <string name="library_are_you_sure_to_delete_this_scan_point">are you sure to delete this scan point</string>
+    <string name="delete_scan_point_ok_button">Delete</string>
+    <string name="clear_search_text">clear</string>
+    <string name="search">search</string>
+    <string name="books_by_title">Books by title</string>
+    <string name="books_by_author">Books by author</string>
+    <string name="library">Library</string>
 
 
 </resources>

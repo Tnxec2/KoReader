@@ -28,8 +28,8 @@
 
         <ImageButton
             android:id="@+id/imageButton_bookmarklist_addBookmark"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:layout_gravity="bottom"
             android:clickable="true"
             app:srcCompat="@drawable/ic_iconmonstr_bookmark_add"
@@ -38,8 +38,8 @@
 
         <ImageButton
             android:id="@+id/imageButton_bookmarklist_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_arrow_back_24"
             android:contentDescription="@string/back" />
 

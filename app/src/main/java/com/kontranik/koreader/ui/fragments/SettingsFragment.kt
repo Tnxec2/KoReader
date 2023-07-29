@@ -8,13 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.Nullable
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.databinding.FragmentSettingsBinding
@@ -22,17 +20,13 @@ import com.kontranik.koreader.ui.preferences.ImagePickerPreference
 import com.rarepebble.colorpicker.ColorPreference
 
 
-class SettingsFragment : BottomSheetDialogFragment(),
+class SettingsFragment : Fragment(),
         PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     private lateinit var binding: FragmentSettingsBinding
 
     private lateinit var mReaderActivityViewModel: ReaderActivityViewModel
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -50,7 +44,7 @@ class SettingsFragment : BottomSheetDialogFragment(),
         binding.imageButtonSettingsBack.setOnClickListener {
             if (childFragmentManager.backStackEntryCount == 0) {
                 mReaderActivityViewModel.loadSettings(requireActivity())
-                dismiss()
+                requireActivity().supportFragmentManager.popBackStack()
             } else {
                 childFragmentManager.popBackStack()
             }

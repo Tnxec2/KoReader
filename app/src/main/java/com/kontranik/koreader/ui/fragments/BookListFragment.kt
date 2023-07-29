@@ -6,10 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.kontranik.koreader.App
-import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.ReaderActivityViewModelFactory
 import com.kontranik.koreader.database.BookStatusViewModel
@@ -20,9 +20,9 @@ import com.kontranik.koreader.ui.adapters.BookListAdapter
 import com.kontranik.koreader.utils.FileHelper
 
 class BookListFragment :
-    DialogFragment(),
+    Fragment(),
     BookListAdapter.BookListAdapterClickListener,
-    BookInfoFragment.BookInfoListener{
+    BookInfoFragment.BookInfoListener {
 
     private lateinit var binding: FragmentBookListBinding
 
@@ -31,11 +31,6 @@ class BookListFragment :
     private lateinit var mBookStatusViewModel: BookStatusViewModel
 
     private lateinit var mReaderActivityViewModel: ReaderActivityViewModel
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -56,12 +51,12 @@ class BookListFragment :
 
 
         binding.imageButtonBooklistBack.setOnClickListener {
-            dismiss()
+            requireActivity().supportFragmentManager.popBackStack()
         }
 
         binding.reciclerViewBooklistList.adapter = BookListAdapter(requireContext(), bookInfoList, this)
 
-        mBookStatusViewModel.lastOpenedBooks.observe(this) {
+        mBookStatusViewModel.lastOpenedBooks.observe(viewLifecycleOwner) {
             if (it != null) {
                 bookInfoList.clear()
                 for (bookStatus in it) {
@@ -80,8 +75,10 @@ class BookListFragment :
                         bookInfoList.add(bookInfo)
                     }
                 }
+                binding.reciclerViewBooklistList.adapter?.notifyDataSetChanged()
             }
         }
+
     }
 
     private fun savePrefs(uriString: String?) {
@@ -106,17 +103,13 @@ class BookListFragment :
         }
     }
 
-    companion object {
-        const val BOOKLIST_TYP = "typ"
-        const val BOOKLIST_TYP_LAST_OPENED = "lastopened"
-        const val BOOKLIST_TYP_DEFAULT = BOOKLIST_TYP_LAST_OPENED
 
-    }
 
     override fun onBookInfoFragmentReadBook(bookUri: String) {
         savePrefs(bookUri)
         mReaderActivityViewModel.setBookPath(requireContext(), bookUri)
-        dismiss()
+
+        requireActivity().supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     }
 
     override fun onBookInfoFragmentDeleteBook(bookUri: String) {

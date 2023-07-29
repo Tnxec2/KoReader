@@ -10,8 +10,8 @@
 
     <ImageView
         android:id="@+id/imageView_libraryscan_item_image"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
         app:srcCompat ="@drawable/ic_folder_black_24dp"
         android:contentDescription="@string/icon" />
 

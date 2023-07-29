@@ -4,7 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,7 +17,8 @@ import com.kontranik.koreader.database.model.LibraryItem
 import com.kontranik.koreader.databinding.FragmentLibraryBookListBinding
 import com.kontranik.koreader.ui.adapters.PagingLibraryItemAdapter
 
-class LibraryByTitleFragment : DialogFragment(), PagingLibraryItemAdapter.PagingLibraryItemAdapterListener {
+class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibraryItemAdapterListener,
+    BookInfoFragment.BookInfoListener {
 
     private lateinit var binding: FragmentLibraryBookListBinding
 
@@ -28,11 +30,6 @@ class LibraryByTitleFragment : DialogFragment(), PagingLibraryItemAdapter.Paging
 
     private lateinit var mFileChooseFragmentViewModel: FileChooseFragmentViewModel
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -62,7 +59,7 @@ class LibraryByTitleFragment : DialogFragment(), PagingLibraryItemAdapter.Paging
         binding.reciclerViewLibraryBooklistList.layoutManager = LinearLayoutManager(requireContext())
 
         binding.imageButtonLibraryBooklistBack.setOnClickListener {
-            dismiss()
+            requireActivity().supportFragmentManager.popBackStack()
         }
 
         binding.ibLibrarySearchClear.setOnClickListener {
@@ -70,7 +67,7 @@ class LibraryByTitleFragment : DialogFragment(), PagingLibraryItemAdapter.Paging
             mLibraryViewModel.changeSearchText(null)
         }
 
-        binding.ibSearch.setOnClickListener {
+        binding.ibLibrarySearch.setOnClickListener {
             val searchText = if ( binding.etLibrarySearchText.text.isNotBlank() && binding.etLibrarySearchText.text.isNotBlank() ) {
                 binding.etLibrarySearchText.text.toString()
             } else {
@@ -79,7 +76,7 @@ class LibraryByTitleFragment : DialogFragment(), PagingLibraryItemAdapter.Paging
             mLibraryViewModel.changeSearchText(searchText)
         }
 
-        mLibraryViewModel.libraryPageByFilter.observe(this) { libraryItems ->
+        mLibraryViewModel.libraryPageByFilter.observe(viewLifecycleOwner) { libraryItems ->
             libraryItems?.let {
                 mAdapter.submitData(viewLifecycleOwner.lifecycle, PagingData.empty())
                 mAdapter.submitData(viewLifecycleOwner.lifecycle, it)
@@ -91,9 +88,15 @@ class LibraryByTitleFragment : DialogFragment(), PagingLibraryItemAdapter.Paging
     }
 
     override fun onClickLibraryItem(libraryItem: LibraryItem) {
-        mFileChooseFragmentViewModel.savePrefs(libraryItem.path)
-        mReaderActivityViewModel.setBookPath(requireContext(), libraryItem.path)
-        dismiss()
+        openBookInfo(libraryItem.path)
+    }
+
+    private fun openBookInfo(bookPathUri: String?) {
+        if ( bookPathUri != null) {
+            val bookInfoFragment = BookInfoFragment.newInstance(bookPathUri)
+            bookInfoFragment.setListener(this)
+            bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
+        }
     }
 
     override fun onDeleteLibraryItem(position: Int, libraryItem: LibraryItem?) {
@@ -111,10 +114,19 @@ class LibraryByTitleFragment : DialogFragment(), PagingLibraryItemAdapter.Paging
                 view, getString(R.string.undo_delete_snackbar_message),
                 Snackbar.LENGTH_LONG
             )
-            snackbar.setAction(getString(R.string.undo_delete_undo_action)) { v -> mLibraryViewModel.insert(mRecentlyDeletedItem) }
+            snackbar.setAction(getString(R.string.undo_delete_undo_action)) { _  -> mLibraryViewModel.insert(mRecentlyDeletedItem) }
             snackbar.show()
         }
     }
 
+    override fun onBookInfoFragmentReadBook(bookUri: String) {
+        mFileChooseFragmentViewModel.savePrefs(bookUri)
+        mReaderActivityViewModel.setBookPath(requireContext(), bookUri)
 
+        requireActivity().supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    }
+
+    override fun onBookInfoFragmentDeleteBook(bookUri: String) {
+        // TODO("Not yet implemented")
+    }
 }

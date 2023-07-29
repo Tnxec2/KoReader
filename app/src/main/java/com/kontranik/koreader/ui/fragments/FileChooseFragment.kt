@@ -3,7 +3,6 @@ package com.kontranik.koreader.ui.fragments
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kontranik.koreader.R
@@ -21,7 +21,7 @@ import com.kontranik.koreader.ui.adapters.FileListAdapter
 import com.kontranik.koreader.utils.FileItem
 
 
-class FileChooseFragment : DialogFragment(),
+class FileChooseFragment : Fragment(),
         FileListAdapter.FileListAdapterClickListener,
         BookInfoFragment.BookInfoListener{
     
@@ -31,7 +31,7 @@ class FileChooseFragment : DialogFragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
+        //  setStyle(STYLE_NO_TITLE, R.style.DialogTheme)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -47,7 +47,8 @@ class FileChooseFragment : DialogFragment(),
         mFileChooseFragmentViewModel = ViewModelProvider(this)[FileChooseFragmentViewModel::class.java]
 
         binding.imageButtonFilechooseClose.setOnClickListener {
-            dismiss()
+
+            requireActivity().supportFragmentManager.popBackStack()
         }
 
         binding.imageButtonFilechooseBack.setOnClickListener {
@@ -63,22 +64,22 @@ class FileChooseFragment : DialogFragment(),
         }
         binding.imageButtonFilechooseAddStorage.visibility = View.GONE
 
-        mFileChooseFragmentViewModel.showOpenBookInfo.observe(this) {
+        mFileChooseFragmentViewModel.showOpenBookInfo.observe(viewLifecycleOwner) {
             openBookInfo(it)
         }
-        mFileChooseFragmentViewModel.removedItemIndex.observe(this) {
+        mFileChooseFragmentViewModel.removedItemIndex.observe(viewLifecycleOwner) {
             binding.reciclerViewFiles.adapter?.notifyItemRemoved(it)
         }
-        mFileChooseFragmentViewModel.showConfirmSelectStorageDialog.observe(this) {
+        mFileChooseFragmentViewModel.showConfirmSelectStorageDialog.observe(viewLifecycleOwner) {
             if ( it ) confirmSelectStorageDialog()
         }
-        mFileChooseFragmentViewModel.isVisibleImageButtonFilechooseAddStorage.observe(this) {
+        mFileChooseFragmentViewModel.isVisibleImageButtonFilechooseAddStorage.observe(viewLifecycleOwner) {
             binding.imageButtonFilechooseAddStorage.visibility = if (it) View.VISIBLE else View.GONE
         }
-        mFileChooseFragmentViewModel.fileItemList.observe(this) {
+        mFileChooseFragmentViewModel.fileItemList.observe(viewLifecycleOwner) {
             binding.reciclerViewFiles.adapter = FileListAdapter(requireContext(), it, this)
         }
-        mFileChooseFragmentViewModel.scrollToDocumentFileUriString.observe(this) {
+        mFileChooseFragmentViewModel.scrollToDocumentFileUriString.observe(viewLifecycleOwner) {
             (binding.reciclerViewFiles.layoutManager as LinearLayoutManager)
                 .scrollToPositionWithOffset(
                     mFileChooseFragmentViewModel.
@@ -89,7 +90,8 @@ class FileChooseFragment : DialogFragment(),
     private fun openBook(uriString: String) {
         mFileChooseFragmentViewModel.savePrefs(uriString)
         mReaderActivityViewModel.setBookPath(requireContext(), uriString)
-        dismiss()
+
+        requireActivity().supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     }
 
     private fun deleteBook(uriString: String?) {

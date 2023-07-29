@@ -20,16 +20,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Books by title"
+            android:text="@string/books_by_title"
             android:layout_gravity="center_vertical"
             style="@style/TextAppearance.AppCompat.Title"
             />
 
-
         <ImageButton
             android:id="@+id/imageButton_library_booklist_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_arrow_back_24"
             android:contentDescription="@string/back" />
 
@@ -48,31 +47,31 @@
             android:id="@+id/et_library_search_text"
             style="@style/TextAppearance.AppCompat.Medium"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/icon_size"
             android:layout_weight="1"
             android:inputType="text"
             android:text=""
             tools:ignore="Autofill,LabelFor,SpeakableTextPresentCheck" />
         <ImageButton
             android:id="@+id/ib_library_search_clear"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/baseline_backspace_24"
-            android:contentDescription="clear" />
+            android:contentDescription="@string/clear_search_text" />
         <ImageButton
-            android:contentDescription="search"
-            android:id="@+id/ib_search"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="16dp"
-            app:srcCompat="@drawable/baseline_search_24" />
+            android:id="@+id/ib_library_search"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
+            app:srcCompat="@drawable/baseline_search_24"
+            android:contentDescription="@string/search" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/reciclerView_library_booklist_list"
         app:layoutManager="LinearLayoutManager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         tools:listitem="@layout/booklist_item"
         android:divider="@drawable/list_divider"
         android:dividerHeight="4dp"/>

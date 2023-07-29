@@ -4,13 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:padding="@dimen/activity_padding"
-    android:layout_gravity="center_vertical"
-    tools:layout_editor_absoluteX="16dp"
     android:background="@color/background_main_dialog"
     android:textColor="@color/foreground_main_dialog"
-
     >
 
     <LinearLayout
@@ -21,22 +18,17 @@
         <TextView
             android:id="@+id/textView_floattextview_title"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:text="@string/note"
-            android:textSize="@dimen/text_size_dialog_title"
-            />
-
-        <Space
-            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:text="@string/note"
+            style="@style/TextAppearance.AppCompat.Title"
+            />
 
         <ImageButton
             android:id="@+id/imageButton_floattextview_close"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_close_24"
             android:contentDescription="@string/back" />
 
@@ -45,15 +37,15 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    <TextView
-        android:id="@+id/textView_floattextview_content"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:gravity="center_vertical"
-        android:textColor="@color/foreground_sepia"
-        android:textColorLink="@color/foreground_sepia_link"
-        android:text=""
-        />
+        <TextView
+            android:id="@+id/textView_floattextview_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:gravity="center_vertical"
+            android:textColor="@color/foreground_sepia"
+            android:textColorLink="@color/foreground_sepia_link"
+            android:text=""
+            />
     </ScrollView>
 
 </LinearLayout>
