@@ -86,6 +86,7 @@ class LibrarySettingsFragment : Fragment(), LibraryScanPointListAdapter.LibraryS
             val eP = settings.getStringSet(PREF_SCAN_POINTS, null)
             scanPointList = eP?.toMutableList() ?: mutableListOf()
         }
+        updateUi()
     }
 
     private fun savePrefs() {
@@ -95,11 +96,20 @@ class LibrarySettingsFragment : Fragment(), LibraryScanPointListAdapter.LibraryS
                 Context.MODE_PRIVATE)
         val prefEditor = settings.edit()
 
-        if ( scanPointList.isNotEmpty())
+        if ( scanPointList.isNotEmpty()) {
             prefEditor.putStringSet(PREF_SCAN_POINTS, scanPointList.toMutableSet())
-        else
+        } else {
             prefEditor.remove(PREF_SCAN_POINTS)
+        }
         prefEditor.apply()
+        updateUi()
+    }
+
+    private fun updateUi() {
+        if (scanPointList.isEmpty())
+            binding.imageButtonLibrarySettingsRefresh.visibility = View.GONE
+        else
+            binding.imageButtonLibrarySettingsRefresh.visibility = View.VISIBLE
     }
 
     companion object {

@@ -23,7 +23,6 @@ import androidx.paging.cachedIn
 import androidx.paging.liveData
 import com.kontranik.koreader.App
 import com.kontranik.koreader.R
-import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.model.LibraryItem
 import com.kontranik.koreader.database.repository.AuthorsRepository
 import com.kontranik.koreader.database.repository.LibraryItemRepository
@@ -132,7 +131,7 @@ class LibraryViewModel(
             if ( documentsTree == null || ! documentsTree.isDirectory || ! documentsTree.canRead() ) {
                 //
             } else {
-                Thread {
+                applicationScope.launch {
                     var builder = NotificationCompat.Builder(App.getContext(), CHANNEL_ID)
                         .setStyle(NotificationCompat.MessagingStyle("Me")
                             .setConversationTitle("Library refresh"))
@@ -153,8 +152,7 @@ class LibraryViewModel(
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
                     notify(context, builder)
-                }.start()
-
+                }
             }
         }
     }
@@ -219,7 +217,7 @@ class LibraryViewModel(
                         || name.endsWith(".fb2.zip", true)
                     ) {
                         val documentUri = DocumentsContract.buildDocumentUriUsingTree(rootUri, docId)
-                        readBookInfo(documentUri, name, docId)
+                        readBookInfo(documentUri, docId)
                     }
                 }
             } finally {
@@ -230,7 +228,7 @@ class LibraryViewModel(
 
     // Util method to check if the mime type is a directory
     private fun isDirectory(mimeType: String): Boolean {
-        return DocumentsContract.Document.MIME_TYPE_DIR == mimeType
+        return Document.MIME_TYPE_DIR == mimeType
     }
 
     // Util method to close a closeable
@@ -246,8 +244,7 @@ class LibraryViewModel(
         }
     }
 
-    private fun readBookInfo(uri: Uri, name: String, path: String) {
-        applicationScope.launch {
+    private fun readBookInfo(uri: Uri, path: String) {
             val item = libraryItemRepository.getByPath(path)
             if (item.isEmpty()) {
                 val bookInfo = readBookInfo(
@@ -274,15 +271,9 @@ class LibraryViewModel(
         }
 
         if ( result != null) {
-            if (result.cover != null) {
-                result.cover =
-                    ImageUtils.scaleBitmap(result.cover!!, 50, 100)
-            } else {
-                result.cover = ImageUtils.getBitmap(mContext, ImageEnum.Ebook)
-            }
+            if (result.cover == null) result.cover = ImageUtils.getBitmap(mContext, ImageEnum.Ebook)
         }
         return result
-    }
 }
 
 

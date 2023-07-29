@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 import com.kontranik.koreader.database.BookStatusHelper
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookPosition
+import com.kontranik.koreader.utils.ImageUtils
 import java.util.*
 
 @Entity(tableName = BookStatusHelper.TABLE)
@@ -17,7 +18,9 @@ class BookStatus(
     @ColumnInfo(name = BookStatusHelper.COLUMN_AUTHOR) var authors: String? = null,
     @ColumnInfo(name = BookStatusHelper.COLUMN_POSITION_PAGE) var position_section: Int = 0,
     @ColumnInfo(name = BookStatusHelper.COLUMN_POSITION_OFFSET) var position_offset: Int = 0,
-    @ColumnInfo(name = BookStatusHelper.COLUMN_LAST_OPEN_TIME) var lastOpenTime: Long? = null
+    @ColumnInfo(name = BookStatusHelper.COLUMN_LAST_OPEN_TIME) var lastOpenTime: Long? = null,
+    @ColumnInfo(name = LibraryItemHelper.COLUMN_COVER, typeAffinity = ColumnInfo.BLOB)
+    var cover: ByteArray? = null
 ) {
     constructor(book: Book) : this(
         id = null,
@@ -25,7 +28,8 @@ class BookStatus(
         title = book.ebookHelper?.bookInfo?.title,
         authors = book.ebookHelper?.bookInfo?.authorsAsString(),
         position_section = if ( book.curPage == null) 0 else book.curPage!!.startBookPosition.section,
-        position_offset = if ( book.curPage == null) 0 else book.curPage!!.startBookPosition.offSet
+        position_offset = if ( book.curPage == null) 0 else book.curPage!!.startBookPosition.offSet,
+        cover = ImageUtils.getBytes(book.ebookHelper?.bookInfo?.cover)
     )
 
     init {

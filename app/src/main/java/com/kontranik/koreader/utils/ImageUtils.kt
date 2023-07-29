@@ -1,11 +1,20 @@
 package com.kontranik.koreader.utils
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Bitmap.CompressFormat
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.core.content.res.ResourcesCompat
 import com.kontranik.koreader.R
+import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 
 
@@ -30,7 +39,7 @@ object ImageUtils {
     }
 
     @JvmStatic
-    fun getBitmap(c: Context, imageEnum: ImageEnum): Bitmap? {
+    fun getBitmap(c: Context, imageEnum: ImageEnum): Bitmap {
 
         val d = when (imageEnum) {
             ImageEnum.Parent -> ResourcesCompat.getDrawable(
@@ -131,12 +140,18 @@ object ImageUtils {
         return Rect(0, 0, width.toInt(), height.toInt())
     }
 
-    fun bitmapToByteArray(bitmap: Bitmap?): ByteArray? {
+    // convert from bitmap to byte array
+    fun getBytes(bitmap: Bitmap?): ByteArray? {
         if (bitmap == null) return null
 
-        val size = bitmap.rowBytes * bitmap.height
-        val byteBuffer = ByteBuffer.allocate(size)
-        bitmap.copyPixelsToBuffer(byteBuffer)
-        return byteBuffer.array()
+        val scaled = if (bitmap.width > 50 || bitmap.height > 100) scaleBitmap(bitmap, 50, 100) else bitmap
+        val stream = ByteArrayOutputStream()
+        scaled.compress(CompressFormat.PNG, 0, stream)
+        return stream.toByteArray()
+    }
+
+    // convert from byte array to bitmap
+    fun getImage(byteArray: ByteArray): Bitmap? {
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 }

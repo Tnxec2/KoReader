@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="@dimen/activity_padding"
     android:background="@color/background_main_dialog"
-    android:textColor="@color/foreground_main_dialog"
-    >
+    android:textColor="@color/foreground_main_dialog">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -60,6 +60,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:divider="@drawable/list_divider"
-        android:dividerHeight="2dp"/>
+        android:dividerHeight="2dp"
+        tools:listitem="@layout/filelist_item"
+        />
 
 </LinearLayout>

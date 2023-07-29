@@ -39,8 +39,6 @@ class SettingsFragment : Fragment(),
 
         mReaderActivityViewModel = ViewModelProvider(requireActivity())[ReaderActivityViewModel::class.java]
 
-        binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_close_24))
-
         binding.imageButtonSettingsBack.setOnClickListener {
             if (childFragmentManager.backStackEntryCount == 0) {
                 mReaderActivityViewModel.loadSettings(requireActivity())
@@ -51,13 +49,6 @@ class SettingsFragment : Fragment(),
         }
 
         if (savedInstanceState == null) {
-            childFragmentManager.addOnBackStackChangedListener {
-                if (childFragmentManager.backStackEntryCount == 0) {
-                    binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_close_24))
-                } else {
-                    binding.imageButtonSettingsBack.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_arrow_back_24))
-                }
-            }
             childFragmentManager
                     .beginTransaction()
                     .add(binding.settingsContainer.id, RootSettingsFragment())

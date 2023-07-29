@@ -14,17 +14,18 @@ import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.ReaderActivityViewModelFactory
 import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.BookStatusViewModelFactory
-import com.kontranik.koreader.databinding.FragmentBookListBinding
+import com.kontranik.koreader.databinding.FragmentLastOpenedBookListBinding
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.ui.adapters.BookListAdapter
 import com.kontranik.koreader.utils.FileHelper
+import com.kontranik.koreader.utils.ImageUtils
 
-class BookListFragment :
+class LastOpenedBookListFragment :
     Fragment(),
     BookListAdapter.BookListAdapterClickListener,
     BookInfoFragment.BookInfoListener {
 
-    private lateinit var binding: FragmentBookListBinding
+    private lateinit var binding: FragmentLastOpenedBookListBinding
 
     private var bookInfoList: MutableList<BookInfo> = mutableListOf()
 
@@ -34,7 +35,7 @@ class BookListFragment :
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        binding = FragmentBookListBinding.inflate(inflater, container, false)
+        binding = FragmentLastOpenedBookListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -66,7 +67,7 @@ class BookListFragment :
                         }
                         val bookInfo = BookInfo(
                             title = bookStatus.title,
-                            cover = null,
+                            cover = bookStatus.cover?.let { it1 -> ImageUtils.getImage(it1) },
                             authors = mutableListOf(),
                             filename = bookStatus.path!!,
                             path = bookStatus.path!!,

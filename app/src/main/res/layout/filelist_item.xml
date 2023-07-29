@@ -3,9 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingTop="16dp"
-    android:paddingBottom="16dp"
-
     >
 
     <ImageView
@@ -19,7 +16,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        
+        android:layout_gravity="center_vertical"
         android:layout_marginStart="@dimen/activity_padding">
 
         <TextView
@@ -28,7 +25,7 @@
             android:layout_height="wrap_content"
             android:text="@string/title"
             android:textSize="@dimen/text_size_file_name"
-            android:textStyle="bold" />
+            style="@style/TextAppearance.Compat.Notification.Title" />
 
         <TextView
             android:id="@+id/filedesc"
@@ -36,14 +33,16 @@
             android:layout_height="wrap_content"
             android:text="@string/description"
             android:textSize="@dimen/text_size_file_desc"
-            android:textStyle="italic" />
+            style="@style/TextAppearance.Compat.Notification.Line2" />
 
         <TextView
             android:id="@+id/filepath"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/text_size_file_path"
-            android:text="@string/path" />
+            android:text="@string/path"
+            style="@style/TextAppearance.AppCompat.Small"
+            />
 
     </LinearLayout>
 </LinearLayout>

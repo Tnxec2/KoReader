@@ -64,7 +64,7 @@ class BookStatusViewModel(private val mRepository: BookStatusRepository) : ViewM
                     }
                 }
             }
-
+            mRepository.deleteOlderCount(LAST_OPENED_COUNT)
             Log.d("BookStatusCleanup", "cleanup: finish. deleted: $countDeleted")
         }
     }

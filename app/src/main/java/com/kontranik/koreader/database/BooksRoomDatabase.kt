@@ -17,9 +17,10 @@ import java.util.concurrent.Executors
 
 // https://developer.android.com/codelabs/android-room-with-a-view#7
 
-@Database(entities = [BookStatus::class, Bookmark::class, Author::class, LibraryItem::class, LibraryItemAuthorsCrossRef::class],
+@Database(
+    entities = [BookStatus::class, Bookmark::class, Author::class, LibraryItem::class, LibraryItemAuthorsCrossRef::class],
     version = BooksRoomDatabase.SCHEMA,
-    exportSchema = false)
+    exportSchema = true)
 abstract class BooksRoomDatabase : RoomDatabase() {
     abstract fun bookStatusDao(): BookStatusDao
     abstract fun bookmarksDao(): BookmarksDao
@@ -66,6 +67,6 @@ abstract class BooksRoomDatabase : RoomDatabase() {
         }
 
         private const val DATABASE_NAME = "books.db" // db name
-        internal const val SCHEMA = 6 // db version
+        internal const val SCHEMA = 1 // db version
     }
 }

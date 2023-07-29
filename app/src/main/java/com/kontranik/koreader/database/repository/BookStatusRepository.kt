@@ -40,5 +40,7 @@ class BookStatusRepository(private val mBookStatusDao: BookStatusDao) {
         BooksRoomDatabase.databaseWriteExecutor.execute { mBookStatusDao.delete(id) }
     }
 
-
+    fun deleteOlderCount(count: Int) {
+        BooksRoomDatabase.databaseWriteExecutor.execute { mBookStatusDao.deleteOlderCount(count) }
+    }
 }

@@ -16,6 +16,11 @@ interface BookStatusDao {
     @Query("DELETE FROM ${BookStatusHelper.TABLE} where ${BookStatusHelper.COLUMN_ID} = :id")
     fun delete(id: Long)
 
+    @Query("DELETE FROM ${BookStatusHelper.TABLE} where ${BookStatusHelper.COLUMN_ID} NOT IN " +
+            "( SELECT ${BookStatusHelper.COLUMN_ID} FROM ${BookStatusHelper.TABLE} " +
+            "ORDER BY ${BookStatusHelper.COLUMN_LAST_OPEN_TIME} DESC LIMIT :count)")
+    fun deleteOlderCount(count: Int)
+
     @Query("SELECT * FROM ${BookStatusHelper.TABLE}")
     suspend fun getAll(): List<BookStatus>
 

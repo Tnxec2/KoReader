@@ -27,14 +27,14 @@ class LibraryItem(
         id = null,
         path = book.fileLocation,
         title = book.ebookHelper?.bookInfo?.title,
-        cover = ImageUtils.bitmapToByteArray(book.ebookHelper?.bookInfo?.cover)
+        cover = ImageUtils.getBytes(book.ebookHelper?.bookInfo?.cover)
     )
 
     constructor(bookInfo: BookInfo) :this(
         id = null,
         path = bookInfo.path,
         title = bookInfo.title,
-        cover = ImageUtils.bitmapToByteArray(bookInfo.cover)
+        cover = ImageUtils.getBytes(bookInfo.cover)
     )
 
     override fun hashCode(): Int {

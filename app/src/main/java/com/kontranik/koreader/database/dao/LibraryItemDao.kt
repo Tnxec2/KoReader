@@ -24,8 +24,8 @@ interface LibraryItemDao {
             else where.append(" AND ")
             where.append(" LOWER(title) LIKE LOWER('%$searchText%') ")
         }
-
-        val statement = "SELECT * FROM ${LibraryItemHelper.TABLE} $where"
+        val order = " ORDER BY ${LibraryItemHelper.COLUMN_TITLE}"
+        val statement = "SELECT * FROM ${LibraryItemHelper.TABLE} $where $order"
         val query = SimpleSQLiteQuery(statement)
         return getPagedLibraryItemViaQuery(query)
     }

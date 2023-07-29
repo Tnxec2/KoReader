@@ -77,7 +77,7 @@ class MainMenuFragment : Fragment() {
     }
 
     private fun openLastOpened() {
-        val fragment = BookListFragment()
+        val fragment = LastOpenedBookListFragment()
 
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container_view, fragment, "fragment_last_opened")

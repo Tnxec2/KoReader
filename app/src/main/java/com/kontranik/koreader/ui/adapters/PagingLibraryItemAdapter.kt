@@ -1,6 +1,7 @@
 package com.kontranik.koreader.ui.adapters
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
@@ -58,7 +59,8 @@ class PagingLibraryItemAdapter(private val context: Context, private val mListen
                 booklistitemAuthor.text =  "" //item.authorsAsString()
                 booklistitemPath.text = URLDecoder.decode(item.path)
                 if (item.cover != null) {
-                    val bitmap = ImageUtils.byteArrayToScaledBitmap(item.cover, 50, 100)
+                    val bitmap = ImageUtils.getImage(item.cover!!)
+                    Log.d("LibraryAdapter", "${item.title} has bitmap")
                     if (bitmap != null)
                         booklistitemCover.setImageBitmap(bitmap)
                     else
