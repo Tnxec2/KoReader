@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.documentfile.provider.DocumentFile
@@ -40,27 +41,31 @@ class LibraryScanPointListAdapter(
             context, directoryUri)
         holder.textView.text =  documentsTree?.uri?.pathSegments?.last() ?: scanPointItem
 
-        holder.textView.setOnClickListener {
+        holder.ll.setOnClickListener {
             mListener.onLibraryScanPointListItemClick(position)
         }
 
-        holder.textView.setOnLongClickListener {
-            val popup = PopupMenu(context, holder.textView)
-            popup.inflate(R.menu.menu_file_item_clicked)
-            popup.setOnMenuItemClickListener { item: MenuItem? ->
-                if (item != null) {
-                    when (item.itemId) {
-                        R.id.itemDelete -> {
-                            mListener.onLibraryScanPointListItemDelete(position, scanPointItem)
-                        }
-                    }
-                }
-                false
-            }
-            popup.show()
-            true
+        holder.ll.setOnLongClickListener {
+            onDeleteItem(holder, position, scanPointItem)
         }
 
+    }
+
+    private fun onDeleteItem(holder: ViewHolder, position: Int, scanPointItem: String): Boolean {
+        val popup = PopupMenu(context, holder.textView)
+        popup.inflate(R.menu.menu_file_item_clicked)
+        popup.setOnMenuItemClickListener { item: MenuItem? ->
+            if (item != null) {
+                when (item.itemId) {
+                    R.id.itemDelete -> {
+                        mListener.onLibraryScanPointListItemDelete(position, scanPointItem)
+                    }
+                }
+            }
+            false
+        }
+        popup.show()
+        return true
     }
 
     override fun getItemCount(): Int {
@@ -69,6 +74,7 @@ class LibraryScanPointListAdapter(
 
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val textView = view.findViewById<View>(R.id.textView_libraryscan_itemname) as TextView
+        val ll = view.findViewById<View>(R.id.ll_library_scanlist_item) as LinearLayout
     }
 
 

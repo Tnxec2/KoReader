@@ -8,13 +8,11 @@
 
     <ImageButton
         android:id="@+id/imageView_preference_text_textSizeDecrease"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:clickable="true"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
         app:srcCompat="@drawable/ic_a_small"
-        android:focusable="true"
-        android:contentDescription="@string/decrease" />
+        android:contentDescription="@string/decrease"
+        app:tint="?attr/colorControlNormal"  />
 
     <TextView
         android:id="@+id/textView_preference_text_sample"
@@ -29,10 +27,9 @@
 
     <ImageButton
         android:id="@+id/imageView_preference_text_textSizeIncrease"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
         app:srcCompat="@drawable/ic_aa"
         android:contentDescription="@string/increase"
-        android:focusable="true" />
+        app:tint="?attr/colorControlNormal"  />
 </LinearLayout>

@@ -5,7 +5,7 @@
     android:orientation="horizontal"
     android:paddingTop="16dp"
     android:paddingBottom="16dp"
-
+    android:id="@+id/ll_library_scanlist_item"
     >
 
     <ImageView
@@ -19,7 +19,7 @@
 
     <TextView
         android:id="@+id/textView_libraryscan_itemname"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:text="@string/title"

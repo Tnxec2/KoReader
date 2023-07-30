@@ -5,7 +5,9 @@ import androidx.paging.PagingSource
 import androidx.room.*
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.LibraryItem
+import com.kontranik.koreader.database.model.LibraryItemAuthorsCrossRef
 import com.kontranik.koreader.database.model.LibraryItemHelper
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import kotlinx.coroutines.flow.Flow
@@ -14,11 +16,16 @@ import kotlinx.coroutines.flow.Flow
 interface LibraryItemDao {
 
     @RawQuery(observedEntities = [LibraryItem::class])
-    fun getPagedLibraryItemViaQuery(query: SupportSQLiteQuery): PagingSource<Int, LibraryItem>
+    fun getPagedLibraryItemViaQuery(query: SupportSQLiteQuery): PagingSource<Int, LibraryItemWithAuthors>
 
     fun getPage(
-        searchText: String?): PagingSource<Int, LibraryItem> {
+        author: Author?,
+        searchText: String?): PagingSource<Int, LibraryItemWithAuthors> {
         val where = StringBuilder("")
+        if (author?.id != null) {
+            where.append( " WHERE ${LibraryItemHelper.COLUMN_ID} IN " +
+                    "(SELECT ${LibraryItemHelper.COLUMN_ID} FROM libraryItemToAuthorCrossRef WHERE authorid = ${author.id} )" )
+        }
         if (searchText != null) {
             if (where.isBlank()) where.append(" WHERE ")
             else where.append(" AND ")
@@ -31,7 +38,10 @@ interface LibraryItemDao {
     }
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(libraryItem: LibraryItem)
+    fun insert(libraryItem: LibraryItem): Long?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertCrossRef(libraryItemAuthorsCrossRef: LibraryItemAuthorsCrossRef)
 
     @Update
     fun update(libraryItem: LibraryItem)
@@ -39,8 +49,14 @@ interface LibraryItemDao {
     @Query("DELETE FROM ${LibraryItemHelper.TABLE} where ${LibraryItemHelper.COLUMN_ID} = :id")
     fun delete(id: Long)
 
+    @Query("DELETE FROM libraryItemToAuthorCrossRef where libraryitemid = :libraryitemid")
+    fun deleteCrossRefLibraryItem(libraryitemid: Long)
+
     @Query("DELETE FROM ${LibraryItemHelper.TABLE}")
     fun deleteAll()
+
+    @Query("DELETE FROM libraryItemToAuthorCrossRef")
+    fun deleteAllCrossRef()
 
     @Transaction
     @Query("SELECT * FROM ${LibraryItemHelper.TABLE}")

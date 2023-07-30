@@ -1,6 +1,7 @@
 package com.kontranik.koreader.database.model
 
 import androidx.room.*
+import com.kontranik.koreader.model.BookInfo
 
 @Entity(tableName = "libraryItemToAuthorCrossRef", primaryKeys = ["authorid", "libraryitemid"],
     indices = [Index(value = ["libraryitemid"])])
@@ -17,7 +18,12 @@ data class LibraryItemWithAuthors(
         associateBy = Junction(LibraryItemAuthorsCrossRef::class)
     )
     val authors: List<Author>
-)
+) {
+    constructor(bookInfo: BookInfo) : this(
+        libraryItem = LibraryItem(bookInfo),
+        authors = bookInfo.authors?.map { author -> Author(author) } ?: listOf()
+    )
+}
 
 data class AuthorWithLibraryItems(
     @Embedded val author: Author,

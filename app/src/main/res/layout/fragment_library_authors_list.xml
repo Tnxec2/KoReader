@@ -16,17 +16,17 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/textView_library_booklist_title"
+            android:id="@+id/textView_library_authors_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/books_by_title"
+            android:text="@string/authors"
             android:layout_gravity="center_vertical"
             style="@style/TextAppearance.AppCompat.Title"
             />
 
         <ImageButton
-            android:id="@+id/imageButton_library_booklist_back"
+            android:id="@+id/imageButton_library_authors_back"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_arrow_back_24"
@@ -34,12 +34,6 @@
             app:tint="?attr/colorControlNormal"  />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/textView_library_booklist_author"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
 
     <LinearLayout
         android:id="@+id/ll_library_search"
@@ -51,7 +45,7 @@
         >
 
         <EditText
-            android:id="@+id/et_library_search_text"
+            android:id="@+id/et_library_authors_search_text"
             style="@style/TextAppearance.AppCompat.Medium"
             android:layout_width="0dp"
             android:layout_height="@dimen/icon_size"
@@ -60,14 +54,14 @@
             android:text=""
             tools:ignore="Autofill,LabelFor,SpeakableTextPresentCheck" />
         <ImageButton
-            android:id="@+id/ib_library_search_clear"
+            android:id="@+id/ib_library_authors_search_clear"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/baseline_backspace_24"
             android:contentDescription="@string/clear_search_text"
             app:tint="?attr/colorControlNormal"  />
         <ImageButton
-            android:id="@+id/ib_library_search"
+            android:id="@+id/ib_library_authors_search"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/baseline_search_24"
@@ -76,12 +70,12 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/reciclerView_library_booklist_list"
+        android:id="@+id/reciclerView_library_authors_list"
         app:layoutManager="LinearLayoutManager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        tools:listitem="@layout/booklist_item"
+        tools:listitem="@layout/authors_list_item"
         android:divider="@drawable/list_divider"
         android:dividerHeight="4dp"/>
 

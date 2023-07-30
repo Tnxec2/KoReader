@@ -29,28 +29,32 @@
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_iconmonstr_folder_add"
-            android:contentDescription="@string/go_to_storage" />
+            android:contentDescription="@string/go_to_storage"
+            app:tint="?attr/colorControlNormal" />
 
         <ImageButton
             android:id="@+id/imageButton_filechoose_goto_storage"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_storage_24"
-            android:contentDescription="@string/go_to_storage" />
+            android:contentDescription="@string/go_to_storage"
+            app:tint="?attr/colorControlNormal"  />
 
         <ImageButton
             android:id="@+id/imageButton_filechoose_back"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_arrow_back_24"
-            android:contentDescription="@string/back" />
+            android:contentDescription="@string/back"
+            app:tint="?attr/colorControlNormal"  />
 
         <ImageButton
             android:id="@+id/imageButton_filechoose_close"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_close_24"
-            android:contentDescription="@string/close" />
+            android:contentDescription="@string/close"
+            app:tint="?attr/colorControlNormal"  />
 
     </LinearLayout>
 

@@ -142,7 +142,7 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
 
     private fun getAuthors(tempScheme: FB2Scheme): List<Author> {
         return tempScheme.description.titleInfo.authors.map {
-            Author(it.firstname, it.middlename, it.lastname)
+            Author(it.firstname?.trim(), it.middlename?.trim(), it.lastname?.trim())
         }
     }
 

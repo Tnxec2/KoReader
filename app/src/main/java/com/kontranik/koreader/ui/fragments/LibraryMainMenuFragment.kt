@@ -49,15 +49,12 @@ class LibraryMainMenuFragment : Fragment() {
     }
 
     private fun openByAuthor() {
-        // TODO: open library by author
-//        val fragment = FileChooseFragment()
-//        fragment.show(requireActivity().supportFragmentManager, "fragment_open_file")
-//
-//        requireActivity().supportFragmentManager.setFragmentResultListener("open_file", this) { key, _ ->
-//            if (key == "open_file") {
-//                dismiss()
-//            }
-//        }
+        val fragment = LibraryByAuthorFragment()
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.fragment_container_view, fragment, "fragment_library_by_author")
+            .addToBackStack("fragment_library_by_author")
+            .commit()
     }
 
     private fun settings() {

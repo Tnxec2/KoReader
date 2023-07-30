@@ -23,7 +23,10 @@ import androidx.paging.cachedIn
 import androidx.paging.liveData
 import com.kontranik.koreader.App
 import com.kontranik.koreader.R
+import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.LibraryItem
+import com.kontranik.koreader.database.model.LibraryItemAuthorsCrossRef
+import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.database.repository.AuthorsRepository
 import com.kontranik.koreader.database.repository.LibraryItemRepository
 import com.kontranik.koreader.model.BookInfo
@@ -42,28 +45,52 @@ class LibraryViewModel(
     private val authorsRepository: AuthorsRepository,
     private val applicationScope: CoroutineScope) : ViewModel() {
 
-    private val librarySearchFilter = MutableLiveData<String?>()
+    private val libraryTitleSearchFilter = MutableLiveData<String?>()
+    private var author: Author? = null
 
-    val libraryPageByFilter = librarySearchFilter.switchMap(
-        :: getPageByFilter
+    val libraryTitlePageByFilter = libraryTitleSearchFilter.switchMap(
+        :: getTitlePageByFilter
     )
 
-    private fun getPageByFilter(songTextFilter: String?) = Pager(PagingConfig(pageSize = 15)) {
-        libraryItemRepository.pageLibraryItem(songTextFilter) }
+    private fun getTitlePageByFilter(searchFilter: String?) = Pager(PagingConfig(pageSize = 15)) {
+        libraryItemRepository.pageLibraryItem(author, searchFilter) }
         .liveData
         .cachedIn(viewModelScope)
 
-    fun loadPageInit() = apply {
-        if ( libraryPageByFilter.value == null) {
-            Log.d("ALLTitles", "load library init...")
-            this.librarySearchFilter.value = null
+    fun loadTitlePageInit(author: Author?) = apply {
+        this.author = author
+        if ( libraryTitlePageByFilter.value == null) {
+            this.libraryTitleSearchFilter.value = null
         }
     }
 
-    fun changeSearchText(text: String?) {
-        val altVal = this.librarySearchFilter.value
+    fun changeTitleSearchText(text: String?) {
+        val altVal = this.libraryTitleSearchFilter.value
         if ( altVal == null || altVal != text) {
-            librarySearchFilter.postValue(text)
+            libraryTitleSearchFilter.postValue(text)
+        }
+    }
+    private val libraryAuthorSearchFilter = MutableLiveData<String?>()
+
+    val libraryAuthorPageByFilter = libraryAuthorSearchFilter.switchMap(
+        :: getAuthorPageByFilter
+    )
+
+    private fun getAuthorPageByFilter(searchFilter: String?) = Pager(PagingConfig(pageSize = 15)) {
+        authorsRepository.pageAuthor(searchFilter) }
+        .liveData
+        .cachedIn(viewModelScope)
+
+    fun loadAuthorPageInit() = apply {
+        if ( libraryAuthorPageByFilter.value == null) {
+            this.libraryAuthorSearchFilter.value = null
+        }
+    }
+
+    fun changeAuthorSearchText(text: String?) {
+        val altVal = this.libraryAuthorSearchFilter.value
+        if ( altVal == null || altVal != text) {
+            libraryAuthorSearchFilter.postValue(text)
         }
     }
 
@@ -71,25 +98,32 @@ class LibraryViewModel(
         libraryItemRepository.insert(libraryItem)
     }
 
-    fun delete(id: Long) = viewModelScope.launch {
-        libraryItemRepository.delete(id)
+    fun delete(libraryItemWithAuthors: LibraryItemWithAuthors) = viewModelScope.launch {
+        libraryItemWithAuthors.libraryItem.id?.let {
+            libraryItemRepository.delete(it)
+        }
+        libraryItemWithAuthors.authors.forEach { author ->
+            author.id?.let { authorsRepository.delete(it) }
+        }
+        libraryItemRepository.deleteCrossRefLibraryItem(libraryItemWithAuthors.libraryItem)
     }
 
     fun deleteAll() = viewModelScope.launch {
         libraryItemRepository.deleteAll()
+        authorsRepository.deleteAll()
+        libraryItemRepository.deleteAllCrossRef()
     }
 
-    fun openDeleteSongDialog(adapter: PagingLibraryItemAdapter, position: Int, libraryItem: LibraryItem, context: Context) {
+    fun openDeleteLibraryItemDialog(adapter: PagingLibraryItemAdapter, position: Int, libraryItem: LibraryItemWithAuthors, context: Context) {
         AlertDialog.Builder(context)
             .setTitle(context.getString(R.string.library_delete_item_dialog_title))
             .setMessage(context.getString(R.string.library_delete_item_dialog_message)) // Specifying a listener allows you to take an action before dismissing the dialog.
             // The dialog is automatically dismissed when a dialog button is clicked.
             .setPositiveButton(android.R.string.ok
             ) { dialog, which ->
-                libraryItem.id?.let {
-                    delete(libraryItem.id!!)
-                    adapter.deleteItem(position)
-                }
+                delete(libraryItem)
+                adapter.deleteItem(position)
+
             } // A null listener allows the button to dismiss the dialog and take no further action.
             .setNegativeButton(android.R.string.cancel) { dialogInterface, i ->
                 adapter.cancelDeletion(position)
@@ -253,12 +287,106 @@ class LibraryViewModel(
                 )
                 Log.d("LibraryViewModel", "bookInfo " + bookInfo.toString())
                 bookInfo?.let {
-                    libraryItemRepository.insert(LibraryItem(it))
+                    val libraryItemId = libraryItemRepository.insert(LibraryItem(it))
+                    if (libraryItemId != null) {
+                        bookInfo.authors?.forEach { bookInfoAuthor ->
+                            val dbAuthorList = authorsRepository.getByName(
+                                firstname = bookInfoAuthor.firstname,
+                                middlename = bookInfoAuthor.middlename,
+                                lastname = bookInfoAuthor.lastname)
+                            Log.d("LibraryVieWModel", "dbAuthorList size: ${dbAuthorList.size}")
+                            if (dbAuthorList.isEmpty()) {
+                                val authorId = authorsRepository.insert(Author(bookInfoAuthor))
+                                if (authorId != null) {
+                                    libraryItemRepository.inserCrossRef(
+                                        LibraryItemAuthorsCrossRef(authorId, libraryItemId)
+                                    )
+                                }
+                            } else {
+                                val authorId = dbAuthorList[0].id
+                                if (authorId != null) {
+                                    libraryItemRepository.inserCrossRef(
+                                        LibraryItemAuthorsCrossRef(authorId, libraryItemId)
+                                    )
+                                }
+                            }
+                        }
+                    }
                     Log.d("LibraryViewModel", "save " + it.path)
                 }
             }
         }
+
+    fun updateLibraryItem(position: Int, libraryItemWithAuthors: LibraryItemWithAuthors) {
+        applicationScope.launch {
+            val bookInfo = readBookInfo(
+                App.getContext(),
+                libraryItemWithAuthors.libraryItem.path
+            )
+            Log.d("LibraryViewModel", "bookInfo " + bookInfo.toString())
+            bookInfo?.let {
+                with(libraryItemWithAuthors.libraryItem) {
+                    title = it.title
+                    cover = ImageUtils.getBytes(it.cover)
+                }
+                libraryItemRepository.update(libraryItemWithAuthors.libraryItem)
+
+                if (bookInfo.authors == null) {
+                    libraryItemRepository.deleteCrossRefLibraryItem(libraryItemWithAuthors.libraryItem)
+                } else {
+                    // delete authors where are not in bookinfo
+                    libraryItemWithAuthors.authors.forEach { libraryItemAuthor ->
+                        if (bookInfo.authors?.firstOrNull { bookInfoAuthor ->
+                                bookInfoAuthor.compare(
+                                    libraryItemAuthor
+                                )
+                            } == null) {
+                            authorsRepository.deleteCrossRefAuthor(libraryItemAuthor)
+                        }
+                    }
+                    // insert new authors from bookinfo
+                    bookInfo.authors?.forEach { bookInfoAuthor ->
+                        val libraryItemAuthor =
+                            libraryItemWithAuthors.authors.firstOrNull { libraryItemAuthor ->
+                                bookInfoAuthor.compare(libraryItemAuthor)
+                            }
+                        if (libraryItemAuthor == null) {
+                            val dbAuthorList = authorsRepository.getByName(
+                                bookInfoAuthor.firstname?.trim(),
+                                bookInfoAuthor.middlename?.trim(),
+                                bookInfoAuthor.lastname?.trim()
+                            )
+                            if (dbAuthorList.isEmpty()) {
+                                val authorId = authorsRepository.insert(Author(bookInfoAuthor))
+                                if (authorId != null) {
+                                    libraryItemRepository.inserCrossRef(
+                                        LibraryItemAuthorsCrossRef(
+                                            authorid = authorId,
+                                            libraryitemid = libraryItemWithAuthors.libraryItem.id!!
+                                        )
+                                    )
+                                }
+                            } else {
+                                val authorId = dbAuthorList[0].id
+                                if (authorId != null) {
+                                    libraryItemRepository.inserCrossRef(
+                                        LibraryItemAuthorsCrossRef(
+                                            authorid = authorId,
+                                            libraryitemid = libraryItemWithAuthors.libraryItem.id!!
+                                        )
+                                    )
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                Log.d("LibraryViewModel", "updated " + it.path)
+            }
+        }
     }
+}
 
     private fun readBookInfo(mContext: Context, contentUriPath: String): BookInfo? {
         val result: BookInfo? = if (contentUriPath.endsWith(".epub", ignoreCase = true)) {

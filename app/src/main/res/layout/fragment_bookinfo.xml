@@ -29,19 +29,22 @@
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_delete_24"
-            android:contentDescription="@string/deletebook" />
+            android:contentDescription="@string/deletebook"
+            app:tint="?attr/colorControlNormal" />
         <ImageButton
             android:id="@+id/imageButton_bookinfo_read"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_iconmonstr_book_opened"
-            android:contentDescription="@string/readbook" />
+            android:contentDescription="@string/readbook"
+            app:tint="?attr/colorControlNormal"  />
         <ImageButton
             android:id="@+id/imageButton_bookinfo_close"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_close_24"
-            android:contentDescription="@string/back" />
+            android:contentDescription="@string/back"
+            app:tint="?attr/colorControlNormal"  />
     </LinearLayout>
 
     <ScrollView

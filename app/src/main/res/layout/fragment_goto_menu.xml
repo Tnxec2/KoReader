@@ -31,14 +31,16 @@
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             android:contentDescription="@string/save"
-            app:srcCompat="@drawable/ic_baseline_check_24" />
+            app:srcCompat="@drawable/ic_baseline_check_24"
+            app:tint="?attr/colorControlNormal"  />
 
         <ImageButton
             android:id="@+id/imageButton_gotomenu_close"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             android:contentDescription="@string/back"
-            app:srcCompat="@drawable/ic_baseline_close_24" />
+            app:srcCompat="@drawable/ic_baseline_close_24"
+            app:tint="?attr/colorControlNormal"  />
     </LinearLayout>
 
     <LinearLayout
@@ -57,11 +59,9 @@
             android:id="@+id/imageView_goto_menu_page_left"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
-            android:layout_gravity="bottom"
-            android:clickable="true"
             app:srcCompat="@drawable/ic_baseline_arrow_left_24"
-            android:focusable="true"
-            android:contentDescription="@string/left" />
+            android:contentDescription="@string/left"
+            app:tint="?attr/colorControlNormal"  />
 
         <TextView
             android:id="@+id/textView_goto_menu_page"
@@ -75,11 +75,9 @@
             android:id="@+id/imageView_goto_menu_page_right"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
-            android:layout_gravity="bottom"
-            android:clickable="true"
             app:srcCompat="@drawable/ic_baseline_arrow_right_24"
-            android:focusable="true"
-            android:contentDescription="@string/right" />
+            android:contentDescription="@string/right"
+            app:tint="?attr/colorControlNormal"  />
 
     </LinearLayout>
 

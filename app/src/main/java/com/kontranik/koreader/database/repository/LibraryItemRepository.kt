@@ -7,32 +7,29 @@ import com.kontranik.koreader.database.dao.LibraryItemDao
 import com.kontranik.koreader.database.model.LibraryItem
 
 import androidx.paging.PagingSource
-import androidx.room.Query
-import com.kontranik.koreader.database.model.LibraryItemHelper
+import com.kontranik.koreader.database.model.Author
+import com.kontranik.koreader.database.model.LibraryItemAuthorsCrossRef
+import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 
 class LibraryItemRepository(private val mLibraryItemDao: LibraryItemDao) {
 
-    fun insert(libraryItem: LibraryItem) {
+    @WorkerThread
+    fun insert(libraryItem: LibraryItem): Long? {
+        return mLibraryItemDao.insert(libraryItem)
+    }
+
+    @WorkerThread
+    fun inserCrossRef(libraryItemAuthorsCrossRef: LibraryItemAuthorsCrossRef) {
         BooksRoomDatabase.databaseWriteExecutor.execute {
-            val list = mLibraryItemDao.getByPath(libraryItem.path)
-            if (list.isEmpty()) {
-                mLibraryItemDao.insert(libraryItem)
-            } else {
-                val toUpdate = list[0]
-                with(toUpdate)  {
-                    cover = libraryItem.cover
-                    title = libraryItem.title
-                }
-                mLibraryItemDao.update(toUpdate)
-            }
+            mLibraryItemDao.insertCrossRef(libraryItemAuthorsCrossRef)
         }
     }
 
     @WorkerThread
     fun getByPath(path: String): List<LibraryItem> = mLibraryItemDao.getByPath(path)
 
-    fun pageLibraryItem(searchText: String?): PagingSource<Int, LibraryItem> {
-        return mLibraryItemDao.getPage(searchText)
+    fun pageLibraryItem(author: Author?, searchText: String?): PagingSource<Int, LibraryItemWithAuthors> {
+        return mLibraryItemDao.getPage(author, searchText)
     }
 
     fun getAllGroupedTitles(): LiveData<List<String>> {
@@ -43,7 +40,26 @@ class LibraryItemRepository(private val mLibraryItemDao: LibraryItemDao) {
         BooksRoomDatabase.databaseWriteExecutor.execute { mLibraryItemDao.delete(id) }
     }
 
+    fun deleteCrossRefLibraryItem(libraryItem: LibraryItem) {
+        BooksRoomDatabase.databaseWriteExecutor.execute {
+            libraryItem.id?.let { mLibraryItemDao.deleteCrossRefLibraryItem(it) }
+        }
+    }
+
     fun deleteAll() {
-        BooksRoomDatabase.databaseWriteExecutor.execute { mLibraryItemDao.deleteAll() }
+        BooksRoomDatabase.databaseWriteExecutor.execute {
+            mLibraryItemDao.deleteAll()
+        }
+    }
+    fun deleteAllCrossRef() {
+        BooksRoomDatabase.databaseWriteExecutor.execute {
+            mLibraryItemDao.deleteAllCrossRef()
+        }
+    }
+
+    fun update(libraryItem: LibraryItem) {
+        BooksRoomDatabase.databaseWriteExecutor.execute {
+            mLibraryItemDao.update(libraryItem)
+        }
     }
 }

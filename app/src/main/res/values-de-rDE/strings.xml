@@ -165,7 +165,9 @@
     <string name="delete_scan_point_ok_button">Löschen</string>
     <string name="clear_search_text">Suchtext löschen</string>
     <string name="search">Suchen</string>
-    <string name="books_by_title">Bücher nach Titel</string>
+    <string name="books_by_title">Bücher</string>
     <string name="library">Bibliothek</string>
-    <string name="books_by_author">Bücher nach Author</string>
+    <string name="books_by_author">Authoren</string>
+    <string name="authors">Authoren</string>
+    <string name="by_author">von %1$s</string>
 </resources>

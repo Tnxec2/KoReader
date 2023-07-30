@@ -46,11 +46,9 @@
             android:id="@+id/imageView_quick_menU_textSizeDecrease"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
-            android:layout_gravity="bottom"
-            android:clickable="true"
             app:srcCompat="@drawable/ic_a_small"
-            android:focusable="true"
-            android:contentDescription="@string/decrease" />
+            android:contentDescription="@string/decrease"
+            app:tint="?attr/colorControlNormal" />
 
         <TextView
             android:id="@+id/textView_quick_menU_textSizeExample"
@@ -65,10 +63,9 @@
             android:id="@+id/imageView_quick_menU_textSizeIncrease"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
-            android:clickable="true"
             app:srcCompat="@drawable/ic_aa"
             android:contentDescription="@string/increase"
-            android:focusable="true" />
+            app:tint="?attr/colorControlNormal"  />
     </LinearLayout>
 
     <LinearLayout
@@ -127,21 +124,17 @@
             android:id="@+id/imageView_quick_menu_addBookmark"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
-            android:layout_gravity="bottom"
-            android:clickable="true"
             app:srcCompat="@drawable/ic_iconmonstr_bookmark_add"
             android:contentDescription="@string/add_bookmark"
-            android:focusable="true" />
+            app:tint="?attr/colorControlNormal" />
 
         <ImageButton
             android:id="@+id/imageView_quick_menu_listBookmark"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
-            android:layout_gravity="bottom"
-            android:clickable="true"
             app:srcCompat="@drawable/ic_iconmonstr_bookmark_list2"
             android:contentDescription="@string/bookmarklist"
-            android:focusable="true" />
+            app:tint="?attr/colorControlNormal"  />
 
     </LinearLayout>
 
@@ -157,7 +150,8 @@
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_iconmonstr_book_info"
-            android:contentDescription="@string/bookinfo" />
+            android:contentDescription="@string/bookinfo"
+            app:tint="?attr/colorControlNormal"  />
 
         <androidx.legacy.widget.Space
             android:layout_width="0dp"
@@ -169,14 +163,16 @@
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_check_24"
-            android:contentDescription="@string/save" />
+            android:contentDescription="@string/save"
+            app:tint="?attr/colorControlNormal"  />
 
         <ImageButton
             android:id="@+id/imageButton_quickmenu_back"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_close_24"
-            android:contentDescription="@string/back" />
+            android:contentDescription="@string/back"
+            app:tint="?attr/colorControlNormal"  />
 
 
     </LinearLayout>

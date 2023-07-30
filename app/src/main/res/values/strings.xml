@@ -205,9 +205,11 @@
     <string name="delete_scan_point_ok_button">Delete</string>
     <string name="clear_search_text">clear</string>
     <string name="search">search</string>
-    <string name="books_by_title">Books by title</string>
-    <string name="books_by_author">Books by author</string>
+    <string name="books_by_title">Books</string>
+    <string name="books_by_author">Authors</string>
     <string name="library">Library</string>
+    <string name="authors">Authors</string>
+    <string name="by_author">by %1$s</string>
 
 
 </resources>

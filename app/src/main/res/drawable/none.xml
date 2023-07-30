@@ -1,6 +1,6 @@
 <vector android:alpha="0"
     android:height="1dp"
-    android:tint="?attr/colorControlNormal"
+    android:tint="?attr/colorButtonNormal"
     android:viewportHeight="1"
     android:viewportWidth="1"
     android:width="1dp"

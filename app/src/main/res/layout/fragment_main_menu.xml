@@ -31,7 +31,8 @@
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_close_24"
-            android:contentDescription="@string/back" />
+            android:contentDescription="@string/back"
+            app:tint="?attr/colorControlNormal"  />
     </LinearLayout>
 
     <LinearLayout
@@ -157,7 +158,8 @@
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_iconmonstr_book_info"
-            android:contentDescription="@string/bookinfo" />
+            android:contentDescription="@string/bookinfo"
+            app:tint="?attr/colorControlNormal"  />
     </LinearLayout>
 
 </LinearLayout>

@@ -29,20 +29,23 @@
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/baseline_autorenew_24"
-            android:contentDescription="@string/refresh" />
+            android:contentDescription="@string/refresh"
+            app:tint="?attr/colorControlNormal"  />
         <ImageButton
             android:id="@+id/imageButton_library_settings_add_scan_point"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_iconmonstr_folder_add"
-            android:contentDescription="@string/add_scan_point" />
+            android:contentDescription="@string/add_scan_point"
+            app:tint="?attr/colorControlNormal"  />
 
         <ImageButton
             android:id="@+id/imageButton_library_settings__close"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/ic_baseline_arrow_back_24"
-            android:contentDescription="@string/close" />
+            android:contentDescription="@string/close"
+            app:tint="?attr/colorControlNormal"  />
 
     </LinearLayout>
 
@@ -68,7 +71,8 @@
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             app:srcCompat="@drawable/baseline_delete_forever_24"
-            android:contentDescription="@string/clear_library" />
+            android:contentDescription="@string/clear_library"
+            app:tint="?attr/colorControlNormal"  />
 
     </LinearLayout>
 </LinearLayout>

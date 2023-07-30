@@ -21,8 +21,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_baseline_compare_24"
         android:contentDescription="@string/toggle_invert"
-        android:clickable="true"
-        android:focusable="true"
+        app:tint="?attr/colorControlNormal"
         />
     <ImageView
         android:id="@+id/imageView_imageviewer_close"
@@ -32,8 +31,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_baseline_close_24"
         android:contentDescription="@string/close"
-        android:clickable="true"
-        android:focusable="true"
+        app:tint="?attr/colorControlNormal"
         />
 
 

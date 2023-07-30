@@ -1,5 +1,6 @@
 package com.kontranik.koreader.ui.fragments
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,18 +10,18 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
 import com.kontranik.koreader.App
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
-import com.kontranik.koreader.database.model.LibraryItem
+import com.kontranik.koreader.database.model.Author
+import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.databinding.FragmentLibraryBookListBinding
 import com.kontranik.koreader.ui.adapters.PagingLibraryItemAdapter
 
-class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibraryItemAdapterListener,
+open class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibraryItemAdapterListener,
     BookInfoFragment.BookInfoListener {
 
-    private lateinit var binding: FragmentLibraryBookListBinding
+    protected lateinit var binding: FragmentLibraryBookListBinding
 
     private lateinit var mAdapter: PagingLibraryItemAdapter
 
@@ -55,7 +56,23 @@ class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibrar
 
         mLibraryViewModel.createNotificationChannel()
 
-        binding.textViewLibraryBooklistTitle.text = requireContext().resources.getString(R.string.books_by_title)
+        var author: Author? = null
+        arguments?.let {
+            if ( it.containsKey(KEY_AUTHOR)) {
+                author = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    it.getSerializable(KEY_AUTHOR, Author::class.java)
+                } else {
+                    it.getSerializable(KEY_AUTHOR) as Author
+                }
+            }
+        }
+
+        if (author != null) {
+            binding.textViewLibraryBooklistAuthor.visibility = View.VISIBLE
+            binding.textViewLibraryBooklistAuthor.text = getString(R.string.by_author, author?.asString())
+        } else {
+            binding.textViewLibraryBooklistAuthor.visibility = View.GONE
+        }
 
         binding.reciclerViewLibraryBooklistList.adapter = mAdapter
         binding.reciclerViewLibraryBooklistList.layoutManager = LinearLayoutManager(requireContext())
@@ -66,7 +83,7 @@ class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibrar
 
         binding.ibLibrarySearchClear.setOnClickListener {
             binding.etLibrarySearchText.text = null
-            mLibraryViewModel.changeSearchText(null)
+            mLibraryViewModel.changeTitleSearchText(null)
         }
 
         binding.ibLibrarySearch.setOnClickListener {
@@ -75,10 +92,10 @@ class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibrar
             } else {
                 null
             }
-            mLibraryViewModel.changeSearchText(searchText)
+            mLibraryViewModel.changeTitleSearchText(searchText)
         }
 
-        mLibraryViewModel.libraryPageByFilter.observe(viewLifecycleOwner) { libraryItems ->
+        mLibraryViewModel.libraryTitlePageByFilter.observe(viewLifecycleOwner) { libraryItems ->
             libraryItems?.let {
                 mAdapter.submitData(viewLifecycleOwner.lifecycle, PagingData.empty())
                 mAdapter.submitData(viewLifecycleOwner.lifecycle, it)
@@ -86,11 +103,11 @@ class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibrar
             mAdapter.notifyDataSetChanged()
         }
 
-        mLibraryViewModel.loadPageInit()
+        mLibraryViewModel.loadTitlePageInit(author)
     }
 
-    override fun onClickLibraryItem(libraryItem: LibraryItem) {
-        openBookInfo(libraryItem.path)
+    override fun onClickLibraryItem(libraryItem: LibraryItemWithAuthors) {
+        openBookInfo(libraryItem.libraryItem.path)
     }
 
     private fun openBookInfo(bookPathUri: String?) {
@@ -101,25 +118,31 @@ class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibrar
         }
     }
 
-    override fun onDeleteLibraryItem(position: Int, libraryItem: LibraryItem?) {
+    override fun onDeleteLibraryItem(position: Int, libraryItem: LibraryItemWithAuthors?) {
         if (libraryItem != null) {
-            mLibraryViewModel.openDeleteSongDialog(
+            mLibraryViewModel.openDeleteLibraryItemDialog(
                 binding.reciclerViewLibraryBooklistList.adapter as PagingLibraryItemAdapter,
                 position, libraryItem, requireContext())
         }
     }
 
-    override fun showUndoSnackbar(mRecentlyDeletedItem: LibraryItem?) {
-        if (mRecentlyDeletedItem != null) {
-            val view: View = requireActivity().findViewById(R.id.reciclerView_library_booklist_list)
-            val snackbar: Snackbar = Snackbar.make(
-                view, getString(R.string.undo_delete_snackbar_message),
-                Snackbar.LENGTH_LONG
-            )
-            snackbar.setAction(getString(R.string.undo_delete_undo_action)) { _  -> mLibraryViewModel.insert(mRecentlyDeletedItem) }
-            snackbar.show()
+    override fun onUpdateLibraryItem(position: Int, libraryItem: LibraryItemWithAuthors?) {
+        if (libraryItem != null) {
+            mLibraryViewModel.updateLibraryItem(position, libraryItem)
         }
     }
+
+//    override fun showUndoSnackbar(mRecentlyDeletedItem: LibraryItemWithAuthors?) {
+//        if (mRecentlyDeletedItem != null) {
+//            val view: View = requireActivity().findViewById(R.id.reciclerView_library_booklist_list)
+//            val snackbar: Snackbar = Snackbar.make(
+//                view, getString(R.string.undo_delete_snackbar_message),
+//                Snackbar.LENGTH_LONG
+//            )
+//            snackbar.setAction(getString(R.string.undo_delete_undo_action)) { _  -> mLibraryViewModel.insert(mRecentlyDeletedItem) }
+//            snackbar.show()
+//        }
+//    }
 
     override fun onBookInfoFragmentReadBook(bookUri: String) {
         mFileChooseFragmentViewModel.savePrefsOpenedBook(bookUri)
@@ -130,5 +153,20 @@ class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibrar
 
     override fun onBookInfoFragmentDeleteBook(bookUri: String) {
         // TODO("Not yet implemented")
+    }
+
+    companion object {
+        const val KEY_AUTHOR = "AUTHOR"
+
+        fun newInstance(
+            author: Author?
+        ): LibraryByTitleFragment {
+            val frag = LibraryByTitleFragment()
+            val args = Bundle()
+            author?.let{ args.putSerializable(KEY_AUTHOR, it) }
+            frag.arguments = args
+
+            return frag
+        }
     }
 }
