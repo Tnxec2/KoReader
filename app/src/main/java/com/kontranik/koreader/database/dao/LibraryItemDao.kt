@@ -6,11 +6,13 @@ import androidx.room.*
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.kontranik.koreader.database.model.Author
+import com.kontranik.koreader.database.model.AuthorHelper
 import com.kontranik.koreader.database.model.LibraryItem
 import com.kontranik.koreader.database.model.LibraryItemAuthorsCrossRef
 import com.kontranik.koreader.database.model.LibraryItemHelper
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import kotlinx.coroutines.flow.Flow
+
 
 @Dao
 interface LibraryItemDao {
@@ -21,19 +23,46 @@ interface LibraryItemDao {
     fun getPage(
         author: Author?,
         searchText: String?): PagingSource<Int, LibraryItemWithAuthors> {
+
+        val args: MutableList<Any?> = mutableListOf()
+
         val where = StringBuilder("")
-        if (author?.id != null) {
-            where.append( " WHERE ${LibraryItemHelper.COLUMN_ID} IN " +
-                    "(SELECT ${LibraryItemHelper.COLUMN_ID} FROM libraryItemToAuthorCrossRef WHERE authorid = ${author.id} )" )
+        if (author != null) {
+            if (author.id != null) {
+                where.append(
+                    " WHERE ${LibraryItemHelper.COLUMN_ID} IN " +
+                            "(SELECT ${LibraryItemHelper.COLUMN_ID} FROM libraryItemToAuthorCrossRef WHERE authorid = ? )"
+                )
+                args.add(author.id)
+            } else {
+                where.append(
+                    " WHERE ${LibraryItemHelper.COLUMN_ID} IN " +
+                            "( SELECT ${LibraryItemHelper.COLUMN_ID} FROM libraryItemToAuthorCrossRef WHERE " +
+                            " authorid IN ( SELECT ${AuthorHelper.COLUMN_ID} FROM ${AuthorHelper.TABLE}" +
+                            " WHERE ${AuthorHelper.COLUMN_FIRSTNAME} IS ? " +
+                            " AND ${AuthorHelper.COLUMN_MIDDLENAME} IS ? " +
+                            " AND ${AuthorHelper.COLUMN_LASTNAME} IS ?  " +
+                            " ) )"
+                )
+                args.add(author.firstname)
+                args.add(author.middlename)
+                args.add(author.lastname)
+            }
         }
         if (searchText != null) {
             if (where.isBlank()) where.append(" WHERE ")
             else where.append(" AND ")
-            where.append(" LOWER(title) LIKE LOWER('%$searchText%') ")
+            where.append(" LOWER(title) LIKE LOWER(%?%) ")
+            args.add(searchText)
         }
         val order = " ORDER BY ${LibraryItemHelper.COLUMN_TITLE}"
         val statement = "SELECT * FROM ${LibraryItemHelper.TABLE} $where $order"
-        val query = SimpleSQLiteQuery(statement)
+
+        val argArray = arrayOfNulls<Any>(args.size)
+        args.forEachIndexed { index, element ->
+            argArray[index] = element
+        }
+        val query = SimpleSQLiteQuery(statement, argArray)
         return getPagedLibraryItemViaQuery(query)
     }
 

@@ -51,7 +51,7 @@
     <string name="readbook">Read book</string>
     <string name="deletebook">Delete book file</string>
     <string name="note">Note</string>
-    <string name="bookinfo">Info</string>
+    <string name="bookinfo">Book info</string>
     <string name="toc">Table of content</string>
 
 
@@ -210,6 +210,7 @@
     <string name="library">Library</string>
     <string name="authors">Authors</string>
     <string name="by_author">by %1$s</string>
+    <string name="cover">Book cover</string>
 
 
 </resources>

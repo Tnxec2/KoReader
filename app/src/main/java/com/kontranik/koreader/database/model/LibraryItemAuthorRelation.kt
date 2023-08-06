@@ -21,7 +21,7 @@ data class LibraryItemWithAuthors(
 ) {
     constructor(bookInfo: BookInfo) : this(
         libraryItem = LibraryItem(bookInfo),
-        authors = bookInfo.authors?.map { author -> Author(author) } ?: listOf()
+        authors = bookInfo.authors ?: listOf()
     )
 }
 

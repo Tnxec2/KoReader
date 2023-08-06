@@ -49,7 +49,7 @@
     <string name="delete">löschen</string>
     <string name="readbook">Buch lesen</string>
     <string name="note">Notiz</string>
-    <string name="bookinfo">Info</string>
+    <string name="bookinfo">Bookinfo</string>
     <string name="toc">Inhalt</string>
     <string name="text_normal">Normal</string>
     <string name="text_bold">Fett</string>
@@ -170,4 +170,5 @@
     <string name="books_by_author">Authoren</string>
     <string name="authors">Authoren</string>
     <string name="by_author">von %1$s</string>
+    <string name="cover">Book cover</string>
 </resources>

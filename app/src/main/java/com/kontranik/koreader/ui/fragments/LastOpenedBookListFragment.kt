@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.kontranik.koreader.App
+import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.ReaderActivityViewModelFactory
 import com.kontranik.koreader.database.BookStatusViewModel
@@ -100,7 +101,10 @@ class LastOpenedBookListFragment :
         if ( bookPathUri != null) {
             val bookInfoFragment = BookInfoFragment.newInstance(bookPathUri)
             bookInfoFragment.setListener(this)
-            bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container_view, bookInfoFragment, "fragment_bookinfo_from_lastopened")
+                .addToBackStack("fragment_bookinfo_from_lastopened")
+                .commit()
         }
     }
 

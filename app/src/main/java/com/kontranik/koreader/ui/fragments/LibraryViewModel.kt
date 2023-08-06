@@ -296,7 +296,7 @@ class LibraryViewModel(
                                 lastname = bookInfoAuthor.lastname)
                             Log.d("LibraryVieWModel", "dbAuthorList size: ${dbAuthorList.size}")
                             if (dbAuthorList.isEmpty()) {
-                                val authorId = authorsRepository.insert(Author(bookInfoAuthor))
+                                val authorId = authorsRepository.insert(bookInfoAuthor)
                                 if (authorId != null) {
                                     libraryItemRepository.inserCrossRef(
                                         LibraryItemAuthorsCrossRef(authorId, libraryItemId)
@@ -357,7 +357,7 @@ class LibraryViewModel(
                                 bookInfoAuthor.lastname?.trim()
                             )
                             if (dbAuthorList.isEmpty()) {
-                                val authorId = authorsRepository.insert(Author(bookInfoAuthor))
+                                val authorId = authorsRepository.insert(bookInfoAuthor)
                                 if (authorId != null) {
                                     libraryItemRepository.inserCrossRef(
                                         LibraryItemAuthorsCrossRef(

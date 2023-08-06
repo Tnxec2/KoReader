@@ -3,7 +3,7 @@ package com.kontranik.koreader.parser.fb2reader
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import com.kontranik.koreader.model.Author
+import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme
 import com.kontranik.koreader.model.BookSchemeItem
@@ -142,7 +142,7 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
 
     private fun getAuthors(tempScheme: FB2Scheme): List<Author> {
         return tempScheme.description.titleInfo.authors.map {
-            Author(it.firstname?.trim(), it.middlename?.trim(), it.lastname?.trim())
+            Author(null, it.firstname?.trim(), it.middlename?.trim(), it.lastname?.trim())
         }
     }
 

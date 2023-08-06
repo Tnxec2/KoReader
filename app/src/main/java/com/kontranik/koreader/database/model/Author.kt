@@ -25,12 +25,6 @@ class Author(
     var lastname: String? = null,
 
 ) : Serializable {
-    constructor(author: com.kontranik.koreader.model.Author) : this(
-        id = null,
-        firstname = author.firstname,
-        middlename = author.middlename,
-        lastname = author.lastname
-    )
 
     override fun hashCode(): Int {
         var result = id.hashCode()
@@ -67,4 +61,12 @@ class Author(
         }
         return result
     }
+
+    fun compare(other: Author): Boolean {
+        if (firstname != other.firstname) return false
+        if (middlename != other.middlename) return false
+        if (lastname != other.lastname) return false
+        return true
+    }
+
 }

@@ -97,7 +97,10 @@ class MainMenuFragment : Fragment() {
     private fun openBookInfo(bookUri: String?) {
         if ( bookUri != null) {
             val bookInfoFragment: BookInfoFragment = BookInfoFragment.newInstance(bookUri)
-            bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container_view, bookInfoFragment, "fragment_bookinfo_from_mainmenu")
+                .addToBackStack("fragment_bookinfo_from_mainmenu")
+                .commit()
         }
     }
 

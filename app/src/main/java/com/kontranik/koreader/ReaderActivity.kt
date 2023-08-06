@@ -160,11 +160,11 @@ class ReaderActivity :
             }
         }
 
-        supportFragmentManager.addOnBackStackChangedListener {
-            if (supportFragmentManager.backStackEntryCount == 0) {
-                binding.fragmentContainerView.visibility = View.GONE
-            }
-        }
+//        supportFragmentManager.addOnBackStackChangedListener {
+//            if (supportFragmentManager.backStackEntryCount == 0) {
+//                binding.fragmentContainerView.visibility = View.GONE
+//            }
+//        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -328,25 +328,19 @@ class ReaderActivity :
             .commit()
     }
 
-
-
-//    private var resultLauncherMainMenu = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-//        if (result.resultCode == Activity.RESULT_OK) {
-//            val intentData: Intent? = result.data
-//
-//            if (intentData != null && intentData.hasExtra(PREF_TYPE)) {
-//                when (intentData.getIntExtra(PREF_TYPE, 0)) {
-//                    PREF_TYPE_SETTINGS -> {
-//                        mReaderActivityViewModel.loadSettings(this@ReaderActivity)
-//                    }
-//                }
-//            }
-//        }
-//    }
-
     private fun openQuickMenu() {
         val quickMenuFragment = QuickMenuFragment()
         quickMenuFragment.show(supportFragmentManager, "fragment_quick_menu")
+    }
+
+    override fun onOpenBookInfoQuickMenuDialog(bookUri: String?) {
+        if ( bookUri != null) {
+            val bookInfoFragment: BookInfoFragment = BookInfoFragment.newInstance(bookUri)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container_view, bookInfoFragment, "fragment_bookinfo")
+                .addToBackStack("fragment_bookinfo")
+                .commit()
+        }
     }
 
     override fun onFinishQuickMenuDialog(

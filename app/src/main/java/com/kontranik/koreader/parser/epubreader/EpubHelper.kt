@@ -3,7 +3,7 @@ package com.kontranik.koreader.parser.epubreader
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import com.kontranik.koreader.model.Author
+import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme
 import com.kontranik.koreader.model.BookSchemeItem
@@ -146,7 +146,7 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
 
     private fun getAuthors(eBook: Book): List<Author> {
         return eBook.metadata.authors.map {
-            Author(it.firstname, middlename = null, it.lastname)
+            Author(null, it.firstname, middlename = null, it.lastname)
         }
     }
 

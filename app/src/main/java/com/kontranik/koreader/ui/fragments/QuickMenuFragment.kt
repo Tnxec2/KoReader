@@ -55,6 +55,8 @@ class QuickMenuFragment : BottomSheetDialogFragment() {
         fun onAddBookmarkQuickMenuDialog()
         fun onShowBookmarklistQuickMenuDialog()
         fun onChangeColorThemeQuickMenuDialog(colorTheme: String, colorThemeIndex: Int)
+
+        fun onOpenBookInfoQuickMenuDialog(bookUri: String?)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -96,7 +98,7 @@ class QuickMenuFragment : BottomSheetDialogFragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is QuickMenuDialogListener) {
-            mListener = context as QuickMenuDialogListener
+            mListener = context
         } else {
             throw RuntimeException(
                 context.toString()
@@ -260,10 +262,8 @@ class QuickMenuFragment : BottomSheetDialogFragment() {
     }
 
     private fun openBookInfo(bookUri: String?) {
-        if ( bookUri != null) {
-            val bookInfoFragment: BookInfoFragment = BookInfoFragment.newInstance(bookUri)
-            bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
-        }
+        mListener?.onOpenBookInfoQuickMenuDialog(bookUri)
+        dismiss()
     }
 
     private fun save() {

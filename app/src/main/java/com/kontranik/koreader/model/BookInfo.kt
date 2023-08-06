@@ -1,6 +1,7 @@
 package com.kontranik.koreader.model
 
 import android.graphics.Bitmap
+import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.utils.FileItem
 import java.io.Serializable
 
@@ -20,7 +21,7 @@ class BookInfo(
         if (authors != null) {
             authors?.forEach { author ->
                 if (result.isNotEmpty()) result += ", "
-                result += author.firstname + " " + author.lastname
+                result += author.asString()
             }
         }
         return result

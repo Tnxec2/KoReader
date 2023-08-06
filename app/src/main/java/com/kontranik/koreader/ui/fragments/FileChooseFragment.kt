@@ -129,7 +129,10 @@ class FileChooseFragment : Fragment(),
         if ( bookUri != null) {
             val bookInfoFragment = BookInfoFragment.newInstance(bookUri)
             bookInfoFragment.setListener(this)
-            bookInfoFragment.show(requireActivity().supportFragmentManager, "fragment_bookinfo")
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container_view, bookInfoFragment, "fragment_bookinfo_from_filechoose")
+                .addToBackStack("fragment_bookinfo_from_filechoose")
+                .commit()
         }
     }
 
