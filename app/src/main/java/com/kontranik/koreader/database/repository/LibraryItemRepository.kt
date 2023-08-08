@@ -62,4 +62,7 @@ class LibraryItemRepository(private val mLibraryItemDao: LibraryItemDao) {
             mLibraryItemDao.update(libraryItem)
         }
     }
+
+    @WorkerThread
+    fun getCountByAuthorId(authorId: Long): Long = mLibraryItemDao.getCountByAuthorId(authorId)
 }

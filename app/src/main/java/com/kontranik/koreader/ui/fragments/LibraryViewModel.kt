@@ -103,7 +103,11 @@ class LibraryViewModel(
             libraryItemRepository.delete(it)
         }
         libraryItemWithAuthors.authors.forEach { author ->
-            author.id?.let { authorsRepository.delete(it) }
+            val authorId = author.id
+            authorId?.let{id ->
+                val count = libraryItemRepository.getCountByAuthorId(id)
+                if (count == 0L) author.id?.let { authorsRepository.delete(id) }
+            }
         }
         libraryItemRepository.deleteCrossRefLibraryItem(libraryItemWithAuthors.libraryItem)
     }
@@ -324,6 +328,7 @@ class LibraryViewModel(
                 libraryItemWithAuthors.libraryItem.path
             )
             Log.d("LibraryViewModel", "bookInfo " + bookInfo.toString())
+            if (bookInfo == null) delete(libraryItemWithAuthors)
             bookInfo?.let {
                 with(libraryItemWithAuthors.libraryItem) {
                     title = it.title
@@ -390,10 +395,18 @@ class LibraryViewModel(
 
     private fun readBookInfo(mContext: Context, contentUriPath: String): BookInfo? {
         val result: BookInfo? = if (contentUriPath.endsWith(".epub", ignoreCase = true)) {
-            EpubHelper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
+            try {
+                EpubHelper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
+            } catch (e: Exception) {
+                null
+            }
         } else if (contentUriPath.endsWith(".fb2", ignoreCase = true)
             || contentUriPath.endsWith(".fb2.zip", ignoreCase = true)) {
-            FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
+            try {
+                FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
+            } catch (e: Exception) {
+                null
+            }
         } else {
             null
         }
