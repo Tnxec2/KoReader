@@ -115,7 +115,7 @@ open class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingL
             val bookInfoFragment = BookInfoFragment.newInstance(bookPathUri)
             bookInfoFragment.setListener(this)
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container_view, bookInfoFragment, "fragment_bookinfo_from_library_by_title")
+                .add(R.id.fragment_container_view, bookInfoFragment, "fragment_bookinfo_from_library_by_title")
                 .addToBackStack("fragment_bookinfo_from_library_by_title")
                 .commit()
         }

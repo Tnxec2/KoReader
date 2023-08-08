@@ -12,6 +12,7 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.kontranik.koreader.R
@@ -61,7 +62,10 @@ class QuickMenuFragment : BottomSheetDialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        binding = FragmentQuickMenuBinding.inflate(inflater, container, false)
+        val contextThemeWrapper = ContextThemeWrapper(requireActivity(), R.style.AppTheme_Fullscreen)
+        val view = inflater.cloneInContext(contextThemeWrapper).inflate(R.layout.fragment_quick_menu, container, false)
+        binding = FragmentQuickMenuBinding.bind(view)
+
         return binding.root
     }
 
