@@ -1,5 +1,7 @@
 package com.kontranik.koreader.ui.fragments
 
+import android.app.AlertDialog
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,9 +16,11 @@ import com.kontranik.koreader.App
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.database.model.Author
+import com.kontranik.koreader.database.model.LibraryItem
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.databinding.FragmentLibraryBookListBinding
 import com.kontranik.koreader.ui.adapters.PagingLibraryItemAdapter
+
 
 open class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibraryItemAdapterListener,
     BookInfoFragment.BookInfoListener {
@@ -106,18 +110,31 @@ open class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingL
         mLibraryViewModel.loadTitlePageInit(author)
     }
 
-    override fun onClickLibraryItem(libraryItem: LibraryItemWithAuthors) {
-        openBookInfo(libraryItem.libraryItem.path)
-    }
-
-    private fun openBookInfo(bookPathUri: String?) {
-        if ( bookPathUri != null) {
+    override fun onClickLibraryItem(position: Int, libraryItem: LibraryItemWithAuthors) {
+        val bookPathUri = libraryItem.libraryItem.path
+        try {
+            val inputStream = requireContext().contentResolver.openInputStream(Uri.parse(bookPathUri))
+            inputStream?.close()
             val bookInfoFragment = BookInfoFragment.newInstance(bookPathUri)
             bookInfoFragment.setListener(this)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container_view, bookInfoFragment, "fragment_bookinfo_from_library_by_title")
                 .addToBackStack("fragment_bookinfo_from_library_by_title")
                 .commit()
+        } catch (e: Exception) {
+            AlertDialog.Builder(context)
+                .setTitle("Book does not exist")
+                .setMessage("Are you sure you want to delete this book from library?") // Specifying a listener allows you to take an action before dismissing the dialog.
+                // The dialog is automatically dismissed when a dialog button is clicked.
+                .setPositiveButton(
+                    android.R.string.yes
+                ) { _, _ ->
+                    mLibraryViewModel.delete(libraryItem)
+                    (binding.reciclerViewLibraryBooklistList.adapter as PagingLibraryItemAdapter).deleteItem(position)
+                } // A null listener allows the button to dismiss the dialog and take no further action.
+                .setNegativeButton(android.R.string.no, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show()
         }
     }
 

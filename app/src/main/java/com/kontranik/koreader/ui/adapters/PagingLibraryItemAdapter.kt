@@ -21,7 +21,7 @@ class PagingLibraryItemAdapter(private val context: Context, private val mListen
     private var position: Int = 0
 
     interface  PagingLibraryItemAdapterListener {
-        fun onClickLibraryItem(libraryItem: LibraryItemWithAuthors)
+        fun onClickLibraryItem(position: Int, libraryItem: LibraryItemWithAuthors)
         fun onDeleteLibraryItem(position: Int, libraryItem: LibraryItemWithAuthors?)
         fun onUpdateLibraryItem(position: Int, libraryItem: LibraryItemWithAuthors?)
     }
@@ -71,7 +71,7 @@ class PagingLibraryItemAdapter(private val context: Context, private val mListen
                     booklistitemCover.setImageBitmap(ImageUtils.getBitmap(context, ImageEnum.Ebook))
                 }
             }
-            holder.itemView.setOnClickListener { mListener.onClickLibraryItem(libraryItemWithAuthors) }
+            holder.itemView.setOnClickListener { mListener.onClickLibraryItem(position, libraryItemWithAuthors) }
 
             holder.itemView.setOnLongClickListener {
                 val popup = PopupMenu(context, holder.itemView)
