@@ -337,7 +337,7 @@ class ReaderActivity :
         if ( bookUri != null) {
             val bookInfoFragment: BookInfoFragment = BookInfoFragment.newInstance(bookUri)
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container_view, bookInfoFragment, "fragment_bookinfo")
+                .add(R.id.fragment_container_view, bookInfoFragment, "fragment_bookinfo")
                 .addToBackStack("fragment_bookinfo")
                 .commit()
         }

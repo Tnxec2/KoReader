@@ -8,8 +8,7 @@
     android:padding="@dimen/activity_padding"
     android:layout_gravity="center_vertical"
     tools:layout_editor_absoluteX="16dp"
-    android:background="@color/background_main_dialog"
-    android:textColor="@color/foreground_main_dialog"
+    android:background="?android:colorBackground"
     >
 
     <LinearLayout

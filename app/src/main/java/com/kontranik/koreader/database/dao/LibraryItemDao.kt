@@ -107,4 +107,7 @@ interface LibraryItemDao {
 //            "where libraryItemToAuthorCrossRef.authorId := authorId")
 //    fun getByAuthor(authorId: Long): Flow<List<LibraryItemWithAuthors>>
 
+    @Query("SELECT COUNT(${LibraryItemHelper.COLUMN_ID}) FROM ${LibraryItemHelper.TABLE} WHERE ${LibraryItemHelper.COLUMN_ID} " +
+            " IN (SELECT libraryitemid FROM libraryItemToAuthorCrossRef WHERE authorid = :authorid )")
+    fun getCountByAuthorId(authorid: Long): Long
 }

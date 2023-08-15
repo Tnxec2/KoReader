@@ -61,8 +61,8 @@ class MainMenuFragment : Fragment() {
     private fun openFile() {
         val fragment = FileChooseFragment()
 
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container_view, fragment, "fragment_open_file")
+        requireActivity().supportFragmentManager.beginTransaction()
+            .add(R.id.fragment_container_view, fragment, "fragment_open_file")
             .addToBackStack("fragment_open_file")
             .commit()
     }
@@ -71,7 +71,7 @@ class MainMenuFragment : Fragment() {
         val fragment = SettingsFragment()
 
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container_view, fragment, "fragment_settings")
+            .add(R.id.fragment_container_view, fragment, "fragment_settings")
             .addToBackStack("fragment_settings")
             .commit()
     }
@@ -80,7 +80,7 @@ class MainMenuFragment : Fragment() {
         val fragment = LastOpenedBookListFragment()
 
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container_view, fragment, "fragment_last_opened")
+            .add(R.id.fragment_container_view, fragment, "fragment_last_opened")
             .addToBackStack("fragment_last_opened")
             .commit()
     }
@@ -89,7 +89,7 @@ class MainMenuFragment : Fragment() {
         val fragment = LibraryMainMenuFragment()
 
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container_view, fragment, "fragment_library")
+            .add(R.id.fragment_container_view, fragment, "fragment_library")
             .addToBackStack("fragment_library")
             .commit()
     }
