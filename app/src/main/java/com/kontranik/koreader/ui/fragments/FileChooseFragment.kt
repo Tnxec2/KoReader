@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.kontranik.koreader.App
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.databinding.FragmentFilechooseBinding
@@ -29,6 +30,8 @@ class FileChooseFragment : Fragment(),
     private lateinit var mReaderActivityViewModel: ReaderActivityViewModel
     private lateinit var mFileChooseFragmentViewModel: FileChooseFragmentViewModel
 
+    private lateinit var mLibraryViewModel: LibraryViewModel
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         binding = FragmentFilechooseBinding.inflate(inflater, container, false)
@@ -40,6 +43,13 @@ class FileChooseFragment : Fragment(),
 
         mReaderActivityViewModel = ViewModelProvider(requireActivity())[ReaderActivityViewModel::class.java]
         mFileChooseFragmentViewModel = ViewModelProvider(this)[FileChooseFragmentViewModel::class.java]
+
+        mLibraryViewModel = ViewModelProvider(this,
+            LibraryViewModelFactory(
+                (requireContext().applicationContext as App).libraryItemRepository,
+                (requireContext().applicationContext as App).authorsRepository,
+                App.getApplicationScope())
+        )[LibraryViewModel::class.java]
 
         binding.imageButtonFilechooseClose.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
@@ -104,6 +114,12 @@ class FileChooseFragment : Fragment(),
     override fun onFilelistItemDelete(position: Int, item: FileItem) {
         if( item.isStorage )
             confirmDeleteStorage(position)
+    }
+
+    override fun onFilelistItemUpdateLibrary(position: Int, fileItem: FileItem) {
+        fileItem.uriString?.let {
+            mLibraryViewModel.readRecursive(requireContext(), mutableListOf(it))
+        }
     }
 
     private fun confirmDeleteStorage(position: Int) {

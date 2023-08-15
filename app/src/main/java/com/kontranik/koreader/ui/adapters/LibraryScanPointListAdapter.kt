@@ -51,9 +51,15 @@ class LibraryScanPointListAdapter(
 
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        holder.ll.setOnLongClickListener(null)
+        holder.ll.setOnClickListener(null)
+        super.onViewRecycled(holder)
+    }
+
     private fun onDeleteItem(holder: ViewHolder, position: Int, scanPointItem: String): Boolean {
         val popup = PopupMenu(context, holder.textView)
-        popup.inflate(R.menu.menu_file_item_clicked)
+        popup.inflate(R.menu.menu_file_item_storage_clicked)
         popup.setOnMenuItemClickListener { item: MenuItem? ->
             if (item != null) {
                 when (item.itemId) {

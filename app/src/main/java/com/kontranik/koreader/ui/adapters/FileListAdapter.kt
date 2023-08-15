@@ -18,6 +18,7 @@ import com.kontranik.koreader.utils.FileItem
 import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.ImageUtils.getBitmap
+import kotlinx.coroutines.coroutineScope
 
 
 class FileListAdapter(
@@ -31,6 +32,7 @@ class FileListAdapter(
     interface FileListAdapterClickListener {
         fun onFilelistItemDelete(position: Int, item: FileItem)
         fun onFilelistItemClick(position: Int)
+        fun onFilelistItemUpdateLibrary(position: Int, fileItem: FileItem)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -47,8 +49,8 @@ class FileListAdapter(
         holder.pathView.text = fileItem.path
         if (!fileItem.isDir) {
             if (fileItem.bookInfo == null) {
-                val asyncTask = ReadBookInfoAsync(this)
-                asyncTask.execute(position)
+                holder.asyncTask = ReadBookInfoAsync(this)
+                holder.asyncTask?.execute(position)
             } else {
                 holder.nameView.text = fileItem.bookInfo!!.title
                 holder.descView.text = fileItem.bookInfo!!.authorsAsString()
@@ -67,7 +69,7 @@ class FileListAdapter(
         if ( fileItem.isStorage ) {
             holder.itemView.setOnLongClickListener {
                 val popup = PopupMenu(context, holder.nameView)
-                popup.inflate(R.menu.menu_file_item_clicked)
+                popup.inflate(R.menu.menu_file_item_storage_clicked)
                 popup.setOnMenuItemClickListener { item: MenuItem? ->
                     if (item != null) {
                         when (item.itemId) {
@@ -81,19 +83,47 @@ class FileListAdapter(
                 popup.show()
                 true
             }
+        } else if (fileItem.isDir) {
+            holder.itemView.setOnLongClickListener {
+                val popup = PopupMenu(context, holder.itemView)
+                popup.inflate(R.menu.menu_file_item_folder_clicked)
+                popup.setOnMenuItemClickListener { menuItem: MenuItem? ->
+                    if (menuItem != null) {
+                        when (menuItem.itemId) {
+                            R.id.itemUpdateLibrary -> {
+                                fileListAdapterClickListener.onFilelistItemUpdateLibrary(position, fileItem)
+                            }
+                        }
+                    }
+                    false
+                }
+                popup.show()
+                true
+            }
         }
     }
 
-        override fun getItemCount(): Int {
+    override fun onViewRecycled(holder: ViewHolder) {
+        with(holder.itemView) {
+            setOnClickListener(null)
+            setOnLongClickListener(null)
+        }
+        holder.asyncTask?.cancel(true)
+        super.onViewRecycled(holder)
+    }
+
+    override fun getItemCount(): Int {
         return fileItems.size
     }
 
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+        var asyncTask: ReadBookInfoAsync? = null
         val imageView = itemView.findViewById<View>(R.id.fileimage) as ImageView
         val nameView = itemView.findViewById<View>(R.id.filename) as TextView
         val descView = itemView.findViewById<View>(R.id.filedesc) as TextView
         val pathView = itemView.findViewById<View>(R.id.filepath) as TextView
     }
+
 
 
     class ReadBookInfoAsync(private val adapter: FileListAdapter) : AsyncTask<Int?, Int?, FileItem?>() {
