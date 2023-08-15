@@ -106,7 +106,11 @@ class PagingLibraryItemAdapter(private val context: Context, private val mListen
     }
 
     override fun onViewRecycled(holder: LibraryItemVeiwHolder) {
-        holder.itemView.setOnClickListener(null)
+        with(holder.itemView) {
+            setOnClickListener(null)
+            setOnLongClickListener(null)
+        }
+
         super.onViewRecycled(holder)
     }
 
