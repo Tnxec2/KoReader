@@ -279,43 +279,55 @@ class LibraryViewModel(
     }
 
     private fun readBookInfo(uri: Uri, path: String) {
-            val item = libraryItemRepository.getByPath(path)
-            if (item.isEmpty()) {
-                val bookInfo = readBookInfo(
-                    App.getContext(),
-                    uri.toString()
-                )
-                Log.d("LibraryViewModel", "bookInfo " + bookInfo.toString())
-                bookInfo?.let {
-                    val libraryItemId = libraryItemRepository.insert(LibraryItem(it))
-                    if (libraryItemId != null) {
-                        bookInfo.authors?.forEach { bookInfoAuthor ->
-                            val dbAuthorList = authorsRepository.getByName(
-                                firstname = bookInfoAuthor.firstname,
-                                middlename = bookInfoAuthor.middlename,
-                                lastname = bookInfoAuthor.lastname)
-                            Log.d("LibraryVieWModel", "dbAuthorList size: ${dbAuthorList.size}")
-                            if (dbAuthorList.isEmpty()) {
-                                val authorId = authorsRepository.insert(bookInfoAuthor)
-                                if (authorId != null) {
-                                    libraryItemRepository.inserCrossRef(
-                                        LibraryItemAuthorsCrossRef(authorId, libraryItemId)
-                                    )
-                                }
-                            } else {
-                                val authorId = dbAuthorList[0].id
-                                if (authorId != null) {
-                                    libraryItemRepository.inserCrossRef(
-                                        LibraryItemAuthorsCrossRef(authorId, libraryItemId)
-                                    )
-                                }
-                            }
-                        }
+        val item = libraryItemRepository.getByPath(path)
+        if (item.isEmpty()) {
+            val bookInfo = readBookInfo(
+                App.getContext(),
+                uri.toString()
+            )
+            Log.d("LibraryViewModel", "bookInfo " + bookInfo.toString())
+            saveBookInLibrary(bookInfo)
+        }
+    }
+
+    private fun saveBookInLibrary(bookInfo: BookInfo?) {
+        bookInfo?.let {
+            val result = libraryItemRepository.getByPath(it.path)
+            if (result.isEmpty()) {
+                val libraryItemId = libraryItemRepository.insert(LibraryItem(it))
+                if (libraryItemId != null) {
+                    bookInfo.authors?.forEach { bookInfoAuthor ->
+                        saveAuthor(bookInfoAuthor, libraryItemId)
                     }
-                    Log.d("LibraryViewModel", "save " + it.path)
                 }
+                Log.d("LibraryViewModel", "save " + it.path)
             }
         }
+    }
+
+    private fun saveAuthor(author: Author, libraryItemId: Long) {
+        val dbAuthorList = authorsRepository.getByName(
+            firstname = author.firstname,
+            middlename = author.middlename,
+            lastname = author.lastname
+        )
+        Log.d("LibraryVieWModel", "dbAuthorList size: ${dbAuthorList.size}")
+        if (dbAuthorList.isEmpty()) {
+            val authorId = authorsRepository.insert(author)
+            if (authorId != null) {
+                libraryItemRepository.inserCrossRef(
+                    LibraryItemAuthorsCrossRef(authorId, libraryItemId)
+                )
+            }
+        } else {
+            val authorId = dbAuthorList[0].id
+            if (authorId != null) {
+                libraryItemRepository.inserCrossRef(
+                    LibraryItemAuthorsCrossRef(authorId, libraryItemId)
+                )
+            }
+        }
+    }
 
     fun updateLibraryItem(position: Int, libraryItemWithAuthors: LibraryItemWithAuthors) {
         applicationScope.launch {
