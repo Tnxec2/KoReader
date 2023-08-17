@@ -16,17 +16,24 @@ interface AuthorDao {
 
     fun getPage(
         searchText: String?): PagingSource<Int, Author> {
+        val args: MutableList<Any?> = mutableListOf()
         val where = StringBuilder("")
         if (searchText != null) {
-            if (where.isBlank()) where.append(" WHERE ")
-            else where.append(" AND ( ")
-            where.append(" LOWER(${AuthorHelper.COLUMN_FIRSTNAME}) LIKE LOWER('%$searchText%') ")
-            where.append(" OR LOWER(${AuthorHelper.COLUMN_MIDDLENAME}) LIKE LOWER('%$searchText%') ")
-            where.append(" OR LOWER(${AuthorHelper.COLUMN_LASTNAME}) LIKE LOWER('%$searchText%') ")
+            where.append(" WHERE ")
+            where.append(" LOWER(${AuthorHelper.COLUMN_FIRSTNAME}) LIKE LOWER(?) ")
+            where.append(" OR LOWER(${AuthorHelper.COLUMN_MIDDLENAME}) LIKE LOWER(?) ")
+            where.append(" OR LOWER(${AuthorHelper.COLUMN_LASTNAME}) LIKE LOWER(?) ")
+            args.add("%$searchText%")
+            args.add("%$searchText%")
+            args.add("%$searchText%")
         }
         val order = " ORDER BY ${AuthorHelper.COLUMN_LASTNAME}, ${AuthorHelper.COLUMN_FIRSTNAME}"
         val statement = "SELECT * FROM ${AuthorHelper.TABLE} $where $order"
-        val query = SimpleSQLiteQuery(statement)
+        val argArray = arrayOfNulls<Any>(args.size)
+        args.forEachIndexed { index, element ->
+            argArray[index] = element
+        }
+        val query = SimpleSQLiteQuery(statement, argArray)
         return getAuthorViaQuery(query)
     }
 
