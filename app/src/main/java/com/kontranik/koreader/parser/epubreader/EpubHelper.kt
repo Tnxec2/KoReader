@@ -148,26 +148,30 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
         return coverBitmap
     }
 
-    private fun getCoverImage(coverImage: Resource): Bitmap? {
+    private fun getCoverImage(resource: Resource): Bitmap? {
         var coverBitmap: Bitmap? = null
-        if (MediatypeService.isBitmapImage(coverImage.mediaType)) {
-            coverBitmap = ImageUtils.byteArrayToBitmap(coverImage.data)
-        } else if (coverImage.mediaType == MediatypeService.XHTML) {
-            val resource = coverImage.data
+        if (MediatypeService.isBitmapImage(resource.mediaType)) {
+            coverBitmap = ImageUtils.byteArrayToBitmap(resource.data)
+        } else if (resource.mediaType == MediatypeService.XHTML) {
+            val resourceData = resource.data
 
-            val document = Jsoup.parse(String(resource))
-            var imageElement: Element? = document.selectFirst("img")
+            val document = Jsoup.parse(String(resourceData))
+            if (document != null) {
+                var imageElement: Element? = document.selectFirst("img")
 
-            if (imageElement != null) {
-                val href: String = imageElement.attr("src")
-                val image = getImageByHref(href)
-                coverBitmap = image?.let { ImageUtils.byteArrayToBitmap(it) }
-            } else {
-                imageElement = document.selectFirst("image")
-                val href: String = imageElement.attr("xlink:href")
-                var image = getImageByHref(href)
-                if (image == null) image = getImageByHref("OEBPS/$href")
-                coverBitmap = image?.let { ImageUtils.byteArrayToBitmap(it) }
+                if (imageElement != null) {
+                    val href: String = imageElement.attr("src")
+                    val image = getImageByHref(href)
+                    coverBitmap = image?.let { ImageUtils.byteArrayToBitmap(it) }
+                } else {
+                    imageElement = document.selectFirst("image")
+                    if (imageElement != null) {
+                        val href: String = imageElement.attr("xlink:href")
+                        var image = getImageByHref(href)
+                        if (image == null) image = getImageByHref("OEBPS/$href")
+                        coverBitmap = image?.let { ImageUtils.byteArrayToBitmap(it) }
+                    }
+                }
             }
         }
         return coverBitmap
