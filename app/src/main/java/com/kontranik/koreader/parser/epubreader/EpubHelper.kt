@@ -10,9 +10,12 @@ import com.kontranik.koreader.model.BookSchemeItem
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.utils.ImageUtils
 import nl.siegmann.epublib.domain.Book
+import nl.siegmann.epublib.domain.Resource
 import nl.siegmann.epublib.domain.TOCReference
 import nl.siegmann.epublib.epub.EpubReader
+import nl.siegmann.epublib.service.MediatypeService
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import java.io.FileNotFoundException
 import java.io.IOException
 import kotlin.math.ceil
@@ -48,7 +51,7 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
 
     private fun calculateScheme() {
         if ( epubBook == null ) return
-        if ( epubBook != null && getContentSize() == 0   ) return
+        if ( getContentSize() == 0   ) return
         pageScheme = BookPageScheme()
         pageScheme.sectionCount = getContentSize()-1
         pageScheme.sectionCountWithOutNotes = pageScheme.sectionCount
@@ -112,21 +115,19 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
 
     override fun getBookInfoTemporary(contentUri: String): BookInfo? {
         val eb = readBook(contentUri)
-        if (eb != null) {
-            return getBookInfoFromBook(eb)
+        return if (eb != null) {
+            getBookInfoFromBook(eb)
         } else {
-            return null
+            null
         }
     }
 
     private fun getBookInfoFromBook(eb: Book): BookInfo {
         val t = eb.title
-        val coverImage = eb.coverImage
-        var coverBitmap = getCoverbitmap(coverImage?.data)
 
         return BookInfo(
                 title = t,
-                cover = coverBitmap,
+                cover = getCoverBitmap(),
                 authors = getAuthors(eb).toMutableList(),
                 path = contentUri,
                 filename = contentUri,
@@ -134,13 +135,41 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
         )
     }
 
-    private fun getcoverbitmap(): Bitmap? {
-        return getCoverbitmap(epubBook?.coverImage?.data)
+    private fun getCoverBitmap(): Bitmap? {
+
+        val coverImage = epubBook?.coverImage
+        val coverPage = epubBook?.coverPage
+        var coverBitmap: Bitmap? = null
+        if ( coverImage != null) {
+            coverBitmap = getCoverImage(coverImage)
+        } else  if ( coverPage != null) {
+            coverBitmap = getCoverImage(coverPage)
+        }
+        return coverBitmap
     }
 
-    private fun getCoverbitmap(coverImage: ByteArray?): Bitmap? {
+    private fun getCoverImage(coverImage: Resource): Bitmap? {
         var coverBitmap: Bitmap? = null
-        if ( coverImage != null)  coverBitmap = ImageUtils.byteArrayToBitmap(coverImage)
+        if (MediatypeService.isBitmapImage(coverImage.mediaType)) {
+            coverBitmap = ImageUtils.byteArrayToBitmap(coverImage.data)
+        } else if (coverImage.mediaType == MediatypeService.XHTML) {
+            val resource = coverImage.data
+
+            val document = Jsoup.parse(String(resource))
+            var imageElement: Element? = document.selectFirst("img")
+
+            if (imageElement != null) {
+                val href: String = imageElement.attr("src")
+                val image = getImageByHref(href)
+                coverBitmap = image?.let { ImageUtils.byteArrayToBitmap(it) }
+            } else {
+                imageElement = document.selectFirst("image")
+                val href: String = imageElement.attr("xlink:href")
+                var image = getImageByHref(href)
+                if (image == null) image = getImageByHref("OEBPS/$href")
+                coverBitmap = image?.let { ImageUtils.byteArrayToBitmap(it) }
+            }
+        }
         return coverBitmap
     }
 
@@ -153,10 +182,6 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
     override fun getCoverPage(): String? {
         val data = epubBook?.coverPage?.data
         return data?.let { String(it) }
-    }
-
-    companion object {
-        private const val TAG = "Book"
     }
 
 }
