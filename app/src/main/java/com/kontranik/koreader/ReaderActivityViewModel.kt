@@ -35,6 +35,8 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
 
     var book: MutableLiveData<Book?> = MutableLiveData()
 
+    private var changingPage = false
+
     var pageViewContent: MutableLiveData<CharSequence?> = MutableLiveData()
     var pageViewSettings: MutableLiveData<PageViewSettings> = MutableLiveData(
         PageViewSettings(
@@ -387,11 +389,17 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
     }
 
     fun goToNextPage(textView: TextView) {
+        if (changingPage) return
+        changingPage = true
         if (pageNext(textView)) savePositionForBook()
+        changingPage = false
     }
 
     fun doPagePrev(textView: TextView) {
+        if (changingPage) return
+        changingPage = true
         if (pagePrev(textView)) savePositionForBook()
+        changingPage = false
     }
 
     private fun savePositionForBook() {
