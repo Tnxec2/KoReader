@@ -1,0 +1,63 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="8sp"
+    android:paddingBottom="8sp"
+    >
+        <LinearLayout
+            android:id="@+id/opdsentry_listitem_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+                <ImageView
+                    android:id="@+id/opdsentry_listitem_cover"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    app:srcCompat ="@drawable/ic_book_black_24dp"
+                    android:scaleType="fitCenter"
+                    android:layout_gravity="center_vertical"
+                    android:contentDescription="@string/icon" />
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/activity_padding"
+                    >
+
+                        <TextView
+                            android:id="@+id/opdsentry_listitem_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/title"
+                            style="@style/TextAppearance.AppCompat.Headline" />
+
+                        <TextView
+                            android:id="@+id/opdsentry_listitem_author"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/description"
+                            style="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+                        <TextView
+                            android:id="@+id/opdsentry_listitem_content"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/description"
+                            style="@style/TextAppearance.MaterialComponents.Subtitle2" />
+
+
+                </LinearLayout>
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/opdsentry_listitem_menu"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:srcCompat ="@drawable/iconmonstr_menu_dot_vertical_filled"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/icon" />
+</LinearLayout>

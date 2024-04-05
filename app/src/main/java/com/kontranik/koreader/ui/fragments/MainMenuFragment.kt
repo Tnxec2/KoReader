@@ -40,6 +40,10 @@ class MainMenuFragment : Fragment() {
             openLibrary()
         }
 
+        binding.llMainMenuOpds.setOnClickListener {
+            openOpds()
+        }
+
         binding.llMainMenuSettings.setOnClickListener {
             settings()
         }
@@ -91,6 +95,15 @@ class MainMenuFragment : Fragment() {
         requireActivity().supportFragmentManager.beginTransaction()
             .add(R.id.fragment_container_view, fragment, "fragment_library")
             .addToBackStack("fragment_library")
+            .commit()
+    }
+
+    private fun openOpds() {
+        val fragment = OpdsEntryListFragment.newInstance()
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .add(R.id.fragment_container_view, fragment, "fragment_opds")
+            .addToBackStack("fragment_opds")
             .commit()
     }
 

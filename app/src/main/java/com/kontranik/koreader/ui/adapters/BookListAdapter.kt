@@ -2,7 +2,8 @@ package com.kontranik.koreader.ui.adapters
 
 import android.content.Context
 import android.net.Uri
-import android.os.AsyncTask
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,11 +13,11 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.RecyclerView
 import com.kontranik.koreader.R
 import com.kontranik.koreader.model.BookInfo
-import com.kontranik.koreader.parser.epubreader.EpubHelper
-import com.kontranik.koreader.parser.fb2reader.FB2Helper
+import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
 import java.net.URLDecoder
+import java.util.concurrent.Executors
 
 class BookListAdapter(
         val context: Context,
@@ -47,8 +48,34 @@ class BookListAdapter(
         } else {
             bookInfo.cover = ImageUtils.getBitmap(context, ImageEnum.Ebook)
             holder.imageView.setImageBitmap(bookInfo.cover)
-            val asyncTask = ReadBookInfoAsync(this)
-            asyncTask.execute(position)
+//            val asyncTask = ReadBookInfoAsync(this)
+//            asyncTask.execute(position)
+            if (!bookInfo.coverLoaded) {
+                bookInfo.coverLoaded = true
+                val executor = Executors.newSingleThreadExecutor()
+                val handler = Handler(Looper.getMainLooper())
+                executor.execute {
+                    val contentUriPath = bookInfo.path
+                    val uri = Uri.parse(contentUriPath)
+                    val doc = DocumentFile.fromSingleUri(context, uri)
+
+                    if (doc != null) {
+                        val bookInfoTemp: BookInfo? = EbookHelper.getBookInfoTemporary(context, contentUriPath)
+
+                        if (bookInfoTemp?.cover != null) {
+                            bookInfo.cover = ImageUtils.scaleBitmap(bookInfoTemp.cover!!, 50, 100)
+                        } else {
+                            bookInfo.cover =
+                                ImageUtils.getBitmap(context, ImageEnum.Ebook)
+                        }
+                    }
+                    handler.post {
+                        if (bookInfo.cover != null) {
+                            holder.imageView.setImageBitmap(bookInfo.cover!!)
+                        }
+                    }
+                }
+            }
         }
 
         holder.itemView.setOnClickListener {
@@ -68,48 +95,4 @@ class BookListAdapter(
     }
 
 
-    class ReadBookInfoAsync(val adapter: BookListAdapter) : AsyncTask<Int?, Int?, BookInfo?>() {
-
-        var position = 0
-        override fun doInBackground(vararg params: Int?): BookInfo? {
-            var result: BookInfo? = null
-            if (params.isNotEmpty() && params.first() != null) {
-                position = params.first()!!
-                if ( position >= adapter.books.size ) return null
-                result = adapter.books[position]
-                val contentUriPath = result.path
-
-                val mContext = adapter.context
-                val uri = Uri.parse(contentUriPath)
-                val doc = DocumentFile.fromSingleUri(mContext, uri)
-                if (doc != null) {
-                    var bookInfo: BookInfo? = null
-                    if (contentUriPath.endsWith(".epub", ignoreCase = true)) {
-                        bookInfo = EpubHelper(
-                            mContext,
-                            contentUriPath
-                        ).getBookInfoTemporary(contentUriPath)
-                    } else if (contentUriPath.endsWith(".fb2", ignoreCase = true)
-                        || contentUriPath.endsWith(".fb2.zip", ignoreCase = true)
-                    ) {
-                        bookInfo =
-                            FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
-                    }
-
-                    if (bookInfo?.cover != null) {
-                        result.cover = ImageUtils.scaleBitmap(bookInfo.cover!!, 50, 100)
-                    } else {
-                        result.cover =
-                            ImageUtils.getBitmap(adapter.context, ImageEnum.Ebook)
-                    }
-                }
-
-            }
-            return result
-        }
-
-        override fun onPostExecute(result: BookInfo?) {
-            if ( result != null) adapter.notifyItemChanged(position)
-        }
-    }
 }

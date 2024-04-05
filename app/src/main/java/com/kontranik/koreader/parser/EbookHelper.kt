@@ -1,7 +1,11 @@
-package com.kontranik.koreader.parser;
+package com.kontranik.koreader.parser
 
+import android.content.Context
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme
+import com.kontranik.koreader.parser.epubreader.EpubHelper
+import com.kontranik.koreader.parser.fb2reader.FB2Helper
+import com.kontranik.koreader.utils.FileItem
 
 interface EbookHelper {
 
@@ -15,4 +19,49 @@ interface EbookHelper {
     fun getImageByHref(href: String): ByteArray?
     fun getBookInfoTemporary(contentUri: String): BookInfo?
     fun getCoverPage(): String?
+
+    companion object {
+        fun getBookInfo(mContext: Context, contentUriPath: String, result: FileItem): BookInfo? {
+            return if (isEpub(contentUriPath)) {
+                EpubHelper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
+            } else if (isFb2(contentUriPath)) {
+                FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
+            } else {
+                BookInfo(result)
+            }
+        }
+
+        fun isEpub(contentUriPath: String): Boolean {
+            return contentUriPath.endsWith(".epub", true)
+                || contentUriPath.endsWith(".epub.zip",  true)
+        }
+
+        fun isFb2(contentUriPath: String): Boolean{
+            return contentUriPath.endsWith(".fb2",  true)
+                    || contentUriPath.endsWith(".fb2.zip",  true)
+        }
+
+        fun getBookInfoTemporary(context: Context, contentUriPath: String): BookInfo? {
+            if (isEpub(contentUriPath)) {
+                return EpubHelper(
+                    context,
+                    contentUriPath
+                ).getBookInfoTemporary(contentUriPath)
+            } else if (isFb2(contentUriPath)) {
+                return FB2Helper(context, contentUriPath).getBookInfoTemporary(
+                        contentUriPath
+                    )
+            }
+            return null
+        }
+
+        fun getHelper(context: Context, contentUri: String): EbookHelper? {
+            if (isEpub(contentUri)) {
+                return EpubHelper(context, contentUri)
+            } else if (isFb2(contentUri)) {
+                return FB2Helper(context, contentUri)
+            }
+            return null
+        }
+    }
 }

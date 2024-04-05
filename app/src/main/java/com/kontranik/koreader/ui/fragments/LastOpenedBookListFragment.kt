@@ -108,8 +108,6 @@ class LastOpenedBookListFragment :
         }
     }
 
-
-
     override fun onBookInfoFragmentReadBook(bookUri: String) {
         savePrefs(bookUri)
         mReaderActivityViewModel.setBookPath(requireContext(), bookUri)

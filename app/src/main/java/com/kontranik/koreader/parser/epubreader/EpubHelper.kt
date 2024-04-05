@@ -18,6 +18,9 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.nio.charset.Charset
+import java.util.Locale
+import java.util.zip.ZipInputStream
 import kotlin.math.ceil
 
 class EpubHelper(private val context: Context, private val contentUri: String) : EbookHelper {
@@ -35,10 +38,19 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
     private fun readBook(documentUri: String): Book? {
         try {
             val fileInputStream = context.contentResolver.openInputStream(Uri.parse(documentUri)) ?: return null
-            epubBook = epubReader.readEpub(fileInputStream)
+            if (documentUri.endsWith(".zip")) {
+                val zis =
+                    ZipInputStream(fileInputStream, Charset.forName("Cp437"))
+                epubBook = epubReader.readEpub(zis)
+                zis.close()
+            } else if (documentUri.lowercase(Locale.getDefault()).endsWith(".epub")) {
+                epubBook = epubReader.readEpub(fileInputStream)
+            }
+
             if ( epubBook != null) {
                 bookInfo = getBookInfoFromBook(epubBook!!)
             }
+
             fileInputStream.close()
             return epubBook
         } catch (e: FileNotFoundException) {

@@ -16,6 +16,8 @@ class BookInfo(
 ) : Serializable {
     constructor(fileItem: FileItem) : this(title = fileItem.name, cover = null, authors = null, filename = fileItem.name, path = fileItem.path, annotation = "")
 
+    var coverLoaded: Boolean = false
+
     fun authorsAsString() : String {
         var result = ""
         if (authors != null) {

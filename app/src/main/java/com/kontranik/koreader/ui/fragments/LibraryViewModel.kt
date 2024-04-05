@@ -30,6 +30,7 @@ import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.database.repository.AuthorsRepository
 import com.kontranik.koreader.database.repository.LibraryItemRepository
 import com.kontranik.koreader.model.BookInfo
+import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.parser.epubreader.EpubHelper
 import com.kontranik.koreader.parser.fb2reader.FB2Helper
 import com.kontranik.koreader.ui.adapters.PagingLibraryItemAdapter
@@ -145,18 +146,16 @@ class LibraryViewModel(
     fun createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = App.getContext().getString(R.string.channel_name_library)
-            val descriptionText = App.getContext().getString(R.string.channel_description_library)
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-            // Register the channel with the system
-            val notificationManager: NotificationManager =
-                App.getContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+        val name = App.getContext().getString(R.string.channel_name_library)
+        val descriptionText = App.getContext().getString(R.string.channel_description_library)
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
         }
+        // Register the channel with the system
+        val notificationManager: NotificationManager =
+            App.getContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
     fun readRecursive(context: Context, scanPoints: MutableList<String>) {
@@ -250,9 +249,9 @@ class LibraryViewModel(
                         dirNodes.add(newNode)
                         // traverseDirectoryEntries(contentResolver, newNode)
                     } else if (
-                        name.endsWith(".epub", true)
-                        || name.endsWith(".fb2", true)
-                        || name.endsWith(".fb2.zip", true)
+                        EbookHelper.isEpub(name)
+                        ||
+                        EbookHelper.isFb2(name)
                     ) {
                         val documentUri = DocumentsContract.buildDocumentUriUsingTree(rootUri, docId)
                         readBookInfo(documentUri, docId)
@@ -406,14 +405,13 @@ class LibraryViewModel(
 }
 
     private fun readBookInfo(mContext: Context, contentUriPath: String): BookInfo? {
-        val result: BookInfo? = if (contentUriPath.endsWith(".epub", ignoreCase = true)) {
+        val result: BookInfo? = if (EbookHelper.isEpub(contentUriPath)) {
             try {
                 EpubHelper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
             } catch (e: Exception) {
                 null
             }
-        } else if (contentUriPath.endsWith(".fb2", ignoreCase = true)
-            || contentUriPath.endsWith(".fb2.zip", ignoreCase = true)) {
+        } else if (EbookHelper.isFb2(contentUriPath)) {
             try {
                 FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
             } catch (e: Exception) {

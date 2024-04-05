@@ -2,14 +2,9 @@ package com.kontranik.koreader.model
 
 import android.content.Context
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
-import android.util.Log
-import android.view.WindowManager
 import android.widget.TextView
 import com.kontranik.koreader.parser.EbookHelper
-import com.kontranik.koreader.parser.epubreader.EpubHelper
-import com.kontranik.koreader.parser.fb2reader.FB2Helper
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.PageLoader
 import org.jsoup.Jsoup
@@ -26,7 +21,7 @@ class Book(private var context: Context, var fileLocation: String) {
     private var pageLoader: PageLoader = PageLoader(context, this)
 
     init {
-        ebookHelper = getHelper(context, fileLocation)
+        ebookHelper = EbookHelper.getHelper(context, fileLocation)
         if ( ebookHelper != null) ebookHelper!!.readBook()
     }
 
@@ -123,13 +118,13 @@ class Book(private var context: Context, var fileLocation: String) {
 
     fun getNext(pageView: TextView): Page? {
         val bookPosition =  BookPosition(curPage!!.endBookPosition)
-        bookPosition.offSet = bookPosition.offSet + 1
+        bookPosition.offSet += 1
         return pageLoader.getPage(pageView, BookPosition(bookPosition), revers = false, recalc = false)
     }
 
     fun getPrev(pageView: TextView): Page? {
         val bookPosition =  BookPosition(curPage!!.startBookPosition)
-        bookPosition.offSet = bookPosition.offSet - 1
+        bookPosition.offSet -= 1
         return pageLoader.getPage(pageView, BookPosition(bookPosition), revers = true, recalc = false)
     }
 
@@ -150,20 +145,5 @@ class Book(private var context: Context, var fileLocation: String) {
         }
         curTextPage += ( curPage!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
         return curTextPage
-    }
-
-    companion object {
-        fun getHelper(context: Context, contentUri: String): EbookHelper? {
-            Log.d("Book", contentUri)
-            if (contentUri.endsWith(".epub", true)) {
-                return EpubHelper(context, contentUri)
-            } else if (
-                contentUri.endsWith(".fb2", ignoreCase = true)
-                || contentUri.endsWith(".fb2.zip", ignoreCase = true)
-            ) {
-                return FB2Helper(context, contentUri)
-            }
-            return null
-        }
     }
 }

@@ -19,7 +19,7 @@ import com.kontranik.koreader.App
 import com.kontranik.koreader.R
 import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.databinding.FragmentBookinfoBinding
-import com.kontranik.koreader.model.Book
+import com.kontranik.koreader.parser.EbookHelper
 
 
 class BookInfoFragment: Fragment()  {
@@ -99,7 +99,7 @@ class BookInfoFragment: Fragment()  {
             binding.imageButtonBookinfoDelete.visibility = View.GONE
         }
 
-        val ebookHelper = Book.getHelper(requireContext(), bookPath)
+        val ebookHelper = EbookHelper.getHelper(requireContext(), bookPath)
 
         if ( ebookHelper == null)
             requireActivity().supportFragmentManager.popBackStack()

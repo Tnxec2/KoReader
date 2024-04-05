@@ -19,7 +19,6 @@ import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
@@ -165,6 +164,16 @@ class ReaderActivity :
 //                binding.fragmentContainerView.visibility = View.GONE
 //            }
 //        }
+
+
+        // test opds
+        // https://flibusta.is/opds
+//        val startUrl = "https://www.gutenberg.org/ebooks.opds/"
+//        val fragment = OpdsEntryListFragment.newInstance(startUrl)
+//        supportFragmentManager.beginTransaction()
+//            .add(R.id.fragment_container_view, fragment, "fragment_opds_list")
+//            .addToBackStack("fragment_opds_list")
+//            .commit()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -182,7 +191,8 @@ class ReaderActivity :
                     resources.getString(R.string.open_book),
                     Toast.LENGTH_LONG
                 ).show()
-                openFile()
+                // TODO: test
+                // openFile()
             }
         }
     }
@@ -588,14 +598,12 @@ class ReaderActivity :
                 }
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val lFlags = window.decorView.systemUiVisibility
+            val lFlags = window.decorView.systemUiVisibility
 
-                window.decorView.systemUiVisibility =
-                    if (pIsDark) (lFlags and (View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR).inv()) else
-                        (lFlags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+            window.decorView.systemUiVisibility =
+                if (pIsDark) (lFlags and (View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR).inv()) else
+                    (lFlags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
 
-            }
         } catch (e: Exception) {
             e.printStackTrace()
         }

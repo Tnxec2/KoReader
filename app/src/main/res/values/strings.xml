@@ -211,6 +211,32 @@
     <string name="authors">Authors</string>
     <string name="by_author">by %1$s</string>
     <string name="cover">Book cover</string>
+    <string name="connection_error">connection error</string>
+    <string name="xml_error">xml error</string>
+    <string name="links">Links</string>
+    <string name="opds">OPDS Network Library</string>
 
+    <string name="icon_back_base64" translatable="false">data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAA7EAAAOxAGVKw4bAAADE0lEQVRo3tWZu2sUURTGz3fuY+dmN5PEkM2iEiSIbFJIsBARCSLBQpsg/gH+CZZim1IkRRALCwsRSZFSLMRGRYghWAaDIhaRNTHIJmbD4mzGwjXEZR939nVnP7jNcOae7zf3MfdBZKlMJsNCiHnb+Fipv79fM/MzIgpde4ksY4zPzK/K5nsLIJFIZAB8OGK+dwCUUmcAfK4w3xsASqnzALaqmI8dACofSCmvBUGwSESpGu8Umk4GHBDRLyL6BuATEa0KId4ODw+/z+VyQcs0QohbRPSbqn/5jhUAW8z8QGt9thXzd7ptvFph5udKqSlr4yMjI8zMC66NV5QSMy8kk8m+hgDM/DQGhmt1rTWl1GRdACnlVSLac222DkReSnmlEcRFAD9dm61T9qWUM3UhlFJTAL7HwGytlthtOLjLf9+vrs3WgfhijBmsC6G1HgOw5tpsrcLMT6iREolEGsBqjUqa1sTEhGeMOSWlnGXmhwC2m4GQUl5umMzzvEEAb9oJUKlkMpkSQtyliLMggBXbBH3M/KJTAP+ktc4C+BixFWasKvd9XzPzYicBiA67rfXYY+Yl68rLy41HnQQgItJanwawawMAYD+VSvmREggh7nUSoJzjtg0A/e1Gs532E1m+73u2P1Rmvi9cG65UsVgMmPlEGIYXLML32bXhamLml5ah4669VpUxZozsBvJeLFtgdHT0h2VoXywBCoWCtAw9iCVAPp8/bhm6E0uAIAjOWYbmYgkQhuF1mzgA67ED8DwvHYbhDctwu1VpNxXliEcpNe3a73+SUk4TUcnGPICtdDptO1t1XuU9Qa0D5WrroAeuPR9KSnkp4olISWs92WS69skYc4yZ5ynigXKkzUw7lc1mPc/zxoUQN5n5se3mpaIUtdbZVnw4PVYRQsy1+iFdHmwtDwwM6J4EALChtT7ZqnknAAC2lVLN3964BACw0U7zXQUAsNyubtNtgKIQYs73/ZYHbLcBSsy81Oo833WAI9eskZcHiPpCOWlTKl907xBRDsA6Ea0IIV4PDQ2929zcbOqi+w/Du2UKT5qJwgAAAABJRU5ErkJggg==</string>
+    <string name="opds_overview">Overview opds</string>
+    <string name="search_term">search term</string>
+    <string name="add_opds">add opds</string>
+    <string name="add_opds_overview_entry">Edit a OPDS overview item</string>
+    <string name="opds_entry_name">Name</string>
+    <string name="opds_entry_url">Url</string>
+    <string name="opds_item_edit">Edit</string>
+    <string name="opds_item_delete">Delete</string>
+    <string name="opds_entry_details">Entry details</string>
+    <string name="opds_entry_cover">cover</string>
+    <string name="opds_entry_title">Opds Entry Title</string>
+    <string name="opds_entry_author">Opds Entry Author</string>
+    <string name="opds_entry_content">Content</string>
+    <string name="opds_icon">opds icon</string>
+    <string name="opds_entrys">Opds Entrys</string>
+    <string name="opds_subtitle">Subtitle</string>
+    <string name="opds_author_content">author/content</string>
 
+    <string-array name="opds_list" translatable="false">
+        <item>gutenberg|https://www.gutenberg.org/ebooks.opds/</item>
+        <item>flibusta|https://flibusta.is/opds</item>
+    </string-array>
 </resources>

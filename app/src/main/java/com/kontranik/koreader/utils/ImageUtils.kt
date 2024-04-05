@@ -15,7 +15,9 @@ import android.graphics.drawable.Drawable
 import androidx.core.content.res.ResourcesCompat
 import com.kontranik.koreader.R
 import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.Base64
 
 
 object ImageUtils {
@@ -153,5 +155,26 @@ object ImageUtils {
     // convert from byte array to bitmap
     fun getImage(byteArray: ByteArray): Bitmap? {
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+    }
+
+    fun drawableFromUrl(url: String?, startUrl: String?): Bitmap? {
+        if (url  == null) return null
+
+        try {
+            if (url.startsWith("data:image")) {
+                val imagedata: ByteArray =
+                    Base64.getDecoder().decode(url.substring(url.indexOf(",") + 1))
+                return BitmapFactory.decodeByteArray(imagedata, 0, imagedata.size)
+            }
+
+            val connection = URL(UrlHelper.getUrl(url, startUrl)).openConnection() as HttpURLConnection
+            connection.setRequestProperty("User-agent", "Mozilla/4.0")
+            connection.connect()
+            val input = connection.inputStream
+            return BitmapFactory.decodeStream(input)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
     }
 }

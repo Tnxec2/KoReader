@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.util.Log
+import com.kontranik.koreader.parser.EbookHelper
 
 object FileHelper {
 
@@ -87,13 +88,9 @@ object FileHelper {
             if ( resultF[i].third == DocumentsContract.Document.MIME_TYPE_DIR) {
                 dirs.add(FileItem(ImageEnum.Dir, name, path, uriString = uriString, isDir = true, isRoot = false, null))
             } else {
-
-                if (name.endsWith(".epub", true)) {
+                if (EbookHelper.isEpub(name)) {
                     files.add(FileItem(ImageEnum.Epub, name, path, uriString = uriString, isDir = false, false, null))
-                } else if (
-                        name.endsWith(".fb2", true)
-                     || name.endsWith(".fb2.zip", true)
-                ) {
+                } else if (EbookHelper.isFb2(name)) {
                     files.add(FileItem(ImageEnum.Fb2, name, path, uriString = uriString, isDir = false, false, null))
                 }
             }

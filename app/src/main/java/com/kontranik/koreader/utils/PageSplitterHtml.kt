@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.text.*
 import android.text.style.QuoteSpan
 import android.widget.TextView
-import androidx.core.text.HtmlCompat
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookPosition
@@ -43,24 +42,17 @@ open class PageSplitterHtml(context: Context) : FontsHelper(context) {
             else context.resources.getString(PrefsHelper.colorForegroundDefaultArray[colorThemeIndex-1])
         )
 
-        content = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        content =
             SpannableStringBuilder(Html.fromHtml(
-                    html, Html.FROM_HTML_MODE_LEGACY, CustomImageGetter(book, pageWidth, pageHeight, colorText, section > 0), null))
-        } else {
-            SpannableStringBuilder(
-                HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_COMPACT, CustomImageGetter(book, pageWidth, pageHeight, colorText, section > 0), null))
-        }
+                    html, Html.FROM_HTML_MODE_COMPACT, CustomImageGetter(book, pageWidth, pageHeight, colorText, section > 0), null))
 
         postformatContent(textView)
 
-        staticLayout = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+        staticLayout =
             StaticLayout.Builder.obtain(content, 0, content.length, paint, pageWidth)
                     .setLineSpacing(lineSpacingExtra, lineSpacingMultiplier)
                     .setAlignment(Layout.Alignment.ALIGN_NORMAL)
                     .build()
-        } else {
-            StaticLayout(content, paint, pageWidth, Layout.Alignment.ALIGN_NORMAL, lineSpacingMultiplier, lineSpacingExtra, true)
-        }
 
         pages = mutableListOf()
 
@@ -133,10 +125,6 @@ open class PageSplitterHtml(context: Context) : FontsHelper(context) {
             // add an new QuoteSpan span in the same place
             content.setSpan(newQuoteSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
-    }
-
-    companion object {
-        const val TAG = "PageSplitterOneHtml"
     }
 }
 
