@@ -70,7 +70,6 @@ class OpdsTypes {
             TYPE_APP_RTFZIP to "rtf.zip",
             TYPE_APP_EPUBZIP to "epub.zip",
             TYPE_APP_MOBIPOCKET to "mobi"
-
         )
 
         val REL_THUMBNAIL = "http://opds-spec.org/image/thumbnail"

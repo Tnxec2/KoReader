@@ -8,8 +8,16 @@ class Link(val type: String?, var title: String?, var href: String?, val rel: St
     constructor(title: String?, href: String?) : this(type = OpdsTypes.TYPE_LINK_OPDS_CATALOG, title, href, rel = OpdsTypes.REL_SUBSECTION )
 
     fun getTitle() : CharSequence? {
-        return title ?: if ( type?.startsWith(OpdsTypes.TYPE_APPLICATION_PREFIX) == true) type.split("/")[1] else href
+        return title ?:
+            if ( type != OpdsTypes.TYPE_LINK_OPDS_CATALOG
+                && type != OpdsTypes.TYPE_LINK_ATOM_XML
+                && type?.startsWith(OpdsTypes.TYPE_APPLICATION_PREFIX) == true)
+                type.split("/")[1]
+            else if (rel != null)
+                OpdsTypes.MAP_REL[rel] ?: rel
+            else href
     }
+
     fun isThumbnail(): Boolean {
         return type?.startsWith(OpdsTypes.TYPE_LINK_IMAGE_PREFIX) == true && ( rel == OpdsTypes.REL_THUMBNAIL || rel == OpdsTypes.REL_THUMBNAIL_X)
     }

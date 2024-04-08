@@ -24,6 +24,7 @@ import com.kontranik.koreader.opds.model.OpdsTypes
 import com.kontranik.koreader.opds.model.OpenSearchDescription
 import com.kontranik.koreader.opds.model.SearchUrlTypes
 import com.kontranik.koreader.ui.adapters.OpdsEntryListAdapter
+import com.kontranik.koreader.utils.Divider
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.UrlHelper
 import kotlinx.coroutines.Dispatchers
@@ -47,12 +48,12 @@ class OpdsEntryListFragment :
 
     private var openedLink: String? = null
 
-    var searchTerm: String? = "frank"
-    var searchDescription: OpenSearchDescription? = null
+    private var searchTerm: String? = "frank" // TODO: remove initialization
+    private var searchDescription: OpenSearchDescription? = null
 
-    var startUrl: String? = OVERVIEW
+    private var startUrl: String? = OVERVIEW
 
-    private lateinit var  overview_opds: Opds
+    private lateinit var overviewOpds: Opds
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -75,19 +76,8 @@ class OpdsEntryListFragment :
             openSearchTermDialog()
         }
 
-        val divider = DividerItemDecoration(
-            binding.reciclerViewOpdsentrylistList.context, DividerItemDecoration.VERTICAL
-        )
-        ResourcesCompat.getDrawable(
-            requireContext().resources,
-            R.drawable.recycler_view_divider,
-            null
-        )?.let {
-            divider.setDrawable(
-                it
-            )
-        }
-        binding.reciclerViewOpdsentrylistList.addItemDecoration(divider)
+        Divider.appendDivider(requireContext(), binding.reciclerViewOpdsentrylistList)
+
         binding.reciclerViewOpdsentrylistList.adapter =
             OpdsEntryListAdapter(requireContext(), opdsEntryList, this)
 
@@ -125,20 +115,22 @@ class OpdsEntryListFragment :
         }
     }
 
-    fun load(url: String) {
+    private fun load(url: String, back: Boolean = false) {
         if (url == OVERVIEW) {
             binding.imageButtonOpdsentrylistAdd.visibility = View.VISIBLE
         } else {
             binding.imageButtonOpdsentrylistAdd.visibility = View.GONE
         }
-        openedLink?.let { navigationHistory.add(it) }
-        openedLink = url
+        if (!back) {
+            openedLink?.let { navigationHistory.add(it) }
+            openedLink = url
+        }
         lifecycleScope.launch(Dispatchers.IO) {
             val result: Opds?
             var icon: Bitmap? = null
             try {
                  if (url == OVERVIEW){
-                     result = overview_opds
+                     result = overviewOpds
                      startUrl = OVERVIEW
                 } else {
                      if (startUrl == OVERVIEW) startUrl = url
@@ -185,44 +177,16 @@ class OpdsEntryListFragment :
 
                     result?.entries?.forEach { entry -> Log.d("OPDS List Fragment", "entry: ${entry.title} : ${entry.clickLink}") }
 
-                    if (url != OVERVIEW) {
-                        navigationHistory.last().let { link ->
-                            opdsEntryList.add(Entry(
-                                id = "back",
-                                title = "..",
-                                clickLink = Link(
-                                    type = OpdsTypes.TYPE_LINK_OPDS_CATALOG,
-                                    title = "back",
-                                    href = link,
-                                    rel = null
-                                ),
-                                thumbnail = Link(
-                                    type = OpdsTypes.TYPE_LINK_IMAGE_PNG,
-                                    title = null,
-                                    href = resources.getString(R.string.icon_back_base64),
-                                    rel = OpdsTypes.REL_IMAGE
-                                )
-                            ))
-                        }
-                    }
-                    if (result != null && result.entries.isNotEmpty()) {
-                        opdsEntryList.addAll(
-                            result.entries
-                        )
-                    }
+                    if (url != OVERVIEW) opdsEntryList.add(Entry.BACK)
+
+                    if (result != null && result.entries.isNotEmpty())
+                        opdsEntryList.addAll(result.entries)
+
                     if (result?.links?.isNotEmpty() == true) {
                         result.links.forEach { link: Link ->
                             if (link.isCatalogEntry()) {
-                                opdsEntryList.add(
-                                    Entry(
-                                        id = link.title,
-                                        title = link.title,
-                                        content = null,
-                                        thumbnail = null,
-                                        clickLink = link,
-                                        otherLinks = null
-                                    )
-                                )
+                                Log.d("LOAD", link.toString())
+                                opdsEntryList.add(Entry(link))
                             }
                         }
                     }
@@ -261,8 +225,72 @@ class OpdsEntryListFragment :
         }
     }
 
-    fun parseStringArrayToEntryList(stringArrayResourceId: Int): MutableList<Entry> {
-        val stringArray = resources.getStringArray(stringArrayResourceId)
+
+    private fun goBack() {
+        if (navigationHistory.isNotEmpty()) {
+            val url = navigationHistory.removeLast()
+            load(url, true)
+        }
+    }
+
+    override fun onOpdsEntrylistItemClick(entry: Entry) {
+        Log.d("OPDS List", "clicked opds item: ${entry.title} - ${entry.clickLink}")
+        if (entry.clickLink != null) {
+            entry.clickLink.href?.let {
+                if (it == "back") goBack() else load(it)
+            }
+        } else {
+            val fragment = OpdsEntryDetailsFragment.newInstance(entry, startUrl!!)
+            fragment.setListener(this)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container_view, fragment, "fragment_opds_details")
+                .addToBackStack("fragment_opds_details")
+                .commit()
+        }
+    }
+
+    override fun onOpdslistItemDelete(position: Int) {
+        overviewOpds.entries.removeAt(position)
+        savePrefs()
+        load(OVERVIEW)
+    }
+
+    override fun onOpdslistItemEdit(position: Int) {
+        val editFragment: OpdsEntryEditFragment =
+            OpdsEntryEditFragment.newInstance(position, overviewOpds.entries[position].title, overviewOpds.entries[position].clickLink?.href)
+        editFragment.setListener(this)
+        editFragment.show(requireActivity().supportFragmentManager, "fragment_opds_edit")
+    }
+
+    private fun openAddItemDialog() {
+        val editFragment: OpdsEntryEditFragment =
+            OpdsEntryEditFragment.newInstance(overviewOpds.entries.size)
+        editFragment.setListener(this)
+        editFragment.show(requireActivity().supportFragmentManager, "fragment_opds_edit")
+    }
+
+
+    private fun loadPrefs() {
+        val settings = requireContext()
+            .getSharedPreferences(
+                PREFS_FILE,
+                Context.MODE_PRIVATE)
+        val eP = settings.getStringSet(PREF_OPDS_OVERVIEW, null)
+        overviewOpds = eP?.let { Opds(
+            title = resources.getString(R.string.opds_overview),
+            subtitle = null,
+            entries = it.map { s -> splitEntry(s)}.toMutableList(),
+            links = emptyList()
+        ) } ?:  Opds(
+            title = resources.getString(R.string.opds_overview),
+            subtitle = null,
+            entries = parseOpdsListResource(),
+            links = emptyList()
+        )
+    }
+
+    private fun parseOpdsListResource(): MutableList<Entry> {
+        val stringArray = resources.getStringArray(R.array.opds_list)
         val outputArray = mutableListOf<Entry>()
         for (entry in stringArray) {
             outputArray.add(splitEntry(entry))
@@ -279,69 +307,6 @@ class OpdsEntryListFragment :
         )
     }
 
-    private fun goBack() {
-        if (navigationHistory.isNotEmpty()) {
-            val url = navigationHistory.removeLast()
-            load(url)
-        }
-    }
-
-    override fun onOpdsEntrylistItemClick(entry: Entry) {
-        Log.d("OPDS List", "clicked opds item: ${entry.title} - ${entry.clickLink}")
-        if (entry.clickLink != null) {
-            entry.clickLink.href?.let {
-                load(it)
-            }
-        } else {
-            val fragment = OpdsEntryDetailsFragment.newInstance(entry, startUrl!!)
-            fragment.setListener(this)
-            requireActivity().supportFragmentManager.beginTransaction()
-                .add(R.id.fragment_container_view, fragment, "fragment_opds_details")
-                .addToBackStack("fragment_opds_details")
-                .commit()
-        }
-    }
-
-    override fun onOpdslistItemDelete(position: Int) {
-        overview_opds.entries.removeAt(position)
-        savePrefs()
-        load(OVERVIEW)
-    }
-
-    override fun onOpdslistItemEdit(position: Int) {
-        val editFragment: OpdsEntryEditFragment =
-            OpdsEntryEditFragment.newInstance(position, overview_opds.entries[position].title, overview_opds.entries[position].clickLink?.href)
-        editFragment.setListener(this)
-        editFragment.show(requireActivity().supportFragmentManager, "fragment_opds_edit")
-    }
-
-    private fun openAddItemDialog() {
-        val editFragment: OpdsEntryEditFragment =
-            OpdsEntryEditFragment.newInstance(overview_opds.entries.size)
-        editFragment.setListener(this)
-        editFragment.show(requireActivity().supportFragmentManager, "fragment_opds_edit")
-    }
-
-
-    private fun loadPrefs() {
-        val settings = requireContext()
-            .getSharedPreferences(
-                PREFS_FILE,
-                Context.MODE_PRIVATE)
-        val eP = settings.getStringSet(PREF_OPDS_OVERVIEW, null)
-        overview_opds = eP?.let { Opds(
-            title = resources.getString(R.string.opds_overview),
-            subtitle = null,
-            entries = it.map { s -> splitEntry(s)}.toMutableList(),
-            links = emptyList()
-        ) } ?:  Opds(
-            title = resources.getString(R.string.opds_overview),
-            subtitle = null,
-            entries = parseStringArrayToEntryList(R.array.opds_list),
-            links = emptyList()
-        )
-    }
-
     private fun savePrefs() {
         val settings = requireContext()
             .getSharedPreferences(
@@ -349,8 +314,8 @@ class OpdsEntryListFragment :
                 Context.MODE_PRIVATE)
         val prefEditor = settings.edit()
 
-        if ( overview_opds.entries.isNotEmpty() ) {
-            prefEditor.putStringSet(PREF_OPDS_OVERVIEW, overview_opds.entries.map { e -> "${e.title}|${e.clickLink?.href}" }.toMutableSet())
+        if ( overviewOpds.entries.isNotEmpty() ) {
+            prefEditor.putStringSet(PREF_OPDS_OVERVIEW, overviewOpds.entries.map { e -> "${e.title}|${e.clickLink?.href}" }.toMutableSet())
         } else {
             prefEditor.remove(PREF_OPDS_OVERVIEW)
         }
@@ -359,15 +324,15 @@ class OpdsEntryListFragment :
 
     override fun onClickOpdsEntryLink(link: Link) {
         Log.d("OPDS List", "clicked opds entry link: $link")
-        link.href?.let { load(it) }
+        link.href?.let { if (it == "back") goBack() else load(it) }
     }
 
     override fun onOpdsOverviewEntryEditSave(pos: Int, name: String, url: String) {
-        if (pos < overview_opds.entries.size) {
-            overview_opds.entries[pos].title = name
-            overview_opds.entries[pos].clickLink?.href = url
+        if (pos < overviewOpds.entries.size) {
+            overviewOpds.entries[pos].title = name
+            overviewOpds.entries[pos].clickLink?.href = url
         } else {
-            overview_opds.entries.add(Entry(
+            overviewOpds.entries.add(Entry(
                 title = name,
                 clickLink = Link(title = name, href =  url)
             ))

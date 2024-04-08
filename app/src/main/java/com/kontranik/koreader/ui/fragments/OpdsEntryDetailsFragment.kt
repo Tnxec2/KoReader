@@ -81,7 +81,12 @@ class OpdsEntryDetailsFragment :
 
         opdsEntry?.let {entry ->
             binding.textViewOpdsentrydetailsTitle.text = entry.title
-            binding.textViewOpdsentrydetailsAuthor.text = entry.author.toString()
+            if (entry.author != null) {
+                binding.textViewOpdsentrydetailsAuthor.visibility = View.VISIBLE
+                binding.textViewOpdsentrydetailsAuthor.text = entry.author.toString()
+            } else {
+                binding.textViewOpdsentrydetailsAuthor.visibility = View.GONE
+            }
 
             val content = SpannableStringBuilder(getHtml(entry.content?.data ?: ""))
 
@@ -93,7 +98,7 @@ class OpdsEntryDetailsFragment :
                     links.forEach { link ->
                         content.append(OpdsLinkSpan(link, object : OpdsLinkOnClickListener {
                             override fun onClick(link: Link) {
-                                Log.d("ENTRYLINK", "clicked entry.otherLinks: ${link}")
+                                Log.d("ENTRYLINK", "clicked entry.otherLinks: $link")
                                 if (link.isCatalogEntry()) {
                                     listener?.onClickOpdsEntryLink(link)
                                     requireActivity().supportFragmentManager.popBackStack()
@@ -109,13 +114,13 @@ class OpdsEntryDetailsFragment :
                                             val fileName = "${entry.title}.${link.getExtension()}"
                                             val file = File(dir, fileName)
 
-                                            val executor = Executors.newSingleThreadExecutor()
-                                            val handler = Handler(Looper.getMainLooper())
                                             Toast.makeText(
                                                 requireContext(),
                                                 "Download $fileName start",
                                                 Toast.LENGTH_SHORT
                                             ).show()
+                                            val executor = Executors.newSingleThreadExecutor()
+                                            val handler = Handler(Looper.getMainLooper())
                                             executor.execute {
                                                 var input: InputStream? = null
                                                 var output: OutputStream? = null
@@ -171,15 +176,15 @@ class OpdsEntryDetailsFragment :
                                                     if (error!=null)
                                                         Toast.makeText(
                                                             requireContext(),
-                                                            "Download ${fileName} error:\n$error",
+                                                            "Download $fileName error:\n$error",
                                                             Toast.LENGTH_SHORT
                                                         ).show()
                                                     else
                                                         Toast.makeText(
-                                                                requireContext(),
-                                                                "Download completed: ${fileName}",
-                                                                Toast.LENGTH_SHORT
-                                                            ).show()
+                                                            requireContext(),
+                                                            "Download completed: $fileName",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
                                                 }
                                             }
                                         }catch(e: Exception){
@@ -188,7 +193,7 @@ class OpdsEntryDetailsFragment :
                                     }
                                 } else  {
                                     link.href?.let {
-                                        Log.d("OPENLINK", "open link in browser ${link}")
+                                        Log.d("OPENLINK", "open link in browser $link")
                                         val browserIntent = Intent(
                                             Intent.ACTION_VIEW,
                                             Uri.parse(UrlHelper.getUrl(it, startUrl))
@@ -224,7 +229,6 @@ class OpdsEntryDetailsFragment :
                     e.printStackTrace()
                 }
             }
-
         }
     }
 

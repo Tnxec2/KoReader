@@ -75,10 +75,7 @@ class OpdsEntryListAdapter(
                         )
                     }
                     handler.post {
-                        if (entry.thumbnailBitmap != null) {
-                            holder.iconView.setImageBitmap(entry.thumbnailBitmap)
-                            holder.iconView.visibility = View.VISIBLE
-                        }
+                        notifyItemChanged(position)
                     }
                 }
             }
