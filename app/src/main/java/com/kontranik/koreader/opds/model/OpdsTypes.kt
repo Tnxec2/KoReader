@@ -24,6 +24,9 @@ class OpdsTypes {
 
         val TYPE_APPLICATION_PREFIX = "application/"
         val TYPE_LINK_OPDS_CATALOG = "application/atom+xml;profile=opds-catalog"
+        val TYPE_LINK_OPDS_CATALOG_ENTRY = "application/atom+xml;type=entry;profile=opds-catalog"
+        val TYPE_PROFILE_OPDS_CATALOG = "profile=opds-catalog"
+
         val TYPE_LINK_ATOM_XML = "application/atom+xml"
         val TYPE_LINK_OPEN_SEARCH = "application/opensearchdescription+xml"
         val TYPE_LINK_IMAGE_PNG = "image/png"
@@ -96,7 +99,9 @@ class OpdsTypes {
             REL_ACQUISITION to "Acquisition",
             REL_NEW to "New",
             REL_THUMBNAIL to "Thumbnail",
+            REL_THUMBNAIL_X to "Thumbnail",
             REL_IMAGE to "Image",
+            REL_IMAGE_X to "Image",
             )
 
         fun mapRel(rel: String?): String {

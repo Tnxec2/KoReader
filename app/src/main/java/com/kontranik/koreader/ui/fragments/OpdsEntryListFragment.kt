@@ -10,17 +10,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentOpdsEntrysListBinding
 import com.kontranik.koreader.opds.LoadOpds
+import com.kontranik.koreader.opds.model.BACK
 import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.Link
 import com.kontranik.koreader.opds.model.Opds
-import com.kontranik.koreader.opds.model.OpdsTypes
 import com.kontranik.koreader.opds.model.OpenSearchDescription
 import com.kontranik.koreader.opds.model.SearchUrlTypes
 import com.kontranik.koreader.ui.adapters.OpdsEntryListAdapter
@@ -177,7 +175,7 @@ class OpdsEntryListFragment :
 
                     result?.entries?.forEach { entry -> Log.d("OPDS List Fragment", "entry: ${entry.title} : ${entry.clickLink}") }
 
-                    if (url != OVERVIEW) opdsEntryList.add(Entry.BACK)
+                    if (url != OVERVIEW) opdsEntryList.add(BACK)
 
                     if (result != null && result.entries.isNotEmpty())
                         opdsEntryList.addAll(result.entries)

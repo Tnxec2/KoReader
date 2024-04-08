@@ -90,6 +90,8 @@ class OpdsEntryDetailsFragment :
 
             val content = SpannableStringBuilder(getHtml(entry.content?.data ?: ""))
 
+            if (entry.otherLinks?.isNotEmpty() == true) content.append(getHtml("<h1>Links</h1>"))
+
             entry.otherLinks
                 ?.sortedBy { link: Link -> link.rel }
                 ?.groupBy { it.rel }
@@ -103,103 +105,9 @@ class OpdsEntryDetailsFragment :
                                     listener?.onClickOpdsEntryLink(link)
                                     requireActivity().supportFragmentManager.popBackStack()
                                 } else if (link.isDownloadable())  {
-                                    link.href?.let {
-                                        try{
-                                            val subdir = (entry.author?.name ?: "unknown")
-                                            val dir = File(
-                                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                                                    .toString() + File.separator + subdir
-                                            )
-                                            if (!dir.exists()) dir.mkdirs()
-                                            val fileName = "${entry.title}.${link.getExtension()}"
-                                            val file = File(dir, fileName)
-
-                                            Toast.makeText(
-                                                requireContext(),
-                                                "Download $fileName start",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            val executor = Executors.newSingleThreadExecutor()
-                                            val handler = Handler(Looper.getMainLooper())
-                                            executor.execute {
-                                                var input: InputStream? = null
-                                                var output: OutputStream? = null
-                                                var connection: HttpURLConnection? = null
-                                                var error: String? = null
-                                                try {
-                                                    val url = URL(UrlHelper.getUrl(it, startUrl))
-                                                    connection =
-                                                        url.openConnection() as HttpURLConnection
-                                                    connection.connect()
-
-                                                    // expect HTTP 200 OK, so we don't mistakenly save error report
-                                                    // instead of the file
-                                                    if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                                                        Log.i(
-                                                            "DownloadTask",
-                                                            "Response " + connection.responseCode
-                                                        )
-                                                        // this will be useful to display download percentage
-                                                        // might be -1: server did not report the length
-                                                        // val fileLength = connection.contentLength
-
-                                                        // download the file
-                                                        input = connection.inputStream
-                                                        output =
-                                                            FileOutputStream(file, false)
-                                                        val data = ByteArray(4096)
-                                                        var total: Long = 0
-                                                        var count: Int
-                                                        while (input.read(data)
-                                                                .also { count = it } != -1
-                                                        ) {
-                                                            total += count.toLong()
-                                                            // Log.d("DownloadTask", total.toString())
-                                                            // publishing the progress....
-                                                            //if (fileLength > 0) // only if total length is known
-                                                                //publishProgress((total * 100 / fileLength).toInt())
-                                                            output.write(data, 0, count)
-                                                        }
-                                                    }
-                                                } catch (e: Exception) {
-                                                    Log.e("DownloadTask", e.localizedMessage, e)
-                                                    error = e.localizedMessage
-                                                } finally {
-                                                    try {
-                                                        output?.close()
-                                                        input?.close()
-                                                    } catch (ignored: IOException) {
-                                                    }
-                                                    connection?.disconnect()
-                                                }
-                                                handler.post {
-                                                    if (error!=null)
-                                                        Toast.makeText(
-                                                            requireContext(),
-                                                            "Download $fileName error:\n$error",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                    else
-                                                        Toast.makeText(
-                                                            requireContext(),
-                                                            "Download completed: $fileName",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                }
-                                            }
-                                        }catch(e: Exception){
-                                            Log.e("DOWNLOAD", e.localizedMessage, e)
-                                        }
-                                    }
+                                    download(entry, link)
                                 } else  {
-                                    link.href?.let {
-                                        Log.d("OPENLINK", "open link in browser $link")
-                                        val browserIntent = Intent(
-                                            Intent.ACTION_VIEW,
-                                            Uri.parse(UrlHelper.getUrl(it, startUrl))
-                                        )
-                                        startActivity(browserIntent)
-                                    }
+                                    openInBrowser(link)
                                 }
                             }
                         }))
@@ -211,24 +119,134 @@ class OpdsEntryDetailsFragment :
             binding.textViewOpdsentrydetailsContent.text = content
             binding.textViewOpdsentrydetailsContent.movementMethod = LinkMovementMethod.getInstance()
 
-            lifecycleScope.launch(Dispatchers.IO) {
-                var icon: Bitmap? = null
-                try {
-                    if (entry.image?.href != null) {
-                        icon = ImageUtils.drawableFromUrl(entry.image.href, startUrl)
+            loadIcon(entry)
+        }
+    }
+
+    private fun loadIcon(
+        entry: Entry
+    ) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            var icon: Bitmap? = null
+            try {
+                if (entry.image?.href != null) {
+                    icon = ImageUtils.drawableFromUrl(entry.image.href, startUrl)
+                }
+                withContext(Dispatchers.Main) {
+                    if (icon != null) {
+                        binding.imageViewOpdsentrydetailsCover.visibility = View.VISIBLE
+                        binding.imageViewOpdsentrydetailsCover.setImageBitmap(icon)
+                    } else {
+                        binding.imageViewOpdsentrydetailsCover.visibility = View.GONE
                     }
-                    withContext(Dispatchers.Main) {
-                        if (icon != null) {
-                            binding.imageViewOpdsentrydetailsCover.visibility = View.VISIBLE
-                            binding.imageViewOpdsentrydetailsCover.setImageBitmap(icon)
-                        } else {
-                            binding.imageViewOpdsentrydetailsCover.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun openInBrowser(link: Link) {
+        link.href?.let {
+            Log.d("OPENLINK", "open link in browser $link")
+            val browserIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(UrlHelper.getUrl(it, startUrl))
+            )
+            startActivity(browserIntent)
+        }
+    }
+
+    private fun download(
+        entry: Entry,
+        link: Link
+    ) {
+        if (link.href == null) return
+        try {
+            val subdir = (entry.author?.name ?: "unknown")
+            val dir = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    .toString() + File.separator + subdir
+            )
+            if (!dir.exists()) dir.mkdirs()
+            val fileName = "${entry.title}.${link.getExtension()}"
+            val file = File(dir, fileName)
+
+            Toast.makeText(
+                requireContext(),
+                "Download $fileName start",
+                Toast.LENGTH_SHORT
+            ).show()
+            val executor = Executors.newSingleThreadExecutor()
+            val handler = Handler(Looper.getMainLooper())
+            executor.execute {
+                var input: InputStream? = null
+                var output: OutputStream? = null
+                var connection: HttpURLConnection? = null
+                var error: String? = null
+                try {
+                    val url = URL(UrlHelper.getUrl(link.href!!, startUrl))
+                    connection =
+                        url.openConnection() as HttpURLConnection
+                    connection.connect()
+
+                    // expect HTTP 200 OK, so we don't mistakenly save error report
+                    // instead of the file
+                    if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                        Log.i(
+                            "DownloadTask",
+                            "Response ${connection.responseCode}"
+                        )
+                        // this will be useful to display download percentage
+                        // might be -1: server did not report the length
+                        // val fileLength = connection.contentLength
+
+                        // download the file
+                        input = connection.inputStream
+                        output =
+                            FileOutputStream(file, false)
+                        val data = ByteArray(4096)
+                        var total: Long = 0
+                        var count: Int
+                        while (input.read(data)
+                                .also { count = it } != -1
+                        ) {
+                            total += count.toLong()
+                            // Log.d("DownloadTask", total.toString())
+                            // publishing the progress....
+                            //if (fileLength > 0) // only if total length is known
+                            //publishProgress((total * 100 / fileLength).toInt())
+                            output.write(data, 0, count)
                         }
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("DownloadTask", e.localizedMessage, e)
+                    error = e.localizedMessage
+                } finally {
+                    try {
+                        output?.close()
+                        input?.close()
+                    } catch (ignored: IOException) {
+                    }
+                    connection?.disconnect()
+                }
+                handler.post {
+                    if (error != null)
+                        Toast.makeText(
+                            requireContext(),
+                            "Download $fileName error:\n$error",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    else
+                        Toast.makeText(
+                            requireContext(),
+                            "Download completed: $fileName",
+                            Toast.LENGTH_SHORT
+                        ).show()
                 }
             }
+        } catch (e: Exception) {
+            Log.e("DOWNLOAD", e.localizedMessage, e)
         }
     }
 
