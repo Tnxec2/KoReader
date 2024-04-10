@@ -68,17 +68,14 @@ class OpdsEntryListAdapter(
                 val executor = Executors.newSingleThreadExecutor()
                 val handler = Handler(Looper.getMainLooper())
                 executor.execute {
-                    entry.thumbnailBitmapLoaded = true
-                    entry.thumbnail?.href?.let {
-                        entry.thumbnailBitmap = ImageUtils.drawableFromUrl(
+                    entrys[position].thumbnailBitmapLoaded = true
+                    entrys[position].thumbnail?.href?.let {
+                        entrys[position].thumbnailBitmap = ImageUtils.drawableFromUrl(
                             it, startUrl
                         )
                     }
                     handler.post {
-                        if (entry.thumbnailBitmap != null) {
-                            holder.iconView.setImageBitmap(entry.thumbnailBitmap)
-                            holder.iconView.visibility = View.VISIBLE
-                        }
+                        notifyItemChanged(position)
                     }
                 }
             }
