@@ -3,12 +3,12 @@ package com.kontranik.koreader.ui.fragments
 import android.app.Application
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.FileItem
-import com.kontranik.koreader.utils.ImageEnum
 
 const val PREFS_FILE = "OpenFileActivitySettings"
 const val PREF_LAST_PATH = "LastPath"
@@ -20,8 +20,8 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
     val fileItemList = MutableLiveData(mutableListOf<FileItem>())
 
     val scrollToDocumentFileUriString = MutableLiveData<String?>()
-    val selectedDocumentFileUriString = MutableLiveData<String?>()
-    val lastPath = MutableLiveData<String?>()
+    private val selectedDocumentFileUriString = MutableLiveData<String?>()
+    private val lastPath = MutableLiveData<String?>()
 
     val isVisibleImageButtonFilechooseAddStorage = MutableLiveData<Boolean>(false)
     val showConfirmSelectStorageDialog = MutableLiveData<Boolean>(false)
@@ -76,7 +76,7 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
         prefEditor.apply()
     }
 
-    fun savePrefsExternalPaths() {
+    private fun savePrefsExternalPaths() {
         val settings = app
             .getSharedPreferences(
                 PREFS_FILE,
@@ -122,34 +122,25 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
         }
 
         val fileList = mutableListOf<FileItem>()
-        for ( path in externalPaths.value!! ) {
-            val directoryUri = Uri.parse(path)
-                ?: throw IllegalArgumentException("Must pass URI of directory to open")
-            val documentsTree = DocumentFile.fromTreeUri(
-                app.applicationContext, directoryUri)
-            if ( documentsTree == null || ! documentsTree.isDirectory || ! documentsTree.canRead() ) {
-                externalPaths.value!!.remove(path)
-            } else {
-                //val childDocuments = documentsTree.listFiles()
-                var name = documentsTree.name
-                if ( name == null) name = documentsTree.uri.toString()
-                fileList.add(
-                    FileItem(
-                        ImageEnum.SD,
-                        name = name,
-                        path = documentsTree.uri.pathSegments.last(),
-                        uriString = documentsTree.uri.toString(),
-                        isDir = true,
-                        isRoot = false,
-                        bookInfo = null,
-                        isStorage = true
-                    ))
+        try {
+            val iterator = externalPaths.value?.iterator()
+            while(iterator?.hasNext() == true) {
+                val path = iterator.next()
+                val directoryUri = Uri.parse(path)
+
+                val documentsTree = DocumentFile.fromTreeUri(app.applicationContext, directoryUri)
+                if ( documentsTree == null || ! documentsTree.isDirectory || ! documentsTree.canRead() ) {
+                    iterator.remove()
+                } else {
+                    fileList.add(FileItem(documentsTree))
+                }
             }
+        } catch (e: Exception) {
+            Log.e("STORAGELIST", e.localizedMessage, e)
         }
+
         fileList.sortBy { it.name }
         fileItemList.value = fileList
-
-
     }
 
     private fun getFileList(fileItem: FileItem) {
