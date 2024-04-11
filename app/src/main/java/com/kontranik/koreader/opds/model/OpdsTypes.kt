@@ -78,6 +78,7 @@ class OpdsTypes {
         val REL_THUMBNAIL = "http://opds-spec.org/image/thumbnail"
         val REL_THUMBNAIL_X = "x-stanza-cover-image"
         val REL_IMAGE = "http://opds-spec.org/image"
+        val REL_COVER = "http://opds-spec.org/cover"
         val REL_IMAGE_X = "x-stanza-cover-image-thumbnail"
         val REL_SUBSECTION = "subsection"
         val REL_SEARCH = "search"

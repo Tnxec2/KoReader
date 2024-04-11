@@ -46,7 +46,7 @@ class OpdsEntryListFragment :
 
     private var openedLink: String? = null
 
-    private var searchTerm: String? = "frank" // TODO: remove initialization
+    private var searchTerm: String? = null
     private var searchDescription: OpenSearchDescription? = null
 
     private var startUrl: String? = OVERVIEW
@@ -200,7 +200,6 @@ class OpdsEntryListFragment :
                         resources.getString(R.string.connection_error), Toast.LENGTH_LONG
                     ).show()
                 }
-                goBack()
             } catch (e: XmlPullParserException) {
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
@@ -209,7 +208,6 @@ class OpdsEntryListFragment :
                         resources.getString(R.string.xml_error), Toast.LENGTH_LONG
                     ).show()
                 }
-                goBack()
             } catch (e: MalformedURLException) {
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
@@ -218,7 +216,6 @@ class OpdsEntryListFragment :
                         resources.getString(R.string.connection_error), Toast.LENGTH_LONG
                     ).show()
                 }
-                goBack()
             }
         }
     }

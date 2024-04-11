@@ -21,7 +21,7 @@ class Link(val type: String?, var title: String?, var href: String?, val rel: St
     }
 
     fun isCoverImage(): Boolean {
-        return type?.startsWith(OpdsTypes.TYPE_LINK_IMAGE_PREFIX) == true && ( rel == OpdsTypes.REL_IMAGE || rel == OpdsTypes.REL_IMAGE_X)
+        return type?.startsWith(OpdsTypes.TYPE_LINK_IMAGE_PREFIX) == true && ( rel == OpdsTypes.REL_IMAGE || rel == OpdsTypes.REL_IMAGE_X || rel == OpdsTypes.REL_COVER)
     }
 
     fun isCatalogEntry(): Boolean {
