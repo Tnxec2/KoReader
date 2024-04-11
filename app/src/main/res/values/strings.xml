@@ -236,7 +236,9 @@
     <string name="opds_author_content">author/content</string>
 
     <string-array name="opds_list" translatable="false">
-        <item>gutenberg|https://www.gutenberg.org/ebooks.opds/</item>
-        <item>flibusta|https://flibusta.is/opds</item>
+        <item>Project Gutenberg|https://www.gutenberg.org/ebooks.opds/</item>
+        <item>Flibusta|https://flibusta.is/opds</item>
+        <item>Qumran DE, Izzy\'s freie Bibliotek|https://ebooks.qumran.org/opds/?lang=de</item>
+        <item>Qumran EN, Izzy\'s Free Library|https://ebooks.qumran.org/opds/?lang=en</item>
     </string-array>
 </resources>
