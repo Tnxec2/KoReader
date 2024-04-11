@@ -57,10 +57,7 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) :
         fontpath = sharedPreferences!!.getString(getFontPathPref(), null)
         fontname = sharedPreferences!!.getString(getFontNamePref(), TypefaceRecord.DEFAULT.name)!!
 
-        selectedFont = if ( fontpath != null)
-            TypefaceRecord(fontname, File(fontpath!!))
-        else
-            TypefaceRecord(fontname)
+        selectedFont = TypefaceRecord(fontname, fontpath)
 
         textViewFontName!!.typeface = selectedFont.getTypeface()
         // textViewFontName!!.textSize = textSize
@@ -86,9 +83,12 @@ class FontPickerPreference(context: Context, attrs: AttributeSet) :
     override fun onSaveFontPickerDialog(font: TypefaceRecord?) {
         if ( font != null ) {
             selectedFont = font
+            fontpath = selectedFont.file?.absolutePath
+            fontname = selectedFont.name
             textViewFontName!!.text = font.name
-            val editor = sharedPreferences!!.edit()
+            textViewFontName!!.typeface = selectedFont.getTypeface()
 
+            val editor = sharedPreferences!!.edit()
             editor.putString(getFontPathPref(), selectedFont.file?.absolutePath)
             editor.putString(getFontNamePref(), selectedFont.name)
             editor.apply()

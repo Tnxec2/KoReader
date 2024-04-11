@@ -1,6 +1,8 @@
 package com.kontranik.koreader.utils.typefacefactory
 
 import android.graphics.Typeface
+import com.kontranik.koreader.App
+import com.kontranik.koreader.R
 import java.io.File
 import java.util.*
 
@@ -12,10 +14,11 @@ class TypefaceRecord(
         val name: String,
         val file: File? = null,
         var otherNames: Set<String?>? = null) {
+    constructor(name: String, filePath: String?) : this(name, filePath?.let { File(it) })
 
-    fun getTypeface(): Typeface {
-        if ( file != null ) return Typeface.createFromFile(file)
-        else return Typeface.create(name, Typeface.NORMAL)
+    fun getTypeface(style: Int = Typeface.NORMAL): Typeface {
+        if (file != null) return Typeface.createFromFile(file)
+        return fonts[name] ?: Typeface.create(name, style)
     }
 
     override fun toString(): String {
@@ -54,6 +57,19 @@ class TypefaceRecord(
         const val SANSSERIF = "sans-serif"
         const val SERIF = "serif"
         const val MONO = "monospace"
-        val DEFAULT = TypefaceRecord(SANSSERIF, null, emptySet())
+
+        val DEFAULT = TypefaceRecord(SANSSERIF)
+
+        val fonts = mapOf(
+            "amazon ember" to App.getContext().resources.getFont(R.font.amazon_ember_regular),
+            "amazon ember bold" to App.getContext().resources.getFont(R.font.amazon_ember_bold),
+            "amazon ember italic" to App.getContext().resources.getFont(R.font.amazon_ember_italic),
+            "amazon ember bold italic" to App.getContext().resources.getFont(R.font.amazon_ember_bold_italic),
+            "amazon ember mono" to App.getContext().resources.getFont(R.font.amazon_ember_mono_reg),
+            "bookerly regular" to App.getContext().resources.getFont(R.font.bookerly_regular),
+            "bookerly bold" to App.getContext().resources.getFont(R.font.bookerly_bold),
+            "bookerly italic" to App.getContext().resources.getFont(R.font.bookerly_italic),
+            "bookerly bold italic" to App.getContext().resources.getFont(R.font.bookerly_bold_italic),
+        )
     }
 }

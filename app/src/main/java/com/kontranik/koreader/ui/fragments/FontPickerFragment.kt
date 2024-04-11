@@ -93,7 +93,10 @@ class FontPickerFragment :
         fontList = mutableListOf(
                 TypefaceRecord(name = TypefaceRecord.SANSSERIF),
                 TypefaceRecord(name = TypefaceRecord.SERIF),
-                TypefaceRecord(name = TypefaceRecord.MONO))
+                TypefaceRecord(name = TypefaceRecord.MONO),
+        )
+        TypefaceRecord.fonts.forEach { (name, _) -> println("loadFonts $name"); fontList.add(TypefaceRecord(name))  }
+
         try {
             fonts = FontManager.enumerateFonts(requireContext(), showSystemFonts, showNotoFonts)
             // val collectedFonts = ZLTTFInfoDetector().collectFonts(fonts!!.values)

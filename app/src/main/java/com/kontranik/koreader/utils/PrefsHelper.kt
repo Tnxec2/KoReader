@@ -308,37 +308,153 @@ class PrefsHelper() {
 
         fun loadSettings(activity: Activity) {
             val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext())
+            loadInterfaceSettings(prefs)
+            loadTextSettings(prefs)
+            loadFontSettings(prefs)
+            loadMarginSettings(prefs)
+            loadTapSettings(prefs)
+            setOrientation(activity)
+            setThemeDefault()
+        }
+
+        private fun loadInterfaceSettings(prefs: SharedPreferences) {
             interfaceTheme = prefs.getString(PREF_KEY_THEME, "Auto")
             screenOrientation =
                 prefs.getString(PREF_KEY_ORIENTATION, "PortraitSensor")
             screenBrightness = prefs.getString(PREF_KEY_BRIGHTNESS, "Manual")
+            colorTheme = prefs.getString(
+                PREF_KEY_COLOR_SELECTED_THEME,
+                PREF_COLOR_SELECTED_THEME_DEFAULT
+            )
+                ?: PREF_COLOR_SELECTED_THEME_DEFAULT
+        }
 
-            textSize =
-                prefs.getFloat(PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
-
-            val lineSpacingMultiplierString = prefs.getString(PREF_KEY_BOOK_LINE_SPACING, null)
-            lineSpacingMultiplier =
-                lineSpacingMultiplierString?.toFloat() ?: defaultLineSpacingMultiplier
-
-            val letterSpacingString = prefs.getString(PREF_KEY_BOOK_LETTER_SPACING, null)
-            letterSpacing = letterSpacingString?.toFloat() ?: defaultLetterSpacing
-
-            if (prefs.contains(PREF_KEY_BOOK_FONT_PATH_NORMAL)) {
-                val fontpath = prefs.getString(PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
-                if (fontpath != null) {
-                    val fontFile = File(fontpath)
-                    if (fontFile.isFile && fontFile.canRead()) {
-                        font = TypefaceRecord(name = fontFile.name, file = fontFile)
-                    }
-                }
-            } else if (prefs.contains(PREF_KEY_BOOK_FONT_NAME_NORMAL)) {
-                font = TypefaceRecord(
-                    name = prefs.getString(
-                        PREF_KEY_BOOK_FONT_NAME_NORMAL,
-                        TypefaceRecord.SANSSERIF
-                    )!!
+        private fun loadTapSettings(prefs: SharedPreferences) {
+            tapDoubleAction = EnumMap(
+                hashMapOf(
+                    ScreenZone.TopLeft to prefs.getString(
+                        PREF_KEY_TAP_DOUBLE_TOP_LEFT,
+                        tapZoneDoubleTopLeft
+                    ),
+                    ScreenZone.TopCenter to prefs.getString(
+                        PREF_KEY_TAP_DOUBLE_TOP_CENTER,
+                        tapZoneDoubleTopCenter
+                    ),
+                    ScreenZone.TopRight to prefs.getString(
+                        PREF_KEY_TAP_DOUBLE_TOP_RIGHT,
+                        tapZoneDoubleTopRight
+                    ),
+                    ScreenZone.MiddleLeft to prefs.getString(
+                        PREF_KEY_TAP_DOUBLE_MIDDLE_LEFT,
+                        tapZoneDoubleMiddleLeft
+                    ),
+                    ScreenZone.MiddleCenter to prefs.getString(
+                        PREF_KEY_TAP_DOUBLE_MIDDLE_CENTER,
+                        tapZoneDoubleMiddleCenter
+                    ),
+                    ScreenZone.MiddleRight to prefs.getString(
+                        PREF_KEY_TAP_DOUBLE_MIDDLE_RIGHT,
+                        tapZoneDoubleMiddleRight
+                    ),
+                    ScreenZone.BottomLeft to prefs.getString(
+                        PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT,
+                        tapZoneDoubleBottomLeft
+                    ),
+                    ScreenZone.BottomCenter to prefs.getString(
+                        PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER,
+                        tapZoneDoubleBottomCenter
+                    ),
+                    ScreenZone.BottomRight to prefs.getString(
+                        PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT,
+                        tapZoneDoubleBottomRight
+                    ),
                 )
-            }
+            )
+
+            tapOneAction = EnumMap(
+                hashMapOf(
+                    ScreenZone.TopLeft to prefs.getString(
+                        PREF_KEY_TAP_ONE_TOP_LEFT,
+                        tapZoneOneTopLeft
+                    ),
+                    ScreenZone.TopCenter to prefs.getString(
+                        PREF_KEY_TAP_ONE_TOP_CENTER,
+                        tapZoneOneTopCenter
+                    ),
+                    ScreenZone.TopRight to prefs.getString(
+                        PREF_KEY_TAP_ONE_TOP_RIGHT,
+                        tapZoneOneTopRight
+                    ),
+                    ScreenZone.MiddleLeft to prefs.getString(
+                        PREF_KEY_TAP_ONE_MIDDLE_LEFT,
+                        tapZoneOneMiddleLeft
+                    ),
+                    //                ScreenZone.MiddleCenter to prefs.getString(
+                    //                    PREF_KEY_TAP_ONE_MIDDLE_CENTER,
+                    //                    tapZoneOneMiddleCenter
+                    //                ),
+                    ScreenZone.MiddleCenter to tapZoneOneMiddleCenter, // always default main menu
+                    ScreenZone.MiddleRight to prefs.getString(
+                        PREF_KEY_TAP_ONE_MIDDLE_RIGHT,
+                        tapZoneOneMiddleRight
+                    ),
+                    ScreenZone.BottomLeft to prefs.getString(
+                        PREF_KEY_TAP_ONE_BOTTOM_LEFT,
+                        tapZoneOneBottomLeft
+                    ),
+                    ScreenZone.BottomCenter to prefs.getString(
+                        PREF_KEY_TAP_ONE_BOTTOM_CENTER,
+                        tapZoneOneBottomCenter
+                    ),
+                    ScreenZone.BottomRight to prefs.getString(
+                        PREF_KEY_TAP_ONE_BOTTOM_RIGHT,
+                        tapZoneOneBottomRight
+                    ),
+                )
+            )
+            tapLongAction = EnumMap(
+                hashMapOf(
+                    ScreenZone.TopLeft to prefs.getString(
+                        PREF_KEY_TAP_LONG_TOP_LEFT,
+                        tapZoneLongTopLeft
+                    ),
+                    ScreenZone.TopCenter to prefs.getString(
+                        PREF_KEY_TAP_LONG_TOP_CENTER,
+                        tapZoneLongTopCenter
+                    ),
+                    ScreenZone.TopRight to prefs.getString(
+                        PREF_KEY_TAP_LONG_TOP_RIGHT,
+                        tapZoneLongTopRight
+                    ),
+                    ScreenZone.MiddleLeft to prefs.getString(
+                        PREF_KEY_TAP_LONG_MIDDLE_LEFT,
+                        tapZoneLongMiddleLeft
+                    ),
+                    ScreenZone.MiddleCenter to prefs.getString(
+                        PREF_KEY_TAP_LONG_MIDDLE_CENTER,
+                        tapZoneLongMiddleCenter
+                    ),
+                    ScreenZone.MiddleRight to prefs.getString(
+                        PREF_KEY_TAP_LONG_MIDDLE_RIGHT,
+                        tapZoneLongMiddleRight
+                    ),
+                    ScreenZone.BottomLeft to prefs.getString(
+                        PREF_KEY_TAP_LONG_BOTTOM_LEFT,
+                        tapZoneLongBottomLeft
+                    ),
+                    ScreenZone.BottomCenter to prefs.getString(
+                        PREF_KEY_TAP_LONG_BOTTOM_CENTER,
+                        tapZoneLongBottomCenter
+                    ),
+                    ScreenZone.BottomRight to prefs.getString(
+                        PREF_KEY_TAP_LONG_BOTTOM_RIGHT,
+                        tapZoneLongBottomRight
+                    ),
+                )
+            )
+        }
+
+        private fun loadMarginSettings(prefs: SharedPreferences) {
             var sMargin =
                 prefs.getString(PREF_KEY_MERGE_TOP + colorTheme, null)
             marginTop = try {
@@ -365,133 +481,40 @@ class PrefsHelper() {
             } catch (e: Exception) {
                 marginDefault
             }
+        }
 
-            colorTheme = prefs.getString(
-                PREF_KEY_COLOR_SELECTED_THEME,
-                PREF_COLOR_SELECTED_THEME_DEFAULT
-            )
-                ?: PREF_COLOR_SELECTED_THEME_DEFAULT
+        private fun loadTextSettings(prefs: SharedPreferences) {
+            textSize =
+                prefs.getFloat(PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
 
+            val lineSpacingMultiplierString = prefs.getString(PREF_KEY_BOOK_LINE_SPACING, null)
+            lineSpacingMultiplier =
+                lineSpacingMultiplierString?.toFloat() ?: defaultLineSpacingMultiplier
 
-            tapDoubleAction = EnumMap( hashMapOf(
-                ScreenZone.TopLeft to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_TOP_LEFT,
-                    tapZoneDoubleTopLeft
-                ),
-                ScreenZone.TopCenter to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_TOP_CENTER,
-                    tapZoneDoubleTopCenter
-                ),
-                ScreenZone.TopRight to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_TOP_RIGHT,
-                    tapZoneDoubleTopRight
-                ),
-                ScreenZone.MiddleLeft to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_MIDDLE_LEFT,
-                    tapZoneDoubleMiddleLeft
-                ),
-                ScreenZone.MiddleCenter to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_MIDDLE_CENTER,
-                    tapZoneDoubleMiddleCenter
-                ),
-                ScreenZone.MiddleRight to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_MIDDLE_RIGHT,
-                    tapZoneDoubleMiddleRight
-                ),
-                ScreenZone.BottomLeft to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT,
-                    tapZoneDoubleBottomLeft
-                ),
-                ScreenZone.BottomCenter to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER,
-                    tapZoneDoubleBottomCenter
-                ),
-                ScreenZone.BottomRight to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT,
-                    tapZoneDoubleBottomRight
-                ),
-            ))
+            val letterSpacingString = prefs.getString(PREF_KEY_BOOK_LETTER_SPACING, null)
+            letterSpacing = letterSpacingString?.toFloat() ?: defaultLetterSpacing
+        }
 
-            tapOneAction = EnumMap(hashMapOf(
-                ScreenZone.TopLeft to prefs.getString(
-                    PREF_KEY_TAP_ONE_TOP_LEFT,
-                    tapZoneOneTopLeft
-                ),
-                ScreenZone.TopCenter to prefs.getString(
-                    PREF_KEY_TAP_ONE_TOP_CENTER,
-                    tapZoneOneTopCenter
-                ),
-                ScreenZone.TopRight to prefs.getString(
-                    PREF_KEY_TAP_ONE_TOP_RIGHT,
-                    tapZoneOneTopRight
-                ),
-                ScreenZone.MiddleLeft to prefs.getString(
-                    PREF_KEY_TAP_ONE_MIDDLE_LEFT,
-                    tapZoneOneMiddleLeft
-                ),
-//                ScreenZone.MiddleCenter to prefs.getString(
-//                    PREF_KEY_TAP_ONE_MIDDLE_CENTER,
-//                    tapZoneOneMiddleCenter
-//                ),
-                ScreenZone.MiddleCenter to tapZoneOneMiddleCenter, // always default main menu
-                ScreenZone.MiddleRight to prefs.getString(
-                    PREF_KEY_TAP_ONE_MIDDLE_RIGHT,
-                    tapZoneOneMiddleRight
-                ),
-                ScreenZone.BottomLeft to prefs.getString(
-                    PREF_KEY_TAP_ONE_BOTTOM_LEFT,
-                    tapZoneOneBottomLeft
-                ),
-                ScreenZone.BottomCenter to prefs.getString(
-                    PREF_KEY_TAP_ONE_BOTTOM_CENTER,
-                    tapZoneOneBottomCenter
-                ),
-                ScreenZone.BottomRight to prefs.getString(
-                    PREF_KEY_TAP_ONE_BOTTOM_RIGHT,
-                    tapZoneOneBottomRight
-                ),
-            ))
-            tapLongAction = EnumMap(hashMapOf(
-                ScreenZone.TopLeft to prefs.getString(
-                    PREF_KEY_TAP_LONG_TOP_LEFT,
-                    tapZoneLongTopLeft
-                ),
-                ScreenZone.TopCenter to prefs.getString(
-                    PREF_KEY_TAP_LONG_TOP_CENTER,
-                    tapZoneLongTopCenter
-                ),
-                ScreenZone.TopRight to prefs.getString(
-                    PREF_KEY_TAP_LONG_TOP_RIGHT,
-                    tapZoneLongTopRight
-                ),
-                ScreenZone.MiddleLeft to prefs.getString(
-                    PREF_KEY_TAP_LONG_MIDDLE_LEFT,
-                    tapZoneLongMiddleLeft
-                ),
-                ScreenZone.MiddleCenter to prefs.getString(
-                    PREF_KEY_TAP_LONG_MIDDLE_CENTER,
-                    tapZoneLongMiddleCenter
-                ),
-                ScreenZone.MiddleRight to prefs.getString(
-                    PREF_KEY_TAP_LONG_MIDDLE_RIGHT,
-                    tapZoneLongMiddleRight
-                ),
-                ScreenZone.BottomLeft to prefs.getString(
-                    PREF_KEY_TAP_LONG_BOTTOM_LEFT,
-                    tapZoneLongBottomLeft
-                ),
-                ScreenZone.BottomCenter to prefs.getString(
-                    PREF_KEY_TAP_LONG_BOTTOM_CENTER,
-                    tapZoneLongBottomCenter
-                ),
-                ScreenZone.BottomRight to prefs.getString(
-                    PREF_KEY_TAP_LONG_BOTTOM_RIGHT,
-                    tapZoneLongBottomRight
-                ),
-            ))
-
-            setOrientation(activity)
-            setThemeDefault()
+        private fun loadFontSettings(prefs: SharedPreferences) {
+            if (prefs.contains(PREF_KEY_BOOK_FONT_PATH_NORMAL)) {
+                val fontpath = prefs.getString(PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
+                if (fontpath != null) {
+                    val fontFile = File(fontpath)
+                    if (fontFile.isFile && fontFile.canRead()) {
+                        font = TypefaceRecord(name = fontFile.name, file = fontFile)
+                    }
+                }
+                println("loaded fontpath: $fontpath")
+            } else if (prefs.contains(PREF_KEY_BOOK_FONT_NAME_NORMAL)) {
+                val fontname = prefs.getString(
+                    PREF_KEY_BOOK_FONT_NAME_NORMAL,
+                    TypefaceRecord.SANSSERIF
+                )
+                fontname?.let {
+                    font = TypefaceRecord(name = it)
+                }
+                println("loaded fontname: ${font.name}")
+            }
         }
 
         fun loadColorThemeSettings(): PageViewColorSettings {

@@ -6,7 +6,7 @@ import java.io.RandomAccessFile
 
 
 // The class which loads the TTF file, parses it and returns the TTF font name
-internal class TTFAnalyzer {
+internal class  TTFAnalyzer {
     // This function parses the TTF file and returns the font name specified in the file
     fun getTtfFontName(fontFilename: String?): String? {
         return try {

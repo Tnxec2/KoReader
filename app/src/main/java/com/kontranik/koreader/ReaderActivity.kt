@@ -164,16 +164,6 @@ class ReaderActivity :
 //                binding.fragmentContainerView.visibility = View.GONE
 //            }
 //        }
-
-
-        // test opds
-        // https://flibusta.is/opds
-//        val startUrl = "https://www.gutenberg.org/ebooks.opds/"
-//        val fragment = OpdsEntryListFragment.newInstance(startUrl)
-//        supportFragmentManager.beginTransaction()
-//            .add(R.id.fragment_container_view, fragment, "fragment_opds_list")
-//            .addToBackStack("fragment_opds_list")
-//            .commit()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

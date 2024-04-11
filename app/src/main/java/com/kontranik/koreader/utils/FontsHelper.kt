@@ -13,6 +13,7 @@ import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.model.BookFonts
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
+import java.io.File
 
 open class FontsHelper(var context: Context) {
 
@@ -27,38 +28,24 @@ open class FontsHelper(var context: Context) {
 
         var fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
         var fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.DEFAULT.name)!!
-        val typefaceNormal = if ( fontPath != null)
-            Typeface.createFromFile(fontPath)
-        else
-            Typeface.create(fontName, Typeface.NORMAL)
+        val typefaceNormal = TypefaceRecord(fontName, fontPath).getTypeface(Typeface.NORMAL)
 
         fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_BOLD, null)
         fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_BOLD, TypefaceRecord.DEFAULT.name)!!
-        val typefaceBold = if ( fontPath != null)
-            Typeface.createFromFile(fontPath)
-        else
-            Typeface.create(fontName, Typeface.BOLD)
+        val typefaceBold = TypefaceRecord(fontName, fontPath).getTypeface(Typeface.BOLD)
 
         fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_ITALIC, null)
         fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_ITALIC, TypefaceRecord.DEFAULT.name)!!
-        val typefaceItalic = if ( fontPath != null)
-            Typeface.createFromFile(fontPath)
-        else
-            Typeface.create(fontName, Typeface.ITALIC)
+        val typefaceItalic = TypefaceRecord(fontName, fontPath).getTypeface(Typeface.ITALIC)
 
         fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_BOLDITALIC, null)
         fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_BOLDITALIC, TypefaceRecord.DEFAULT.name)!!
-        val typefaceBoldItalic = if ( fontPath != null)
-            Typeface.createFromFile(fontPath)
-        else
-            Typeface.create(fontName, Typeface.BOLD_ITALIC)
+        val typefaceBoldItalic = TypefaceRecord(fontName, fontPath).getTypeface(Typeface.BOLD_ITALIC)
 
         fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_MONOSPACE, null)
         fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_MONOSPACE, TypefaceRecord.MONO)!!
-        val typefaceMonospace = if ( fontPath != null)
-            Typeface.createFromFile(fontPath)
-        else
-            Typeface.create(fontName, Typeface.NORMAL)
+        val typefaceMonospace = TypefaceRecord(fontName, fontPath).getTypeface(Typeface.NORMAL)
+
         bookFonts = BookFonts(typefaceNormal, typefaceBold, typefaceItalic, typefaceBoldItalic, typefaceMonospace)
     }
 

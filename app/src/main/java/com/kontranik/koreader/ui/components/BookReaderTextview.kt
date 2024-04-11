@@ -144,6 +144,7 @@ class BookReaderTextview: AppCompatTextView {
         textSize = pageViewSettings.textSize
         letterSpacing = pageViewSettings.letterSpacing
         typeface = pageViewSettings.typeFace
+        println("changeSettings. typeface: ${typeface.style} / $typeface")
         setLineSpacing(
             lineSpacingExtra,
             pageViewSettings.lineSpacingMultiplier
