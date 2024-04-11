@@ -48,8 +48,6 @@ class BookListAdapter(
         } else {
             bookInfo.cover = ImageUtils.getBitmap(context, ImageEnum.Ebook)
             holder.imageView.setImageBitmap(bookInfo.cover)
-//            val asyncTask = ReadBookInfoAsync(this)
-//            asyncTask.execute(position)
             if (!bookInfo.coverLoaded) {
                 bookInfo.coverLoaded = true
                 val executor = Executors.newSingleThreadExecutor()
@@ -63,16 +61,14 @@ class BookListAdapter(
                         val bookInfoTemp: BookInfo? = EbookHelper.getBookInfoTemporary(context, contentUriPath)
 
                         if (bookInfoTemp?.cover != null) {
-                            bookInfo.cover = ImageUtils.scaleBitmap(bookInfoTemp.cover!!, 50, 100)
+                            books[position].cover = ImageUtils.scaleBitmap(bookInfoTemp.cover!!, 50, 100)
                         } else {
-                            bookInfo.cover =
+                            books[position].cover =
                                 ImageUtils.getBitmap(context, ImageEnum.Ebook)
                         }
                     }
                     handler.post {
-                        if (bookInfo.cover != null) {
-                            holder.imageView.setImageBitmap(bookInfo.cover!!)
-                        }
+                        notifyItemChanged(position)
                     }
                 }
             }
