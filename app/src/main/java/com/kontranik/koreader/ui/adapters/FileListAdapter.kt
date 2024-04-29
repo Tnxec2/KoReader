@@ -48,7 +48,9 @@ class FileListAdapter(
         holder.pathView.text = fileItem.path
         if (!fileItem.isDir) {
             if (fileItem.bookInfo == null) {
-                holder.executor.execute {
+                val executor = Executors.newSingleThreadExecutor()
+                val handler = Handler(Looper.getMainLooper())
+                executor.execute {
                     val result = fileItems[position]
                     val contentUriPath = result.uriString
                     if ( contentUriPath != null) {
@@ -65,7 +67,7 @@ class FileListAdapter(
                             }
                         }
                     }
-                    holder.handler.post {
+                    handler.post {
                         notifyItemChanged(position)
                     }
                 }
@@ -126,7 +128,6 @@ class FileListAdapter(
             setOnClickListener(null)
             setOnLongClickListener(null)
         }
-        holder.executor.shutdown()
         super.onViewRecycled(holder)
     }
 
@@ -135,8 +136,6 @@ class FileListAdapter(
     }
 
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        val executor = Executors.newSingleThreadExecutor()
-        val handler = Handler(Looper.getMainLooper())
         val imageView = itemView.findViewById<View>(R.id.fileimage) as ImageView
         val nameView = itemView.findViewById<View>(R.id.filename) as TextView
         val descView = itemView.findViewById<View>(R.id.filedesc) as TextView
