@@ -50,4 +50,15 @@ val BACK = Entry(
     )
 )
 
+val LOAD = Entry(
+    id = "load",
+    title = "load...",
+    thumbnail = Link(
+        type = OpdsTypes.TYPE_LINK_IMAGE_PNG,
+        title = null,
+        href = App.getContext().resources.getString(R.string.icon_loading_base64),
+        rel = OpdsTypes.REL_IMAGE
+    )
+)
+
 

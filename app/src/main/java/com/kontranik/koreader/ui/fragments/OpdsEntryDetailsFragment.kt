@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.kontranik.koreader.App
 import com.kontranik.koreader.databinding.FragmentOpdsEntrysDetailsBinding
 import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.Link
@@ -173,7 +174,7 @@ class OpdsEntryDetailsFragment :
             val file = File(dir, fileName)
 
             Toast.makeText(
-                requireContext(),
+                App.getContext(),
                 "Download $fileName start",
                 Toast.LENGTH_SHORT
             ).show()
@@ -233,13 +234,13 @@ class OpdsEntryDetailsFragment :
                 handler.post {
                     if (error != null)
                         Toast.makeText(
-                            requireContext(),
+                            App.getContext(),
                             "Download $fileName error:\n$error",
                             Toast.LENGTH_SHORT
                         ).show()
                     else
                         Toast.makeText(
-                            requireContext(),
+                            App.getContext(),
                             "Download completed: $fileName",
                             Toast.LENGTH_SHORT
                         ).show()

@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
+import com.kontranik.koreader.App
 import com.kontranik.koreader.R
 import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.OpdsTypes
@@ -21,13 +22,12 @@ import java.util.concurrent.Executors
 
 
 class OpdsEntryListAdapter(
-    val context: Context,
     private val entrys: MutableList<Entry>,
     private val listAdapterClickListener: OpdsEntryListAdapterClickListener
 ) :
     RecyclerView.Adapter<OpdsEntryListAdapter.ViewHolder>() {
 
-    private val inflater = LayoutInflater.from(context)
+    private val inflater = LayoutInflater.from(App.getContext())
 
     private var startUrl: String? = null
 
@@ -88,7 +88,7 @@ class OpdsEntryListAdapter(
         if (startUrl == OpdsEntryListFragment.OVERVIEW) {
             holder.menuView.visibility = View.VISIBLE
             holder.menuView.setOnClickListener {
-                val popup = PopupMenu(context, holder.menuView)
+                val popup = PopupMenu(App.getContext(), holder.menuView)
                 popup.inflate(R.menu.menu_opds_item_clicked)
                 popup.setOnMenuItemClickListener { item: MenuItem? ->
                     if (item != null) {

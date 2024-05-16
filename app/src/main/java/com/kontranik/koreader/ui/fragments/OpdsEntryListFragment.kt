@@ -12,11 +12,13 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.kontranik.koreader.App
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentOpdsEntrysListBinding
 import com.kontranik.koreader.opds.LoadOpds
 import com.kontranik.koreader.opds.model.BACK
 import com.kontranik.koreader.opds.model.Entry
+import com.kontranik.koreader.opds.model.LOAD
 import com.kontranik.koreader.opds.model.Link
 import com.kontranik.koreader.opds.model.Opds
 import com.kontranik.koreader.opds.model.OpenSearchDescription
@@ -74,10 +76,10 @@ class OpdsEntryListFragment :
             openSearchTermDialog()
         }
 
-        Divider.appendDivider(requireContext(), binding.reciclerViewOpdsentrylistList)
+        Divider.appendDivider(binding.reciclerViewOpdsentrylistList)
 
         binding.reciclerViewOpdsentrylistList.adapter =
-            OpdsEntryListAdapter(requireContext(), opdsEntryList, this)
+            OpdsEntryListAdapter( opdsEntryList, this)
 
         binding.imageButtonOpdsentrylistAdd.setOnClickListener {
             openAddItemDialog()
@@ -87,10 +89,10 @@ class OpdsEntryListFragment :
     }
 
     private fun openSearchTermDialog() {
-        val builder = android.app.AlertDialog.Builder(requireContext())
+        val builder = android.app.AlertDialog.Builder(App.getContext())
         builder.setTitle(resources.getString(R.string.search_term))
 
-        val input = EditText(requireContext())
+        val input = EditText(App.getContext())
         input.inputType = InputType.TYPE_CLASS_TEXT
         input.setText(searchTerm)
         builder.setView(input)
@@ -123,6 +125,11 @@ class OpdsEntryListFragment :
             openedLink?.let { navigationHistory.add(it) }
             openedLink = url
         }
+
+        opdsEntryList.clear()
+        opdsEntryList.add(LOAD)
+        binding.reciclerViewOpdsentrylistList.adapter?.notifyDataSetChanged()
+
         lifecycleScope.launch(Dispatchers.IO) {
             val result: Opds?
             var icon: Bitmap? = null
@@ -131,8 +138,8 @@ class OpdsEntryListFragment :
                      result = overviewOpds
                      startUrl = OVERVIEW
                 } else {
-                     if (startUrl == OVERVIEW) startUrl = url
-                     result = LoadOpds.loadXmlFromNetwork(UrlHelper.getUrl(url, startUrl))
+                    if (startUrl == OVERVIEW) startUrl = url
+                    result = LoadOpds.loadXmlFromNetwork(UrlHelper.getUrl(url, startUrl))
                     if (searchDescription == null) {
                         Log.d("OPDS List Fragment", "searchlink: ${result?.search.toString()}")
                         result?.search?.href?.let {
@@ -196,7 +203,7 @@ class OpdsEntryListFragment :
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
-                        requireContext(),
+                        App.getContext(),
                         resources.getString(R.string.connection_error), Toast.LENGTH_LONG
                     ).show()
                 }
@@ -204,7 +211,7 @@ class OpdsEntryListFragment :
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
-                        requireContext(),
+                        App.getContext(),
                         resources.getString(R.string.xml_error), Toast.LENGTH_LONG
                     ).show()
                 }
@@ -212,7 +219,7 @@ class OpdsEntryListFragment :
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
-                        requireContext(),
+                        App.getContext(),
                         resources.getString(R.string.connection_error), Toast.LENGTH_LONG
                     ).show()
                 }
@@ -266,7 +273,7 @@ class OpdsEntryListFragment :
 
 
     private fun loadPrefs() {
-        val settings = requireContext()
+        val settings = App.getContext()
             .getSharedPreferences(
                 PREFS_FILE,
                 Context.MODE_PRIVATE)
@@ -303,7 +310,7 @@ class OpdsEntryListFragment :
     }
 
     private fun savePrefs() {
-        val settings = requireContext()
+        val settings = App.getContext()
             .getSharedPreferences(
                 PREFS_FILE,
                 Context.MODE_PRIVATE)
