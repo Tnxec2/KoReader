@@ -85,14 +85,18 @@ class OpdsEntryListFragment :
             openAddItemDialog()
         }
 
+        binding.imageButtonOpdsentrylistReload.setOnClickListener {
+            load(openedLink ?: OVERVIEW)
+        }
+
         load(OVERVIEW)
     }
 
     private fun openSearchTermDialog() {
-        val builder = android.app.AlertDialog.Builder(App.getContext())
+        val builder = android.app.AlertDialog.Builder(requireContext())
         builder.setTitle(resources.getString(R.string.search_term))
 
-        val input = EditText(App.getContext())
+        val input = EditText(requireContext())
         input.inputType = InputType.TYPE_CLASS_TEXT
         input.setText(searchTerm)
         builder.setView(input)
@@ -118,8 +122,12 @@ class OpdsEntryListFragment :
     private fun load(url: String, back: Boolean = false) {
         if (url == OVERVIEW) {
             binding.imageButtonOpdsentrylistAdd.visibility = View.VISIBLE
+            binding.imageButtonOpdsentrylistSearch.visibility = View.GONE
+            binding.imageButtonOpdsentrylistReload.visibility = View.GONE
         } else {
             binding.imageButtonOpdsentrylistAdd.visibility = View.GONE
+            binding.imageButtonOpdsentrylistSearch.visibility = View.VISIBLE
+            binding.imageButtonOpdsentrylistReload.visibility = View.VISIBLE
         }
         if (!back) {
             openedLink?.let { navigationHistory.add(it) }
@@ -195,6 +203,9 @@ class OpdsEntryListFragment :
                             }
                         }
                     }
+
+                    if (url != OVERVIEW) opdsEntryList.add(BACK)
+
                     (binding.reciclerViewOpdsentrylistList.adapter as OpdsEntryListAdapter).setStartUrl(startUrl)
                     binding.reciclerViewOpdsentrylistList.adapter?.notifyDataSetChanged()
                     binding.reciclerViewOpdsentrylistList.scrollToPosition(0)
@@ -206,6 +217,7 @@ class OpdsEntryListFragment :
                         App.getContext(),
                         resources.getString(R.string.connection_error), Toast.LENGTH_LONG
                     ).show()
+                    loadErrorList(url)
                 }
             } catch (e: XmlPullParserException) {
                 Log.e("OPDS List fragment", e.localizedMessage, e)
@@ -214,17 +226,26 @@ class OpdsEntryListFragment :
                         App.getContext(),
                         resources.getString(R.string.xml_error), Toast.LENGTH_LONG
                     ).show()
+                    loadErrorList(url)
                 }
             } catch (e: MalformedURLException) {
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         App.getContext(),
-                        resources.getString(R.string.connection_error), Toast.LENGTH_LONG
+                        resources.getString(R.string.connection_error_malformedURLException), Toast.LENGTH_LONG
                     ).show()
+                    loadErrorList(url)
                 }
             }
         }
+    }
+
+    private fun loadErrorList(url: String?) {
+        opdsEntryList.clear()
+        if (url != OVERVIEW) opdsEntryList.add(BACK)
+        binding.reciclerViewOpdsentrylistList.adapter?.notifyItemChanged(0)
+        binding.reciclerViewOpdsentrylistList.scrollToPosition(0)
     }
 
 

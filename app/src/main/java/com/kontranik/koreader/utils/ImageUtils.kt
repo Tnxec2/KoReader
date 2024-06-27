@@ -12,6 +12,7 @@ import android.graphics.PorterDuff
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.core.content.res.ResourcesCompat
 import com.kontranik.koreader.R
 import java.io.ByteArrayOutputStream
@@ -159,11 +160,14 @@ object ImageUtils {
 
     fun drawableFromUrl(url: String?, startUrl: String?): Bitmap? {
         if (url  == null) return null
-
+        Log.d("NIK", url)
         try {
             if (url.startsWith("data:image")) {
+                var urldata = url.substring(url.indexOf(",") + 1)
+                if (urldata.endsWith("==")) urldata = urldata.substring(0, urldata.length - 2)
+                Log.d("NIK", urldata)
                 val imagedata: ByteArray =
-                    Base64.getDecoder().decode(url.substring(url.indexOf(",") + 1))
+                    Base64.getDecoder().decode(urldata)
                 return BitmapFactory.decodeByteArray(imagedata, 0, imagedata.size)
             }
 

@@ -49,6 +49,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
                 android:contentDescription="@string/opds_entry_cover" />
 
             <TextView

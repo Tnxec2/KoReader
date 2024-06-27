@@ -41,7 +41,14 @@
             android:contentDescription="@string/add_opds"
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
             app:tint="?attr/colorControlNormal"  />
-
+        <ImageButton
+            android:id="@+id/imageButton_opdsentrylist_reload"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
+            app:srcCompat="@drawable/baseline_autorenew_24"
+            android:contentDescription="@string/reload"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            app:tint="?attr/colorControlNormal"  />
         <ImageButton
             android:id="@+id/imageButton_opdsentrylist_back"
             android:layout_width="@dimen/icon_size"

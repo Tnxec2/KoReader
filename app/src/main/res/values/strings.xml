@@ -21,6 +21,7 @@
     <string name="go_to_storage">Go to Storage</string>
     <string name="add_to_storage">Add a entry to Storage</string>
     <string name="back">Back</string>
+    <string name="reload">Reload</string>
     <string name="text">Text</string>
     <string name="position">Position</string>
     <string name="no_bookmarks">No Bookmarks</string>
@@ -212,6 +213,7 @@
     <string name="by_author">by %1$s</string>
     <string name="cover">Book cover</string>
     <string name="connection_error">connection error</string>
+    <string name="connection_error_malformedURLException">connection error. MalformedURLException</string>
     <string name="xml_error">xml error</string>
     <string name="links">Links</string>
     <string name="opds">OPDS Network Library</string>
