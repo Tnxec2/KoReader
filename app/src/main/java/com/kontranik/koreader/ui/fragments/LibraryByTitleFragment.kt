@@ -12,11 +12,10 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.kontranik.koreader.App
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.database.model.Author
-import com.kontranik.koreader.database.model.LibraryItem
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.databinding.FragmentLibraryBookListBinding
 import com.kontranik.koreader.ui.adapters.PagingLibraryItemAdapter
@@ -49,9 +48,9 @@ open class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingL
 
         mLibraryViewModel = ViewModelProvider(this,
             LibraryViewModelFactory(
-                (requireContext().applicationContext as App).libraryItemRepository,
-                (requireContext().applicationContext as App).authorsRepository,
-                App.getApplicationScope())
+                (requireContext().applicationContext as KoReaderApplication).libraryItemRepository,
+                (requireContext().applicationContext as KoReaderApplication).authorsRepository,
+                KoReaderApplication.getApplicationScope())
         )[LibraryViewModel::class.java]
 
         mReaderActivityViewModel = ViewModelProvider(requireActivity())[ReaderActivityViewModel::class.java]

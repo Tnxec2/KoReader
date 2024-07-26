@@ -1,7 +1,7 @@
 package com.kontranik.koreader.opds.model
 
 import android.graphics.Bitmap
-import com.kontranik.koreader.App
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import java.io.Serializable
 import java.util.Date
@@ -45,7 +45,7 @@ val BACK = Entry(
     thumbnail = Link(
         type = OpdsTypes.TYPE_LINK_IMAGE_PNG,
         title = null,
-        href = App.getContext().resources.getString(R.string.icon_back_base64),
+        href = KoReaderApplication.getContext().resources.getString(R.string.icon_back_base64),
         rel = OpdsTypes.REL_IMAGE
     )
 )
@@ -56,7 +56,7 @@ val LOAD = Entry(
     thumbnail = Link(
         type = OpdsTypes.TYPE_LINK_IMAGE_PNG,
         title = null,
-        href = App.getContext().resources.getString(R.string.icon_loading_base64),
+        href = KoReaderApplication.getContext().resources.getString(R.string.icon_loading_base64),
         rel = OpdsTypes.REL_IMAGE
     )
 )

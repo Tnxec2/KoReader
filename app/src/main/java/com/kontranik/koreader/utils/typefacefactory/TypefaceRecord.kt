@@ -1,7 +1,7 @@
 package com.kontranik.koreader.utils.typefacefactory
 
 import android.graphics.Typeface
-import com.kontranik.koreader.App
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import java.io.File
 import java.util.*
@@ -61,15 +61,15 @@ class TypefaceRecord(
         val DEFAULT = TypefaceRecord(SANSSERIF)
 
         val fonts = mapOf(
-            "amazon ember" to App.getContext().resources.getFont(R.font.amazon_ember_regular),
-            "amazon ember bold" to App.getContext().resources.getFont(R.font.amazon_ember_bold),
-            "amazon ember italic" to App.getContext().resources.getFont(R.font.amazon_ember_italic),
-            "amazon ember bold italic" to App.getContext().resources.getFont(R.font.amazon_ember_bold_italic),
-            "amazon ember mono" to App.getContext().resources.getFont(R.font.amazon_ember_mono_reg),
-            "bookerly regular" to App.getContext().resources.getFont(R.font.bookerly_regular),
-            "bookerly bold" to App.getContext().resources.getFont(R.font.bookerly_bold),
-            "bookerly italic" to App.getContext().resources.getFont(R.font.bookerly_italic),
-            "bookerly bold italic" to App.getContext().resources.getFont(R.font.bookerly_bold_italic),
+            "amazon ember" to KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_regular),
+            "amazon ember bold" to KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_bold),
+            "amazon ember italic" to KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_italic),
+            "amazon ember bold italic" to KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_bold_italic),
+            "amazon ember mono" to KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_mono_reg),
+            "bookerly regular" to KoReaderApplication.getContext().resources.getFont(R.font.bookerly_regular),
+            "bookerly bold" to KoReaderApplication.getContext().resources.getFont(R.font.bookerly_bold),
+            "bookerly italic" to KoReaderApplication.getContext().resources.getFont(R.font.bookerly_italic),
+            "bookerly bold italic" to KoReaderApplication.getContext().resources.getFont(R.font.bookerly_bold_italic),
         )
     }
 }

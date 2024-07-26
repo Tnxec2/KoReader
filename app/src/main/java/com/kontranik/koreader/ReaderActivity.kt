@@ -68,9 +68,9 @@ class ReaderActivity :
         val view = binding.root
         setContentView(view)
 
-        mBookStatusViewModel = ViewModelProvider(this, BookStatusViewModelFactory((application as App).bookStatusRepository))[BookStatusViewModel::class.java]
-        mBookmarksViewModel = ViewModelProvider(this, BookmarksViewModelFactory((application as App).bookmarksRepository))[BookmarksViewModel::class.java]
-        mReaderActivityViewModel = ViewModelProvider(this, ReaderActivityViewModelFactory((application as App).bookStatusRepository))[ReaderActivityViewModel::class.java]
+        mBookStatusViewModel = ViewModelProvider(this, BookStatusViewModelFactory((application as KoReaderApplication).bookStatusRepository))[BookStatusViewModel::class.java]
+        mBookmarksViewModel = ViewModelProvider(this, BookmarksViewModelFactory((application as KoReaderApplication).bookmarksRepository))[BookmarksViewModel::class.java]
+        mReaderActivityViewModel = ViewModelProvider(this, ReaderActivityViewModelFactory((application as KoReaderApplication).bookStatusRepository))[ReaderActivityViewModel::class.java]
 
         mBookStatusViewModel.cleanup(this)
 

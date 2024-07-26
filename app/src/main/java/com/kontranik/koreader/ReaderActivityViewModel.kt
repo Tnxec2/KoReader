@@ -16,7 +16,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.model.BookStatus
 import com.kontranik.koreader.database.model.Bookmark
@@ -76,20 +75,20 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
     fun loadBook(context: Context) {
         try {
             if (book.value == null || book.value!!.fileLocation != PrefsHelper.bookPath ) {
-                if (!FileHelper.contentFileExist(App.getContext(), PrefsHelper.bookPath)) {
+                if (!FileHelper.contentFileExist(KoReaderApplication.getContext(), PrefsHelper.bookPath)) {
                     Toast.makeText(
                         context,
-                        App.getContext().resources.getString(R.string.can_not_load_book, PrefsHelper.bookPath),
+                        KoReaderApplication.getContext().resources.getString(R.string.can_not_load_book, PrefsHelper.bookPath),
                         Toast.LENGTH_LONG
                     ).show()
                     return
                 }
                 Toast.makeText(
                     context,
-                    App.getContext().resources.getString(R.string.loading_book),
+                    KoReaderApplication.getContext().resources.getString(R.string.loading_book),
                     Toast.LENGTH_SHORT
                 ).show()
-                book.value = Book(App.getContext(), PrefsHelper.bookPath!!)
+                book.value = Book(KoReaderApplication.getContext(), PrefsHelper.bookPath!!)
             }
         } catch (e: Exception) {
             Log.e("tag", e.stackTraceToString())
@@ -179,7 +178,7 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
             book.value?.curPage = Page(page)
             pageViewContent.value = page.content
         } else {
-            pageViewContent.value = App.getContext().getString(R.string.no_page_content)
+            pageViewContent.value = KoReaderApplication.getContext().getString(R.string.no_page_content)
         }
         updateInfo()
     }
@@ -191,7 +190,7 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
             val curTextPage = book.value!!.getCurTextPage()
 
             infoTextLeft.value =
-                App.getContext().getString(
+                KoReaderApplication.getContext().getString(
                     R.string.page_info_text_left,
                     min(curTextPage, book.value!!.getPageScheme()!!.countTextPages),
                     book.value!!.getPageScheme()!!.countTextPages,
@@ -200,25 +199,25 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
                 )
 
             infoTextRight.value =
-                App.getContext().getString(
+                KoReaderApplication.getContext().getString(
                     R.string.page_info_text_right,
                     curSection,
                     book.value!!.getPageScheme()!!.sectionCountWithOutNotes,
                     book.value!!.getPageScheme()!!.sectionCount
                 )
         } else {
-            infoTextRight.value = App.getContext().getString(R.string.no_book)
+            infoTextRight.value = KoReaderApplication.getContext().getString(R.string.no_book)
         }
         updateSystemStatus()
     }
 
     fun updateSystemStatus() {
         val simpleDateFormatTime = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val bm = App.getContext().getSystemService(AppCompatActivity.BATTERY_SERVICE) as BatteryManager
+        val bm = KoReaderApplication.getContext().getSystemService(AppCompatActivity.BATTERY_SERVICE) as BatteryManager
         val batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         val strTime: String = simpleDateFormatTime.format(Date().time)
         infoTextSystemstatus.value =
-            App.getContext().resources.getString(R.string.page_info_text_time, strTime, batLevel)
+            KoReaderApplication.getContext().resources.getString(R.string.page_info_text_time, strTime, batLevel)
     }
 
     fun goToPositionByBookStatus(pageView: TextView, bookStatus: BookStatus?) {
@@ -307,7 +306,7 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
     }
 
     fun loadPrefs(activity: Activity) {
-        val settings = App.getContext().getSharedPreferences(
+        val settings = KoReaderApplication.getContext().getSharedPreferences(
             ReaderActivity.PREFS_FILE,
             AppCompatActivity.MODE_PRIVATE
         )
@@ -326,7 +325,7 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
     }
 
     fun savePrefs() {
-        val settings = App.getContext().getSharedPreferences(
+        val settings = KoReaderApplication.getContext().getSharedPreferences(
             ReaderActivity.PREFS_FILE,
             AppCompatActivity.MODE_PRIVATE
         )
@@ -337,7 +336,7 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
     }
 
     private fun removePathFromPrefs() {
-        val settings = App.getContext().getSharedPreferences(
+        val settings = KoReaderApplication.getContext().getSharedPreferences(
             ReaderActivity.PREFS_FILE,
             AppCompatActivity.MODE_PRIVATE
         )
@@ -372,7 +371,7 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
 
     fun deleteBook(uriString: String?): Boolean {
         val uri = Uri.parse(uriString)
-        val doc = DocumentFile.fromSingleUri(App.getContext().applicationContext, uri)
+        val doc = DocumentFile.fromSingleUri(KoReaderApplication.getContext().applicationContext, uri)
         if (doc != null) {
             if (doc.delete()) {
                 if (uriString == PrefsHelper.bookPath) {
@@ -382,7 +381,7 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
                 }
                 return true
             } else {
-                Toast.makeText(App.getContext().applicationContext, "Can't delete book", Toast.LENGTH_LONG)
+                Toast.makeText(KoReaderApplication.getContext().applicationContext, "Can't delete book", Toast.LENGTH_LONG)
                     .show()
             }
         }

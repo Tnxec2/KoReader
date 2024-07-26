@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
-import com.kontranik.koreader.App
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.ReaderActivityViewModelFactory
@@ -44,11 +44,11 @@ class LastOpenedBookListFragment :
         super.onViewCreated(view, savedInstanceState)
 
         mBookStatusViewModel = ViewModelProvider(this,
-            BookStatusViewModelFactory((requireContext().applicationContext as App)
+            BookStatusViewModelFactory((requireContext().applicationContext as KoReaderApplication)
                 .bookStatusRepository))[BookStatusViewModel::class.java]
 
         mReaderActivityViewModel = ViewModelProvider(this,
-            ReaderActivityViewModelFactory((requireContext().applicationContext as App)
+            ReaderActivityViewModelFactory((requireContext().applicationContext as KoReaderApplication)
                 .bookStatusRepository))[ReaderActivityViewModel::class.java]
 
 

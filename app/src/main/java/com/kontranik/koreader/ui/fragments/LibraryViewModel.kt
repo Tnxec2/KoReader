@@ -8,7 +8,6 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.Document
 import android.util.Log
@@ -21,7 +20,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.paging.liveData
-import com.kontranik.koreader.App
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.LibraryItem
@@ -146,15 +145,15 @@ class LibraryViewModel(
     fun createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
-        val name = App.getContext().getString(R.string.channel_name_library)
-        val descriptionText = App.getContext().getString(R.string.channel_description_library)
+        val name = KoReaderApplication.getContext().getString(R.string.channel_name_library)
+        val descriptionText = KoReaderApplication.getContext().getString(R.string.channel_description_library)
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
             description = descriptionText
         }
         // Register the channel with the system
         val notificationManager: NotificationManager =
-            App.getContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            KoReaderApplication.getContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
 
@@ -169,7 +168,7 @@ class LibraryViewModel(
                 //
             } else {
                 applicationScope.launch {
-                    var builder = NotificationCompat.Builder(App.getContext(), CHANNEL_ID)
+                    var builder = NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
                         .setStyle(NotificationCompat.MessagingStyle("Me")
                             .setConversationTitle("Library refresh"))
                         .setSmallIcon(R.drawable.baseline_notifications_24)
@@ -181,7 +180,7 @@ class LibraryViewModel(
                     traverseDirectoryEntries(resolver, directoryUri)
                     refreshInProgress.postValue(false)
 
-                    builder = NotificationCompat.Builder(App.getContext(), CHANNEL_ID)
+                    builder = NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
                         .setStyle(NotificationCompat.MessagingStyle("Me")
                             .setConversationTitle("Library refresh"))
                         .setSmallIcon(R.drawable.baseline_notifications_24)
@@ -195,7 +194,7 @@ class LibraryViewModel(
     }
 
     private fun notify(context: Context, builder: NotificationCompat.Builder) {
-        NotificationManagerCompat.from(App.getContext()).apply {
+        NotificationManagerCompat.from(KoReaderApplication.getContext()).apply {
             if (ActivityCompat.checkSelfPermission(
                     context,
                     Manifest.permission.POST_NOTIFICATIONS
@@ -285,7 +284,7 @@ class LibraryViewModel(
         val item = libraryItemRepository.getByPath(path)
         if (item.isEmpty()) {
             val bookInfo = readBookInfo(
-                App.getContext(),
+                KoReaderApplication.getContext(),
                 uri.toString()
             )
             Log.d("LibraryViewModel", "bookInfo " + bookInfo.toString())
@@ -335,7 +334,7 @@ class LibraryViewModel(
     fun updateLibraryItem(position: Int, libraryItemWithAuthors: LibraryItemWithAuthors) {
         applicationScope.launch {
             val bookInfo = readBookInfo(
-                App.getContext(),
+                KoReaderApplication.getContext(),
                 libraryItemWithAuthors.libraryItem.path
             )
             Log.d("LibraryViewModel", "bookInfo " + bookInfo.toString())

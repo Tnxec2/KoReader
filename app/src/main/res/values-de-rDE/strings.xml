@@ -194,4 +194,5 @@
     <string name="opds_entrys">Opds Entrys</string>
     <string name="opds_subtitle">Subtitle</string>
     <string name="opds_author_content">author/content</string>
+    <string name="drawer_menu_description">Menu navigation button</string>
 </resources>

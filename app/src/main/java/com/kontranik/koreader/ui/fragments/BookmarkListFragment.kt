@@ -11,7 +11,7 @@ import android.widget.AdapterView.OnItemClickListener
 import android.widget.AdapterView.OnItemLongClickListener
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
-import com.kontranik.koreader.App
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.database.BookmarksViewModelFactory
@@ -55,7 +55,7 @@ class BookmarkListFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         mBookmarksViewModel = ViewModelProvider(this,
-            BookmarksViewModelFactory((requireContext().applicationContext as App)
+            BookmarksViewModelFactory((requireContext().applicationContext as KoReaderApplication)
             .bookmarksRepository))[BookmarksViewModel::class.java]
 
         binding.imageButtonBookmarklistBack.setOnClickListener {

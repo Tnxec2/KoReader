@@ -13,7 +13,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.kontranik.koreader.App
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentLibrarySettingsBinding
 import com.kontranik.koreader.ui.adapters.LibraryScanPointListAdapter
@@ -38,9 +38,9 @@ class LibrarySettingsFragment : Fragment(), LibraryScanPointListAdapter.LibraryS
 
         mLibraryViewModel = ViewModelProvider(this,
             LibraryViewModelFactory(
-                (requireContext().applicationContext as App).libraryItemRepository,
-                (requireContext().applicationContext as App).authorsRepository,
-                App.getApplicationScope())
+                (requireContext().applicationContext as KoReaderApplication).libraryItemRepository,
+                (requireContext().applicationContext as KoReaderApplication).authorsRepository,
+                KoReaderApplication.getApplicationScope())
         )[LibraryViewModel::class.java]
 
         mLibraryViewModel.createNotificationChannel()

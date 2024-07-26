@@ -12,7 +12,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.kontranik.koreader.App
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.databinding.FragmentOpdsEntrysListBinding
 import com.kontranik.koreader.opds.LoadOpds
@@ -214,7 +214,7 @@ class OpdsEntryListFragment :
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
-                        App.getContext(),
+                        KoReaderApplication.getContext(),
                         resources.getString(R.string.connection_error), Toast.LENGTH_LONG
                     ).show()
                     loadErrorList(url)
@@ -223,7 +223,7 @@ class OpdsEntryListFragment :
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
-                        App.getContext(),
+                        KoReaderApplication.getContext(),
                         resources.getString(R.string.xml_error), Toast.LENGTH_LONG
                     ).show()
                     loadErrorList(url)
@@ -232,7 +232,7 @@ class OpdsEntryListFragment :
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
-                        App.getContext(),
+                        KoReaderApplication.getContext(),
                         resources.getString(R.string.connection_error_malformedURLException), Toast.LENGTH_LONG
                     ).show()
                     loadErrorList(url)
@@ -294,7 +294,7 @@ class OpdsEntryListFragment :
 
 
     private fun loadPrefs() {
-        val settings = App.getContext()
+        val settings = KoReaderApplication.getContext()
             .getSharedPreferences(
                 PREFS_FILE,
                 Context.MODE_PRIVATE)
@@ -331,7 +331,7 @@ class OpdsEntryListFragment :
     }
 
     private fun savePrefs() {
-        val settings = App.getContext()
+        val settings = KoReaderApplication.getContext()
             .getSharedPreferences(
                 PREFS_FILE,
                 Context.MODE_PRIVATE)

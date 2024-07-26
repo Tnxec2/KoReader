@@ -1,9 +1,7 @@
 package com.kontranik.koreader.ui.adapters
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -13,7 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
-import com.kontranik.koreader.App
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.OpdsTypes
@@ -28,7 +26,7 @@ class OpdsEntryListAdapter(
 ) :
     RecyclerView.Adapter<OpdsEntryListAdapter.ViewHolder>() {
 
-    private val inflater = LayoutInflater.from(App.getContext())
+    private val inflater = LayoutInflater.from(KoReaderApplication.getContext())
 
     private var startUrl: String? = null
 
@@ -89,7 +87,7 @@ class OpdsEntryListAdapter(
         if (startUrl == OpdsEntryListFragment.OVERVIEW) {
             holder.menuView.visibility = View.VISIBLE
             holder.menuView.setOnClickListener {
-                val popup = PopupMenu(App.getContext(), holder.menuView)
+                val popup = PopupMenu(KoReaderApplication.getContext(), holder.menuView)
                 popup.inflate(R.menu.menu_opds_item_clicked)
                 popup.setOnMenuItemClickListener { item: MenuItem? ->
                     if (item != null) {

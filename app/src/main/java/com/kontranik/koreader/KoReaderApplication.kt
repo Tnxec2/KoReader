@@ -11,26 +11,31 @@ import com.kontranik.koreader.database.repository.LibraryItemRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 
-class App : Application() {
+class KoReaderApplication : Application() {
     // No need to cancel this scope as it'll be torn down with the process
     val applicationScope = CoroutineScope(SupervisorJob())
 
-    // Using by lazy so the database and the repository are only created when they're needed
-    // rather than when the application starts
+    // TODO: remove old initialisation, this should be done by AppContainer
     private val database by lazy { BooksRoomDatabase.getDatabase(this, applicationScope) }
     val bookmarksRepository by lazy { BookmarksRepository(database.bookmarksDao()) }
     val bookStatusRepository by lazy { BookStatusRepository(database.bookStatusDao()) }
     val libraryItemRepository by lazy { LibraryItemRepository(database.libraryItemDao()) }
     val authorsRepository by lazy { AuthorsRepository(database.authorDao()) }
 
+    /**
+     * AppContainer instance used by the rest of classes to obtain dependencies
+     */
+    lateinit var container: AppContainer
+
 
     override fun onCreate() {
         super.onCreate()
         mInstance = this
+        container = AppDataContainer(this, applicationScope)
     }
 
     companion object {
-        lateinit var mInstance: App
+        lateinit var mInstance: KoReaderApplication
         fun getContext(): Context {
             return mInstance.applicationContext
         }

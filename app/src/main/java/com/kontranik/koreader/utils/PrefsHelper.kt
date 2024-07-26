@@ -9,7 +9,7 @@ import android.util.TypedValue
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
-import com.kontranik.koreader.App
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.model.PageViewColorSettings
 import com.kontranik.koreader.model.ScreenZone
@@ -135,7 +135,7 @@ class PrefsHelper() {
          *  Textview Parameters
          */
 
-        var defaultTextSize: Float = App.getContext().resources.getDimension(R.dimen.text_size)
+        var defaultTextSize: Float = KoReaderApplication.getContext().resources.getDimension(R.dimen.text_size)
         var textSize: Float = defaultTextSize
         private val fontDefault: TypefaceRecord = TypefaceRecord.DEFAULT
         var font: TypefaceRecord = fontDefault
@@ -151,7 +151,7 @@ class PrefsHelper() {
 
         fun getFloatTypedValue(resource: Int): Float {
             val typedValue = TypedValue()
-            App.getContext().resources.getValue(resource, typedValue, true)
+            KoReaderApplication.getContext().resources.getValue(resource, typedValue, true)
             return typedValue.float
         }
 
@@ -180,17 +180,17 @@ class PrefsHelper() {
          *  Color
          */
         var colorTheme: String = PREF_COLOR_SELECTED_THEME_DEFAULT
-        private val colorBackDefault: String = App.getContext().resources.getString(R.string.color_theme1_backgroud_default)
+        private val colorBackDefault: String = KoReaderApplication.getContext().resources.getString(R.string.color_theme1_backgroud_default)
         var colorBack: String = colorBackDefault
-        val colorTextDefault: String = App.getContext().resources.getString(R.string.color_theme1_foregroud_default)
+        val colorTextDefault: String = KoReaderApplication.getContext().resources.getString(R.string.color_theme1_foregroud_default)
         var colorText: String = colorTextDefault
-        val colorLinkTextDefault: String = App.getContext().resources.getString(R.string.color_theme1_linktext_default)
+        val colorLinkTextDefault: String = KoReaderApplication.getContext().resources.getString(R.string.color_theme1_linktext_default)
         var colorLinkText: String = colorLinkTextDefault
         var colorInfoText: String = colorTextDefault
         var showBackgroundImage: Boolean = false
         var backgroundImageUri: String? = null
         var backgroundImageTiledRepeat: Boolean = false
-        val marginDefault: Int = Integer.parseInt(App.getContext().resources.getString(R.string.default_margin_value))
+        val marginDefault: Int = Integer.parseInt(KoReaderApplication.getContext().resources.getString(R.string.default_margin_value))
         var marginTop: Int = marginDefault
         var marginBottom: Int = marginDefault
         var marginLeft: Int = marginDefault
@@ -279,7 +279,7 @@ class PrefsHelper() {
             return when ( interfaceTheme) {
                     "Light" -> false
                     "Dark" -> true
-                    else -> when (App.getContext().resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
+                    else -> when (KoReaderApplication.getContext().resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)) {
                                 Configuration.UI_MODE_NIGHT_YES -> true
                                 Configuration.UI_MODE_NIGHT_NO -> false
                                 else -> false
@@ -307,7 +307,7 @@ class PrefsHelper() {
         }
 
         fun loadSettings(activity: Activity) {
-            val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext())
+            val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(KoReaderApplication.getContext())
             loadInterfaceSettings(prefs)
             loadTextSettings(prefs)
             loadFontSettings(prefs)
@@ -518,27 +518,27 @@ class PrefsHelper() {
         }
 
         fun loadColorThemeSettings(): PageViewColorSettings {
-            val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext())
+            val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(KoReaderApplication.getContext())
 
             var co = prefs.getInt(PREF_KEY_COLOR_BACK + colorTheme, 0)
             colorBack =
                 if (co != 0) "#" + Integer.toHexString(co)
-                else App.getContext().resources.getString(colorBackgroundDefaultArray[colorTheme.toInt()-1])
+                else KoReaderApplication.getContext().resources.getString(colorBackgroundDefaultArray[colorTheme.toInt()-1])
 
             co = prefs.getInt(PREF_KEY_COLOR_TEXT + colorTheme, 0)
             colorText =
                 if (co != 0) "#" + Integer.toHexString(co)
-                else App.getContext().resources.getString(colorForegroundDefaultArray[colorTheme.toInt()-1])
+                else KoReaderApplication.getContext().resources.getString(colorForegroundDefaultArray[colorTheme.toInt()-1])
 
             co = prefs.getInt(PREF_KEY_COLOR_LINKTEXT + colorTheme, 0)
             colorLinkText =
                 if (co != 0) "#" + Integer.toHexString(co)
-                else App.getContext().resources.getString(colorLinkDefaultArray[colorTheme.toInt()-1])
+                else KoReaderApplication.getContext().resources.getString(colorLinkDefaultArray[colorTheme.toInt()-1])
 
             co = prefs.getInt(PREF_KEY_COLOR_INFOTEXT + colorTheme, 0)
             colorInfoText =
                 if (co != 0) "#" + Integer.toHexString(co)
-                else App.getContext().resources.getString(colorInfotextDefaultArray[colorTheme.toInt()-1])
+                else KoReaderApplication.getContext().resources.getString(colorInfotextDefaultArray[colorTheme.toInt()-1])
 
             showBackgroundImage = prefs.getBoolean(
                 PREF_KEY_SHOW_BACKGROUND_IMAGE + colorTheme,
