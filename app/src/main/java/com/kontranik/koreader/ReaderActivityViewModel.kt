@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.kontranik.koreader.database.BookStatusViewModel
+import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.model.BookStatus
 import com.kontranik.koreader.database.model.Bookmark
 import com.kontranik.koreader.database.repository.BookStatusRepository
@@ -411,20 +412,22 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
 
     private fun savePosition() {
         viewModelScope.launch {
-            val bookStatus = mRepository.getBookStatusByPath(book.value!!.fileLocation)
+            BooksRoomDatabase.databaseWriteExecutor.execute {
+                val bookStatus = mRepository.getBookStatusByPath(book.value!!.fileLocation)
 
-            if (bookStatus == null) {
-                Log.d("savePosition", "bookstatus is null")
-                mRepository.insert(BookStatus(book.value!!))
-            } else {
-                Log.d(
-                    "savePosition",
-                    bookStatus.position_section.toString() + " " + bookStatus.position_offset
-                )
-                val bookPosition =
-                    if (book.value!!.curPage == null) BookPosition() else BookPosition(book.value!!.curPage!!.startBookPosition)
-                bookStatus.updatePosition(bookPosition)
-                mRepository.update(bookStatus)
+                if (bookStatus == null) {
+                    Log.d("savePosition", "bookstatus is null")
+                    mRepository.insert(BookStatus(book.value!!))
+                } else {
+                    Log.d(
+                        "savePosition",
+                        bookStatus.position_section.toString() + " " + bookStatus.position_offset
+                    )
+                    val bookPosition =
+                        if (book.value!!.curPage == null) BookPosition() else BookPosition(book.value!!.curPage!!.startBookPosition)
+                    bookStatus.updatePosition(bookPosition)
+                    mRepository.update(bookStatus)
+                }
             }
         }
     }

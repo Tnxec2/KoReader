@@ -5,10 +5,11 @@ import androidx.lifecycle.LiveData
 import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.dao.BookStatusDao
 import com.kontranik.koreader.database.model.BookStatus
+import kotlinx.coroutines.flow.Flow
 
 class BookStatusRepository(private val mBookStatusDao: BookStatusDao) {
 
-    suspend fun allBookStatus(): List<BookStatus> {
+    fun allBookStatus(): List<BookStatus> {
         return mBookStatusDao.getAll()
     }
 
@@ -16,7 +17,7 @@ class BookStatusRepository(private val mBookStatusDao: BookStatusDao) {
         BooksRoomDatabase.databaseWriteExecutor.execute { mBookStatusDao.insert(bookStatus) }
     }
 
-    suspend fun getBookStatusByPath(path: String): BookStatus? {
+    fun getBookStatusByPath(path: String): BookStatus? {
         return mBookStatusDao.getBookStatusByPath(path)
     }
 

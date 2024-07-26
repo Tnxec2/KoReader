@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.kontranik.koreader.database.BookStatusHelper
 import com.kontranik.koreader.database.model.BookStatus
+import kotlinx.coroutines.flow.Flow
+
 
 @Dao
 interface BookStatusDao {
@@ -22,13 +24,13 @@ interface BookStatusDao {
     fun deleteOlderCount(count: Int)
 
     @Query("SELECT * FROM ${BookStatusHelper.TABLE}")
-    suspend fun getAll(): List<BookStatus>
+    fun getAll(): List<BookStatus>
 
     @Query("SELECT * FROM ${BookStatusHelper.TABLE} ORDER BY ${BookStatusHelper.COLUMN_LAST_OPEN_TIME} DESC LIMIT :count")
     fun getLastOpened(count: Int): LiveData<List<BookStatus>>
 
     @Query("SELECT * FROM ${BookStatusHelper.TABLE} WHERE ${BookStatusHelper.COLUMN_PATH} = :path LIMIT 1")
-    suspend fun getBookStatusByPath(path: String): BookStatus?
+    fun getBookStatusByPath(path: String): BookStatus?
 
     @Query("SELECT * FROM ${BookStatusHelper.TABLE} WHERE ${BookStatusHelper.COLUMN_PATH} = :path LIMIT 1")
     fun getLiveDataBookStatusByPath(path: String): LiveData<BookStatus?>

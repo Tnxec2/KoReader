@@ -47,31 +47,34 @@ internal open class OnSwipeTouchListener(c: Context?) :
         }
 
         override fun onScroll(
-                e1: MotionEvent,
-                e2: MotionEvent,
-                distanceX: Float,
-                distanceY: Float): Boolean {
+            e1: MotionEvent?,
+            e2: MotionEvent,
+            distanceX: Float,
+            distanceY: Float
+        ): Boolean {
             // return super.onScroll(e1, e2, distanceX, distanceY)
             try {
-                val diffY = e2.y - e1.y
-                val diffX = e2.x - e1.x
-                if (abs(diffX) > abs(diffY)) {
-                    if (abs(diffX) > SWIPE_THRESHOLD) {
-                        if (diffX > 0) {
-                            onSlideRight(Point( e1.x.toInt(), e1.y.toInt()))
-                        } else {
-                            onSlideLeft(Point( e1.x.toInt(), e1.y.toInt()))
+                e1?.let {
+                    val diffY = e2.y - e1.y
+                    val diffX = e2.x - e1.x
+                    if (abs(diffX) > abs(diffY)) {
+                        if (abs(diffX) > SWIPE_THRESHOLD) {
+                            if (diffX > 0) {
+                                onSlideRight(Point(e1.x.toInt(), e1.y.toInt()))
+                            } else {
+                                onSlideLeft(Point(e1.x.toInt(), e1.y.toInt()))
+                            }
                         }
-                    }
-                } else {
-                    if (abs(diffY) > SWIPE_THRESHOLD) {
-                        if (diffY < 0) {
-                            onSlideUp(Point( e1.x.toInt(), e1.y.toInt()))
-                        } else {
-                            onSlideDown(Point( e1.x.toInt(), e1.y.toInt()))
+                    } else {
+                        if (abs(diffY) > SWIPE_THRESHOLD) {
+                            if (diffY < 0) {
+                                onSlideUp(Point(e1.x.toInt(), e1.y.toInt()))
+                            } else {
+                                onSlideDown(Point(e1.x.toInt(), e1.y.toInt()))
+                            }
                         }
-                    }
 
+                    }
                 }
             } catch (exception: Exception) {
                 exception.printStackTrace()
@@ -80,32 +83,34 @@ internal open class OnSwipeTouchListener(c: Context?) :
         }
 
         override fun onFling(
-                e1: MotionEvent,
-                e2: MotionEvent,
-                velocityX: Float,
-                velocityY: Float
+            e1: MotionEvent?,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
         ): Boolean {
             try {
-                val diffY = e2.y - e1.y
-                val diffX = e2.x - e1.x
-                if (abs(diffX) > abs(diffY)) {
-                    if ( abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                        // swipe
-                        if (abs(diffX) > SWIPE_THRESHOLD) {
-                            if (diffX > 0) {
-                                onSwipeRight()
-                            } else {
-                                onSwipeLeft()
+                e1?.let {
+                    val diffY = e2.y - it.y
+                    val diffX = e2.x - it.x
+                    if (abs(diffX) > abs(diffY)) {
+                        if (abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                            // swipe
+                            if (abs(diffX) > SWIPE_THRESHOLD) {
+                                if (diffX > 0) {
+                                    onSwipeRight()
+                                } else {
+                                    onSwipeLeft()
+                                }
                             }
                         }
-                    }
-                } else {
-                    if (abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                        if (abs(diffY) > SWIPE_THRESHOLD) {
-                            if (diffY < 0) {
-                                onSwipeUp()
-                            } else {
-                                onSwipeDown()
+                    } else {
+                        if (abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                            if (abs(diffY) > SWIPE_THRESHOLD) {
+                                if (diffY < 0) {
+                                    onSwipeUp()
+                                } else {
+                                    onSwipeDown()
+                                }
                             }
                         }
                     }

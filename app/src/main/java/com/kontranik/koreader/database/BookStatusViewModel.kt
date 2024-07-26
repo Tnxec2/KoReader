@@ -17,11 +17,13 @@ class BookStatusViewModel(private val mRepository: BookStatusRepository) : ViewM
 
     fun updateLastOpenTime(book: Book) {
         viewModelScope.launch {
-            val bookStatus = mRepository.getBookStatusByPath(book.fileLocation)
-            if (bookStatus != null) {
-                mRepository.updateLastOpenTime(bookStatus.id, Date().time)
-            } else {
-                mRepository.insert(BookStatus(book))
+            BooksRoomDatabase.databaseWriteExecutor.execute {
+                val bookStatus = mRepository.getBookStatusByPath(book.fileLocation)
+                if (bookStatus != null) {
+                    mRepository.updateLastOpenTime(bookStatus.id, Date().time)
+                } else {
+                    mRepository.insert(BookStatus(book))
+                }
             }
         }
     }
@@ -42,7 +44,7 @@ class BookStatusViewModel(private val mRepository: BookStatusRepository) : ViewM
 
     fun cleanup(context: Context) {
         Log.d("BookStatusCleanup", "Start: " + Date().toString())
-        viewModelScope.launch {
+        BooksRoomDatabase.databaseWriteExecutor.execute {
             val list = mRepository.allBookStatus()
             Log.d("BookStatusCleanup", "list size: " + list.size)
             var countDeleted = 0
@@ -71,10 +73,12 @@ class BookStatusViewModel(private val mRepository: BookStatusRepository) : ViewM
 
     fun deleteByPath(bookUri: String) {
         viewModelScope.launch {
-            val bookStatus = mRepository.getBookStatusByPath(bookUri)
+            BooksRoomDatabase.databaseWriteExecutor.execute {
+                val bookStatus = mRepository.getBookStatusByPath(bookUri)
 
-            if (bookStatus?.id == null) {
-                delete(bookStatus!!.id!!)
+                if (bookStatus?.id == null) {
+                    delete(bookStatus!!.id!!)
+                }
             }
         }
     }
