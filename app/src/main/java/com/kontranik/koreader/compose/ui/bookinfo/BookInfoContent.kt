@@ -24,8 +24,8 @@ import androidx.core.text.HtmlCompat
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLandscapeLightDark
 import com.kontranik.koreader.database.model.Author
 import de.kontranik.freebudget.ui.theme.AppTheme
-import de.kontranik.freebudget.ui.theme.paddingMedium
-import de.kontranik.freebudget.ui.theme.paddingSmall
+import com.kontranik.koreader.compose.theme.paddingMedium
+import com.kontranik.koreader.compose.theme.paddingSmall
 import kotlinx.coroutines.launch
 
 

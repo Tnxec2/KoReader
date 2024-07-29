@@ -1,0 +1,220 @@
+package com.kontranik.koreader.compose.ui.shared
+
+import android.content.SharedPreferences
+import android.graphics.Typeface
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import androidx.preference.PreferenceManager
+import com.kontranik.koreader.utils.PrefsHelper
+import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.paddingSmall
+
+
+@Composable
+fun DropdownListThemed(
+    itemList: List<String>,
+    selectedItem: String,
+    selectedPosition: Int,
+    onItemClick: (pos: Int, value: String) -> Unit,
+    modifier: Modifier = Modifier,
+    show: Boolean = false,
+    textSize: TextUnit,
+    typeface: Typeface,
+) {
+
+    val context = LocalContext.current
+    var showDropdown by rememberSaveable { mutableStateOf(show) }
+    val scrollState = rememberScrollState()
+    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+    val bg = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + (selectedPosition + 1), 0)
+    val colorBack = if (bg != 0) "0x" + Integer.toHexString(bg)
+    else context.resources.getString(
+        PrefsHelper.colorBackgroundDefaultArray[selectedPosition]
+    )
+
+    val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + (selectedPosition + 1), 0)
+    val colorText = if (co != 0) "0x" + Integer.toHexString(co)
+    else context.resources.getString(
+        PrefsHelper.colorForegroundDefaultArray[selectedPosition]
+    )
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        // button
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier
+                .clickable { showDropdown = !showDropdown; }
+                .background(Color(android.graphics.Color.parseColor(colorBack)))
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = selectedItem,
+                fontSize = textSize,
+                fontFamily = FontFamily(typeface),
+                color = Color(android.graphics.Color.parseColor(colorText)),
+                modifier = Modifier
+                    .padding(paddingSmall)
+                    .weight(1f)
+            )
+            Icon(
+                imageVector = Icons.Filled.KeyboardArrowDown,
+                contentDescription = "open",
+                tint = Color(android.graphics.Color.parseColor(colorText))
+            )
+        }
+
+        // dropdown list
+        Box {
+            if (showDropdown) {
+                DropdownListContentThemed(
+                    itemList = itemList,
+                    scrollState = scrollState,
+                    onItemClick = onItemClick,
+                    onClose = { showDropdown = false; },
+                    textSize = textSize,
+                    typeface = typeface,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DropdownListContentThemed(
+    itemList: List<String>,
+    onItemClick: (pos: Int, value: String) -> Unit,
+    scrollState: ScrollState,
+    onClose: () -> Unit,
+    textSize: TextUnit,
+    typeface: Typeface,
+    modifier: Modifier = Modifier
+) {
+
+    val context = LocalContext.current
+
+    Popup(
+        alignment = Alignment.TopCenter,
+        properties = PopupProperties(
+            excludeFromSystemGesture = true,
+        ),
+        // to dismiss on click outside
+        onDismissRequest = { onClose() }
+    ) {
+        LazyColumn(
+            modifier = modifier
+                .heightIn(max = 300.dp)
+                .padding(paddingSmall)
+                //.verticalScroll(state = scrollState)
+                .border(width = 1.dp, color = Color.Gray)
+                .background(color = MaterialTheme.colorScheme.background),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            itemsIndexed(itemList) { index, item ->
+                if (index != 0) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.primary, thickness = 0.5.dp)
+                }
+
+                val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+                val bg = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + (index + 1), 0)
+                val colorBack = if (bg != 0) "0x" + Integer.toHexString(bg)
+                else context.resources.getString(
+                    PrefsHelper.colorBackgroundDefaultArray[index]
+                )
+
+                val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + (index + 1), 0)
+                val colorText = if (co != 0) "0x" + Integer.toHexString(co)
+                else context.resources.getString(
+                    PrefsHelper.colorForegroundDefaultArray[index]
+                )
+
+                Box(
+                    modifier = Modifier
+                        .clickable {
+                            onItemClick(index, item)
+                            onClose()
+                        }
+                        .background(Color(android.graphics.Color.parseColor(colorBack)))
+                        .fillMaxWidth()
+                    ,
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = item,
+                        fontSize = textSize,
+                        fontFamily = FontFamily(typeface),
+                        color = Color(android.graphics.Color.parseColor(colorText)),
+                        modifier = Modifier
+                            .padding(paddingSmall)
+                    )
+                }
+            }
+
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun DropdownListPreview() {
+    val options = listOf("theme1", "theme2", "theme3", "theme4", "theme4")
+
+    var expanded by remember { mutableStateOf(false) }
+
+    AppTheme {
+        Surface {
+
+        DropdownListThemed(
+            itemList = options,
+            selectedItem = options[1],
+            selectedPosition = 1,
+            onItemClick = { pos, item ->  },
+            textSize = 13.sp,
+            typeface = Typeface.DEFAULT,
+            show = true,
+            )
+
+        }
+    }
+}
+
+

@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.kontranik.koreader.R
 import de.kontranik.freebudget.ui.theme.AppTheme
-import de.kontranik.freebudget.ui.theme.paddingMedium
-import de.kontranik.freebudget.ui.theme.paddingSmall
+import com.kontranik.koreader.compose.theme.paddingMedium
+import com.kontranik.koreader.compose.theme.paddingSmall
 
 
 @Composable

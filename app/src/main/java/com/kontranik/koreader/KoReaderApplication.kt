@@ -27,10 +27,12 @@ class KoReaderApplication : Application() {
      */
     lateinit var container: AppContainer
 
+    init {
+        mInstance = this
+    }
 
     override fun onCreate() {
         super.onCreate()
-        mInstance = this
         container = AppDataContainer(this, applicationScope)
     }
 

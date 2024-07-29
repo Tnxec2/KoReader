@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.compose.ui.shared.ConfirmDialog
@@ -44,8 +43,8 @@ import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLandscapeLightDark
 import com.kontranik.koreader.database.model.Author
 import de.kontranik.freebudget.ui.theme.AppTheme
-import de.kontranik.freebudget.ui.theme.paddingMedium
-import de.kontranik.freebudget.ui.theme.paddingSmall
+import com.kontranik.koreader.compose.theme.paddingMedium
+import com.kontranik.koreader.compose.theme.paddingSmall
 import kotlinx.coroutines.launch
 
 
