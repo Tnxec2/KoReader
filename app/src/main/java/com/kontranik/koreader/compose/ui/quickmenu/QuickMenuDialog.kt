@@ -29,7 +29,7 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickMenuDialog(
-    onFinishQuickMenuDialog: (textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorTheme: String) -> Unit,
+    onFinishQuickMenuDialog: (textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorThemeIndex: Int) -> Unit,
     onClose: () -> Unit,
     onAddBookmark: () -> Unit,
     onOpenBookmarks: () -> Unit,
@@ -43,9 +43,8 @@ fun QuickMenuDialog(
 
     var bookPath by remember {mutableStateOf<String?>(null)}
 
-    var themes by remember {mutableStateOf(getThemes(context))}
-    var colorTheme by remember {mutableStateOf("")}
-    var colorThemePosition by remember { mutableIntStateOf(0) }
+    val themes by remember {mutableStateOf(getThemes(context))}
+    var colorThemeIndex by remember { mutableIntStateOf(0) }
 
     var textSize by remember { mutableFloatStateOf(defaultTextSize) }
 
@@ -64,9 +63,8 @@ fun QuickMenuDialog(
 
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
-        colorTheme = prefs.getString(
-            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME,
-            PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT)
+        colorThemeIndex = prefs.getString(
+            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, null)?.toIntOrNull()
             ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
 
         val lineSpacingMultiplierString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, defaultLineSpacingMultiplier.toString() )
@@ -76,8 +74,6 @@ fun QuickMenuDialog(
         if ( letterSpacingString != null) letterSpacing = letterSpacingString.toFloat()
 
         textSize = prefs.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
-
-        println("$textSize, $defaultTextSize")
 
         val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
         val fontname = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.DEFAULT.name) ?: TypefaceRecord.DEFAULT.name
@@ -94,23 +90,22 @@ fun QuickMenuDialog(
 
     fun saveQuickSettings() {
         val prefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit()
-        prefEditor.putString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, colorTheme)
+        prefEditor.putString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, colorThemeIndex.toString())
         prefEditor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
         prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, lineSpacingMultiplier.toString())
         prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, letterSpacing.toString())
         prefEditor.apply()
 
-        // Return Data back to activity through the implemented listener
-        onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorTheme)
+        // Return Data back to activity
+        onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex)
     }
 
     ModalBottomSheet(onDismissRequest = { onClose() }) {
         QuickMenuDialogContent(
             themes = themes,
-            colorThemePosition = colorThemePosition,
+            colorThemePosition = colorThemeIndex,
             onChangeTheme = { pos, item ->
-                colorTheme = item
-                colorThemePosition = pos
+                colorThemeIndex = pos
                 onChangeColorThemeQuickMenuDialog(item, pos)
             },
             textSize = textSize,

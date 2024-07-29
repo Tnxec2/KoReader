@@ -265,18 +265,17 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
         textSize: Float,
         lineSpacingMultiplier: Float,
         letterSpacing: Float,
-        colorTheme: String
+        colorThemeIndex: Int
     ) {
         if (textSize != PrefsHelper.textSize
             || lineSpacingMultiplier != PrefsHelper.lineSpacingMultiplier
             || letterSpacing != PrefsHelper.letterSpacing
-            || colorTheme != PrefsHelper.colorTheme
+            || colorThemeIndex != PrefsHelper.colorThemeIndex
         ) {
             PrefsHelper.textSize = textSize
             PrefsHelper.lineSpacingMultiplier = lineSpacingMultiplier
             PrefsHelper.letterSpacing = letterSpacing
-            PrefsHelper.colorTheme = colorTheme
-
+            PrefsHelper.colorThemeIndex = colorThemeIndex
 
             pageViewSettings.value = pageViewSettings.value?.also { it ->
                 it.textSize = PrefsHelper.textSize

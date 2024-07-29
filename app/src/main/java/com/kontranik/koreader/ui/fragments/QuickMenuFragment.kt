@@ -20,7 +20,7 @@ class QuickMenuFragment : BottomSheetDialogFragment() {
 
     // 1. Defines the listener interface with a method passing back data result.
     interface QuickMenuDialogListener {
-        fun onFinishQuickMenuDialog(textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorTheme: String)
+        fun onFinishQuickMenuDialog(textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorThemeIndex: Int)
         fun onChangeTextSizeQuickMenuDialog(textSize: Float)
         fun onChangeLineSpacingQuickMenuDialog(lineSpacingMultiplier: Float)
         fun onChangeLetterSpacingQuickMenuDialog(letterSpacing: Float)
@@ -43,8 +43,8 @@ class QuickMenuFragment : BottomSheetDialogFragment() {
 
                 if (show)
                 QuickMenuDialog(
-                    onFinishQuickMenuDialog = { textSize, lineSpacingMultiplier, letterSpacing, colorTheme ->
-                        mListener?.onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorTheme)
+                    onFinishQuickMenuDialog = { textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex ->
+                        mListener?.onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex)
                         show = false
                         dismiss()
                     } ,

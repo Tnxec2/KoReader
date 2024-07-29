@@ -32,7 +32,6 @@ import com.kontranik.koreader.compose.ui.shared.DropdownListThemed
 import com.kontranik.koreader.compose.ui.shared.getLetterSpacing
 import com.kontranik.koreader.compose.ui.shared.getLineSpacings
 import de.kontranik.freebudget.ui.theme.AppTheme
-import com.kontranik.koreader.compose.theme.paddingBig
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 
@@ -68,9 +67,9 @@ fun QuickMenuDialogContent(
                 )
                 Row(Modifier.weight(0.5f)) {
                     DropdownListThemed(
-                        itemList = themes,
-                        selectedItem = themes[colorThemePosition],
-                        selectedPosition = colorThemePosition,
+                        themesList = themes,
+                        selectedTheme = themes[colorThemePosition],
+                        selectedThemeIndex = colorThemePosition,
                         onItemClick = { pos, item -> onChangeTheme(pos, item) },
                         textSize = TextUnit(textSize, TextUnitType.Sp),
                         typeface = selectedFont,

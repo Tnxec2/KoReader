@@ -1,5 +1,6 @@
 package com.kontranik.koreader.compose.ui.shared
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Typeface
 import androidx.compose.foundation.ScrollState
@@ -47,9 +48,9 @@ import com.kontranik.koreader.compose.theme.paddingSmall
 
 @Composable
 fun DropdownListThemed(
-    itemList: List<String>,
-    selectedItem: String,
-    selectedPosition: Int,
+    themesList: List<String>,
+    selectedTheme: String,
+    selectedThemeIndex: Int,
     onItemClick: (pos: Int, value: String) -> Unit,
     modifier: Modifier = Modifier,
     show: Boolean = false,
@@ -60,37 +61,24 @@ fun DropdownListThemed(
     val context = LocalContext.current
     var showDropdown by rememberSaveable { mutableStateOf(show) }
     val scrollState = rememberScrollState()
-    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-
-    val bg = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + (selectedPosition + 1), 0)
-    val colorBack = if (bg != 0) "0x" + Integer.toHexString(bg)
-    else context.resources.getString(
-        PrefsHelper.colorBackgroundDefaultArray[selectedPosition]
-    )
-
-    val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + (selectedPosition + 1), 0)
-    val colorText = if (co != 0) "0x" + Integer.toHexString(co)
-    else context.resources.getString(
-        PrefsHelper.colorForegroundDefaultArray[selectedPosition]
-    )
+    val (colorBack, colorText) = getThemeColors(context, selectedThemeIndex)
 
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // button
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = modifier
                 .clickable { showDropdown = !showDropdown; }
-                .background(Color(android.graphics.Color.parseColor(colorBack)))
+                .background(colorBack)
                 .fillMaxWidth()
         ) {
             Text(
-                text = selectedItem,
+                text = selectedTheme,
                 fontSize = textSize,
                 fontFamily = FontFamily(typeface),
-                color = Color(android.graphics.Color.parseColor(colorText)),
+                color = colorText,
                 modifier = Modifier
                     .padding(paddingSmall)
                     .weight(1f)
@@ -98,7 +86,7 @@ fun DropdownListThemed(
             Icon(
                 imageVector = Icons.Filled.KeyboardArrowDown,
                 contentDescription = "open",
-                tint = Color(android.graphics.Color.parseColor(colorText))
+                tint = colorText
             )
         }
 
@@ -106,7 +94,7 @@ fun DropdownListThemed(
         Box {
             if (showDropdown) {
                 DropdownListContentThemed(
-                    itemList = itemList,
+                    themesList = themesList,
                     scrollState = scrollState,
                     onItemClick = onItemClick,
                     onClose = { showDropdown = false; },
@@ -120,7 +108,7 @@ fun DropdownListThemed(
 
 @Composable
 fun DropdownListContentThemed(
-    itemList: List<String>,
+    themesList: List<String>,
     onItemClick: (pos: Int, value: String) -> Unit,
     scrollState: ScrollState,
     onClose: () -> Unit,
@@ -148,24 +136,12 @@ fun DropdownListContentThemed(
                 .background(color = MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            itemsIndexed(itemList) { index, item ->
+            itemsIndexed(themesList) { index, item ->
                 if (index != 0) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.primary, thickness = 0.5.dp)
                 }
 
-                val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-
-                val bg = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + (index + 1), 0)
-                val colorBack = if (bg != 0) "0x" + Integer.toHexString(bg)
-                else context.resources.getString(
-                    PrefsHelper.colorBackgroundDefaultArray[index]
-                )
-
-                val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + (index + 1), 0)
-                val colorText = if (co != 0) "0x" + Integer.toHexString(co)
-                else context.resources.getString(
-                    PrefsHelper.colorForegroundDefaultArray[index]
-                )
+                val (colorBack, colorText) = getThemeColors(context, index)
 
                 Box(
                     modifier = Modifier
@@ -173,7 +149,7 @@ fun DropdownListContentThemed(
                             onItemClick(index, item)
                             onClose()
                         }
-                        .background(Color(android.graphics.Color.parseColor(colorBack)))
+                        .background(colorBack)
                         .fillMaxWidth()
                     ,
                     contentAlignment = Alignment.Center
@@ -182,7 +158,7 @@ fun DropdownListContentThemed(
                         text = item,
                         fontSize = textSize,
                         fontFamily = FontFamily(typeface),
-                        color = Color(android.graphics.Color.parseColor(colorText)),
+                        color = colorText,
                         modifier = Modifier
                             .padding(paddingSmall)
                     )
@@ -191,6 +167,27 @@ fun DropdownListContentThemed(
 
         }
     }
+}
+
+@Composable
+private fun getThemeColors(
+    context: Context,
+    themesIndex: Int
+): Pair<Color, Color> {
+    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+    val bg = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + (themesIndex), 0)
+    val colorBack = if (bg != 0) "0x" + Integer.toHexString(bg)
+    else context.resources.getString(
+        PrefsHelper.colorBackgroundDefaultArray[themesIndex]
+    )
+
+    val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + (themesIndex), 0)
+    val colorText = if (co != 0) "0x" + Integer.toHexString(co)
+    else context.resources.getString(
+        PrefsHelper.colorForegroundDefaultArray[themesIndex]
+    )
+    return Pair(Color(android.graphics.Color.parseColor(colorBack)), Color(android.graphics.Color.parseColor(colorText)))
 }
 
 @Preview
@@ -204,9 +201,9 @@ private fun DropdownListPreview() {
         Surface {
 
         DropdownListThemed(
-            itemList = options,
-            selectedItem = options[1],
-            selectedPosition = 1,
+            themesList = options,
+            selectedTheme = options[1],
+            selectedThemeIndex = 1,
             onItemClick = { pos, item ->  },
             textSize = 13.sp,
             typeface = Typeface.DEFAULT,

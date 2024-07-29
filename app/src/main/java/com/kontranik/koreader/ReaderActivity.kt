@@ -347,10 +347,10 @@ class ReaderActivity :
         textSize: Float,
         lineSpacingMultiplier: Float,
         letterSpacing: Float,
-        colorTheme: String
+        colorThemeIndex: Int
     ) {
         mReaderActivityViewModel.finishQuickMenuSettings(
-            textSize, lineSpacingMultiplier, letterSpacing, colorTheme
+            textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex
         )
     }
 

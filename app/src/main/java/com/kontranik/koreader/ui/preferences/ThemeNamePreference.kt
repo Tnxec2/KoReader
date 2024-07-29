@@ -24,7 +24,7 @@ class ThemeNamePreference(context: Context, attrs: AttributeSet) :
 
     private var value = 0
 
-    private val colorTheme = attrs.getAttributeValue(null, "colorTheme") ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
+    private val colorTheme = attrs.getAttributeValue(null, "colorTheme") ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT.toString()
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)

@@ -56,7 +56,7 @@ class PrefsHelper() {
         const val PREF_BRIGHTNESS_MANUAL = "Manual"
         const val PREF_THEME_DEFAULT = "Manual"
 
-        const val PREF_COLOR_SELECTED_THEME_DEFAULT = "1"
+        const val PREF_COLOR_SELECTED_THEME_DEFAULT = 0
         const val PREF_KEY_COLOR_SELECTED_THEME = "selected_theme"
         const val PREF_KEY_BACKGROUND_IMAGE_URI = "backgroundImageTheme"
         const val PREF_KEY_SHOW_BACKGROUND_IMAGE = "backgroundImageEnableTheme"
@@ -179,7 +179,7 @@ class PrefsHelper() {
         /*
          *  Color
          */
-        var colorTheme: String = PREF_COLOR_SELECTED_THEME_DEFAULT
+        var colorThemeIndex: Int = PREF_COLOR_SELECTED_THEME_DEFAULT
         private val colorBackDefault: String = KoReaderApplication.getContext().resources.getString(R.string.color_theme1_backgroud_default)
         var colorBack: String = colorBackDefault
         val colorTextDefault: String = KoReaderApplication.getContext().resources.getString(R.string.color_theme1_foregroud_default)
@@ -322,10 +322,10 @@ class PrefsHelper() {
             screenOrientation =
                 prefs.getString(PREF_KEY_ORIENTATION, "PortraitSensor")
             screenBrightness = prefs.getString(PREF_KEY_BRIGHTNESS, "Manual")
-            colorTheme = prefs.getString(
+            colorThemeIndex = prefs.getString(
                 PREF_KEY_COLOR_SELECTED_THEME,
-                PREF_COLOR_SELECTED_THEME_DEFAULT
-            )
+                PREF_COLOR_SELECTED_THEME_DEFAULT.toString()
+            )?.toIntOrNull()
                 ?: PREF_COLOR_SELECTED_THEME_DEFAULT
         }
 
@@ -456,26 +456,26 @@ class PrefsHelper() {
 
         private fun loadMarginSettings(prefs: SharedPreferences) {
             var sMargin =
-                prefs.getString(PREF_KEY_MERGE_TOP + colorTheme, null)
+                prefs.getString(PREF_KEY_MERGE_TOP + colorThemeIndex, null)
             marginTop = try {
                 if (sMargin != null) Integer.parseInt(sMargin) else marginDefault
             } catch (e: Exception) {
                 marginDefault
             }
             sMargin =
-                prefs.getString(PREF_KEY_MERGE_BOTTOM + colorTheme, null)
+                prefs.getString(PREF_KEY_MERGE_BOTTOM + colorThemeIndex, null)
             marginBottom = try {
                 if (sMargin != null) Integer.parseInt(sMargin) else marginDefault
             } catch (e: Exception) {
                 marginDefault
             }
-            sMargin = prefs.getString(PREF_KEY_MERGE_LEFT + colorTheme, null)
+            sMargin = prefs.getString(PREF_KEY_MERGE_LEFT + colorThemeIndex, null)
             marginLeft = try {
                 if (sMargin != null) Integer.parseInt(sMargin) else marginDefault
             } catch (e: Exception) {
                 marginDefault
             }
-            sMargin = prefs.getString(PREF_KEY_MERGE_RIGHT + colorTheme, null)
+            sMargin = prefs.getString(PREF_KEY_MERGE_RIGHT + colorThemeIndex, null)
             marginRight = try {
                 if (sMargin != null) Integer.parseInt(sMargin) else marginDefault
             } catch (e: Exception) {
@@ -519,37 +519,36 @@ class PrefsHelper() {
 
         fun loadColorThemeSettings(): PageViewColorSettings {
             val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(KoReaderApplication.getContext())
-
-            var co = prefs.getInt(PREF_KEY_COLOR_BACK + colorTheme, 0)
+            var co = prefs.getInt(PREF_KEY_COLOR_BACK + colorThemeIndex+1, 0)
             colorBack =
                 if (co != 0) "#" + Integer.toHexString(co)
-                else KoReaderApplication.getContext().resources.getString(colorBackgroundDefaultArray[colorTheme.toInt()-1])
+                else KoReaderApplication.getContext().resources.getString(colorBackgroundDefaultArray[colorThemeIndex])
 
-            co = prefs.getInt(PREF_KEY_COLOR_TEXT + colorTheme, 0)
+            co = prefs.getInt(PREF_KEY_COLOR_TEXT + colorThemeIndex, 0)
             colorText =
                 if (co != 0) "#" + Integer.toHexString(co)
-                else KoReaderApplication.getContext().resources.getString(colorForegroundDefaultArray[colorTheme.toInt()-1])
+                else KoReaderApplication.getContext().resources.getString(colorForegroundDefaultArray[colorThemeIndex])
 
-            co = prefs.getInt(PREF_KEY_COLOR_LINKTEXT + colorTheme, 0)
+            co = prefs.getInt(PREF_KEY_COLOR_LINKTEXT + colorThemeIndex, 0)
             colorLinkText =
                 if (co != 0) "#" + Integer.toHexString(co)
-                else KoReaderApplication.getContext().resources.getString(colorLinkDefaultArray[colorTheme.toInt()-1])
+                else KoReaderApplication.getContext().resources.getString(colorLinkDefaultArray[colorThemeIndex])
 
-            co = prefs.getInt(PREF_KEY_COLOR_INFOTEXT + colorTheme, 0)
+            co = prefs.getInt(PREF_KEY_COLOR_INFOTEXT + colorThemeIndex, 0)
             colorInfoText =
                 if (co != 0) "#" + Integer.toHexString(co)
-                else KoReaderApplication.getContext().resources.getString(colorInfotextDefaultArray[colorTheme.toInt()-1])
+                else KoReaderApplication.getContext().resources.getString(colorInfotextDefaultArray[colorThemeIndex])
 
             showBackgroundImage = prefs.getBoolean(
-                PREF_KEY_SHOW_BACKGROUND_IMAGE + colorTheme,
+                PREF_KEY_SHOW_BACKGROUND_IMAGE + colorThemeIndex,
                 false
             )
             backgroundImageUri = prefs.getString(
-                PREF_KEY_BACKGROUND_IMAGE_URI + colorTheme,
+                PREF_KEY_BACKGROUND_IMAGE_URI + colorThemeIndex,
                 null
             )
             backgroundImageTiledRepeat = prefs.getBoolean(
-                PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT + colorTheme,
+                PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT + colorThemeIndex,
                 false
             )
             return PageViewColorSettings(

@@ -29,17 +29,15 @@ open class PageSplitterHtml(context: Context) : FontsHelper(context) {
         val lineSpacingExtra: Float = textView.lineSpacingExtra
 
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val colorTheme = prefs.getString(
-            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME,
-            PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT)
+
+        val colorThemeIndex = prefs.getString(
+            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, null)?.toIntOrNull()
             ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
 
-
-        val colorThemeIndex = colorTheme.toInt()
-        val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + colorTheme, 0)
+        val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + colorThemeIndex+1, 0)
         val colorText = Color.parseColor(
             if (co != 0) "#" + Integer.toHexString(co)
-            else context.resources.getString(PrefsHelper.colorForegroundDefaultArray[colorThemeIndex-1])
+            else context.resources.getString(PrefsHelper.colorForegroundDefaultArray[colorThemeIndex])
         )
 
         content =
