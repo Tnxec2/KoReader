@@ -89,6 +89,7 @@ dependencies {
     // implementation(libs.androidx.hilt.navigation.compose)
 
 
+    implementation("androidx.fragment:fragment-ktx:1.5.2") // use Compose with Fragments
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
 

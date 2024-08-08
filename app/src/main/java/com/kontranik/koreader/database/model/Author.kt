@@ -70,3 +70,9 @@ class Author(
     }
 
 }
+
+val mocupAuthors = mutableListOf(
+    Author(0L, "Fannie", null,"Rothfuss"),
+    Author(2L, "Darline", null,"Amis"),
+    Author(3L, "Patti", null,"Barrowman"),
+)

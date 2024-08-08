@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.compose.ui.shared.ConfirmDialog
@@ -64,10 +67,14 @@ fun BookInfoScreen(
     onReadBook: (bookUri: String)->Unit,
     onDeleteBook: (bookUri: String)-> Unit,
     modifier: Modifier = Modifier,
-    viewModel: IBookInfoViewModell = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: BookInfoViewModell = viewModel(factory = AppViewModelProvider.Factory),
 ) {
 
     val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = bookUri) {
+        viewModel.readBookInfo(bookUri)
+    }
 
     val bookInfoDetails = viewModel.bookInfoUiState.bookInfoDetails
     val canDeleteState = viewModel.canDeleteState
@@ -81,7 +88,10 @@ fun BookInfoScreen(
     }
 
     if (showDeleteDilaog) {
-        ConfirmDialog(text = stringResource(R.string.sure_delete_book), onDismissRequest = { showDeleteDilaog = false }, onConfirmation = { onDeleteBook(bookUri) })
+        ConfirmDialog(
+            text = stringResource(R.string.sure_delete_book),
+            onDismissRequest = { showDeleteDilaog = false },
+            onConfirmation = { onDeleteBook(bookUri) })
     }
 
     Scaffold(
@@ -89,20 +99,27 @@ fun BookInfoScreen(
             AppBar (
             title = R.string.bookinfo,
             drawerState = drawerState,
-                appBarActions = listOf {
-                    if (canDeleteState) IconButton(onClick = { showDeleteDilaog = true }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_delete_24),
-                            contentDescription = "Delete",
-                        )
-                    }
-                    IconButton(onClick = { onReadBook(bookUri) }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_iconmonstr_book_opened),
-                            contentDescription = "Read",
-                        )
-                    }
+            navigationIcon = {
+                IconButton(onClick = { coroutineScope.launch { navigateBack() } }) {
+                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(
+                        id = R.string.back))
                 }
+            },
+            appBarActions = listOf {
+                if (canDeleteState) IconButton(onClick = { showDeleteDilaog = true }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_delete_24),
+                        contentDescription = "Delete",
+                    )
+                }
+                IconButton(onClick = { onReadBook(bookUri) }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_iconmonstr_book_opened),
+                        contentDescription = "Read",
+                    )
+                }
+            }
             )
 
          },
@@ -167,6 +184,8 @@ fun BookInfoScreen(
             }
         }
     }
+
+
 }
 
 @PreviewPortraitLandscapeLightDark
@@ -177,12 +196,12 @@ private fun BookInfoScreenPreview() {
     AppTheme {
         BookInfoScreen(
             drawerState = DrawerState(DrawerValue.Closed),
-            bookUri = "testUri",
+            bookUri = "preview",
             navigateBack = {},
             navigateToAuthor = {},
             onReadBook = { },
             onDeleteBook = { },
-            viewModel = BookInfoViewModellPreview( context)
+            viewModel = BookInfoViewModell(SavedStateHandle(),  context)
         )
     }
 }

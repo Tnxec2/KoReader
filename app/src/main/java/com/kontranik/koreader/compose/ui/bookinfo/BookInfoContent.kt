@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
+import androidx.lifecycle.SavedStateHandle
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLandscapeLightDark
 import com.kontranik.koreader.database.model.Author
 import de.kontranik.freebudget.ui.theme.AppTheme
@@ -108,7 +109,7 @@ fun BookInfoContent(
 @Composable
 private fun BookInfoContentPreview() {
     val context = LocalContext.current
-    val viewModel = BookInfoViewModellPreview(context)
+    val viewModel = BookInfoViewModell(SavedStateHandle(), context)
     val bookInfoDetails = viewModel.bookInfoUiState.bookInfoDetails
     AppTheme {
         BookInfoContent(
