@@ -1,14 +1,11 @@
 package com.kontranik.koreader.ui.fragments
 
-import android.app.Application
 import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.FileItem
@@ -19,16 +16,16 @@ const val PREF_EXTERNAL_PATHS = "ExternalPaths"
 
 class FileChooseFragmentViewModel(
     val context: Context) : ViewModel()  {
-    private val externalPaths = MutableLiveData(mutableListOf<String>())
+    private var externalPaths = mutableListOf<String>()
+    private var selectedDocumentFileUriString: String? = null
+    private var lastPath: String? = null
 
     val fileItemList = mutableStateOf(listOf<FileItem>())
 
-    val scrollToDocumentFileUriString = MutableLiveData<String?>()
-    private val selectedDocumentFileUriString = MutableLiveData<String?>()
-    private val lastPath = MutableLiveData<String?>()
+    val scrollToDocumentFileUriString = mutableStateOf<String?>(null)
 
-    val isVisibleImageButtonFilechooseAddStorage = mutableStateOf<Boolean>(false)
-    val showConfirmSelectStorageDialog = mutableStateOf<Boolean>(false)
+    val isVisibleImageButtonFilechooseAddStorage = mutableStateOf(false)
+    val showConfirmSelectStorageDialog = mutableStateOf(false)
 
 
     init {
@@ -41,8 +38,9 @@ class FileChooseFragmentViewModel(
             .getSharedPreferences(
                 PREFS_FILE,
                 Context.MODE_PRIVATE)
+
         if ( settings!!.contains(PREF_LAST_PATH) ) {
-            this.lastPath.value = settings.getString(PREF_LAST_PATH, null)
+            this.lastPath = settings.getString(PREF_LAST_PATH, null)
             extractDirectory()
         }
 
@@ -51,22 +49,22 @@ class FileChooseFragmentViewModel(
 
             val eP = settings.getStringSet(PREF_EXTERNAL_PATHS, null)
             if ( eP != null) {
-                externalPaths.value = eP.toMutableList()
+                externalPaths = eP.toMutableList()
             } else {
-                externalPaths.value = mutableListOf()
+                externalPaths = mutableListOf()
             }
         }
     }
 
     private fun extractDirectory() {
-        if ( lastPath.value != null) {
-            val index = lastPath.value!!.lastIndexOf("%2F")
+        lastPath?.let {
+            val index = it.lastIndexOf("%2F")
             val parent = if ( index > 0)  {
-                lastPath.value!!.substring(0, index)
-            } else lastPath.value!!
+                it.substring(0, index)
+            } else it
             val directoryUri = Uri.parse(parent).toString()
             // val sf = DocumentFile.fromSingleUri(applicationContext, directoryUri)
-            selectedDocumentFileUriString.value = directoryUri
+            selectedDocumentFileUriString = directoryUri
         }
     }
 
@@ -87,30 +85,34 @@ class FileChooseFragmentViewModel(
                 Context.MODE_PRIVATE)
         val prefEditor = settings.edit()
 
-        if ( externalPaths.value != null)
-            prefEditor.putStringSet(PREF_EXTERNAL_PATHS, externalPaths.value!!.toMutableSet())
+        prefEditor.putStringSet(PREF_EXTERNAL_PATHS, externalPaths.toMutableSet())
         prefEditor.apply()
     }
 
 
     private fun loadPath() {
-        if ( selectedDocumentFileUriString.value == null ) storageList()
+        if ( selectedDocumentFileUriString == null ) {
+            storageList()
+            return
+        }
 
         var lastPathIsInStorageList = false
-        if (lastPath.value != null) {
-            externalPaths.value?.forEach {
-                if (lastPath.value!!.contains(it)) lastPathIsInStorageList = true
+        lastPath?.let {
+            externalPaths.forEach {
+                if (it.contains(it)) lastPathIsInStorageList = true
             }
         }
-        if (!lastPathIsInStorageList) storageList()
+        if (!lastPathIsInStorageList) {
+            storageList()
+            return
+        }
 
-        getFileList(selectedDocumentFileUriString.value)
+        getFileList(selectedDocumentFileUriString)
 
-        if ( lastPath.value != null) {
+        lastPath?.let {
             for (pos in 0 until fileItemList.value.size) {
                 val uriString = fileItemList.value[pos].uriString
-                if (uriString == lastPath.value!!) {
-                    //(binding.reciclerViewFiles.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
+                if (uriString == it) {
                     scrollToDocumentFileUriString.value = uriString
                 }
             }
@@ -120,15 +122,15 @@ class FileChooseFragmentViewModel(
     fun storageList() {
         isVisibleImageButtonFilechooseAddStorage.value = true
 
-        if ( externalPaths.value == null || externalPaths.value!!.isEmpty() ) {
+        val fileList = mutableListOf<FileItem>()
+        if ( externalPaths.isEmpty() ) {
             showConfirmSelectStorageDialog.value = true
             return
         }
 
-        val fileList = mutableListOf<FileItem>()
         try {
-            val iterator = externalPaths.value?.iterator()
-            while(iterator?.hasNext() == true) {
+            val iterator = externalPaths.iterator()
+            while(iterator.hasNext()) {
                 val path = iterator.next()
                 val directoryUri = Uri.parse(path)
 
@@ -150,8 +152,8 @@ class FileChooseFragmentViewModel(
     private fun getFileList(fileItem: FileItem) {
         isVisibleImageButtonFilechooseAddStorage.value = false
         getFileList(fileItem.uriString)
-        scrollToDocumentFileUriString.value = selectedDocumentFileUriString.value
-        selectedDocumentFileUriString.value = fileItem.uriString
+        scrollToDocumentFileUriString.value = selectedDocumentFileUriString
+        selectedDocumentFileUriString = fileItem.uriString
     }
 
     private fun getFileList(documentFilePath: String?) {
@@ -179,13 +181,13 @@ class FileChooseFragmentViewModel(
     }
 
     fun deleteStorage(position: Int) {
-        externalPaths.value!!.removeAt(position)
+        externalPaths.removeAt(position)
         savePrefsExternalPaths()
         storageList()
     }
 
     fun addStoragePath(uri: String) {
-        externalPaths.value!!.add(uri)
+        externalPaths.add(uri)
         savePrefsExternalPaths()
         storageList()
     }
@@ -201,7 +203,7 @@ class FileChooseFragmentViewModel(
 
         if (selectedFileItem.isDir) {
             if ( selectedFileItem.isRoot ) {
-                if ( externalPaths.value!!.contains(selectedFileItem.uriString) )
+                if ( externalPaths.contains(selectedFileItem.uriString) )
                     getFileList(selectedFileItem)
                 else
                     storageList()

@@ -1,14 +1,9 @@
 package com.kontranik.koreader.ui.fragments
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.ui.platform.ComposeView
@@ -26,7 +21,6 @@ class FileChooseFragment : Fragment(),
 
     private lateinit var mReaderActivityViewModel: ReaderActivityViewModel
     private lateinit var mFileChooseFragmentViewModel: FileChooseFragmentViewModel
-
     private lateinit var mLibraryViewModel: LibraryViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -44,11 +38,6 @@ class FileChooseFragment : Fragment(),
                     drawerState = DrawerState(DrawerValue.Closed),
                     navigateBack = { requireActivity().supportFragmentManager.popBackStack() },
                     navigateToBookInfo = { openBookInfo(it) },
-
-                    onAddToStorage = {
-                        performFileSearchToAddStorage()
-                    },
-                    readerActivityViewModel = mReaderActivityViewModel,
                     fileChooseFragmentViewModel = mFileChooseFragmentViewModel,
                     libraryViewModel = mLibraryViewModel,
                 )
@@ -87,34 +76,4 @@ class FileChooseFragment : Fragment(),
     override fun onBookInfoFragmentDeleteBook(bookUri: String) {
         deleteBook(bookUri)
     }
-
-    /**
-     * Fires an intent to spin up the "file chooser" UI and select a directory.
-     */
-    private fun performFileSearchToAddStorage() {
-        Toast.makeText(
-            requireContext(),
-            "Select directory or storage from dialog, and grant access",
-            Toast.LENGTH_LONG)
-            .show()
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-
-        intent.flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION   // write permission to remove book
-        startForResultPickFileToStorage.launch(Intent.createChooser(intent, "Select file storage"))
-    }
-
-    private val startForResultPickFileToStorage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            result: ActivityResult ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // Handle the Intent
-            result.data?.data?.let {
-                requireActivity().contentResolver.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-                mFileChooseFragmentViewModel.addStoragePath(it.toString())
-            }
-        }
-    }
-
 }

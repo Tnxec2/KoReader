@@ -1,9 +1,12 @@
 package com.kontranik.koreader.compose.ui.openfile
 
+import android.provider.DocumentsContract
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,6 +26,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,13 +43,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
-import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
@@ -63,37 +68,60 @@ import kotlinx.coroutines.launch
 fun OpenFileScreen(
     drawerState: DrawerState,
     navigateBack: () -> Unit,
-    onAddToStorage: () -> Unit,
     navigateToBookInfo: (bookPath: String) -> Unit,
     modifier: Modifier = Modifier,
     fileChooseFragmentViewModel: FileChooseFragmentViewModel = viewModel(factory = AppViewModelProvider.Factory),
     libraryViewModel: LibraryViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    readerActivityViewModel: ReaderActivityViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    val listState = rememberScrollState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val listState = rememberLazyListState()
 
     val fileItemListState = fileChooseFragmentViewModel.fileItemList
 
     var showConfirmOpenStorageDialog by remember { mutableStateOf(false) }
     var deleteStoragePosition by remember { mutableStateOf<Int?>(null) }
 
+    val storagePicker = rememberLauncherForActivityResult(
+         contract = GetStorageToOpen(),
+         onResult = { uri ->
+             uri?.let {
+                 coroutineScope.launch {
+                    println("storagePicker: $it")
+                    fileChooseFragmentViewModel.addStoragePath(it.toString())
+                 }
+             }
+         })
+
     LaunchedEffect(key1 = fileChooseFragmentViewModel.scrollToDocumentFileUriString) {
         fileChooseFragmentViewModel.scrollToDocumentFileUriString.value?.let {
-            listState.scrollTo(
+            listState.scrollToItem(
                 fileChooseFragmentViewModel.getPositionInFileItemList()
             )
+            val layoutInfo = listState.layoutInfo
+            val viewportHeight =
+                layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset
+            val lastItem = listState.layoutInfo.visibleItemsInfo.last()
+            if (lastItem.offset + lastItem.size > viewportHeight) {
+                listState.scrollBy(lastItem.offset + lastItem.size - viewportHeight.toFloat())
+            }
         }
     }
 
     LaunchedEffect(key1 = fileChooseFragmentViewModel.showConfirmSelectStorageDialog) {
+        println(fileChooseFragmentViewModel.showConfirmSelectStorageDialog.value)
         showConfirmOpenStorageDialog = fileChooseFragmentViewModel.showConfirmSelectStorageDialog.value
     }
 
     fun addToStorage() {
-        onAddToStorage()
+        coroutineScope.launch {
+            println("addToStorage")
+            snackbarHostState.showSnackbar("Select directory or storage from dialog, and grant access")
+            storagePicker.launch("*/*")
+        }
     }
 
 
@@ -104,8 +132,8 @@ fun OpenFileScreen(
             isCancelable = false,
             onDismissRequest = { showConfirmOpenStorageDialog = false },
             onConfirmation = {
-                addToStorage()
                 showConfirmOpenStorageDialog = false
+                addToStorage()
             })
     }
 
@@ -115,13 +143,15 @@ fun OpenFileScreen(
             text = stringResource(R.string.sure_delete_storage),
             onDismissRequest = { deleteStoragePosition = null },
             onConfirmation = {
-                    fileChooseFragmentViewModel.deleteStorage(it)
+                fileChooseFragmentViewModel.deleteStorage(it)
                 deleteStoragePosition = null
-
             })
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             AppBar (
                 title = R.string.choose_file,
@@ -138,7 +168,7 @@ fun OpenFileScreen(
                         AppBarAction(appBarAction = AppBarAction(
                             icon = R.drawable.ic_iconmonstr_folder_add,
                             description = R.string.add_to_storage,
-                            onClick = { addToStorage() }
+                            onClick = { showConfirmOpenStorageDialog = true }
                         ))
                     if (!fileChooseFragmentViewModel.isVisibleImageButtonFilechooseAddStorage.value)
                         AppBarAction(appBarAction = AppBarAction(
@@ -160,7 +190,7 @@ fun OpenFileScreen(
     ) { padding ->
 
         Column(Modifier.padding(padding)) {
-            LazyColumn() {
+            LazyColumn(state = listState) {
                 itemsIndexed(
                     fileItemListState.value.toList(),
                     key = {
@@ -288,18 +318,4 @@ private fun FileMenuItemPreview() {
         )
         }
     }
-}
-
-@Preview
-@Composable
-private fun OpenFileScreenPreview() {
-    AppTheme {
-        OpenFileScreen(
-            drawerState = DrawerState(DrawerValue.Closed),
-            navigateBack = {  },
-            onAddToStorage = { },
-            navigateToBookInfo = {},
-        )
-    }
-
 }

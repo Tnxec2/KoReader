@@ -27,9 +27,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.kontranik.koreader.utils.FileItem
 import com.kontranik.koreader.R
-import com.kontranik.koreader.compose.theme.paddingBig
 import com.kontranik.koreader.compose.theme.paddingMedium
-import com.kontranik.koreader.compose.theme.paddingSmall
 
 @Composable
 fun FielItemPopupMenu(
@@ -81,7 +79,7 @@ fun FielItemPopupMenu(
                         .clickable { onDelete() }
                 ) {
                     Text(
-                        text = stringResource(id = R.string.delete_scan_point),
+                        text = stringResource(id = R.string.title_delete_storage),
                         modifier = Modifier
                             .padding(horizontal = paddingMedium, vertical = paddingMedium)
                     )
