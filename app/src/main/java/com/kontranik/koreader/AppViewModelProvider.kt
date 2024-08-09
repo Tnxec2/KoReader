@@ -8,6 +8,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kontranik.koreader.compose.ui.bookinfo.BookInfoViewModell
 import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.BookmarksViewModel
+import com.kontranik.koreader.ui.fragments.FileChooseFragmentViewModel
+import com.kontranik.koreader.ui.fragments.LibraryViewModel
 
 /**
  * Provides Factory to create instance of ViewModel for the entire app
@@ -40,6 +42,19 @@ object AppViewModelProvider {
             )
         }
 
+        initializer {
+            FileChooseFragmentViewModel(
+                koReaderApplication().applicationContext
+            )
+        }
+
+        initializer {
+            LibraryViewModel(
+                this.koReaderApplication().libraryItemRepository,
+                this.koReaderApplication().authorsRepository,
+                this.koReaderApplication().applicationScope
+            )
+        }
     }
 }
 

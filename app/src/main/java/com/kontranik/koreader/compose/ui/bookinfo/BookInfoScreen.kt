@@ -89,6 +89,7 @@ fun BookInfoScreen(
 
     if (showDeleteDilaog) {
         ConfirmDialog(
+            title = "Delete Book",
             text = stringResource(R.string.sure_delete_book),
             onDismissRequest = { showDeleteDilaog = false },
             onConfirmation = { onDeleteBook(bookUri) })

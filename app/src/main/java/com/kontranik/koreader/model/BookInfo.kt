@@ -1,6 +1,8 @@
 package com.kontranik.koreader.model
 
 import android.graphics.Bitmap
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.utils.FileItem
 import java.io.Serializable
@@ -32,4 +34,16 @@ class BookInfo(
     override fun toString(): String {
         return "BookInfo. \n Title: " + title + "\n Authors: " + authorsAsString() + "\n path: " + path
     }
+}
+
+fun BookInfo.toBookInfoComposable(): BookInfoComposable {
+    return BookInfoComposable(
+        title = title ?: "",
+        cover = cover?.asImageBitmap() ?: ImageBitmap(50, 100),
+        authors = authors ?: mutableListOf(),
+        authorsAsString = authorsAsString(),
+        filename = filename,
+        path = path,
+        annotation = annotation
+    )
 }

@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
@@ -55,7 +56,7 @@ open class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingL
 
         mReaderActivityViewModel = ViewModelProvider(requireActivity())[ReaderActivityViewModel::class.java]
 
-        mFileChooseFragmentViewModel = ViewModelProvider(this)[FileChooseFragmentViewModel::class.java]
+        mFileChooseFragmentViewModel = ViewModelProvider(this, AppViewModelProvider.Factory)[FileChooseFragmentViewModel::class.java]
 
         mLibraryViewModel.createNotificationChannel()
 

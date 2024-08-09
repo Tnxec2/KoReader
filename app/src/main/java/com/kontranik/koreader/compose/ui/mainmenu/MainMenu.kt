@@ -118,7 +118,6 @@ fun MainMenuItem(
             .clickable { onClick() }
             .fillMaxWidth()
             .padding(horizontal = paddingMedium)
-            .padding(bottom = paddingMedium)
     ) {
         Image(
             painter = painterResource(id = painterId),

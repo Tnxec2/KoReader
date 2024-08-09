@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -28,9 +30,11 @@ import com.kontranik.koreader.compose.theme.paddingSmall
 
 @Composable
 fun ConfirmDialog(
+    title: String?,
     text: String,
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
+    isCancelable: Boolean = true,
 ) {
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
@@ -47,6 +51,15 @@ fun ConfirmDialog(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if (title != null) Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.Center),
+                    textAlign = TextAlign.Center,
+                )
+
                 Text(
                     text = text,
                     modifier = Modifier
@@ -61,17 +74,18 @@ fun ConfirmDialog(
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                 ) {
-                    TextButton(
-                        onClick = { onDismissRequest() },
-                        modifier = Modifier.padding(paddingSmall),
-                    ) {
-                        Text(stringResource(R.string.cancel))
-                    }
+                    if (isCancelable)
+                        TextButton(
+                            onClick = { onDismissRequest() },
+                            modifier = Modifier.padding(paddingSmall),
+                        ) {
+                            Text(stringResource(android.R.string.cancel))
+                        }
                     TextButton(
                         onClick = { onConfirmation() },
                         modifier = Modifier.padding(paddingSmall),
                     ) {
-                        Text(stringResource(R.string.ok_delete_book))
+                        Text(stringResource(android.R.string.ok))
                     }
                 }
             }
@@ -79,14 +93,29 @@ fun ConfirmDialog(
     }
 }
 
-@PreviewLightDark
+@Preview
 @Composable
 private fun ConfirmDialogPreview() {
     AppTheme {
         ConfirmDialog(
+            title = "Title",
             text = stringResource(id = R.string.sure_delete_book),
-            onDismissRequest = { /*TODO*/ }) {
+            onDismissRequest = {  },
+            onConfirmation = { },
+            )
+    }
+}
 
-        }
+@Preview
+@Composable
+private fun ConfirmDialogPreview2() {
+    AppTheme {
+        ConfirmDialog(
+            title = "Title",
+            text = stringResource(id = R.string.sure_delete_book),
+            onDismissRequest = {  },
+            onConfirmation = { },
+            isCancelable = false
+        )
     }
 }

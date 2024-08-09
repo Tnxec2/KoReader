@@ -4,9 +4,12 @@ import android.app.Application
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.FileItem
 
@@ -14,26 +17,27 @@ const val PREFS_FILE = "OpenFileActivitySettings"
 const val PREF_LAST_PATH = "LastPath"
 const val PREF_EXTERNAL_PATHS = "ExternalPaths"
 
-class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app)  {
+class FileChooseFragmentViewModel(
+    val context: Context) : ViewModel()  {
     private val externalPaths = MutableLiveData(mutableListOf<String>())
 
-    val fileItemList = MutableLiveData(mutableListOf<FileItem>())
+    val fileItemList = mutableStateOf(listOf<FileItem>())
 
     val scrollToDocumentFileUriString = MutableLiveData<String?>()
     private val selectedDocumentFileUriString = MutableLiveData<String?>()
     private val lastPath = MutableLiveData<String?>()
 
-    val isVisibleImageButtonFilechooseAddStorage = MutableLiveData<Boolean>(false)
-    val showConfirmSelectStorageDialog = MutableLiveData<Boolean>(false)
-    val showOpenBookInfo = MutableLiveData<String?>()
-    val removedItemIndex = MutableLiveData<Int>()
+    val isVisibleImageButtonFilechooseAddStorage = mutableStateOf<Boolean>(false)
+    val showConfirmSelectStorageDialog = mutableStateOf<Boolean>(false)
+
+
     init {
         loadPrefs()
         loadPath()
     }
 
     private fun loadPrefs() {
-        val settings = app
+        val settings = context
             .getSharedPreferences(
                 PREFS_FILE,
                 Context.MODE_PRIVATE)
@@ -67,7 +71,7 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
     }
 
     fun savePrefsOpenedBook(uriString: String) {
-        val settings = app
+        val settings = context
             .getSharedPreferences(
                 PREFS_FILE,
                 Context.MODE_PRIVATE)
@@ -77,7 +81,7 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
     }
 
     private fun savePrefsExternalPaths() {
-        val settings = app
+        val settings = context
             .getSharedPreferences(
                 PREFS_FILE,
                 Context.MODE_PRIVATE)
@@ -103,8 +107,8 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
         getFileList(selectedDocumentFileUriString.value)
 
         if ( lastPath.value != null) {
-            for (pos in 0 until fileItemList.value!!.size) {
-                val uriString = fileItemList.value!![pos].uriString
+            for (pos in 0 until fileItemList.value.size) {
+                val uriString = fileItemList.value[pos].uriString
                 if (uriString == lastPath.value!!) {
                     //(binding.reciclerViewFiles.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
                     scrollToDocumentFileUriString.value = uriString
@@ -128,7 +132,7 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
                 val path = iterator.next()
                 val directoryUri = Uri.parse(path)
 
-                val documentsTree = DocumentFile.fromTreeUri(app.applicationContext, directoryUri)
+                val documentsTree = DocumentFile.fromTreeUri(context, directoryUri)
                 if ( documentsTree == null || ! documentsTree.isDirectory || ! documentsTree.canRead() ) {
                     iterator.remove()
                 } else {
@@ -155,23 +159,22 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
             storageList()
             return
         } else {
-            val fl = FileHelper.getFileListDC(app.applicationContext, documentFilePath)
+            val fl = FileHelper.getFileListDC(context, documentFilePath)
             fileItemList.value = fl.toMutableList()
         }
     }
 
     fun getPositionInFileItemList(): Int {
         if (scrollToDocumentFileUriString.value == null) return 0
-        val position = fileItemList.value!!.indexOfFirst { it.uriString.equals(scrollToDocumentFileUriString.value) }
+        val position = fileItemList.value.indexOfFirst { it.uriString.equals(scrollToDocumentFileUriString.value) }
         return if (position > 0) position
         else 0
     }
 
     fun removeBookFromList(uriString: String?) {
         if ( uriString != null) {
-            val index = fileItemList.value!!.indexOfFirst { it.uriString == uriString }
-            fileItemList.value!!.removeAt(index)
-            removedItemIndex.value = index
+            val indexToRemove = fileItemList.value.indexOfFirst { it.uriString == uriString }
+            fileItemList.value = fileItemList.value.filterIndexed{ index, _ -> index == indexToRemove }
         }
     }
 
@@ -188,16 +191,15 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
     }
 
     fun goBack() {
-        if ( fileItemList.value!![0].name == FileHelper.BACKDIR ) {
+        if ( fileItemList.value[0].name == FileHelper.BACKDIR ) {
             onFilelistItemClick(0)
         }
     }
 
     fun onFilelistItemClick(position: Int) {
-        val selectedFileItem = fileItemList.value!![position]
+        val selectedFileItem = fileItemList.value[position]
 
         if (selectedFileItem.isDir) {
-
             if ( selectedFileItem.isRoot ) {
                 if ( externalPaths.value!!.contains(selectedFileItem.uriString) )
                     getFileList(selectedFileItem)
@@ -205,11 +207,6 @@ class FileChooseFragmentViewModel(val app: Application) : AndroidViewModel(app) 
                     storageList()
             } else {
                 getFileList(selectedFileItem)
-            }
-        } else {
-            //openBook(selectedFileItem)
-            if ( selectedFileItem.uriString != null) {
-                showOpenBookInfo.value = selectedFileItem.uriString
             }
         }
     }
