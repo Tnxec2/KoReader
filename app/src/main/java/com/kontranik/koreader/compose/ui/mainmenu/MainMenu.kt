@@ -47,6 +47,7 @@ fun MainMenuScreen(
     navigateBack: () -> Unit,
     navigateToOpenFile: () -> Unit,
     navigateToLastOpened: () -> Unit,
+    navigateToBookmarks: () -> Unit,
     navigateToLibrary: () -> Unit,
     navigateToOpdsNetworkLibrary: () -> Unit,
     navigateToSettings: () -> Unit,
@@ -78,6 +79,7 @@ fun MainMenuScreen(
         LazyColumn() {
             item { MainMenuItem(painterId = R.drawable.ic_folder_black_24dp, menuTextId = R.string.openfile, onClick = { coroutineScope.launch{ navigateToOpenFile() } }) }
             item { MainMenuItem(painterId = R.drawable.ic_iconmonstr_book_time, menuTextId = R.string.last_opened, onClick = { coroutineScope.launch{ navigateToLastOpened() } }) }
+            item { MainMenuItem(painterId = R.drawable.ic_iconmonstr_bookmark, menuTextId = R.string.bookmarklist, onClick = { coroutineScope.launch{ navigateToBookmarks() } }) }
             item { MainMenuItem(painterId = R.drawable.baseline_local_library_24, menuTextId = R.string.library, onClick = { coroutineScope.launch{ navigateToLibrary() } }) }
             item { MainMenuItem(painterId = R.drawable.networking_1, menuTextId = R.string.opds, onClick = { coroutineScope.launch{ navigateToOpdsNetworkLibrary() } }) }
             item { MainMenuItem(painterId = R.drawable.ic_baseline_settings_24, menuTextId = R.string.settings, onClick = { coroutineScope.launch{ navigateToSettings() } }) }
@@ -152,6 +154,7 @@ private fun MainMenuScreenPreview() {
                 mutableStateOf("")
             },
             navigateToBookInfo = {  },
+            navigateToBookmarks = {  },
         )
     }
 

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.dao.BookmarksDao
 import com.kontranik.koreader.database.model.Bookmark
+import kotlinx.coroutines.flow.Flow
 
 
 class BookmarksRepository(private val mBookmarksDao: BookmarksDao) {
@@ -14,8 +15,9 @@ class BookmarksRepository(private val mBookmarksDao: BookmarksDao) {
         }
     }
 
-    fun getByPath(path: String): LiveData<List<Bookmark>> {
-        return mBookmarksDao.getByPath(path)
+    fun getByPath(path: String): Flow<List<Bookmark>> {
+        val result = mBookmarksDao.getByPath(path)
+        return result
     }
 
     fun delete(id: Long) {

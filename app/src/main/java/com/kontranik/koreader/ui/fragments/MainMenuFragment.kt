@@ -36,6 +36,7 @@ class MainMenuFragment : Fragment() {
                     navigateBack = { requireActivity().supportFragmentManager.popBackStack() },
                     navigateToOpenFile = { openFile() },
                     navigateToLastOpened = { openLastOpened() },
+                    navigateToBookmarks = { openBookmarks() },
                     navigateToLibrary = { openLibrary() },
                     navigateToOpdsNetworkLibrary = { openOpds() },
                     navigateToSettings = { settings() },
@@ -44,6 +45,16 @@ class MainMenuFragment : Fragment() {
                 )
             }
         }
+    }
+
+    private fun openBookmarks() {
+        if (PrefsHelper.bookPath == null) return
+        val fragment = BookmarkListFragment.newInstance(PrefsHelper.bookPath!!)
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .add(R.id.fragment_container_view, fragment, "fragment_bookmark_list")
+            .addToBackStack("fragment_bookmark_list")
+            .commit()
     }
 
     private fun openFile() {

@@ -25,7 +25,6 @@ import androidx.preference.PreferenceManager
 import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.BookStatusViewModelFactory
 import com.kontranik.koreader.database.BookmarksViewModel
-import com.kontranik.koreader.database.BookmarksViewModelFactory
 import com.kontranik.koreader.database.model.Bookmark
 import com.kontranik.koreader.databinding.ActivityReaderMainBinding
 import com.kontranik.koreader.model.*
@@ -69,7 +68,7 @@ class ReaderActivity :
         setContentView(view)
 
         mBookStatusViewModel = ViewModelProvider(this, BookStatusViewModelFactory((application as KoReaderApplication).bookStatusRepository))[BookStatusViewModel::class.java]
-        mBookmarksViewModel = ViewModelProvider(this, BookmarksViewModelFactory((application as KoReaderApplication).bookmarksRepository))[BookmarksViewModel::class.java]
+        mBookmarksViewModel = ViewModelProvider(this, AppViewModelProvider.Factory)[BookmarksViewModel::class.java]
         mReaderActivityViewModel = ViewModelProvider(this, ReaderActivityViewModelFactory((application as KoReaderApplication).bookStatusRepository))[ReaderActivityViewModel::class.java]
 
         mBookStatusViewModel.cleanup(this)
@@ -497,7 +496,11 @@ class ReaderActivity :
     private fun addBookmark() {
         mBookmarksViewModel.insert(
             mReaderActivityViewModel.getBookmarkForCurrentPosition(
-                binding.textViewPageview.text.toString().substring(0, 100)))
+                if (binding.textViewPageview.text.toString().length <= 100)
+                    binding.textViewPageview.text.toString() else
+                binding.textViewPageview.text.toString().substring(0, 100)
+            )
+        )
     }
 
     override fun onShowBookmarklistQuickMenuDialog() {
@@ -505,7 +508,10 @@ class ReaderActivity :
         val bookmarkListFragment: BookmarkListFragment =
             BookmarkListFragment.newInstance(
                 PrefsHelper.bookPath!!)
-        bookmarkListFragment.show(supportFragmentManager, "fragment_bookmark_list")
+        supportFragmentManager.beginTransaction()
+            .add(R.id.fragment_container_view, bookmarkListFragment, "fragment_bookmark_list")
+            .addToBackStack("fragment_bookmark_list")
+            .commit()
     }
 
     override fun onSelectBookmarkBookmarkListFragment(bookmark: Bookmark) {

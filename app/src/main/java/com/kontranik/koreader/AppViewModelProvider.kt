@@ -25,6 +25,7 @@ object AppViewModelProvider {
 
         initializer {
             BookmarksViewModel(
+                this.createSavedStateHandle(),
                 koReaderApplication().container.bookmarksRepository
             )
         }

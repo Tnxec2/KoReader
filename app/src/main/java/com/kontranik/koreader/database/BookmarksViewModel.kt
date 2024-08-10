@@ -1,37 +1,57 @@
 package com.kontranik.koreader.database
 
 import androidx.lifecycle.*
+import com.kontranik.koreader.compose.ui.bookmarks.BoomkmarksScreenDestination
 import com.kontranik.koreader.database.repository.BookmarksRepository
 import com.kontranik.koreader.database.model.Bookmark
-import com.kontranik.koreader.database.repository.BookStatusRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.launch
 
-class BookmarksViewModel(private val mRepository: BookmarksRepository) : ViewModel() {
+class BookmarksViewModel(
+    savedStateHandle: SavedStateHandle,
+    private val mRepository: BookmarksRepository) : ViewModel() {
 
     fun insert(bookmark: Bookmark) {
+        println("insert bookmark ${bookmark.path}")
         mRepository.insert(bookmark)
+        loadBookmarks(bookmark.path)
     }
 
-    private val path = MutableLiveData<String>()
-    var mAllBookmarks: LiveData<List<Bookmark>> = path.switchMap { getLiveDataBookmarksByPath(it)}
+    private val pathArg: String? =
+        savedStateHandle[BoomkmarksScreenDestination.PATH_ARG]
 
+    private val mPath = MutableLiveData<String?>()
+    var mAllBookmarks: Flow<List<Bookmark>> = mPath.asFlow().transform { path ->
+        if (path != null) {
+            val result = mRepository.getByPath(path).first()
+            emit(result)
+        }
+    }
 
-    private fun getLiveDataBookmarksByPath(path: String) = mRepository.getByPath(path)
-
-    fun loadBookmarks(path: String) = apply { this.path.value = path }
+    fun loadBookmarks(path: String) = apply {
+        this.mPath.value = path
+    }
 
     fun delete(bookmark: Bookmark) {
-        if (bookmark.id == null) return
-        mRepository.delete(bookmark.id!!)
-    }
-
-}
-
-class BookmarksViewModelFactory(private val repository: BookmarksRepository) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(BookmarksViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return BookmarksViewModel(repository) as T
+        bookmark.id?.let {
+            mRepository.delete(bookmark.id!!)
+            loadBookmarks(bookmark.path)
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
+
+    init {
+        viewModelScope.launch {
+            pathArg?.let {
+                loadBookmarks(it)
+            }
+        }
+    }
+
+
+
 }
