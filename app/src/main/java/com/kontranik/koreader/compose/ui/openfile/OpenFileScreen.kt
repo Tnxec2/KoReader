@@ -1,6 +1,5 @@
 package com.kontranik.koreader.compose.ui.openfile
 
-import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -16,17 +15,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -53,7 +49,7 @@ import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.appbar.AppBarAction
 import com.kontranik.koreader.compose.ui.shared.ConfirmDialog
-import com.kontranik.koreader.compose.ui.shared.rememberBookInfo
+import com.kontranik.koreader.compose.ui.shared.rememberBookInfoForFileItem
 import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.ui.fragments.FileChooseFragmentViewModel
@@ -235,7 +231,7 @@ fun FileMenuItem(
     onUpdateLibrary: () -> Unit,
     modifier: Modifier = Modifier) {
 
-    val bookInfoComposableState = rememberBookInfo(fileItem)
+    val bookInfoComposableState = rememberBookInfoForFileItem(fileItem)
 
     var showPopup by rememberSaveable { mutableStateOf(false) }
 

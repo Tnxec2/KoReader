@@ -27,7 +27,7 @@ interface BookStatusDao {
     fun getAll(): List<BookStatus>
 
     @Query("SELECT * FROM ${BookStatusHelper.TABLE} ORDER BY ${BookStatusHelper.COLUMN_LAST_OPEN_TIME} DESC LIMIT :count")
-    fun getLastOpened(count: Int): LiveData<List<BookStatus>>
+    fun getLastOpened(count: Int): Flow<List<BookStatus>>
 
     @Query("SELECT * FROM ${BookStatusHelper.TABLE} WHERE ${BookStatusHelper.COLUMN_PATH} = :path LIMIT 1")
     fun getBookStatusByPath(path: String): BookStatus?

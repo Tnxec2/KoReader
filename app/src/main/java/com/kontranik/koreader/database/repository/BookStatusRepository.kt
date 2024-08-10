@@ -33,7 +33,7 @@ class BookStatusRepository(private val mBookStatusDao: BookStatusDao) {
         BooksRoomDatabase.databaseWriteExecutor.execute { mBookStatusDao.update(bookStatus) }
     }
 
-    fun getLastOpened(lastOpenedCount: Int): LiveData<List<BookStatus>> {
+    fun getLastOpened(lastOpenedCount: Int): Flow<List<BookStatus>> {
         return mBookStatusDao.getLastOpened(lastOpenedCount)
     }
 

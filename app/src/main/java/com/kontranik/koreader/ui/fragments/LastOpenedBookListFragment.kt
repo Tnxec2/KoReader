@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
@@ -13,35 +16,19 @@ import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
 import com.kontranik.koreader.ReaderActivityViewModelFactory
+import com.kontranik.koreader.compose.ui.lastopened.LastOpenedScreen
 import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.BookStatusViewModelFactory
-import com.kontranik.koreader.databinding.FragmentLastOpenedBookListBinding
-import com.kontranik.koreader.model.BookInfo
-import com.kontranik.koreader.ui.adapters.BookListAdapter
-import com.kontranik.koreader.utils.FileHelper
-import com.kontranik.koreader.utils.ImageUtils
 
 class LastOpenedBookListFragment :
     Fragment(),
-    BookListAdapter.BookListAdapterClickListener,
     BookInfoFragment.BookInfoListener {
 
-    private lateinit var binding: FragmentLastOpenedBookListBinding
-
-    private var bookInfoList: MutableList<BookInfo> = mutableListOf()
-
     private lateinit var mBookStatusViewModel: BookStatusViewModel
-
     private lateinit var mReaderActivityViewModel: ReaderActivityViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        binding = FragmentLastOpenedBookListBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
         mBookStatusViewModel = ViewModelProvider(this,
             BookStatusViewModelFactory((requireContext().applicationContext as KoReaderApplication)
@@ -51,36 +38,18 @@ class LastOpenedBookListFragment :
             ReaderActivityViewModelFactory((requireContext().applicationContext as KoReaderApplication)
                 .bookStatusRepository))[ReaderActivityViewModel::class.java]
 
-
-        binding.imageButtonBooklistBack.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-        }
-
-        binding.reciclerViewBooklistList.adapter = BookListAdapter(requireContext(), bookInfoList, this)
-
-        mBookStatusViewModel.lastOpenedBooks.observe(viewLifecycleOwner) {
-            if (it != null) {
-                bookInfoList.clear()
-                for (bookStatus in it) {
-                    if (bookStatus.path != null) {
-                        if (!FileHelper.contentFileExist(requireContext(), bookStatus.path)) {
-                            mBookStatusViewModel.delete(bookStatus.id!!)
-                        }
-                        val bookInfo = BookInfo(
-                            title = bookStatus.title,
-                            cover = bookStatus.cover?.let { it1 -> ImageUtils.getImage(it1) },
-                            authors = mutableListOf(),
-                            filename = bookStatus.path!!,
-                            path = bookStatus.path!!,
-                            annotation = ""
-                        )
-                        bookInfoList.add(bookInfo)
+        return ComposeView(requireContext()).apply {
+            setContent {
+                LastOpenedScreen(
+                    drawerState = DrawerState(DrawerValue.Closed),
+                    navigateBack = { requireActivity().supportFragmentManager.popBackStack()},
+                    navigateToBookInfo = { bookPath ->
+                        openBookInfo(bookPath)
                     }
-                }
-                binding.reciclerViewBooklistList.adapter?.notifyDataSetChanged()
+                )
+
             }
         }
-
     }
 
     private fun savePrefs(uriString: String?) {
@@ -92,10 +61,6 @@ class LastOpenedBookListFragment :
     }
 
 
-    override fun onBooklistItemClickListener(position: Int) {
-        val selectedBook = bookInfoList[position]
-        openBookInfo(selectedBook.path)
-    }
 
     private fun openBookInfo(bookPathUri: String?) {
         if ( bookPathUri != null) {
@@ -117,9 +82,7 @@ class LastOpenedBookListFragment :
 
     override fun onBookInfoFragmentDeleteBook(bookUri: String) {
         if ( mReaderActivityViewModel.deleteBook(bookUri)) {
-            bookInfoList.removeAll { it.path == bookUri }
             mBookStatusViewModel.deleteByPath(bookUri)
-            binding.reciclerViewBooklistList.adapter?.notifyDataSetChanged()
         }
     }
 }

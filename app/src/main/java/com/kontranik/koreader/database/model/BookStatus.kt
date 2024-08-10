@@ -1,10 +1,12 @@
 package com.kontranik.koreader.database.model
 
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.kontranik.koreader.database.BookStatusHelper
 import com.kontranik.koreader.model.Book
+import com.kontranik.koreader.model.BookInfoComposable
 import com.kontranik.koreader.model.BookPosition
 import com.kontranik.koreader.utils.ImageUtils
 import java.util.*

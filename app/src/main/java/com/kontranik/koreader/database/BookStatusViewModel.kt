@@ -36,7 +36,7 @@ class BookStatusViewModel(private val mRepository: BookStatusRepository) : ViewM
 
     fun loadBookStatus(path: String) = apply { this.path.value = path }
 
-    val lastOpenedBooks: LiveData<List<BookStatus>> = mRepository.getLastOpened(LAST_OPENED_COUNT)
+    val lastOpenedBooks = mRepository.getLastOpened(LAST_OPENED_COUNT)
 
     fun delete(id: Long) {
         mRepository.delete(id)
