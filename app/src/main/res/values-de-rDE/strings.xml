@@ -138,9 +138,13 @@
     <string name="ok_delete_book">Löschen</string>
     <string name="title_delete_storage">Speicherort löschen</string>
     <string name="sure_delete_storage">Wollen Sie wirklich diesen Speicherort löschen</string>
+    <string name="title_delete_scanpoint">Scanpoint löschen</string>
+    <string name="sure_delete_scanpoint">Wollen Sie wirklich diesen Scanpoint löschen</string>
     <string name="ok_delete_storage">Löschen</string>
     <string name="title_select_storage">Auswahl Speicherort</string>
     <string name="sure_select_storage">Wählen Sie in dem nächsten Dialog einen Speicherort aus und erlauben Sie Zugriff drauf</string>
+    <string name="title_select_scanpoint">Auswahl Scanpoint</string>
+    <string name="sure_select_scanpoint">Wählen Sie in dem nächsten Dialog einen Scanpoint aus und erlauben Sie Zugriff drauf</string>
     <string name="ok_select_storage">OK</string>
     <string name="toggle_invert">Invertierung umschalten</string>
     <string name="color_theme">Farb theme</string>

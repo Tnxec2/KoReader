@@ -9,7 +9,7 @@ import com.kontranik.koreader.compose.ui.bookinfo.BookInfoViewModell
 import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.ui.fragments.FileChooseFragmentViewModel
-import com.kontranik.koreader.ui.fragments.LibraryViewModel
+import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 
 /**
  * Provides Factory to create instance of ViewModel for the entire app
@@ -51,9 +51,9 @@ object AppViewModelProvider {
 
         initializer {
             LibraryViewModel(
-                this.koReaderApplication().libraryItemRepository,
-                this.koReaderApplication().authorsRepository,
-                this.koReaderApplication().applicationScope
+                koReaderApplication().libraryItemRepository,
+                koReaderApplication().authorsRepository,
+                koReaderApplication().applicationScope,
             )
         }
     }

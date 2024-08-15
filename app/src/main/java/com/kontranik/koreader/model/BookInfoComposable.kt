@@ -1,11 +1,16 @@
 package com.kontranik.koreader.model
 
+import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.BookStatus
+import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.utils.FileItem
+import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
+import com.kontranik.koreader.utils.ImageUtils.getBitmap
 import java.io.Serializable
 import java.net.URLDecoder
 
@@ -46,5 +51,15 @@ fun FileItem.toBookInfoComposable(cover: ImageBitmap): BookInfoComposable {
         path = path,
         annotation = "",
         authorsAsString = ""
+    )
+}
+
+fun LibraryItemWithAuthors.toBookInfoComposable(cover: Bitmap): BookInfoComposable {
+    return BookInfoComposable(
+        title = libraryItem.title ?: "",
+        cover = cover.asImageBitmap(),
+        path = URLDecoder.decode(libraryItem.path),
+        authors = authors.toMutableList(),
+        authorsAsString = authors.joinToString("; ", transform = { it.asString() }),
     )
 }

@@ -60,6 +60,7 @@ dependencies {
     // Paging
     implementation(libs.androidx.paging.paging.runtime.ktx)
     implementation(libs.androidx.room.room.paging)
+    implementation(libs.androidx.paging.compose) // jetpack compose
 
     // Room components
     implementation(libs.androidx.room.room.runtime)

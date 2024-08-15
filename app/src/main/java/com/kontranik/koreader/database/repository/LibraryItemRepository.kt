@@ -10,6 +10,7 @@ import androidx.paging.PagingSource
 import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.LibraryItemAuthorsCrossRef
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
+import kotlinx.coroutines.flow.Flow
 
 class LibraryItemRepository(private val mLibraryItemDao: LibraryItemDao) {
 

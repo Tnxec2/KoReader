@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
+import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.compose.ui.openfile.OpenFileScreen
 
 

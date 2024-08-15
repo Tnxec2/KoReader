@@ -53,7 +53,7 @@ import com.kontranik.koreader.compose.ui.shared.rememberBookInfoForFileItem
 import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.ui.fragments.FileChooseFragmentViewModel
-import com.kontranik.koreader.ui.fragments.LibraryViewModel
+import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.utils.FileItem
 import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
@@ -209,7 +209,7 @@ fun OpenFileScreen(
                                 item.uriString?.let {
                                     libraryViewModel.readRecursive(
                                         context,
-                                        mutableListOf(it))
+                                        setOf(it))
                                 }
                             }
                         }

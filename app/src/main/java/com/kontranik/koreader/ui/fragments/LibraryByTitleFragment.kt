@@ -7,58 +7,34 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
-import androidx.paging.PagingData
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.kontranik.koreader.AppViewModelProvider
-import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.ReaderActivityViewModel
+import com.kontranik.koreader.compose.ui.library.LibraryViewModel
+import com.kontranik.koreader.compose.ui.library.bytitle.LibraryByTitleScreen
 import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
-import com.kontranik.koreader.databinding.FragmentLibraryBookListBinding
-import com.kontranik.koreader.ui.adapters.PagingLibraryItemAdapter
 
 
-open class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingLibraryItemAdapterListener,
+open class LibraryByTitleFragment : Fragment(),
     BookInfoFragment.BookInfoListener {
 
-    protected lateinit var binding: FragmentLibraryBookListBinding
-
-    private lateinit var mAdapter: PagingLibraryItemAdapter
-
-    private lateinit var mLibraryViewModel: LibraryViewModel
-
     private lateinit var mReaderActivityViewModel: ReaderActivityViewModel
-
     private lateinit var mFileChooseFragmentViewModel: FileChooseFragmentViewModel
-
+    private lateinit var libraryViewModel: LibraryViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        binding = FragmentLibraryBookListBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        mAdapter = PagingLibraryItemAdapter(requireContext(), this)
-
-        mLibraryViewModel = ViewModelProvider(this,
-            LibraryViewModelFactory(
-                (requireContext().applicationContext as KoReaderApplication).libraryItemRepository,
-                (requireContext().applicationContext as KoReaderApplication).authorsRepository,
-                KoReaderApplication.getApplicationScope())
-        )[LibraryViewModel::class.java]
 
         mReaderActivityViewModel = ViewModelProvider(requireActivity())[ReaderActivityViewModel::class.java]
-
         mFileChooseFragmentViewModel = ViewModelProvider(this, AppViewModelProvider.Factory)[FileChooseFragmentViewModel::class.java]
-
-        mLibraryViewModel.createNotificationChannel()
+        libraryViewModel = ViewModelProvider(this, AppViewModelProvider.Factory)[LibraryViewModel::class.java]
 
         var author: Author? = null
         arguments?.let {
@@ -71,50 +47,28 @@ open class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingL
             }
         }
 
-        if (author != null) {
-            binding.textViewLibraryBooklistAuthor.visibility = View.VISIBLE
-            binding.textViewLibraryBooklistAuthor.text = getString(R.string.by_author, author?.asString())
-        } else {
-            binding.textViewLibraryBooklistAuthor.visibility = View.GONE
-        }
-
-        binding.reciclerViewLibraryBooklistList.adapter = mAdapter
-        binding.reciclerViewLibraryBooklistList.layoutManager = LinearLayoutManager(requireContext())
-
-        binding.imageButtonLibraryBooklistBack.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-        }
-
-        binding.ibLibrarySearchClear.setOnClickListener {
-            binding.etLibrarySearchText.text = null
-            mLibraryViewModel.changeTitleSearchText(null)
-        }
-
-        binding.ibLibrarySearch.setOnClickListener {
-            val searchText = if ( binding.etLibrarySearchText.text.isNotBlank() && binding.etLibrarySearchText.text.isNotBlank() ) {
-                binding.etLibrarySearchText.text.toString()
-            } else {
-                null
+        return ComposeView(requireContext()).apply {
+            setContent {
+                LibraryByTitleScreen(
+                    author = author,
+                    drawerState = DrawerState(DrawerValue.Closed),
+                    navigateBack = {
+                        requireActivity().supportFragmentManager.popBackStack()
+                    },
+                    navigateToBook = {
+                        onClickLibraryItem(it)
+                    }
+                )
             }
-            mLibraryViewModel.changeTitleSearchText(searchText)
         }
-
-        mLibraryViewModel.libraryTitlePageByFilter.observe(viewLifecycleOwner) { libraryItems ->
-            libraryItems?.let {
-                mAdapter.submitData(viewLifecycleOwner.lifecycle, PagingData.empty())
-                mAdapter.submitData(viewLifecycleOwner.lifecycle, it)
-            }
-            mAdapter.notifyDataSetChanged()
-        }
-
-        mLibraryViewModel.loadTitlePageInit(author)
     }
 
-    override fun onClickLibraryItem(position: Int, libraryItem: LibraryItemWithAuthors) {
+    private fun onClickLibraryItem( libraryItem: LibraryItemWithAuthors) {
         val bookPathUri = libraryItem.libraryItem.path
         try {
             val inputStream = requireContext().contentResolver.openInputStream(Uri.parse(bookPathUri))
             inputStream?.close()
+
             val bookInfoFragment = BookInfoFragment.newInstance(bookPathUri)
             bookInfoFragment.setListener(this)
             requireActivity().supportFragmentManager.beginTransaction()
@@ -129,40 +83,13 @@ open class LibraryByTitleFragment : Fragment(), PagingLibraryItemAdapter.PagingL
                 .setPositiveButton(
                     android.R.string.yes
                 ) { _, _ ->
-                    mLibraryViewModel.delete(libraryItem)
-                    (binding.reciclerViewLibraryBooklistList.adapter as PagingLibraryItemAdapter).deleteItem(position)
+                    libraryViewModel.delete(libraryItem)
                 } // A null listener allows the button to dismiss the dialog and take no further action.
                 .setNegativeButton(android.R.string.no, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show()
         }
     }
-
-    override fun onDeleteLibraryItem(position: Int, libraryItem: LibraryItemWithAuthors?) {
-        if (libraryItem != null) {
-            mLibraryViewModel.openDeleteLibraryItemDialog(
-                binding.reciclerViewLibraryBooklistList.adapter as PagingLibraryItemAdapter,
-                position, libraryItem, requireContext())
-        }
-    }
-
-    override fun onUpdateLibraryItem(position: Int, libraryItem: LibraryItemWithAuthors?) {
-        if (libraryItem != null) {
-            mLibraryViewModel.updateLibraryItem(position, libraryItem)
-        }
-    }
-
-//    override fun showUndoSnackbar(mRecentlyDeletedItem: LibraryItemWithAuthors?) {
-//        if (mRecentlyDeletedItem != null) {
-//            val view: View = requireActivity().findViewById(R.id.reciclerView_library_booklist_list)
-//            val snackbar: Snackbar = Snackbar.make(
-//                view, getString(R.string.undo_delete_snackbar_message),
-//                Snackbar.LENGTH_LONG
-//            )
-//            snackbar.setAction(getString(R.string.undo_delete_undo_action)) { _  -> mLibraryViewModel.insert(mRecentlyDeletedItem) }
-//            snackbar.show()
-//        }
-//    }
 
     override fun onBookInfoFragmentReadBook(bookUri: String) {
         mFileChooseFragmentViewModel.savePrefsOpenedBook(bookUri)

@@ -178,9 +178,13 @@
     <string name="ok_delete_book">Delete</string>
     <string name="title_delete_storage">Delete storage</string>
     <string name="sure_delete_storage">Are you sure to delete this storage</string>
+    <string name="title_delete_scanpoint">Delete scanpoint</string>
+    <string name="sure_delete_scanpoint">Are you sure to delete this scanpoint</string>
     <string name="ok_delete_storage">Delete</string>
     <string name="title_select_storage">Select storage</string>
     <string name="sure_select_storage">Select storage in next dialog and grand access</string>
+    <string name="title_select_scanpoint">Select scan point</string>
+    <string name="sure_select_scanpoint">Select scan point in next dialog and grand access</string>
     <string name="ok_select_storage">OK</string>
     <string name="toggle_invert">Toggle Invert</string>
     <string name="color_theme">Color theme</string>

@@ -6,6 +6,8 @@ import com.kontranik.koreader.model.BookPageScheme
 import com.kontranik.koreader.parser.epubreader.EpubHelper
 import com.kontranik.koreader.parser.fb2reader.FB2Helper
 import com.kontranik.koreader.utils.FileItem
+import com.kontranik.koreader.utils.ImageEnum
+import com.kontranik.koreader.utils.ImageUtils
 
 interface EbookHelper {
 
@@ -42,17 +44,26 @@ interface EbookHelper {
         }
 
         fun getBookInfoTemporary(context: Context, contentUriPath: String): BookInfo? {
-            if (isEpub(contentUriPath)) {
-                return EpubHelper(
-                    context,
-                    contentUriPath
-                ).getBookInfoTemporary(contentUriPath)
-            } else if (isFb2(contentUriPath)) {
-                return FB2Helper(context, contentUriPath).getBookInfoTemporary(
+            val bookInfo: BookInfo? = try {
+                if (isEpub(contentUriPath)) {
+                    EpubHelper(
+                        context,
+                        contentUriPath
+                    ).getBookInfoTemporary(contentUriPath)
+                } else if (isFb2(contentUriPath)) {
+                    FB2Helper(context, contentUriPath).getBookInfoTemporary(
                         contentUriPath
                     )
+                } else {
+                    null
+                }
+            } catch (ignored: Exception) {
+                null
             }
-            return null
+            bookInfo?.let {
+                if (it.cover == null) bookInfo.cover = ImageUtils.getBitmap(context, ImageEnum.Ebook)
+            }
+            return bookInfo
         }
 
         fun getHelper(context: Context, contentUri: String): EbookHelper? {

@@ -1,4 +1,4 @@
-package com.kontranik.koreader.ui.fragments
+package com.kontranik.koreader.compose.ui.library
 
 import android.Manifest
 import android.app.AlertDialog
@@ -11,6 +11,7 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.Document
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -18,8 +19,11 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.*
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.liveData
+import androidx.paging.map
 import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.database.model.Author
@@ -30,12 +34,17 @@ import com.kontranik.koreader.database.repository.AuthorsRepository
 import com.kontranik.koreader.database.repository.LibraryItemRepository
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.parser.EbookHelper
-import com.kontranik.koreader.parser.epubreader.EpubHelper
-import com.kontranik.koreader.parser.fb2reader.FB2Helper
-import com.kontranik.koreader.ui.adapters.PagingLibraryItemAdapter
-import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import java.io.Closeable
 
@@ -43,47 +52,51 @@ import java.io.Closeable
 class LibraryViewModel(
     private val libraryItemRepository: LibraryItemRepository,
     private val authorsRepository: AuthorsRepository,
-    private val applicationScope: CoroutineScope) : ViewModel() {
+    private val applicationScope: CoroutineScope,
+    ) : ViewModel() {
 
-    private val libraryTitleSearchFilter = MutableLiveData<String?>()
+    private var libraryTitleSearchFilter = MutableLiveData<String?>(null)
     private var author: Author? = null
 
-    val libraryTitlePageByFilter = libraryTitleSearchFilter.switchMap(
-        :: getTitlePageByFilter
-    )
+    val libraryTitlePageByFilter = libraryTitleSearchFilter.switchMap {
+        getTitlePageByFilter(it).liveData.cachedIn(viewModelScope)
+    }.asFlow()
 
-    private fun getTitlePageByFilter(searchFilter: String?) = Pager(PagingConfig(pageSize = 15)) {
-        libraryItemRepository.pageLibraryItem(author, searchFilter) }
-        .liveData
-        .cachedIn(viewModelScope)
+    private fun getTitlePageByFilter(searchFilter: String?) = Pager(config = PagingConfig(15)) {
+        libraryItemRepository.pageLibraryItem(author, searchFilter)
+    }
 
-    fun loadTitlePageInit(author: Author?) = apply {
-        this.author = author
-        if ( libraryTitlePageByFilter.value == null) {
-            this.libraryTitleSearchFilter.value = null
+    fun loadTitlePageInit(mauthor: Author?) = apply {
+        viewModelScope.launch {
+            author = mauthor
+            if ( libraryTitlePageByFilter.asLiveData().value == null) {
+                libraryTitleSearchFilter.postValue(null)
+            }
         }
     }
 
     fun changeTitleSearchText(text: String?) {
+        val filter = if (text?.isEmpty() == true) null else text
         val altVal = this.libraryTitleSearchFilter.value
-        if ( altVal == null || altVal != text) {
-            libraryTitleSearchFilter.postValue(text)
+        if ( altVal == null || altVal != filter) {
+            viewModelScope.launch {
+                libraryTitleSearchFilter.postValue(filter)
+            }
         }
     }
     private val libraryAuthorSearchFilter = MutableLiveData<String?>()
 
-    val libraryAuthorPageByFilter = libraryAuthorSearchFilter.switchMap(
-        :: getAuthorPageByFilter
-    )
+    val libraryAuthorPageByFilter = libraryAuthorSearchFilter.switchMap {
+        getAuthorPageByFilter(it).liveData.cachedIn(viewModelScope)
+    }.asFlow()
 
     private fun getAuthorPageByFilter(searchFilter: String?) = Pager(PagingConfig(pageSize = 15)) {
-        authorsRepository.pageAuthor(searchFilter) }
-        .liveData
-        .cachedIn(viewModelScope)
+        authorsRepository.pageAuthor(searchFilter)
+    }
 
     fun loadAuthorPageInit() = apply {
-        if ( libraryAuthorPageByFilter.value == null) {
-            this.libraryAuthorSearchFilter.value = null
+        if ( libraryAuthorPageByFilter.asLiveData().value == null) {
+            this.libraryAuthorSearchFilter.postValue(null)
         }
     }
 
@@ -99,17 +112,19 @@ class LibraryViewModel(
     }
 
     fun delete(libraryItemWithAuthors: LibraryItemWithAuthors) = viewModelScope.launch {
-        libraryItemWithAuthors.libraryItem.id?.let {
-            libraryItemRepository.delete(it)
-        }
-        libraryItemWithAuthors.authors.forEach { author ->
-            val authorId = author.id
-            authorId?.let{id ->
-                val count = libraryItemRepository.getCountByAuthorId(id)
-                if (count == 0L) author.id?.let { authorsRepository.delete(id) }
+        KoReaderApplication.getApplicationScope().launch {
+            libraryItemWithAuthors.libraryItem.id?.let {
+                libraryItemRepository.delete(it)
             }
+            libraryItemWithAuthors.authors.forEach { author ->
+                val authorId = author.id
+                authorId?.let { id ->
+                    val count = libraryItemRepository.getCountByAuthorId(id)
+                    if (count == 0L) author.id?.let { authorsRepository.delete(id) }
+                }
+            }
+            libraryItemRepository.deleteCrossRefLibraryItem(libraryItemWithAuthors.libraryItem)
         }
-        libraryItemRepository.deleteCrossRefLibraryItem(libraryItemWithAuthors.libraryItem)
     }
 
     fun deleteAll() = viewModelScope.launch {
@@ -118,31 +133,13 @@ class LibraryViewModel(
         libraryItemRepository.deleteAllCrossRef()
     }
 
-    fun openDeleteLibraryItemDialog(adapter: PagingLibraryItemAdapter, position: Int, libraryItem: LibraryItemWithAuthors, context: Context) {
-        AlertDialog.Builder(context)
-            .setTitle(context.getString(R.string.library_delete_item_dialog_title))
-            .setMessage(context.getString(R.string.library_delete_item_dialog_message)) // Specifying a listener allows you to take an action before dismissing the dialog.
-            // The dialog is automatically dismissed when a dialog button is clicked.
-            .setPositiveButton(android.R.string.ok
-            ) { dialog, which ->
-                delete(libraryItem)
-                adapter.deleteItem(position)
-
-            } // A null listener allows the button to dismiss the dialog and take no further action.
-            .setNegativeButton(android.R.string.cancel) { dialogInterface, i ->
-                adapter.cancelDeletion(position)
-            }
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .show()
-    }
-
 
     val CHANNEL_ID = "LIBRARY"
     val notificationId = 0
 
     val refreshInProgress = MutableLiveData<Boolean>(false)
 
-    fun createNotificationChannel() {
+    fun createNotificationChannel(context: Context) {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         val name = KoReaderApplication.getContext().getString(R.string.channel_name_library)
@@ -153,42 +150,53 @@ class LibraryViewModel(
         }
         // Register the channel with the system
         val notificationManager: NotificationManager =
-            KoReaderApplication.getContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         notificationManager.createNotificationChannel(channel)
+
     }
 
-    fun readRecursive(context: Context, scanPoints: MutableList<String>) {
+    fun readRecursive(context: Context, scanPoints: Set<String>) {
         scanPoints.forEach { scanPoint ->
-            val resolver: ContentResolver = context.contentResolver
+            readRecursiveScanpoint(context, scanPoint)
+        }
+    }
 
-            val directoryUri = Uri.parse(scanPoint)
-                ?: throw IllegalArgumentException("Must pass URI of directory to open")
-            val documentsTree = DocumentFile.fromTreeUri(context, directoryUri)
-            if ( documentsTree == null || ! documentsTree.isDirectory || ! documentsTree.canRead() ) {
-                //
-            } else {
-                applicationScope.launch {
-                    var builder = NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
-                        .setStyle(NotificationCompat.MessagingStyle("Me")
-                            .setConversationTitle("Library refresh"))
+    private fun readRecursiveScanpoint(context: Context, scanPoint: String) {
+        val resolver: ContentResolver = context.contentResolver
+
+        val directoryUri = Uri.parse(scanPoint)
+            ?: throw IllegalArgumentException("Must pass URI of directory to open")
+        val documentsTree = DocumentFile.fromTreeUri(context, directoryUri)
+        if (documentsTree == null || !documentsTree.isDirectory || !documentsTree.canRead()) {
+            //
+        } else {
+            applicationScope.launch {
+                var builder =
+                    NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
+                        .setStyle(
+                            NotificationCompat.MessagingStyle("Me")
+                                .setConversationTitle("Library refresh")
+                        )
                         .setSmallIcon(R.drawable.baseline_notifications_24)
                         .setContentText("Refreshing of library started")
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
-                    notify(context, builder)
-                    refreshInProgress.postValue(true)
-                    traverseDirectoryEntries(resolver, directoryUri)
-                    refreshInProgress.postValue(false)
+                notify(context, builder)
+                refreshInProgress.postValue(true)
+                traverseDirectoryEntries(resolver, directoryUri)
+                refreshInProgress.postValue(false)
 
-                    builder = NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
-                        .setStyle(NotificationCompat.MessagingStyle("Me")
-                            .setConversationTitle("Library refresh"))
-                        .setSmallIcon(R.drawable.baseline_notifications_24)
-                        .setContentText("Refreshing of library ended")
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                builder = NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
+                    .setStyle(
+                        NotificationCompat.MessagingStyle("Me")
+                            .setConversationTitle("Library refresh")
+                    )
+                    .setSmallIcon(R.drawable.baseline_notifications_24)
+                    .setContentText("Refreshing of library ended")
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
-                    notify(context, builder)
-                }
+                notify(context, builder)
             }
         }
     }
@@ -253,7 +261,7 @@ class LibraryViewModel(
                         EbookHelper.isFb2(name)
                     ) {
                         val documentUri = DocumentsContract.buildDocumentUriUsingTree(rootUri, docId)
-                        readBookInfo(documentUri, docId)
+                        readBookInfo(documentUri)
                     }
                 }
             } finally {
@@ -280,22 +288,21 @@ class LibraryViewModel(
         }
     }
 
-    private fun readBookInfo(uri: Uri, path: String) {
-        val item = libraryItemRepository.getByPath(path)
+    private fun readBookInfo(uri: Uri) {
+        val item = libraryItemRepository.getByPath(uri.toString())
         if (item.isEmpty()) {
             val bookInfo = readBookInfo(
-                KoReaderApplication.getContext(),
                 uri.toString()
             )
-            Log.d("LibraryViewModel", "bookInfo " + bookInfo.toString())
+            Log.d("saveBookInLibrary", "bookInfo " + bookInfo.toString())
             saveBookInLibrary(bookInfo)
         }
     }
 
     private fun saveBookInLibrary(bookInfo: BookInfo?) {
         bookInfo?.let {
-            val result = libraryItemRepository.getByPath(it.path)
-            if (result.isEmpty()) {
+            val item = libraryItemRepository.getByPath(bookInfo.path)
+            if (item.isEmpty()) {
                 val libraryItemId = libraryItemRepository.insert(LibraryItem(it))
                 if (libraryItemId != null) {
                     bookInfo.authors?.forEach { bookInfoAuthor ->
@@ -331,10 +338,9 @@ class LibraryViewModel(
         }
     }
 
-    fun updateLibraryItem(position: Int, libraryItemWithAuthors: LibraryItemWithAuthors) {
+    fun updateLibraryItem(libraryItemWithAuthors: LibraryItemWithAuthors) {
         applicationScope.launch {
             val bookInfo = readBookInfo(
-                KoReaderApplication.getContext(),
                 libraryItemWithAuthors.libraryItem.path
             )
             Log.d("LibraryViewModel", "bookInfo " + bookInfo.toString())
@@ -401,43 +407,7 @@ class LibraryViewModel(
             }
         }
     }
-}
-
-    private fun readBookInfo(mContext: Context, contentUriPath: String): BookInfo? {
-        val result: BookInfo? = if (EbookHelper.isEpub(contentUriPath)) {
-            try {
-                EpubHelper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
-            } catch (e: Exception) {
-                null
-            }
-        } else if (EbookHelper.isFb2(contentUriPath)) {
-            try {
-                FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
-            } catch (e: Exception) {
-                null
-            }
-        } else {
-            null
-        }
-
-        if ( result != null) {
-            if (result.cover == null) result.cover = ImageUtils.getBitmap(mContext, ImageEnum.Ebook)
-        }
-        return result
-}
-
-
-
-class LibraryViewModelFactory(
-    private val libraryItemRepository: LibraryItemRepository,
-    private val authorsRepository: AuthorsRepository,
-    private val applicationScope: CoroutineScope
-    ) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(LibraryViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return LibraryViewModel(libraryItemRepository, authorsRepository, applicationScope) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
+    private fun readBookInfo(contentUriPath: String): BookInfo? {
+        return EbookHelper.getBookInfoTemporary(KoReaderApplication.getContext(), contentUriPath)
     }
 }

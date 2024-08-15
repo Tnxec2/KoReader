@@ -4,38 +4,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.kontranik.koreader.R
-import com.kontranik.koreader.databinding.FragmentLibraryMainBinding
+import com.kontranik.koreader.compose.ui.library.main.LibraryMainMenuScreen
 
 class LibraryMainMenuFragment : Fragment() {
 
-    private lateinit var binding: FragmentLibraryMainBinding
-
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        binding = FragmentLibraryMainBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        binding.imageButtonLibraryMainBack.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-        }
-
-        binding.llLibraryMainSettings.setOnClickListener {
-            settings()
-        }
-
-        binding.llLibraryMainByTitle.setOnClickListener {
-            openByTitle()
-        }
-
-        binding.llLibraryMainByAuthor.setOnClickListener {
-            openByAuthor()
+        return ComposeView(requireContext()).apply {
+            setContent {
+                LibraryMainMenuScreen(
+                    drawerState = DrawerState(DrawerValue.Closed),
+                    navigateBack = { requireActivity().supportFragmentManager.popBackStack() },
+                    navigateToBooksByTitle = { openByTitle() },
+                    navigateToBooksByAuthor = { openByAuthor() },
+                    navigateToSettings = { settings() })
+            }
         }
     }
 

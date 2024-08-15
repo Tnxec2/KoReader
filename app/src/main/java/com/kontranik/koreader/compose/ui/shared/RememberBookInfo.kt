@@ -1,8 +1,6 @@
 package com.kontranik.koreader.compose.ui.shared
 
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -15,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.documentfile.provider.DocumentFile
 import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.model.BookStatus
+import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookInfoComposable
 import com.kontranik.koreader.model.toBookInfoComposable
@@ -25,8 +24,6 @@ import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.ImageUtils.getBitmap
 import kotlinx.coroutines.launch
-import java.net.URLDecoder
-import java.util.concurrent.Executors
 
 @Composable
 fun rememberBookInfoForFileItem(fileItem: FileItem): MutableState<BookInfoComposable> {
@@ -100,6 +97,26 @@ fun rememberBookInfoForBookStatus(bookStatus: BookStatus, bookStatusViewModel: B
                 }
             }
         }
+    }
+
+    return bookInfoState
+}
+
+@Composable
+fun rememberBookInfoForLibraryItem(item: LibraryItemWithAuthors): MutableState<BookInfoComposable> {
+    val context = LocalContext.current
+
+    val bookInfoState = remember {
+        mutableStateOf(
+            item.toBookInfoComposable(cover = if (item.libraryItem.cover != null) {
+                ImageUtils.getImage(item.libraryItem.cover!!) ?: getBitmap(
+                    context,
+                    ImageEnum.Ebook
+                )
+            } else {
+                getBitmap(context, ImageEnum.Ebook)
+            })
+        )
     }
 
     return bookInfoState
