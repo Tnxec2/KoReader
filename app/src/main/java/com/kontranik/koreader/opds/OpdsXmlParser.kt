@@ -127,7 +127,7 @@ class OpdsXmlParser {
 
         return Entry(
             id = id,
-            title = title,
+            title = title ?: "",
             published = toDate(published),
             rights = rights,
             author = author,

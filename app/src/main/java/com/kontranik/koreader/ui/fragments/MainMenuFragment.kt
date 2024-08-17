@@ -4,15 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.kontranik.koreader.R
-import com.kontranik.koreader.ReaderActivity
 import com.kontranik.koreader.compose.ui.mainmenu.MainMenuScreen
 import com.kontranik.koreader.utils.PrefsHelper
 
@@ -21,13 +17,6 @@ class MainMenuFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-
-        var bookPath: String? = null
-        val prefs = requireActivity().getSharedPreferences(ReaderActivity.PREFS_FILE, AppCompatActivity.MODE_PRIVATE)
-
-        if ( prefs.contains(PrefsHelper.PREF_BOOK_PATH) ) {
-            bookPath = prefs.getString(PrefsHelper.PREF_BOOK_PATH, null)
-        }
 
         return ComposeView(requireContext()).apply {
             setContent {
@@ -40,7 +29,6 @@ class MainMenuFragment : Fragment() {
                     navigateToLibrary = { openLibrary() },
                     navigateToOpdsNetworkLibrary = { openOpds() },
                     navigateToSettings = { settings() },
-                    bookPath = remember { mutableStateOf(bookPath) },
                     navigateToBookInfo = { openBookInfo(it) }
                 )
             }

@@ -201,4 +201,5 @@
     <string name="drawer_menu_description">Menu navigation button</string>
     <string name="bookmark">Lesezeichen</string>
     <string name="go_to_bookmark">Gehe zu Lesezeichen</string>
+    <string name="sure_delete_opds_item">are you sure delete this opds entry</string>
 </resources>

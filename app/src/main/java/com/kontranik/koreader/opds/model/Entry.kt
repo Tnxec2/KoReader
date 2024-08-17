@@ -1,6 +1,9 @@
 package com.kontranik.koreader.opds.model
 
 import android.graphics.Bitmap
+import android.view.View
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import java.io.Serializable
@@ -9,7 +12,7 @@ import java.util.Date
 
 data class Entry(
     val id: String? = null,
-    var title: String? = null,
+    var title: String,
     val published: Date? = null,
     val rights: String? = null,
     val author: Author? = null,
@@ -33,32 +36,33 @@ data class Entry(
     @Transient var thumbnailBitmapLoaded: Boolean = false
 }
 
-val BACK = Entry(
-    id = "back",
-    title = "..",
-    clickLink = Link(
-        type = OpdsTypes.TYPE_LINK_OPDS_CATALOG,
-        title = "back",
-        href = "back",
-        rel = null
-    ),
-    thumbnail = Link(
-        type = OpdsTypes.TYPE_LINK_IMAGE_PNG,
-        title = null,
-        href = KoReaderApplication.getContext().resources.getString(R.string.icon_back_base64),
-        rel = OpdsTypes.REL_IMAGE
-    )
+data class EntryEditDetails(
+    var title: String = "",
+    var url: String = "",
 )
 
-val LOAD = Entry(
-    id = "load",
-    title = "load...",
-    thumbnail = Link(
-        type = OpdsTypes.TYPE_LINK_IMAGE_PNG,
-        title = null,
-        href = KoReaderApplication.getContext().resources.getString(R.string.icon_loading_base64),
-        rel = OpdsTypes.REL_IMAGE
-    )
+data class EntryUiDetails(
+    val title: String,
+    val cover: ImageBitmap? = null,
+    val author: String? = null,
+    val content: String? = null,
 )
+
+fun Entry.toEntryEditDetails(): EntryEditDetails {
+    return EntryEditDetails(
+        title = title,
+        url = clickLink?.href ?: ""
+    )
+}
+
+
+fun Entry.toUiDetails(): EntryUiDetails {
+    return EntryUiDetails(
+        title = title,
+        cover = thumbnailBitmap?.asImageBitmap(),
+        author = author?.toString(),
+        content = if (content?.type == OpdsTypes.TYPE_TEXT) content.data else null,
+    )
+}
 
 

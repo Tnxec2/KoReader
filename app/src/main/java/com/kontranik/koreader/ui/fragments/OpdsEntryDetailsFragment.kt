@@ -1,36 +1,25 @@
 package com.kontranik.koreader.ui.fragments
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.text.SpannableStringBuilder
-import android.text.Spanned
-import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.text.HtmlCompat
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.kontranik.koreader.KoReaderApplication
-import com.kontranik.koreader.databinding.FragmentOpdsEntrysDetailsBinding
+import com.kontranik.koreader.compose.ui.opds.OpdsEntryDetailsScreen
 import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.Link
-import com.kontranik.koreader.opds.model.OpdsTypes
-import com.kontranik.koreader.ui.components.OpdsLinkOnClickListener
-import com.kontranik.koreader.ui.components.OpdsLinkSpan
-import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.UrlHelper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -48,11 +37,6 @@ class OpdsEntryDetailsFragment :
         fun onClickOpdsEntryLink(link: Link)
     }
 
-    private lateinit var binding: FragmentOpdsEntrysDetailsBinding
-
-    private var opdsEntry: Entry? = null
-
-    private var startUrl: String? = null
 
     private var listener: OpdsEntryDetailsFragmentLinkClickListener? = null
 
@@ -60,94 +44,40 @@ class OpdsEntryDetailsFragment :
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentOpdsEntrysDetailsBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        startUrl = requireArguments().getString(START_URL, null)
+        val startUrl: String? = requireArguments().getString(START_URL, null)
         if ( startUrl == null)
             requireActivity().supportFragmentManager.popBackStack()
 
-        opdsEntry = requireArguments().getSerializable(ENTRY) as Entry?
+        val opdsEntry: Entry? = requireArguments().getSerializable(ENTRY) as Entry?
         if ( opdsEntry == null)
             requireActivity().supportFragmentManager.popBackStack()
 
-        binding.imageButtonOpdsentrydetailsBack.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-        }
-
-        opdsEntry?.let {entry ->
-            binding.textViewOpdsentrydetailsTitle.text = entry.title
-            if (entry.author != null) {
-                binding.textViewOpdsentrydetailsAuthor.visibility = View.VISIBLE
-                binding.textViewOpdsentrydetailsAuthor.text = entry.author.toString()
-            } else {
-                binding.textViewOpdsentrydetailsAuthor.visibility = View.GONE
-            }
-
-            val content = SpannableStringBuilder(getHtml(entry.content?.data ?: ""))
-
-            if (entry.otherLinks?.isNotEmpty() == true) content.append(getHtml("<h1>Links</h1>"))
-
-            entry.otherLinks
-                ?.sortedBy { link: Link -> link.rel }
-                ?.groupBy { it.rel }
-                ?.forEach { (rel, links) ->
-                    content.append(getHtml("<h2>${OpdsTypes.mapRel(rel)}</h2>"))
-                    links.forEach { link ->
-                        content.append(OpdsLinkSpan(link, object : OpdsLinkOnClickListener {
-                            override fun onClick(link: Link) {
-                                Log.d("ENTRYLINK", "clicked entry.otherLinks: $link")
-                                if (link.isCatalogEntry()) {
-                                    listener?.onClickOpdsEntryLink(link)
-                                    requireActivity().supportFragmentManager.popBackStack()
-                                } else if (link.isDownloadable())  {
-                                    download(entry, link)
-                                } else  {
-                                    openInBrowser(link)
-                                }
-                            }
-                        }))
-                        content.append(System.lineSeparator())
+        return ComposeView(requireContext()).apply {
+            setContent {
+                OpdsEntryDetailsScreen(
+                    drawerState = DrawerState(DrawerValue.Closed),
+                    entry = opdsEntry!!,
+                    startUrl = startUrl!!,
+                    navigateBack = {
+                        requireActivity().supportFragmentManager.popBackStack()
+                    },
+                    openInBrowser = {
+                        openInBrowser(it, startUrl)
+                    },
+                    download = { e, l ->
+                        download(e, l, startUrl)
+                    },
+                    onClickOpdsEntryLink = {
+                        listener?.onClickOpdsEntryLink(it)
                     }
-                    content.append(System.lineSeparator())
-                }
-
-            binding.textViewOpdsentrydetailsContent.text = content
-            binding.textViewOpdsentrydetailsContent.movementMethod = LinkMovementMethod.getInstance()
-
-            loadIcon(entry)
-        }
-    }
-
-    private fun loadIcon(
-        entry: Entry
-    ) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            var icon: Bitmap? = null
-            try {
-                if (entry.image?.href != null) {
-                    icon = ImageUtils.drawableFromUrl(entry.image.href, startUrl)
-                }
-                withContext(Dispatchers.Main) {
-                    if (icon != null) {
-                        binding.imageViewOpdsentrydetailsCover.visibility = View.VISIBLE
-                        binding.imageViewOpdsentrydetailsCover.setImageBitmap(icon)
-                    } else {
-                        binding.imageViewOpdsentrydetailsCover.visibility = View.GONE
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+                )
             }
         }
     }
 
-    private fun openInBrowser(link: Link) {
+
+    private fun openInBrowser(link: Link, startUrl: String) {
         link.href?.let {
             Log.d("OPENLINK", "open link in browser $link")
             val browserIntent = Intent(
@@ -160,7 +90,8 @@ class OpdsEntryDetailsFragment :
 
     private fun download(
         entry: Entry,
-        link: Link
+        link: Link,
+        startUrl: String
     ) {
         if (link.href == null) return
         try {
@@ -254,12 +185,6 @@ class OpdsEntryDetailsFragment :
     fun setListener(listener: OpdsEntryDetailsFragmentLinkClickListener) {
         this.listener = listener
     }
-
-    private fun getHtml(html: String): Spanned {
-        return HtmlCompat.fromHtml(
-            html, HtmlCompat.FROM_HTML_MODE_COMPACT)
-    }
-
 
     companion object {
         private const val ENTRY = "entry"

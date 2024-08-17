@@ -2,7 +2,7 @@ package com.kontranik.koreader.opds.model
 
 import java.io.Serializable
 
-class Author(val name: String?, val uri: String?, val email: String?) : Serializable {
+class Author(val name: String?, val uri: String? = null, val email: String? = null) : Serializable {
 
     override fun toString(): String {
 

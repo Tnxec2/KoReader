@@ -10,6 +10,7 @@ import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.ui.fragments.FileChooseFragmentViewModel
 import com.kontranik.koreader.compose.ui.library.LibraryViewModel
+import com.kontranik.koreader.compose.ui.opds.OpdsViewModell
 
 /**
  * Provides Factory to create instance of ViewModel for the entire app
@@ -38,6 +39,13 @@ object AppViewModelProvider {
 
         initializer {
             BookInfoViewModell(
+                this.createSavedStateHandle(),
+                koReaderApplication().applicationContext
+            )
+        }
+
+        initializer {
+            OpdsViewModell(
                 this.createSavedStateHandle(),
                 koReaderApplication().applicationContext
             )
