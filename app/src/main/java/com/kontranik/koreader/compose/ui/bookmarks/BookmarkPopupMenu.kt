@@ -14,7 +14,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -30,7 +28,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLight
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 
 @Composable
 fun BookmarkPopupMenu(

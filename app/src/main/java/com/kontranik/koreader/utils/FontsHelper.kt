@@ -12,8 +12,10 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.model.BookFonts
+import com.kontranik.koreader.utils.typefacefactory.FontManager
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
+import java.util.HashMap
 
 open class FontsHelper(var context: Context) {
 
@@ -118,4 +120,54 @@ open class FontsHelper(var context: Context) {
         return spannable
     }
 
+    companion object {
+        fun loadFontsForSettings(
+            context: Context,
+            showSystemFonts: Boolean,
+            showNotoFonts: Boolean,
+        ): MutableList<TypefaceRecord> {
+            val fonts: HashMap<String, File>?
+
+            val fontList = mutableListOf(
+                TypefaceRecord(name = TypefaceRecord.SANSSERIF),
+                TypefaceRecord(name = TypefaceRecord.SERIF),
+                TypefaceRecord(name = TypefaceRecord.MONO),
+            )
+            TypefaceRecord.fonts.forEach { (name, _) ->
+                println("loadFonts $name"); fontList.add(
+                    TypefaceRecord(name)
+                )
+            }
+
+            try {
+                fonts = FontManager.enumerateFonts(context, showSystemFonts, showNotoFonts)
+                // val collectedFonts = ZLTTFInfoDetector().collectFonts(fonts!!.values)
+                val collectedFonts: MutableList<TypefaceRecord> = mutableListOf()
+
+                if (fonts != null) {
+                    for (fontName in fonts.keys) {
+                        try {
+                            Typeface.createFromFile(fonts[fontName])
+                            collectedFonts.add(
+                                TypefaceRecord(
+                                    name = fontName,
+                                    file = fonts[fontName]!!
+                                )
+                            )
+                        } catch (_: Exception) {
+
+                        }
+                    }
+                }
+                collectedFonts.sortBy { it.name }
+                fontList.addAll(collectedFonts)
+            } catch (e: Exception) {
+                if (e is RuntimeException) {
+                    throw e
+                }
+                e.printStackTrace()
+            }
+            return fontList
+        }
+    }
 }

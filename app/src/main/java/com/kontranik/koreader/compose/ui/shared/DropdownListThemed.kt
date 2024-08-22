@@ -42,7 +42,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.preference.PreferenceManager
 import com.kontranik.koreader.utils.PrefsHelper
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingSmall
 
 

@@ -55,7 +55,7 @@ class MainMenuFragment : Fragment() {
     }
 
     private fun settings() {
-        val fragment = SettingsFragment()
+        val fragment = SettingsComposeFragment()
 
         requireActivity().supportFragmentManager.beginTransaction()
             .add(R.id.fragment_container_view, fragment, "fragment_settings")

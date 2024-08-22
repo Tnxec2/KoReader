@@ -11,6 +11,7 @@ import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.ui.fragments.FileChooseFragmentViewModel
 import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.compose.ui.opds.OpdsViewModell
+import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
 
 /**
  * Provides Factory to create instance of ViewModel for the entire app
@@ -53,6 +54,12 @@ object AppViewModelProvider {
 
         initializer {
             FileChooseFragmentViewModel(
+                koReaderApplication().applicationContext
+            )
+        }
+
+        initializer {
+            SettingsViewModel(
                 koReaderApplication().applicationContext
             )
         }

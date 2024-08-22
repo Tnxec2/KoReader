@@ -57,7 +57,7 @@ import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.utils.FileItem
 import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.launch
 
 @Composable

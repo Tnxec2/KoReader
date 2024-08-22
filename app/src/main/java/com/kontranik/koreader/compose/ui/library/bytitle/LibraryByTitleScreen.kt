@@ -55,7 +55,7 @@ import com.kontranik.koreader.database.model.LibraryItem
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.utils.ImageUtils
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.launch
 
 @Composable

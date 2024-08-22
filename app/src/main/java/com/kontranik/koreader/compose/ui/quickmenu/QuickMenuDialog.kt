@@ -64,7 +64,7 @@ fun QuickMenuDialog(
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
         colorThemeIndex = prefs.getString(
-            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, null)?.toIntOrNull()
+            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, null)?.toIntOrNull()?.minus(1)
             ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
 
         val lineSpacingMultiplierString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, defaultLineSpacingMultiplier.toString() )

@@ -327,6 +327,8 @@ class PrefsHelper() {
                 PREF_COLOR_SELECTED_THEME_DEFAULT.toString()
             )?.toIntOrNull()
                 ?: PREF_COLOR_SELECTED_THEME_DEFAULT
+            println("colorThemeIndex " + colorThemeIndex)
+            colorThemeIndex -= 1
         }
 
         private fun loadTapSettings(prefs: SharedPreferences) {
@@ -519,7 +521,8 @@ class PrefsHelper() {
 
         fun loadColorThemeSettings(): PageViewColorSettings {
             val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(KoReaderApplication.getContext())
-            var co = prefs.getInt(PREF_KEY_COLOR_BACK + colorThemeIndex+1, 0)
+            var co = prefs.getInt(PREF_KEY_COLOR_BACK + colorThemeIndex, 0)
+
             colorBack =
                 if (co != 0) "#" + Integer.toHexString(co)
                 else KoReaderApplication.getContext().resources.getString(colorBackgroundDefaultArray[colorThemeIndex])

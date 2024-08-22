@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.paddingSmall
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 
 @Composable
 fun CustomInputDialog(

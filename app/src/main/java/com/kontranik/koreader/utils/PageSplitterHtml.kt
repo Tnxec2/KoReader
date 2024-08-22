@@ -31,8 +31,9 @@ open class PageSplitterHtml(context: Context) : FontsHelper(context) {
         val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
         val colorThemeIndex = prefs.getString(
-            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, null)?.toIntOrNull()
+            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, null)?.toIntOrNull()?.minus(1)
             ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
+
 
         val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + colorThemeIndex+1, 0)
         val colorText = Color.parseColor(

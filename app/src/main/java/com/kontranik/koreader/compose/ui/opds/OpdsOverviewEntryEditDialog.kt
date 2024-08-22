@@ -28,7 +28,7 @@ import androidx.compose.ui.window.Dialog
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.opds.model.EntryEditDetails
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 
 @Composable
 fun OpdsOverviewEntryEditDialog(

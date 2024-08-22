@@ -120,6 +120,8 @@ dependencies {
 
     implementation(libs.colorpicker)
 
+    implementation("com.github.skydoves:colorpicker-compose:1.1.2") // compose
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

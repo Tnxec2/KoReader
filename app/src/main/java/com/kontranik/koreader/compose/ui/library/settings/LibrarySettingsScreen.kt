@@ -7,7 +7,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -55,7 +54,7 @@ import com.kontranik.koreader.compose.ui.appbar.AppBarAction
 import com.kontranik.koreader.compose.ui.openfile.GetStorageToOpen
 import com.kontranik.koreader.compose.ui.shared.ConfirmDialog
 import com.kontranik.koreader.compose.ui.library.LibraryViewModel
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.launch
 
 const val PREFS_FILE = "LibraryActivitySettings"

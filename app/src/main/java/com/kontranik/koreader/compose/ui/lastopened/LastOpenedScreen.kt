@@ -24,11 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -46,11 +42,9 @@ import com.kontranik.koreader.compose.ui.shared.rememberBookInfoForBookStatus
 import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.model.BookStatus
 import com.kontranik.koreader.database.model.mocupAuthors
-import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
-import com.kontranik.koreader.utils.ImageUtils.getBitmap
 import com.kontranik.koreader.utils.ImageUtils.getBytes
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.launch
 
 

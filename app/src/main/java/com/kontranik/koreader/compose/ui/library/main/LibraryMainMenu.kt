@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.mainmenu.MainMenuItem
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.launch
 
 @Composable

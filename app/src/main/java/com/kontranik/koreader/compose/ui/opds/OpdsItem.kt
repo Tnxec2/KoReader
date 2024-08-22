@@ -32,7 +32,8 @@ import com.kontranik.koreader.compose.ui.shared.rememberOpdsEntryUiDetails
 import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.Link
 import com.kontranik.koreader.opds.model.OpdsTypes
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.opds.model.Author
 
 @Composable
 fun OpdsItem(
@@ -117,7 +118,7 @@ private fun OpdsItemPreview() {
             OpdsItem(
                 entry = Entry(
                     title = "Opds Entry",
-                    author = com.kontranik.koreader.opds.model.Author(
+                    author = Author(
                         name = "Author", null, null
                     ),
                     thumbnail = Link(

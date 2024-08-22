@@ -43,7 +43,7 @@ import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.appbar.AppBarAction
 import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.database.model.Bookmark
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.launch
 
 object BoomkmarksScreenDestination : NavigationDestination {

@@ -42,7 +42,7 @@ import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.utils.PrefsHelper
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -140,7 +140,7 @@ fun MainMenuItem(
             .fillMaxWidth()
             .padding(horizontal = paddingMedium)
     ) {
-        Image(
+        Icon(
             painter = painterResource(id = painterId),
             contentDescription = stringResource(id = menuTextId),
             modifier = Modifier

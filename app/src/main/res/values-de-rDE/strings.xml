@@ -82,6 +82,7 @@
     <string name="color_linktext">Linkfarbe</string>
     <string name="color_infotext">Textfarbe der Infoleiste</string>
     <string name="default_color">Standardfarbe setzen</string>
+    <string name="color_theme_indexed_header">Farbschema %1$s</string>
     <string name="color_theme1_header">Farbschema 1</string>
     <string name="color_theme2_header">Farbschema 2</string>
     <string name="color_theme3_header">Farbschema 3</string>
@@ -202,4 +203,6 @@
     <string name="bookmark">Lesezeichen</string>
     <string name="go_to_bookmark">Gehe zu Lesezeichen</string>
     <string name="sure_delete_opds_item">are you sure delete this opds entry</string>
+    <string name="margins">Margins</string>
+    <string name="colors">Colors</string>
 </resources>

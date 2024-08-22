@@ -10,7 +10,7 @@ import java.util.*
 /**
  * Stores information about a [Typeface].
  */
-class TypefaceRecord(
+data class TypefaceRecord(
         val name: String,
         val file: File? = null,
         var otherNames: Set<String?>? = null) {

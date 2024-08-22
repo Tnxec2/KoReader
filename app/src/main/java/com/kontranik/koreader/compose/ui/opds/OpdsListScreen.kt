@@ -53,7 +53,7 @@ import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.EntryEditDetails
 import com.kontranik.koreader.opds.model.toEntryEditDetails
 import com.kontranik.koreader.utils.ImageUtils
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.launch
 
 @Composable

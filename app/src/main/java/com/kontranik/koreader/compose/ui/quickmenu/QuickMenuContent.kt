@@ -18,11 +18,9 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -31,9 +29,10 @@ import com.kontranik.koreader.compose.ui.shared.DropdownList
 import com.kontranik.koreader.compose.ui.shared.DropdownListThemed
 import com.kontranik.koreader.compose.ui.shared.getLetterSpacing
 import com.kontranik.koreader.compose.ui.shared.getLineSpacings
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
+import com.kontranik.koreader.compose.ui.shared.FontSizeWidget
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,40 +75,12 @@ fun QuickMenuDialogContent(
                     )
                 }
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(id = R.string.textsize),
-                    modifier = Modifier.weight(0.5f)
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(0.5f)) {
-                    IconButton(onClick = { onChangeTextSize(textSize-1) }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_a_small),
-                            contentDescription = stringResource(
-                                id = R.string.decrease
-                            )
-                        )
-                    }
-                    Text(
-                        text = stringResource(id = R.string.example_abcabc),
-                        fontSize = TextUnit(textSize, TextUnitType.Sp),
-                        fontFamily = FontFamily(selectedFont),
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(onClick = { onChangeTextSize(textSize+1) }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_aa),
-                            contentDescription = stringResource(
-                                id = R.string.increase
-                            )
-                        )
-                    }
-                }
-            }
+            FontSizeWidget(
+                textSize = textSize,
+                onChangeTextSize = onChangeTextSize,
+                selectedFont = selectedFont,
+                modifier = Modifier.fillMaxWidth()
+            )
             Row(Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(id = R.string.line_spacing),

@@ -95,13 +95,14 @@
     <string name="color_infotext">Text color in info area</string>
     <string name="default_color">set default color</string>
 
+    <string name="color_theme_indexed_header">Theme %1$s</string>
     <string name="color_theme1_header">Theme 1</string>
     <string name="color_theme2_header">Theme 2</string>
     <string name="color_theme3_header">Theme 3</string>
     <string name="color_theme4_header">Theme 4</string>
     <string name="color_theme5_header">Theme 5</string>
 
-    <string name="color_theme_backgroundimage_header">Backgroundimage</string>
+    <string name="color_theme_backgroundimage_header">Background image</string>
 
     <string name="color_theme1_backgroud_default" translatable="false">#FBF0D9</string>
     <string name="color_theme1_foregroud_default" translatable="false">#5F4B32</string>
@@ -246,6 +247,8 @@
     <string name="bookmark">Bookmark</string>
     <string name="go_to_bookmark">Go to Bookmark</string>
     <string name="sure_delete_opds_item">are you sure delete this opds entry</string>
+    <string name="margins">Margins</string>
+    <string name="colors">Colors</string>
 
 
 </resources>

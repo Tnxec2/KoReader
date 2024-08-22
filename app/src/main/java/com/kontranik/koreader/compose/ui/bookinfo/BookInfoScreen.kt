@@ -45,7 +45,7 @@ import com.kontranik.koreader.compose.navigation.NavigationDestination
 import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLandscapeLightDark
 import com.kontranik.koreader.database.model.Author
-import de.kontranik.freebudget.ui.theme.AppTheme
+import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import kotlinx.coroutines.launch
