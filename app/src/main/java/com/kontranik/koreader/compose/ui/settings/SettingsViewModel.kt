@@ -15,13 +15,11 @@ import com.kontranik.koreader.compose.theme.defaultLetterSpacing
 import com.kontranik.koreader.compose.theme.defaultLineSpacingMultiplier
 import com.kontranik.koreader.compose.theme.defaultTextSize
 import com.kontranik.koreader.model.ScreenZone
-import com.kontranik.koreader.ui.preferences.TextType
 
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.MONO
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.SANSSERIF
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.SERIF
-import java.io.File
 import java.util.EnumMap
 
 const val PREFS_FILE = "Sort"
