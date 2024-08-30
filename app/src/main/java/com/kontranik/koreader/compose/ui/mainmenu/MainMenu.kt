@@ -3,9 +3,7 @@ package com.kontranik.koreader.compose.ui.mainmenu
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,12 +35,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kontranik.koreader.R
-import com.kontranik.koreader.ReaderActivity
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
-import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.ui.settings.PREFS_FILE
+import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
 import kotlinx.coroutines.launch
 
 @Composable
@@ -51,7 +49,7 @@ fun MainMenuScreen(
     navigateBack: () -> Unit,
     navigateToOpenFile: () -> Unit,
     navigateToLastOpened: () -> Unit,
-    navigateToBookmarks: () -> Unit,
+    navigateToBookmarks: (bookPath: String) -> Unit,
     navigateToLibrary: () -> Unit,
     navigateToOpdsNetworkLibrary: () -> Unit,
     navigateToSettings: () -> Unit,
@@ -64,13 +62,12 @@ fun MainMenuScreen(
     val bookPath = rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(key1 = Unit) {
-        val prefs = context.getSharedPreferences(ReaderActivity.PREFS_FILE, AppCompatActivity.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_FILE, AppCompatActivity.MODE_PRIVATE)
 
-        if ( prefs.contains(PrefsHelper.PREF_BOOK_PATH) ) {
-            bookPath.value = prefs.getString(PrefsHelper.PREF_BOOK_PATH, null)
+        if ( prefs.contains(PREF_BOOK_PATH) ) {
+            bookPath.value = prefs.getString(PREF_BOOK_PATH, null)
         }
     }
-
 
     Scaffold(
         topBar = {
@@ -94,7 +91,6 @@ fun MainMenuScreen(
         LazyColumn() {
             item { MainMenuItem(painterId = R.drawable.ic_folder_black_24dp, menuTextId = R.string.openfile, onClick = { coroutineScope.launch{ navigateToOpenFile() } }) }
             item { MainMenuItem(painterId = R.drawable.ic_iconmonstr_book_time, menuTextId = R.string.last_opened, onClick = { coroutineScope.launch{ navigateToLastOpened() } }) }
-            item { MainMenuItem(painterId = R.drawable.ic_iconmonstr_bookmark, menuTextId = R.string.bookmarklist, onClick = { coroutineScope.launch{ navigateToBookmarks() } }) }
             item { MainMenuItem(painterId = R.drawable.baseline_local_library_24, menuTextId = R.string.library, onClick = { coroutineScope.launch{ navigateToLibrary() } }) }
             item { MainMenuItem(painterId = R.drawable.networking_1, menuTextId = R.string.opds, onClick = { coroutineScope.launch{ navigateToOpdsNetworkLibrary() } }) }
             item { MainMenuItem(painterId = R.drawable.ic_baseline_settings_24, menuTextId = R.string.settings, onClick = { coroutineScope.launch{ navigateToSettings() } }) }
@@ -104,20 +100,30 @@ fun MainMenuScreen(
             Spacer(modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth())
-            Box(
-                modifier = modifier
-                    .clickable(
-                        onClick = {coroutineScope.launch { navigateToBookInfo(it)}},
-                        role = Role.Button,
-                    ),
-                contentAlignment = Alignment.Center
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
+                Icon(
                     painter = painterResource(id = R.drawable.ic_iconmonstr_book_info),
                     contentDescription = stringResource(id = R.string.bookinfo),
                     modifier = Modifier
                         .padding(paddingSmall)
                         .size(32.dp)
+                        .clickable(
+                            onClick = {coroutineScope.launch { navigateToBookInfo(it)}},
+                            role = Role.Button,
+                        ),
+                )
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_iconmonstr_bookmark),
+                    contentDescription = stringResource(id = R.string.bookmarklist),
+                    modifier = Modifier
+                        .padding(paddingSmall)
+                        .size(32.dp)
+                        .clickable(
+                            onClick = {coroutineScope.launch { navigateToBookmarks(it)}},
+                            role = Role.Button,
+                        ),
                 )
             }
         }

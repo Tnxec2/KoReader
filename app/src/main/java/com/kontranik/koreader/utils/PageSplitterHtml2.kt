@@ -1,58 +1,49 @@
 package com.kontranik.koreader.utils
 
-import android.content.Context
-import android.content.SharedPreferences
-import android.graphics.Color
 import android.text.*
 import android.text.style.QuoteSpan
-import android.widget.TextView
-import androidx.preference.PreferenceManager
-import com.kontranik.koreader.KoReaderApplication
-import com.kontranik.koreader.model.Book
+import com.kontranik.koreader.compose.ui.reader.PageLoaderToken
+import com.kontranik.koreader.model.Book2
 import com.kontranik.koreader.model.BookPosition
 import com.kontranik.koreader.model.Page
 
-open class PageSplitterHtml() : FontsHelper() {
+open class PageSplitterHtml2() : FontsHelper() {
 
     var pages: MutableList<Page> = mutableListOf()
 
     private var content: SpannableStringBuilder = SpannableStringBuilder()
     private var staticLayout: StaticLayout? = null
 
-    fun splitPages(textView: TextView, book: Book, section: Int, html: String, reloadFonts: Boolean) {
-        println("splitPages: textView.measuredWidth = ${textView.measuredWidth}")
-        if (textView.measuredWidth <= 0) return
+    fun splitPages(painter: TextPaint,
+                   pageLoaderToken: PageLoaderToken,
+                   book: Book2,
+                   section: Int,
+                   html: String,
+                   reloadFonts: Boolean) {
+        println("PageSplitterHtml2.pageLoaderToken: ${pageLoaderToken.pageSize}")
+
+        if (pageLoaderToken.pageSize.width <= 0) return
         if ( reloadFonts ) loadFonts()
 
-        val pageWidth: Int = textView.measuredWidth - textView.paddingLeft - textView.paddingRight
-        val pageHeight: Int = textView.measuredHeight - textView.paddingTop - textView.paddingBottom
-        val paint = textView.paint
-        val lineSpacingMultiplier: Float = textView.lineSpacingMultiplier
-        val lineSpacingExtra: Float = textView.lineSpacingExtra
-
-        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(
-            KoReaderApplication.getContext())
-
-        val colorThemeIndex = prefs.getString(
-            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, null)?.toIntOrNull()?.minus(1)
-            ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
-
-
-        val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + colorThemeIndex+1, 0)
-        val colorText = Color.parseColor(
-            if (co != 0) "#" + Integer.toHexString(co)
-            else KoReaderApplication.getContext().resources.getString(PrefsHelper.colorForegroundDefaultArray[colorThemeIndex])
-        )
-
         content =
-            SpannableStringBuilder(Html.fromHtml(
-                    html, Html.FROM_HTML_MODE_COMPACT, CustomImageGetter(book, pageWidth, pageHeight, colorText, section > 0), null))
+            SpannableStringBuilder(
+                Html.fromHtml(
+                    html, Html.FROM_HTML_MODE_COMPACT,
+                    CustomImageGetter2(
+                        book,
+                        pageLoaderToken.pageSize.width,
+                        pageLoaderToken.pageSize.height,
+                        painter.color,
+                        section > 0),
+                    null
+                )
+            )
 
-        postformatContent(textView)
+        postformatContent(painter)
 
         staticLayout =
-            StaticLayout.Builder.obtain(content, 0, content.length, paint, pageWidth)
-                    .setLineSpacing(lineSpacingExtra, lineSpacingMultiplier)
+            StaticLayout.Builder.obtain(content, 0, content.length, painter, pageLoaderToken.pageSize.width)
+                    .setLineSpacing(pageLoaderToken.lineSpacingExtra, pageLoaderToken.lineSpacingMultiplier)
                     .setAlignment(Layout.Alignment.ALIGN_NORMAL)
                     .build()
 
@@ -66,9 +57,9 @@ open class PageSplitterHtml() : FontsHelper() {
         var endOffset: Int
         while (true) {
             startLineTop = staticLayout!!.getLineTop(startLine)
-            endLine = staticLayout!!.getLineForVertical(startLineTop + pageHeight)
+            endLine = staticLayout!!.getLineForVertical(startLineTop + pageLoaderToken.pageSize.height)
             endLineBottom = staticLayout!!.getLineBottom(endLine)
-            var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageHeight ) endLine - 1 else endLine
+            var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageLoaderToken.pageSize.height ) endLine - 1 else endLine
             if ( lastFullyVisibleLine < startLine) lastFullyVisibleLine = startLine
             startOffset = staticLayout!!.getLineStart(startLine)
             endOffset = staticLayout!!.getLineEnd(lastFullyVisibleLine)
@@ -83,8 +74,8 @@ open class PageSplitterHtml() : FontsHelper() {
         }
     }
 
-    private fun postformatContent(textView: TextView) {
-        formatQuotes(textView)
+    private fun postformatContent(painter: TextPaint) {
+        formatQuotes(painter.color)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
             content = SpannableStringBuilder(replaceStyledSpans(content, content.length))
             content = SpannableStringBuilder(replaceTypefaces(content))
@@ -109,8 +100,7 @@ open class PageSplitterHtml() : FontsHelper() {
         }
     }*/
 
-    private fun formatQuotes(textView: TextView) {
-        val quoteColor = textView.currentTextColor
+    private fun formatQuotes(quoteColor: Int) {
         val newQuoteSpan = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
             QuoteSpan(quoteColor, 5, 10)
         } else {

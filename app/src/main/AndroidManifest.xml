@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme.Fullscreen"
         android:usesCleartextTraffic="true"
         >
-        <activity android:name=".ReaderActivity"
+        <activity android:name=".activity.MainActivity"
                 android:configChanges="orientation|screenSize"
                 android:exported="true"
             >

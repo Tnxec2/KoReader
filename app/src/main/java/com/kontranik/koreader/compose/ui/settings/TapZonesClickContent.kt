@@ -30,7 +30,9 @@ import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLight
 data class TapItem(
     val title: Int,
     val defaultValue: String,
-    val onChange: (String) -> Unit
+    val defaultValueTitle: String? = null,
+    val onChange: (String) -> Unit,
+    val enabled: Boolean = true
 )
 
 @Composable
@@ -40,35 +42,45 @@ fun TapZonesClickSettingsContent(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
     topLeft: String,
+    topLeftTitle: String,
     onChangeTopLeft: (String) -> Unit,
     topCenter: String,
+    topCenterTitle: String,
     onChangeTopCenter: (String) -> Unit,
     topRight: String,
+    topRightTitle: String,
     onChangeTopRight: (String) -> Unit,
     middleLeft: String,
+    middleLeftTitle: String,
     onChangeMiddleLeft: (String) -> Unit,
     middleCenter: String,
+    middleCenterEnabled: Boolean,
+    middleCenterTitle: String,
     onChangeMiddleCenter: (String) -> Unit,
     middleRight: String,
+    middleRightTitle: String,
     onChangeMiddleRight: (String) -> Unit,
     bottomLeft: String,
+    bottomLeftTitle: String,
     onChangeBottomLeft: (String) -> Unit,
     bottomCenter: String,
+    bottomCenterTitle: String,
     onChangeBottomCenter: (String) -> Unit,
     bottomRight: String,
+    bottomRightTitle: String,
     onChangeBottomRight: (String) -> Unit,
 ) {
 
     val items = listOf(
-        TapItem(R.string.tapzone_top_left, topLeft, onChangeTopLeft),
-        TapItem(R.string.tapzone_top_center, topCenter, onChangeTopCenter),
-        TapItem(R.string.tapzone_top_right, topRight, onChangeTopRight),
-        TapItem(R.string.tapzone_middle_left, middleLeft, onChangeMiddleLeft),
-        TapItem(R.string.tapzone_middle_center, middleCenter, onChangeMiddleCenter),
-        TapItem(R.string.tapzone_middle_right, middleRight, onChangeMiddleRight),
-        TapItem(R.string.tapzone_bottom_left, bottomLeft, onChangeBottomLeft),
-        TapItem(R.string.tapzone_bottom_center, bottomCenter, onChangeBottomCenter),
-        TapItem(R.string.tapzone_bottom_right, bottomRight, onChangeBottomRight),
+        TapItem(title = R.string.tapzone_top_left, defaultValue = topLeft, defaultValueTitle = topLeftTitle, onChange = onChangeTopLeft),
+        TapItem(title = R.string.tapzone_top_center, defaultValue = topCenter, defaultValueTitle = topCenterTitle, onChange = onChangeTopCenter),
+        TapItem(title = R.string.tapzone_top_right, defaultValue = topRight, defaultValueTitle = topRightTitle, onChange = onChangeTopRight),
+        TapItem(title = R.string.tapzone_middle_left, defaultValue = middleLeft, defaultValueTitle = middleLeftTitle, onChange = onChangeMiddleLeft),
+        TapItem(title = R.string.tapzone_middle_center, defaultValue = middleCenter, defaultValueTitle = middleCenterTitle, onChange = onChangeMiddleCenter, enabled = middleCenterEnabled),
+        TapItem(title = R.string.tapzone_middle_right, defaultValue = middleRight, defaultValueTitle = middleRightTitle, onChange = onChangeMiddleRight),
+        TapItem(title = R.string.tapzone_bottom_left, defaultValue = bottomLeft, defaultValueTitle = bottomLeftTitle, onChange = onChangeBottomLeft),
+        TapItem(title = R.string.tapzone_bottom_center, defaultValue = bottomCenter, defaultValueTitle = bottomCenterTitle, onChange = onChangeBottomCenter),
+        TapItem(title = R.string.tapzone_bottom_right, defaultValue = bottomRight, defaultValueTitle = bottomRightTitle, onChange = onChangeBottomRight),
     )
 
     Scaffold(
@@ -100,9 +112,11 @@ fun TapZonesClickSettingsContent(
                         entries = stringArrayResource(id = R.array.tapzonen_entries).toList(),
                         entryValues = stringArrayResource(id = R.array.tapzonen_values).toList(),
                         defaultValue = item.defaultValue,
+                        defaultValueTitle = item.defaultValueTitle,
                         onChange = item.onChange,
                         showDefaultValue = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = item.enabled,
                     )
                 }
             }
@@ -121,22 +135,32 @@ private fun TapZonesOneClickSettingsContentPreview() {
                 drawerState = DrawerState(DrawerValue.Closed),
                 navigateBack = {},
                 topLeft = "action",
+                topLeftTitle = "action title",
                 onChangeTopLeft = {},
                 topCenter = "action",
+                topCenterTitle = "action title",
                 onChangeTopCenter = {},
                 topRight = "action",
+                topRightTitle = "action",
                 onChangeTopRight = {},
                 middleLeft = "action",
+                middleLeftTitle = "action",
                 onChangeMiddleLeft = {},
                 middleCenter = "action",
+                middleCenterEnabled = true,
+                middleCenterTitle = "action",
                 onChangeMiddleCenter = {},
                 middleRight = "action",
+                middleRightTitle = "action",
                 onChangeMiddleRight = {},
                 bottomLeft = "action",
+                bottomLeftTitle = "action",
                 onChangeBottomLeft = {},
                 bottomCenter = "action",
+                bottomCenterTitle = "action",
                 onChangeBottomCenter = {},
                 bottomRight = "action",
+                bottomRightTitle = "action",
                 onChangeBottomRight = {},
             )
         }

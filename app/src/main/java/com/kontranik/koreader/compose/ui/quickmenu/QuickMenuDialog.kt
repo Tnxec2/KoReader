@@ -1,35 +1,29 @@
 package com.kontranik.koreader.compose.ui.quickmenu
 
-import android.content.SharedPreferences
+import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.preference.PreferenceManager
 import com.kontranik.koreader.ReaderActivity
+import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
 import com.kontranik.koreader.compose.ui.shared.getLetterSpacing
 import com.kontranik.koreader.compose.ui.shared.getLineSpacings
 import com.kontranik.koreader.compose.ui.shared.getThemes
-import com.kontranik.koreader.utils.PrefsHelper
-import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
-import com.kontranik.koreader.compose.theme.defaultLetterSpacing
-import com.kontranik.koreader.compose.theme.defaultLineSpacingMultiplier
-import com.kontranik.koreader.compose.theme.defaultTextSize
-import java.io.File
+import com.kontranik.koreader.model.PageViewSettings
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickMenuDialog(
-    onFinishQuickMenuDialog: (textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorThemeIndex: Int) -> Unit,
     onClose: () -> Unit,
     onAddBookmark: () -> Unit,
     onOpenBookmarks: () -> Unit,
@@ -37,70 +31,48 @@ fun QuickMenuDialog(
     onChangeTextSizeQuickMenuDialog: (textSize: Float) -> Unit,
     onChangeLineSpacingQuickMenuDialog: (lineSpacingMultiplier: Float) -> Unit,
     onChangeLetterSpacingQuickMenuDialog: (lineSpacingMultiplier: Float) -> Unit,
-    onOpenBookInfo: (String) -> Unit,
+    onFinishQuickMenuDialog: (textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorThemeIndex: Int) -> Unit,
+    onOpenBookInfo: () -> Unit,
+    selectedColorTheme: Int,
+    pageViewSettings: PageViewSettings,
+    selectedFont: Typeface
 ) {
     val context = LocalContext.current
 
     var bookPath by remember {mutableStateOf<String?>(null)}
 
     val themes by remember {mutableStateOf(getThemes(context))}
-    var colorThemeIndex by remember { mutableIntStateOf(0) }
+    var colorThemeIndex by remember {
+        mutableIntStateOf(selectedColorTheme)
+    }
 
-    var textSize by remember { mutableFloatStateOf(defaultTextSize) }
+    var textSize by remember { mutableFloatStateOf(
+        pageViewSettings.textSize
+    ) }
 
     val itemsLineSpacing by remember {mutableStateOf(getLineSpacings().map{it.toString()})}
-    var lineSpacingMultiplier by remember {mutableFloatStateOf(0f)}
+    var lineSpacingMultiplier by remember {
+        mutableFloatStateOf(pageViewSettings.lineSpacingMultiplier)
+    }
 
     val itemsLetterSpacing by remember {mutableStateOf(getLetterSpacing().map{it.toString()})}
-    var letterSpacing by remember {mutableFloatStateOf(0f)}
-
-
-    var selectedFont by remember {mutableStateOf<TypefaceRecord>(TypefaceRecord.DEFAULT)}
+    var letterSpacing by remember {
+        mutableFloatStateOf(pageViewSettings.letterSpacing)
+    }
 
     LaunchedEffect(Unit) {
         val settings = context.getSharedPreferences(ReaderActivity.PREFS_FILE, AppCompatActivity.MODE_PRIVATE)
-        bookPath = settings?.getString(PrefsHelper.PREF_BOOK_PATH, null)
-
-        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-
-        colorThemeIndex = prefs.getString(
-            PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, null)?.toIntOrNull()?.minus(1)
-            ?: PrefsHelper.PREF_COLOR_SELECTED_THEME_DEFAULT
-
-        val lineSpacingMultiplierString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, defaultLineSpacingMultiplier.toString() )
-        if ( lineSpacingMultiplierString != null) lineSpacingMultiplier = lineSpacingMultiplierString.toFloat()
-
-        val letterSpacingString = prefs.getString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, defaultLetterSpacing.toString() )
-        if ( letterSpacingString != null) letterSpacing = letterSpacingString.toFloat()
-
-        textSize = prefs.getFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
-
-        val fontpath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
-        val fontname = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.DEFAULT.name) ?: TypefaceRecord.DEFAULT.name
-        selectedFont = if ( fontpath != null ) {
-            val f = File(fontpath)
-            if (f.exists() && f.isFile && f.canRead())
-                TypefaceRecord(fontname, f)
-            else
-                TypefaceRecord.DEFAULT
-        } else {
-            TypefaceRecord(fontname)
-        }
+        bookPath = settings?.getString(PREF_BOOK_PATH, null)
     }
 
     fun saveQuickSettings() {
-        val prefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit()
-        prefEditor.putString(PrefsHelper.PREF_KEY_COLOR_SELECTED_THEME, colorThemeIndex.toString())
-        prefEditor.putFloat(PrefsHelper.PREF_KEY_BOOK_TEXT_SIZE, textSize)
-        prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LINE_SPACING, lineSpacingMultiplier.toString())
-        prefEditor.putString(PrefsHelper.PREF_KEY_BOOK_LETTER_SPACING, letterSpacing.toString())
-        prefEditor.apply()
-
-        // Return Data back to activity
         onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex)
+        onClose()
     }
 
-    ModalBottomSheet(onDismissRequest = { onClose() }) {
+    ModalBottomSheet(
+        onDismissRequest = { onClose() }
+    ) {
         QuickMenuDialogContent(
             themes = themes,
             colorThemePosition = colorThemeIndex,
@@ -113,7 +85,7 @@ fun QuickMenuDialog(
                 textSize = it
                 onChangeTextSizeQuickMenuDialog(it)
            },
-            selectedFont = selectedFont.getTypeface(),
+            selectedFont = selectedFont,
             itemsLineSpacing = itemsLineSpacing,
             itemsLetterSpacing = itemsLetterSpacing,
             lineSpacingMultiplier = lineSpacingMultiplier,
@@ -129,7 +101,7 @@ fun QuickMenuDialog(
             onAddBookmark = {onAddBookmark()},
             onOpenBookmarks = {onOpenBookmarks()},
             onClose = {onClose()},
-            onOpenBookInfo = { bookPath?.let{onOpenBookInfo(it)}},
+            onOpenBookInfo = { onOpenBookInfo() },
             saveQuickSettings = {saveQuickSettings()},
         )
     }

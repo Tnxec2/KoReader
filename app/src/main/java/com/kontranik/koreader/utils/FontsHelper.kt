@@ -11,13 +11,24 @@ import android.text.style.TypefaceSpan
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
+import com.kontranik.koreader.KoReaderApplication
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_BOOK_FONT_NAME_BOLD
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_BOOK_FONT_NAME_BOLDITALIC
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_BOOK_FONT_NAME_ITALIC
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_BOOK_FONT_NAME_MONOSPACE
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_BOOK_FONT_NAME_NORMAL
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_BOOK_FONT_PATH_BOLD
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_BOOK_FONT_PATH_BOLDITALIC
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_BOOK_FONT_PATH_ITALIC
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_BOOK_FONT_PATH_MONOSPACE
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_BOOK_FONT_PATH_NORMAL
 import com.kontranik.koreader.model.BookFonts
 import com.kontranik.koreader.utils.typefacefactory.FontManager
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import java.io.File
 import java.util.HashMap
 
-open class FontsHelper(var context: Context) {
+open class FontsHelper() {
 
     private lateinit var bookFonts: BookFonts
 
@@ -26,26 +37,27 @@ open class FontsHelper(var context: Context) {
     }
 
     fun loadFonts() {
-        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+            KoReaderApplication.getContext())
 
-        var fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
-        var fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.DEFAULT.name)!!
+        var fontPath = prefs.getString(PREF_KEY_BOOK_FONT_PATH_NORMAL, null)
+        var fontName = prefs.getString(PREF_KEY_BOOK_FONT_NAME_NORMAL, TypefaceRecord.DEFAULT.name)!!
         val typefaceNormal = TypefaceRecord(fontName, fontPath).getTypeface(Typeface.NORMAL)
 
-        fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_BOLD, null)
-        fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_BOLD, TypefaceRecord.DEFAULT.name)!!
+        fontPath = prefs.getString(PREF_KEY_BOOK_FONT_PATH_BOLD, null)
+        fontName = prefs.getString(PREF_KEY_BOOK_FONT_NAME_BOLD, TypefaceRecord.DEFAULT.name)!!
         val typefaceBold = TypefaceRecord(fontName, fontPath).getTypeface(Typeface.BOLD)
 
-        fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_ITALIC, null)
-        fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_ITALIC, TypefaceRecord.DEFAULT.name)!!
+        fontPath = prefs.getString(PREF_KEY_BOOK_FONT_PATH_ITALIC, null)
+        fontName = prefs.getString(PREF_KEY_BOOK_FONT_NAME_ITALIC, TypefaceRecord.DEFAULT.name)!!
         val typefaceItalic = TypefaceRecord(fontName, fontPath).getTypeface(Typeface.ITALIC)
 
-        fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_BOLDITALIC, null)
-        fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_BOLDITALIC, TypefaceRecord.DEFAULT.name)!!
+        fontPath = prefs.getString(PREF_KEY_BOOK_FONT_PATH_BOLDITALIC, null)
+        fontName = prefs.getString(PREF_KEY_BOOK_FONT_NAME_BOLDITALIC, TypefaceRecord.DEFAULT.name)!!
         val typefaceBoldItalic = TypefaceRecord(fontName, fontPath).getTypeface(Typeface.BOLD_ITALIC)
 
-        fontPath = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_PATH_MONOSPACE, null)
-        fontName = prefs.getString(PrefsHelper.PREF_KEY_BOOK_FONT_NAME_MONOSPACE, TypefaceRecord.MONO)!!
+        fontPath = prefs.getString(PREF_KEY_BOOK_FONT_PATH_MONOSPACE, null)
+        fontName = prefs.getString(PREF_KEY_BOOK_FONT_NAME_MONOSPACE, TypefaceRecord.MONO)!!
         val typefaceMonospace = TypefaceRecord(fontName, fontPath).getTypeface(Typeface.NORMAL)
 
         bookFonts = BookFonts(typefaceNormal, typefaceBold, typefaceItalic, typefaceBoldItalic, typefaceMonospace)
@@ -133,7 +145,7 @@ open class FontsHelper(var context: Context) {
                 TypefaceRecord(name = TypefaceRecord.SERIF),
                 TypefaceRecord(name = TypefaceRecord.MONO),
             )
-            TypefaceRecord.fonts.forEach { (name, _) ->
+            TypefaceRecord.internalFonts.forEach { name ->
                 println("loadFonts $name"); fontList.add(
                     TypefaceRecord(name)
                 )

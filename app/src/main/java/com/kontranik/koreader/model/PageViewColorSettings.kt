@@ -1,6 +1,7 @@
 package com.kontranik.koreader.model
 
-class PageViewColorSettings (
+
+data class PageViewColorSettings (
     var showBackgroundImage: Boolean,
     var backgroundImageUri: String?,
     var backgroundImageTiledRepeat: Boolean,

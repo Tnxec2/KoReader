@@ -48,6 +48,7 @@ import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
+import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import kotlinx.coroutines.launch
 
 
@@ -55,26 +56,22 @@ object BookInfoDestination : NavigationDestination {
     override val route = "BookInfo"
     override val titleRes = R.string.bookinfo
     const val BOOK_PATH = "bookpatn"
-    val routeWithArgs = "$route/{$BOOK_PATH}"
+    val routeWithArgs = "$route?path={$BOOK_PATH}"
 }
 
 @Composable
 fun BookInfoScreen(
     drawerState: DrawerState,
-    bookUri: String,
     navigateBack: () -> Unit,
+    navigateToReader: () -> Unit,
     navigateToAuthor: (author: Author) -> Unit,
-    onReadBook: (bookUri: String)->Unit,
     onDeleteBook: (bookUri: String)-> Unit,
     modifier: Modifier = Modifier,
     viewModel: BookInfoViewModell = viewModel(factory = AppViewModelProvider.Factory),
+    bookReaderViewModel: BookReaderViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
 
     val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(key1 = bookUri) {
-        viewModel.readBookInfo(bookUri)
-    }
 
     val bookInfoDetails = viewModel.bookInfoUiState.bookInfoDetails
     val canDeleteState = viewModel.canDeleteState
@@ -92,7 +89,7 @@ fun BookInfoScreen(
             title = "Delete Book",
             text = stringResource(R.string.sure_delete_book),
             onDismissRequest = { showDeleteDilaog = false },
-            onConfirmation = { onDeleteBook(bookUri) })
+            onConfirmation = { onDeleteBook(viewModel.bookPath) })
     }
 
     Scaffold(
@@ -114,7 +111,12 @@ fun BookInfoScreen(
                         contentDescription = "Delete",
                     )
                 }
-                IconButton(onClick = { onReadBook(bookUri) }) {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+                        bookReaderViewModel.changePath(viewModel.bookPath)
+                        navigateToReader()
+                    }
+                }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_iconmonstr_book_opened),
                         contentDescription = "Read",
@@ -197,11 +199,10 @@ private fun BookInfoScreenPreview() {
     AppTheme {
         BookInfoScreen(
             drawerState = DrawerState(DrawerValue.Closed),
-            bookUri = "preview",
             navigateBack = {},
             navigateToAuthor = {},
-            onReadBook = { },
             onDeleteBook = { },
+            navigateToReader = { },
             viewModel = BookInfoViewModell(SavedStateHandle(),  context)
         )
     }

@@ -35,14 +35,9 @@ class BookmarkListFragment : Fragment() {
         mBookmarksViewModel = ViewModelProvider(this,
             AppViewModelProvider.Factory)[BookmarksViewModel::class.java]
 
-        path = requireArguments().getString(PATH)
-
-        if (path != null) mBookmarksViewModel.loadBookmarks(path!!)
-
         return ComposeView(requireContext()).apply {
             setContent {
                 BoomkmarksScreen(
-                    path = path,
                     drawerState = DrawerState(DrawerValue.Closed),
                     navigateBack = {
                         requireActivity().supportFragmentManager.popBackStack()

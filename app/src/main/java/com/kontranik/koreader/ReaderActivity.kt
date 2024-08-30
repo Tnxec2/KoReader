@@ -29,7 +29,6 @@ import com.kontranik.koreader.database.model.Bookmark
 import com.kontranik.koreader.databinding.ActivityReaderMainBinding
 import com.kontranik.koreader.model.*
 import com.kontranik.koreader.ui.components.BookReaderTextview.BookReaderTextviewListener
-import com.kontranik.koreader.ui.components.ReadInfoArea.ReadInfoAreaListener
 import com.kontranik.koreader.ui.fragments.*
 import com.kontranik.koreader.utils.*
 import java.io.InputStream
@@ -41,7 +40,6 @@ class ReaderActivity :
     QuickMenuFragment.QuickMenuDialogListener,
     BookmarkListFragment.BookmarkListDialogListener,
     GotoMenuFragment.GotoMenuDialogListener,
-    ReadInfoAreaListener,
     BookReaderTextviewListener {
 
     private lateinit var binding: ActivityReaderMainBinding
@@ -98,7 +96,6 @@ class ReaderActivity :
 
         registerReceiver(mTimeInfoReceiver, IntentFilter(Intent.ACTION_TIME_TICK))
 
-        binding.readInfoArrea.setListener(this)
         binding.textViewPageview.setListener(this)
 
         binding.textViewPageview.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
@@ -136,25 +133,18 @@ class ReaderActivity :
             setColorTheme(it)
         }
 
-        mReaderActivityViewModel.infoTextLeft.observe(this) {
-            binding.readInfoArrea.setTextLeft(it)
-        }
-        mReaderActivityViewModel.infoTextRight.observe(this) {
-            binding.readInfoArrea.setTextRight(it)
-        }
-        mReaderActivityViewModel.infoTextSystemstatus.observe(this) {
-            binding.readInfoArrea.setTextMiddle(it)
-        }
+
 
         mReaderActivityViewModel.note.observe(this) {
             if (it != null) {
-                val floatTextViewFragment: FloatTextViewFragment =
-                    FloatTextViewFragment.newInstance(
-                        it,
-                        PrefsHelper.textSize,
-                        PrefsHelper.font
-                    )
-                floatTextViewFragment.show(supportFragmentManager, "fragment_floattextview")
+//                val floatTextViewFragment: FloatTextViewFragment =
+//                    FloatTextViewFragment.newInstance(
+//                        it,
+//                        PrefsHelper.textSize,
+//                        PrefsHelper.font
+//                    )
+//                floatTextViewFragment.show(supportFragmentManager, "fragment_floattextview")
+                mReaderActivityViewModel.note.value = null
             }
         }
 
@@ -216,8 +206,19 @@ class ReaderActivity :
     }
 
 
-    override fun onTabActionOnBookReaderTextview(tapAction: String?) {
-        Log.d(TAG, "doTapAction: $tapAction")
+    override fun onTapOnBookReaderTextview(zone: ScreenZone) {
+        tapAction(PrefsHelper.tapOneAction[zone])
+    }
+
+    override fun onDoubleTapOnBookReaderTextview(zone: ScreenZone) {
+        tapAction(PrefsHelper.tapDoubleAction[zone])
+    }
+
+    override fun onLongTapOnBookReaderTextview(zone: ScreenZone) {
+        tapAction(PrefsHelper.tapLongAction[zone])
+    }
+
+    private fun tapAction(tapAction: String?) {
         if (tapAction == null) return
         when (tapAction) {
             "PagePrev" -> {
@@ -411,7 +412,6 @@ class ReaderActivity :
 
         binding.textViewPageview.setTextColor(Color.parseColor(colorText))
         binding.textViewPageview.setLinkTextColor(Color.parseColor(colorLinkText))
-        binding.readInfoArrea.changeStyle(Color.parseColor(colorInfoText))
 
         var marginTop = PrefsHelper.marginDefault
         var marginBottom = PrefsHelper.marginDefault
@@ -572,7 +572,6 @@ class ReaderActivity :
 
         binding.textViewPageview.setTextColor(Color.parseColor(colorSettings.colorText))
         binding.textViewPageview.setLinkTextColor(Color.parseColor(colorSettings.colorLink))
-        binding.readInfoArrea.changeStyle(Color.parseColor(colorSettings.colorInfoText))
 
         try {
             val window: Window = window
@@ -603,14 +602,6 @@ class ReaderActivity :
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
-
-    override fun onClickReadInfoArea() {
-        openGotoMenu()
-    }
-
-    override fun onLongClickReadInfoArea() {
-        openGotoMenu()
     }
 
     companion object {

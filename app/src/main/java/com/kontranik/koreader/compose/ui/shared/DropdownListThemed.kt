@@ -44,6 +44,9 @@ import androidx.preference.PreferenceManager
 import com.kontranik.koreader.utils.PrefsHelper
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingSmall
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_COLOR_BACK
+import com.kontranik.koreader.compose.ui.settings.PREF_KEY_COLOR_TEXT
+import com.kontranik.koreader.compose.ui.settings.defaultColors
 
 
 @Composable
@@ -176,18 +179,17 @@ private fun getThemeColors(
 ): Pair<Color, Color> {
     val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
-    val bg = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_BACK + (themesIndex), 0)
-    val colorBack = if (bg != 0) "0x" + Integer.toHexString(bg)
-    else context.resources.getString(
-        PrefsHelper.colorBackgroundDefaultArray[themesIndex]
-    )
+    val defColors = defaultColors[themesIndex]
+    var co = prefs.getInt(PREF_KEY_COLOR_BACK + themesIndex, 0)
+    val colorBack =
+        if (co != 0) Color(co)
+        else defColors.colorBackground
 
-    val co = prefs.getInt(PrefsHelper.PREF_KEY_COLOR_TEXT + (themesIndex), 0)
-    val colorText = if (co != 0) "0x" + Integer.toHexString(co)
-    else context.resources.getString(
-        PrefsHelper.colorForegroundDefaultArray[themesIndex]
-    )
-    return Pair(Color(android.graphics.Color.parseColor(colorBack)), Color(android.graphics.Color.parseColor(colorText)))
+    co = prefs.getInt(PREF_KEY_COLOR_TEXT + themesIndex, 0)
+    val colorText =
+        if (co != 0) Color(co)
+        else defColors.colorsText
+    return Pair(colorBack, colorText)
 }
 
 @Preview

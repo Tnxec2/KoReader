@@ -21,7 +21,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,12 +49,11 @@ object BoomkmarksScreenDestination : NavigationDestination {
     override val route = "BookmarksScreen"
     override val titleRes = R.string.bookmarklist
     const val PATH_ARG = "path"
-    val routeWithArgs = "$route/{$PATH_ARG}"
+    val routeWithArgs = "$route?path={$PATH_ARG}"
 }
 
 @Composable
 fun BoomkmarksScreen(
-    path: String?,
     drawerState: DrawerState,
     navigateBack: () -> Unit,
     navigateToBookmark: (bookmark: Bookmark) -> Unit,
@@ -68,10 +66,6 @@ fun BoomkmarksScreen(
     val listState = rememberLazyListState()
 
     val allBookmarksState = bookmarksViewModel.mAllBookmarks.collectAsState(initial = listOf())
-
-    LaunchedEffect(key1 = path) {
-        path?.let { bookmarksViewModel.loadBookmarks(it) }
-    }
 
     Scaffold(
         topBar = {

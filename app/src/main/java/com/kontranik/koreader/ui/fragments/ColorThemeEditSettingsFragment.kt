@@ -22,14 +22,12 @@ class ColorThemeEditSettingsFragment: Fragment()  {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        val themeIndex = requireArguments().getInt(THEME_INDEX)
 
         val settingsViewModel = ViewModelProvider(requireActivity(), AppViewModelProvider.Factory)[SettingsViewModel::class.java]
 
         return ComposeView(requireContext()).apply {
             setContent {
                 ColorThemeSettingsScreen(
-                    themeIndex = themeIndex,
                     drawerState = DrawerState(DrawerValue.Closed),
                     navigateBack = { requireActivity().supportFragmentManager.popBackStack()},
                     settingsViewModel = settingsViewModel

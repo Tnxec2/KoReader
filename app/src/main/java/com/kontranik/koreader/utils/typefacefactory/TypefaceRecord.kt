@@ -18,7 +18,22 @@ data class TypefaceRecord(
 
     fun getTypeface(style: Int = Typeface.NORMAL): Typeface {
         if (file != null) return Typeface.createFromFile(file)
-        return fonts[name] ?: Typeface.create(name, style)
+        return getInternalFontTypeface(name) ?: Typeface.create(name, style)
+    }
+
+    private fun getInternalFontTypeface(name: String): Typeface? {
+        return when (name) {
+            "amazon ember" -> KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_regular)
+            "amazon ember bold" -> KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_bold)
+            "amazon ember italic" -> KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_italic)
+            "amazon ember bold italic" -> KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_bold_italic)
+            "amazon ember mono" -> KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_mono_reg)
+            "bookerly regular" -> KoReaderApplication.getContext().resources.getFont(R.font.bookerly_regular)
+            "bookerly bold" -> KoReaderApplication.getContext().resources.getFont(R.font.bookerly_bold)
+            "bookerly italic" -> KoReaderApplication.getContext().resources.getFont(R.font.bookerly_italic)
+            "bookerly bold italic" -> KoReaderApplication.getContext().resources.getFont(R.font.bookerly_bold_italic)
+            else -> null
+        }
     }
 
     override fun toString(): String {
@@ -60,16 +75,16 @@ data class TypefaceRecord(
 
         val DEFAULT = TypefaceRecord(SANSSERIF)
 
-        val fonts = mapOf(
-            "amazon ember" to KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_regular),
-            "amazon ember bold" to KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_bold),
-            "amazon ember italic" to KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_italic),
-            "amazon ember bold italic" to KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_bold_italic),
-            "amazon ember mono" to KoReaderApplication.getContext().resources.getFont(R.font.amazon_ember_mono_reg),
-            "bookerly regular" to KoReaderApplication.getContext().resources.getFont(R.font.bookerly_regular),
-            "bookerly bold" to KoReaderApplication.getContext().resources.getFont(R.font.bookerly_bold),
-            "bookerly italic" to KoReaderApplication.getContext().resources.getFont(R.font.bookerly_italic),
-            "bookerly bold italic" to KoReaderApplication.getContext().resources.getFont(R.font.bookerly_bold_italic),
+        val internalFonts = listOf(
+            "amazon ember",
+            "amazon ember bold",
+            "amazon ember italic",
+            "amazon ember bold italic",
+            "amazon ember mono",
+            "bookerly regular",
+            "bookerly bold",
+            "bookerly italic",
+            "bookerly bold italic"
         )
     }
 }

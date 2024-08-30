@@ -36,21 +36,9 @@ open class LibraryByTitleFragment : Fragment(),
         mFileChooseFragmentViewModel = ViewModelProvider(this, AppViewModelProvider.Factory)[FileChooseFragmentViewModel::class.java]
         libraryViewModel = ViewModelProvider(this, AppViewModelProvider.Factory)[LibraryViewModel::class.java]
 
-        var author: Author? = null
-        arguments?.let {
-            if ( it.containsKey(KEY_AUTHOR)) {
-                author = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    it.getSerializable(KEY_AUTHOR, Author::class.java)
-                } else {
-                    it.getSerializable(KEY_AUTHOR) as Author
-                }
-            }
-        }
-
         return ComposeView(requireContext()).apply {
             setContent {
                 LibraryByTitleScreen(
-                    author = author,
                     drawerState = DrawerState(DrawerValue.Closed),
                     navigateBack = {
                         requireActivity().supportFragmentManager.popBackStack()

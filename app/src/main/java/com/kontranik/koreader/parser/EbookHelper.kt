@@ -1,6 +1,7 @@
 package com.kontranik.koreader.parser
 
 import android.content.Context
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookPageScheme
 import com.kontranik.koreader.parser.epubreader.EpubHelper
@@ -23,11 +24,11 @@ interface EbookHelper {
     fun getCoverPage(): String?
 
     companion object {
-        fun getBookInfo(mContext: Context, contentUriPath: String, result: FileItem): BookInfo? {
+        fun getBookInfo(contentUriPath: String, result: FileItem): BookInfo? {
             return if (isEpub(contentUriPath)) {
-                EpubHelper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
+                EpubHelper(KoReaderApplication.getContext(), contentUriPath).getBookInfoTemporary(contentUriPath)
             } else if (isFb2(contentUriPath)) {
-                FB2Helper(mContext, contentUriPath).getBookInfoTemporary(contentUriPath)
+                FB2Helper(KoReaderApplication.getContext(), contentUriPath).getBookInfoTemporary(contentUriPath)
             } else {
                 BookInfo(result)
             }
@@ -43,15 +44,15 @@ interface EbookHelper {
                     || contentUriPath.endsWith(".fb2.zip",  true)
         }
 
-        fun getBookInfoTemporary(context: Context, contentUriPath: String): BookInfo? {
+        fun getBookInfoTemporary(contentUriPath: String): BookInfo? {
             val bookInfo: BookInfo? = try {
                 if (isEpub(contentUriPath)) {
                     EpubHelper(
-                        context,
+                        KoReaderApplication.getContext(),
                         contentUriPath
                     ).getBookInfoTemporary(contentUriPath)
                 } else if (isFb2(contentUriPath)) {
-                    FB2Helper(context, contentUriPath).getBookInfoTemporary(
+                    FB2Helper(KoReaderApplication.getContext(), contentUriPath).getBookInfoTemporary(
                         contentUriPath
                     )
                 } else {
@@ -61,16 +62,16 @@ interface EbookHelper {
                 null
             }
             bookInfo?.let {
-                if (it.cover == null) bookInfo.cover = ImageUtils.getBitmap(context, ImageEnum.Ebook)
+                if (it.cover == null) bookInfo.cover = ImageUtils.getBitmap(KoReaderApplication.getContext(), ImageEnum.Ebook)
             }
             return bookInfo
         }
 
-        fun getHelper(context: Context, contentUri: String): EbookHelper? {
+        fun getHelper(contentUri: String): EbookHelper? {
             if (isEpub(contentUri)) {
-                return EpubHelper(context, contentUri)
+                return EpubHelper(KoReaderApplication.getContext(), contentUri)
             } else if (isFb2(contentUri)) {
-                return FB2Helper(context, contentUri)
+                return FB2Helper(KoReaderApplication.getContext(), contentUri)
             }
             return null
         }

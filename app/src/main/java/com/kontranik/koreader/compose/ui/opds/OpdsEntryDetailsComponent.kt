@@ -4,25 +4,16 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -34,8 +25,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kontranik.koreader.R
+import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingSmall
-import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.shared.Html
 import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.opds.model.Author
@@ -44,47 +35,19 @@ import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.Link
 import com.kontranik.koreader.opds.model.OpdsTypes
 import com.kontranik.koreader.utils.ImageUtils
-import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@Composable
-fun OpdsEntryDetailsScreen(
-    drawerState: DrawerState,
-    entry: Entry,
-    startUrl: String,
-    navigateBack: () -> Unit,
-    openInBrowser: (Link) -> Unit,
-    onClickOpdsEntryLink: (Link) -> Unit,
-    download: (Entry, Link) -> Unit,
-    modifier: Modifier = Modifier
-) {
-
-    OpdsEntryDetailsComponent(
-        drawerState = drawerState,
-        entry = entry,
-        startUrl = startUrl,
-        navigateBack = { navigateBack() },
-        download = { e, link -> download(e, link)},
-        onClickOpdsEntryLink = { link -> onClickOpdsEntryLink(link) },
-        openInBrowser = { link -> openInBrowser(link) },
-        modifier = modifier,
-    )
-}
 
 @Composable
-fun OpdsEntryDetailsComponent(
+fun OpdsEntryDetailsContent(
     entry: Entry,
     startUrl: String,
-    drawerState: DrawerState,
-    onClickOpdsEntryLink: (Link) -> Unit,
+    navigateToOpdsEntryLink: (Link) -> Unit,
     download: (Entry, Link) -> Unit,
     openInBrowser: (Link) -> Unit,
-    navigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val coroutineScope = rememberCoroutineScope()
 
     val cover = remember {
         mutableStateOf<ImageBitmap?>(null)
@@ -119,26 +82,7 @@ fun OpdsEntryDetailsComponent(
         }
     }
 
-    Scaffold(
-        topBar = {
-            AppBar(
-                title = R.string.opds_entry_details,
-                drawerState = drawerState,
-                navigationIcon = {
-                    IconButton(onClick = { coroutineScope.launch { navigateBack() } }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(
-                                id = R.string.back
-                            )
-                        )
-                    }
-                },
-            )
-        },
-        modifier = modifier.fillMaxSize(),
-    ) { padding ->
-        LazyColumn(Modifier.padding(padding).padding(paddingSmall)) {
+        LazyColumn(modifier.padding(paddingSmall)) {
             cover.value?.let {
                 item {
                     Image(
@@ -201,8 +145,7 @@ fun OpdsEntryDetailsComponent(
                                 .clickable {
                                     Log.d("ENTRYLINK", "clicked entry.otherLinks: $link")
                                     if (link.isCatalogEntry()) {
-                                        onClickOpdsEntryLink(link)
-                                        navigateBack()
+                                        navigateToOpdsEntryLink(link)
                                     } else if (link.isDownloadable()) {
                                         download(entry, link)
                                     } else {
@@ -214,13 +157,13 @@ fun OpdsEntryDetailsComponent(
                 }
             }
         }
-    }
+
 }
 
 
 @PreviewLightDark
 @Composable
-private fun OpdsEntryDetailsComponentPreview() {
+private fun OpdsEntryDetailsContentPreview() {
 
     val href = stringResource(id = R.string.book_cover_base64)
 
@@ -251,13 +194,11 @@ private fun OpdsEntryDetailsComponentPreview() {
     }
 
     AppTheme {
-        OpdsEntryDetailsComponent(
-            drawerState = DrawerState(DrawerValue.Closed),
+        OpdsEntryDetailsContent(
             entry = entrysState.value,
             startUrl = "StartUrl",
-            navigateBack = { },
             openInBrowser = { },
-            onClickOpdsEntryLink = { },
+            navigateToOpdsEntryLink = { },
             download = { _, _ -> },
         )
     }

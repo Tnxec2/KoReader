@@ -1,7 +1,6 @@
 package com.kontranik.koreader.compose.ui.library
 
 import android.Manifest
-import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.ContentResolver
@@ -16,16 +15,21 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.documentfile.provider.DocumentFile
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.switchMap
+import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.liveData
-import androidx.paging.map
 import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
+import com.kontranik.koreader.compose.ui.library.bytitle.LibraryByTitleDestination
+import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.LibraryItem
 import com.kontranik.koreader.database.model.LibraryItemAuthorsCrossRef
@@ -36,39 +40,45 @@ import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.utils.ImageUtils
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.count
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import java.io.Closeable
 
 
 class LibraryViewModel(
+    savedStateHandle: SavedStateHandle,
     private val libraryItemRepository: LibraryItemRepository,
     private val authorsRepository: AuthorsRepository,
     private val applicationScope: CoroutineScope,
     ) : ViewModel() {
 
+    private val authorId: String? = savedStateHandle[LibraryByTitleDestination.AUTHOR_ID]
+
+    val authorState = mutableStateOf<Author?>(null)
+
+    init {
+
+        authorId?.let {
+            BooksRoomDatabase.databaseWriteExecutor.execute {
+                authorsRepository.getById(it).firstOrNull().let { author ->
+                    loadTitlePageInit(author)
+                }
+            }
+        }
+    }
+
     private var libraryTitleSearchFilter = MutableLiveData<String?>(null)
-    private var author: Author? = null
 
     val libraryTitlePageByFilter = libraryTitleSearchFilter.switchMap {
         getTitlePageByFilter(it).liveData.cachedIn(viewModelScope)
     }.asFlow()
 
     private fun getTitlePageByFilter(searchFilter: String?) = Pager(config = PagingConfig(15)) {
-        libraryItemRepository.pageLibraryItem(author, searchFilter)
+        libraryItemRepository.pageLibraryItem(authorState.value, searchFilter)
     }
 
-    fun loadTitlePageInit(mauthor: Author?) = apply {
+    private fun loadTitlePageInit(author: Author?) = apply {
         viewModelScope.launch {
-            author = mauthor
+            authorState.value = author
             if ( libraryTitlePageByFilter.asLiveData().value == null) {
                 libraryTitleSearchFilter.postValue(null)
             }
@@ -408,6 +418,6 @@ class LibraryViewModel(
         }
     }
     private fun readBookInfo(contentUriPath: String): BookInfo? {
-        return EbookHelper.getBookInfoTemporary(KoReaderApplication.getContext(), contentUriPath)
+        return EbookHelper.getBookInfoTemporary(contentUriPath)
     }
 }

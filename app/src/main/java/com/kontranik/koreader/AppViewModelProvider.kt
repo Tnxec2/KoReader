@@ -11,6 +11,8 @@ import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.ui.fragments.FileChooseFragmentViewModel
 import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.compose.ui.opds.OpdsViewModell
+import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
+import com.kontranik.koreader.compose.ui.settings.ColorThemeSettingsViewModel
 import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
 
 /**
@@ -18,6 +20,13 @@ import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
  */
 object AppViewModelProvider {
     val Factory = viewModelFactory {
+
+        initializer {
+            BookReaderViewModel(
+                koReaderApplication().container.bookStatusRepository,
+                koReaderApplication().container.bookmarksRepository,
+            )
+        }
 
         initializer {
             ReaderActivityViewModel(
@@ -46,6 +55,12 @@ object AppViewModelProvider {
         }
 
         initializer {
+            ColorThemeSettingsViewModel(
+                this.createSavedStateHandle()
+            )
+        }
+
+        initializer {
             OpdsViewModell(
                 this.createSavedStateHandle(),
                 koReaderApplication().applicationContext
@@ -66,6 +81,7 @@ object AppViewModelProvider {
 
         initializer {
             LibraryViewModel(
+                this.createSavedStateHandle(),
                 koReaderApplication().libraryItemRepository,
                 koReaderApplication().authorsRepository,
                 koReaderApplication().applicationScope,

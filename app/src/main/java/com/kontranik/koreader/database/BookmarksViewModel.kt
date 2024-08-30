@@ -1,6 +1,8 @@
 package com.kontranik.koreader.database
 
+import android.net.Uri
 import androidx.lifecycle.*
+import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDestination
 import com.kontranik.koreader.compose.ui.bookmarks.BoomkmarksScreenDestination
 import com.kontranik.koreader.database.repository.BookmarksRepository
 import com.kontranik.koreader.database.model.Bookmark
@@ -22,8 +24,9 @@ class BookmarksViewModel(
         loadBookmarks(bookmark.path)
     }
 
-    private val pathArg: String? =
-        savedStateHandle[BoomkmarksScreenDestination.PATH_ARG]
+    private val source: String? = savedStateHandle[BookInfoDestination.BOOK_PATH]
+
+    val bookPath = Uri.decode(source).replace('|','%')
 
     private val mPath = MutableLiveData<String?>()
     var mAllBookmarks: Flow<List<Bookmark>> = mPath.asFlow().transform { path ->
@@ -46,9 +49,7 @@ class BookmarksViewModel(
 
     init {
         viewModelScope.launch {
-            pathArg?.let {
-                loadBookmarks(it)
-            }
+            loadBookmarks(bookPath)
         }
     }
 

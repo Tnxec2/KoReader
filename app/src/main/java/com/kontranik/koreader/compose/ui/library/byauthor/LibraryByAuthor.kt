@@ -38,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
+import com.kontranik.koreader.compose.navigation.NavigationDestination
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.library.LibraryViewModel
@@ -45,6 +46,11 @@ import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.launch
+
+object LibraryByAuthorDestination : NavigationDestination {
+    override val route = "LibraryByAuthor"
+    override val titleRes = R.string.books_by_author
+}
 
 @Composable
 fun LibraryByAuthorScreen(
@@ -96,10 +102,17 @@ fun LibraryByAuthorScreen(
                     .padding(paddingSmall)) {
                 OutlinedTextField(
                     value = filter,
-                    onValueChange = { filter = it },
+                    onValueChange = {
+                        filter = it
+                        coroutineScope.launch {
+                            libraryViewModel.changeAuthorSearchText(filter)
+                            listState.scrollToItem(0)
+                        }
+                    },
                     label = {
                         Text(text = stringResource(id = R.string.search_term))
-                    }
+                    },
+                    modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = {
                     coroutineScope.launch {
@@ -108,19 +121,9 @@ fun LibraryByAuthorScreen(
                         listState.scrollToItem(0)
                     }
                 }) {
-                    Icon(painter = painterResource(id = R.drawable.baseline_backspace_24), contentDescription = stringResource(
-                        id = R.string.clear_search_text
-                    ))
-                }
-                IconButton(onClick = {
-                    coroutineScope.launch {
-                        libraryViewModel.changeAuthorSearchText(filter)
-                        listState.scrollToItem(0)
-                    }
-                }) {
-                    Icon(painter = painterResource(id = R.drawable.baseline_search_24), contentDescription = stringResource(
-                        id = R.string.search_term
-                    ))
+                    Icon(painter = painterResource(id = R.drawable.baseline_backspace_24),
+                        contentDescription = stringResource(id = R.string.clear_search_text)
+                    )
                 }
             }
 

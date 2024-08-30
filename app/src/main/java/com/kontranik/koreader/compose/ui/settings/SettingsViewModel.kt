@@ -2,8 +2,7 @@ package com.kontranik.koreader.compose.ui.settings
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.annotation.IntegerRes
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
@@ -11,18 +10,22 @@ import androidx.compose.ui.graphics.toArgb
 
 import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
+import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.defaultLetterSpacing
 import com.kontranik.koreader.compose.theme.defaultLineSpacingMultiplier
 import com.kontranik.koreader.compose.theme.defaultTextSize
+import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.model.ScreenZone
 
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.MONO
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.SANSSERIF
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.SERIF
-import java.util.EnumMap
 
-const val PREFS_FILE = "Sort"
+const val PREFS_FILE = "KOREADER"
+
+const val PREF_BOOK_PATH = "BookPath"
+
 const val PREFS_interface_theme = "interface_theme"
 const val PREFS_interface_brightness = "brightness"
 const val PREFS_orientation = "orientation"
@@ -30,7 +33,6 @@ const val PREFS_orientation = "orientation"
 const val PREF_KEY_USE_SYSTEM_FONTS = "showSystemFonts"
 const val PREF_KEY_SHOW_NOTO_FONTS = "showNotoFonts"
 
-const val PREF_BOOK_PATH = "BookPath"
 const val PREF_KEY_BOOK_TEXT_SIZE = "TextSize"
 const val PREF_KEY_BOOK_LINE_SPACING = "LineSpacing"
 const val PREF_KEY_BOOK_LETTER_SPACING = "LetterSpacing"
@@ -47,6 +49,7 @@ const val PREF_KEY_COLOR_SELECTED_THEME_INDEX = "selected_theme_index"
 const val PREF_KEY_BACKGROUND_IMAGE_URI = "backgroundImageTheme"
 const val PREF_KEY_SHOW_BACKGROUND_IMAGE = "backgroundImageEnableTheme"
 const val PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT = "backgroundImageTileTheme"
+const val PREF_SCREEN_BRIGHTNESS = "ScreenBrightness"
 
 const val PREF_KEY_BOOK_FONT_NAME_NORMAL = "FontNameNormal"
 const val PREF_KEY_BOOK_FONT_PATH_NORMAL = "FontPathNormal"
@@ -90,7 +93,7 @@ const val PREF_KEY_TAP_LONG_BOTTOM_CENTER = "tapZoneLongClickBottomCenter"
 const val PREF_KEY_TAP_LONG_BOTTOM_RIGHT = "tapZoneOneClickBottomRight"
 
 const val PREF_COLOR_SELECTED_THEME_DEFAULT = 0
-const val PREF_DEFAULT_MARGIN = 0
+const val PREF_DEFAULT_MARGIN = 10
 const val interfaceThemeDefault = "Auto"
 const val brightnessDefault = "System"
 const val orientationDefault = "Sensor"
@@ -117,7 +120,7 @@ val defaultColors = arrayOf(
         Color(0xFFFBF0D9),
         Color(0xFF5F4B32),
         Color(0xFF2196F3),
-        Color(0xFFFBF0D9),
+        Color(0xFF5F4B32),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
         backgroundImageUri = null,
@@ -135,7 +138,7 @@ val defaultColors = arrayOf(
         Color(0xff3e1104),
         Color(0xFFe57614),
         Color(0xFF005CA6),
-        Color(0xff3e1104),
+        Color(0xFFe57614),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
         backgroundImageUri = null,
@@ -144,7 +147,7 @@ val defaultColors = arrayOf(
         Color(0xff000000),
         Color(0xFF008705),
         Color(0xFF00599F),
-        Color(0xff000000),
+        Color(0xFF008705),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
         backgroundImageUri = null,
@@ -153,7 +156,7 @@ val defaultColors = arrayOf(
         Color(0xff000000),
         Color(0xFF8C8A83),
         Color(0xFF3D7198),
-        Color(0xff000000),
+        Color(0xFF8C8A83),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
         backgroundImageUri = null,
@@ -168,35 +171,60 @@ val defaultsFonts = mapOf(
     TextType.Monospace to TypefaceRecord(name = MONO),
 )
 
-const val defaultTapZoneOneTopLeft: String = "PagePrev"
-const val defaultTapZoneOneTopCenter: String = "None"
-const val defaultTapZoneOneTopRight: String = "PageNext"
-const val defaultTapZoneOneMiddleLeft: String = "PagePrev"
-const val defaultTapZoneOneMiddleCenter: String = "MainMenu"
-const val defaultTapZoneOneMiddleRight: String = "PageNext"
-const val defaultTapZoneOneBottomLeft: String = "PagePrev"
-const val defaultTapZoneOneBottomCenter: String = "GoTo"
-const val defaultTapZoneOneBottomRight: String = "PageNext"
+enum class Actions {
+    None,
+    PagePrev,
+    PageNext,
+    MainMenu,
+    GoTo,
+    Bookmarks,
+    QuickMenu;
 
-const val defaultTapZoneDoubleTopLeft: String = "PagePrev"
-const val defaultTapZoneDoubleTopCenter: String = "None"
-const val defaultTapZoneDoubleTopRight: String = "PageNext"
-const val defaultTapZoneDoubleMiddleLeft: String = "PagePrev"
-const val defaultTapZoneDoubleMiddleCenter: String = "QuickMenu"
-const val defaultTapZoneDoubleMiddleRight: String = "PageNext"
-const val defaultTapZoneDoubleBottomLeft: String = "PagePrev"
-const val defaultTapZoneDoubleBottomCenter: String = "GoTo"
-const val defaultTapZoneDoubleBottomRight: String = "PageNext"
+    fun toTitle(): Int {
+        return when (this) {
+            None -> R.string.tapzones_activity_none
+            PagePrev -> R.string.tapzones_activity_page_prev
+            PageNext -> R.string.tapzones_activity_page_next
+            QuickMenu -> R.string.tapzones_activity_quick_menu
+            MainMenu -> R.string.tapzones_activity_main_menu
+            GoTo -> R.string.tapzones_activity_goto
+            Bookmarks -> R.string.tapzones_activity_bookmarks
 
-const val defaultTapZoneLongTopLeft: String = "None"
-const val defaultTapZoneLongTopCenter: String = "None"
-const val defaultTapZoneLongTopRight: String = "None"
-const val defaultTapZoneLongMiddleLeft: String = "None"
-const val defaultTapZoneLongMiddleCenter: String = "None"
-const val defaultTapZoneLongMiddleRight: String = "None"
-const val defaultTapZoneLongBottomLeft: String = "None"
-const val defaultTapZoneLongBottomCenter: String = "None"
-const val defaultTapZoneLongBottomRight: String = "None"
+        }
+    }
+}
+
+
+
+val defaultTapZoneOneTopLeft = Actions.PagePrev
+val defaultTapZoneOneTopCenter = Actions.Bookmarks
+val defaultTapZoneOneTopRight = Actions.PageNext
+val defaultTapZoneOneMiddleLeft = Actions.PagePrev
+val defaultTapZoneOneMiddleCenter = Actions.MainMenu
+val defaultTapZoneOneMiddleRight = Actions.PageNext
+val defaultTapZoneOneBottomLeft = Actions.PagePrev
+val defaultTapZoneOneBottomCenter = Actions.GoTo
+val defaultTapZoneOneBottomRight = Actions.PageNext
+
+val defaultTapZoneDoubleTopLeft = Actions.PagePrev
+val defaultTapZoneDoubleTopCenter = Actions.None
+val defaultTapZoneDoubleTopRight = Actions.PageNext
+val defaultTapZoneDoubleMiddleLeft = Actions.PagePrev
+val defaultTapZoneDoubleMiddleCenter = Actions.QuickMenu
+val defaultTapZoneDoubleMiddleRight = Actions.PageNext
+val defaultTapZoneDoubleBottomLeft = Actions.PagePrev
+val defaultTapZoneDoubleBottomCenter = Actions.GoTo
+val defaultTapZoneDoubleBottomRight = Actions.PageNext
+
+val defaultTapZoneLongTopLeft = Actions.None
+val defaultTapZoneLongTopCenter = Actions.None
+val defaultTapZoneLongTopRight = Actions.None
+val defaultTapZoneLongMiddleLeft = Actions.None
+val defaultTapZoneLongMiddleCenter = Actions.QuickMenu
+val defaultTapZoneLongMiddleRight = Actions.None
+val defaultTapZoneLongBottomLeft = Actions.None
+val defaultTapZoneLongBottomCenter = Actions.None
+val defaultTapZoneLongBottomRight = Actions.None
 
 
 class SettingsViewModel(
@@ -216,15 +244,16 @@ class SettingsViewModel(
         index to mutableStateOf(themeColors)
     }.toMap()
 
+    var selectedColors = mutableStateOf(colors[PREF_COLOR_SELECTED_THEME_DEFAULT]!!.value)
+
     var fonts = mutableStateOf(defaultsFonts)
 
-    var fontSize = mutableFloatStateOf(defaultTextSize)
-    var lineSpacingMultiplier = mutableFloatStateOf(defaultLineSpacingMultiplier)
-    var letterSpacing = mutableFloatStateOf(defaultLetterSpacing)
+    var pageViewSettings = mutableStateOf(PageViewSettings())
 
-    val tapOneAction: MutableState<EnumMap<ScreenZone, String?>> = mutableStateOf(EnumMap(ScreenZone::class.java))
-    val tapDoubleAction: MutableState<EnumMap<ScreenZone, String?>> = mutableStateOf(EnumMap(ScreenZone::class.java))
-    val tapLongAction: MutableState<EnumMap<ScreenZone, String?>> = mutableStateOf(EnumMap(ScreenZone::class.java))
+    val tapOneAction = mutableStateOf(mapOf<ScreenZone, Actions>())
+    val tapDoubleAction = mutableStateOf(mapOf<ScreenZone, Actions>())
+    val tapLongAction = mutableStateOf(mapOf<ScreenZone, Actions>())
+
 
     init {
         interfaceTheme.value = prefs.getString(PREFS_interface_theme, interfaceThemeDefault) ?: interfaceThemeDefault
@@ -240,137 +269,140 @@ class SettingsViewModel(
             colors[i]!!.value = readTheme(i)
         }
 
+        selectedColors.value = colors[selectedColorTheme.intValue]!!.value
+
         readFonts()
 
-        fontSize.floatValue = prefs.getFloat(PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
+        readTabZones()
+
+        val fontSize = prefs.getFloat(PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
 
         val lineSpacingMultiplierString = prefs.getString(PREF_KEY_BOOK_LINE_SPACING, null)
-        lineSpacingMultiplier.floatValue =
+        val lineSpacingMultiplier =
             lineSpacingMultiplierString?.toFloat() ?: defaultLineSpacingMultiplier
 
         val letterSpacingString = prefs.getString(PREF_KEY_BOOK_LETTER_SPACING, null)
-        letterSpacing.floatValue = letterSpacingString?.toFloat() ?: defaultLetterSpacing
+        val letterSpacing = letterSpacingString?.toFloat() ?: defaultLetterSpacing
+
+        pageViewSettings.value = pageViewSettings.value.copy(
+            textSize = fontSize, lineSpacingMultiplier = lineSpacingMultiplier, letterSpacing = letterSpacing
+        )
     }
 
     private fun readTabZones() {
-        tapDoubleAction.value = EnumMap(
-            hashMapOf(
-                ScreenZone.TopLeft to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_TOP_LEFT,
-                    defaultTapZoneDoubleTopLeft
-                ),
-                ScreenZone.TopCenter to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_TOP_CENTER,
-                    defaultTapZoneDoubleTopCenter
-                ),
-                ScreenZone.TopRight to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_TOP_RIGHT,
-                    defaultTapZoneDoubleTopRight
-                ),
-                ScreenZone.MiddleLeft to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_MIDDLE_LEFT,
-                    defaultTapZoneDoubleMiddleLeft
-                ),
-                ScreenZone.MiddleCenter to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_MIDDLE_CENTER,
-                    defaultTapZoneDoubleMiddleCenter
-                ),
-                ScreenZone.MiddleRight to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_MIDDLE_RIGHT,
-                    defaultTapZoneDoubleMiddleRight
-                ),
-                ScreenZone.BottomLeft to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT,
-                    defaultTapZoneDoubleBottomLeft
-                ),
-                ScreenZone.BottomCenter to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER,
-                    defaultTapZoneDoubleBottomCenter
-                ),
-                ScreenZone.BottomRight to prefs.getString(
-                    PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT,
-                    defaultTapZoneDoubleBottomRight
-                ),
-            )
-        )
-
-        tapOneAction.value = EnumMap(
-            hashMapOf(
-                ScreenZone.TopLeft to prefs.getString(
+        tapOneAction.value = hashMapOf(
+                ScreenZone.TopLeft to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_ONE_TOP_LEFT,
-                    defaultTapZoneOneTopLeft
-                ),
-                ScreenZone.TopCenter to prefs.getString(
+                    defaultTapZoneOneTopLeft.name
+                ) ?: defaultTapZoneOneTopLeft.name),
+                ScreenZone.TopCenter to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_ONE_TOP_CENTER,
-                    defaultTapZoneOneTopCenter
-                ),
-                ScreenZone.TopRight to prefs.getString(
+                    defaultTapZoneOneTopCenter.name
+                ) ?: defaultTapZoneOneTopCenter.name),
+                ScreenZone.TopRight to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_ONE_TOP_RIGHT,
-                    defaultTapZoneOneTopRight
-                ),
-                ScreenZone.MiddleLeft to prefs.getString(
+                    defaultTapZoneOneTopRight.name
+                ) ?: defaultTapZoneOneTopRight.name),
+                ScreenZone.MiddleLeft to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_ONE_MIDDLE_LEFT,
-                    defaultTapZoneOneMiddleLeft
-                ),
+                    defaultTapZoneOneMiddleLeft.name
+                ) ?: defaultTapZoneOneMiddleLeft.name),
                 ScreenZone.MiddleCenter to defaultTapZoneOneMiddleCenter, // always default main menu
-                ScreenZone.MiddleRight to prefs.getString(
+                ScreenZone.MiddleRight to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_ONE_MIDDLE_RIGHT,
-                    defaultTapZoneOneMiddleRight
-                ),
-                ScreenZone.BottomLeft to prefs.getString(
+                    defaultTapZoneOneMiddleRight.name
+                ) ?: defaultTapZoneOneMiddleRight.name),
+                ScreenZone.BottomLeft to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_ONE_BOTTOM_LEFT,
-                    defaultTapZoneOneBottomLeft
-                ),
-                ScreenZone.BottomCenter to prefs.getString(
+                    defaultTapZoneOneBottomLeft.name
+                ) ?: defaultTapZoneOneBottomLeft.name),
+                ScreenZone.BottomCenter to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_ONE_BOTTOM_CENTER,
-                    defaultTapZoneOneBottomCenter
-                ),
-                ScreenZone.BottomRight to prefs.getString(
+                    defaultTapZoneOneBottomCenter.name
+                ) ?: defaultTapZoneOneBottomCenter.name),
+                ScreenZone.BottomRight to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_ONE_BOTTOM_RIGHT,
-                    defaultTapZoneOneBottomRight
-                ),
+                    defaultTapZoneOneBottomRight.name
+                ) ?: defaultTapZoneOneBottomRight.name),
             )
-        )
-        tapLongAction.value = EnumMap(
-            hashMapOf(
-                ScreenZone.TopLeft to prefs.getString(
+
+        tapLongAction.value = hashMapOf(
+                ScreenZone.TopLeft to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_LONG_TOP_LEFT,
-                    defaultTapZoneLongTopLeft
-                ),
-                ScreenZone.TopCenter to prefs.getString(
+                    defaultTapZoneLongTopLeft.name
+                ) ?: defaultTapZoneLongTopLeft.name),
+                ScreenZone.TopCenter to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_LONG_TOP_CENTER,
-                    defaultTapZoneLongTopCenter
-                ),
-                ScreenZone.TopRight to prefs.getString(
+                    defaultTapZoneLongTopCenter.name
+                ) ?: defaultTapZoneLongTopCenter.name),
+                ScreenZone.TopRight to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_LONG_TOP_RIGHT,
-                    defaultTapZoneLongTopRight
-                ),
-                ScreenZone.MiddleLeft to prefs.getString(
+                    defaultTapZoneLongTopRight.name
+                ) ?: defaultTapZoneLongTopRight.name),
+                ScreenZone.MiddleLeft to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_LONG_MIDDLE_LEFT,
-                    defaultTapZoneLongMiddleLeft
-                ),
-                ScreenZone.MiddleCenter to prefs.getString(
+                    defaultTapZoneLongMiddleLeft.name
+                ) ?: defaultTapZoneLongMiddleLeft.name),
+                ScreenZone.MiddleCenter to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_LONG_MIDDLE_CENTER,
-                    defaultTapZoneLongMiddleCenter
-                ),
-                ScreenZone.MiddleRight to prefs.getString(
+                    defaultTapZoneLongMiddleCenter.name
+                ) ?: defaultTapZoneLongMiddleCenter.name),
+                ScreenZone.MiddleRight to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_LONG_MIDDLE_RIGHT,
-                    defaultTapZoneLongMiddleRight
-                ),
-                ScreenZone.BottomLeft to prefs.getString(
+                    defaultTapZoneLongMiddleRight.name
+                ) ?: defaultTapZoneLongMiddleRight.name),
+                ScreenZone.BottomLeft to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_LONG_BOTTOM_LEFT,
-                    defaultTapZoneLongBottomLeft
-                ),
-                ScreenZone.BottomCenter to prefs.getString(
+                    defaultTapZoneLongBottomLeft.name
+                ) ?: defaultTapZoneLongBottomLeft.name),
+                ScreenZone.BottomCenter to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_LONG_BOTTOM_CENTER,
-                    defaultTapZoneLongBottomCenter
-                ),
-                ScreenZone.BottomRight to prefs.getString(
+                    defaultTapZoneLongBottomCenter.name
+                ) ?: defaultTapZoneLongBottomCenter.name),
+                ScreenZone.BottomRight to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_LONG_BOTTOM_RIGHT,
-                    defaultTapZoneLongBottomRight
-                ),
+                    defaultTapZoneLongBottomRight.name
+                ) ?: defaultTapZoneLongBottomRight.name),
             )
-        )
+        tapDoubleAction.value =
+            hashMapOf(
+                ScreenZone.TopLeft to Actions.valueOf(prefs.getString(
+                    PREF_KEY_TAP_DOUBLE_TOP_LEFT,
+                    defaultTapZoneDoubleTopLeft.name
+                ) ?: defaultTapZoneDoubleTopLeft.name),
+                ScreenZone.TopCenter to Actions.valueOf(prefs.getString(
+                    PREF_KEY_TAP_DOUBLE_TOP_CENTER,
+                    defaultTapZoneDoubleTopCenter.name
+                ) ?: defaultTapZoneDoubleTopCenter.name),
+                ScreenZone.TopRight to Actions.valueOf(prefs.getString(
+                    PREF_KEY_TAP_DOUBLE_TOP_RIGHT,
+                    defaultTapZoneDoubleTopRight.name
+                ) ?: defaultTapZoneDoubleTopRight.name),
+                ScreenZone.MiddleLeft to Actions.valueOf(prefs.getString(
+                    PREF_KEY_TAP_DOUBLE_MIDDLE_LEFT,
+                    defaultTapZoneDoubleMiddleLeft.name
+                ) ?: defaultTapZoneDoubleMiddleLeft.name),
+                ScreenZone.MiddleCenter to Actions.valueOf(prefs.getString(
+                    PREF_KEY_TAP_DOUBLE_MIDDLE_CENTER,
+                    defaultTapZoneDoubleMiddleCenter.name
+                ) ?: defaultTapZoneDoubleMiddleCenter.name),
+                ScreenZone.MiddleRight to Actions.valueOf(prefs.getString(
+                    PREF_KEY_TAP_DOUBLE_MIDDLE_RIGHT,
+                    defaultTapZoneDoubleMiddleRight.name
+                ) ?: defaultTapZoneDoubleMiddleRight.name),
+                ScreenZone.BottomLeft to Actions.valueOf(prefs.getString(
+                    PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT,
+                    defaultTapZoneDoubleBottomLeft.name
+                ) ?: defaultTapZoneDoubleBottomLeft.name),
+                ScreenZone.BottomCenter to Actions.valueOf(prefs.getString(
+                    PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER,
+                    defaultTapZoneDoubleBottomCenter.name
+                ) ?: defaultTapZoneDoubleBottomCenter.name),
+                ScreenZone.BottomRight to Actions.valueOf(prefs.getString(
+                    PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT,
+                    defaultTapZoneDoubleBottomRight.name
+                ) ?: defaultTapZoneDoubleBottomRight.name)
+            )
     }
 
     private fun readFonts() {
@@ -466,6 +498,7 @@ class SettingsViewModel(
     }
     fun changeselectedColorTheme(value: Int) {
         selectedColorTheme.intValue = value
+        selectedColors.value = colors[selectedColorTheme.intValue]!!.value
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putInt(PREF_KEY_COLOR_SELECTED_THEME_INDEX, value)
         prefEditor.apply()
@@ -474,8 +507,15 @@ class SettingsViewModel(
     fun setDefaultColorBackground(themeIndex: Int) {
         changeColorBackground(themeIndex, defaultColors[themeIndex].colorBackground)
     }
+
+    private fun changeColors(themeIndex: Int, newColors: ThemeColors) {
+        colors[themeIndex]!!.value = newColors
+        if (themeIndex == selectedColorTheme.intValue) selectedColors.value = newColors
+    }
+
     fun changeColorBackground(themeIndex: Int, value: Color) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(colorBackground = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(colorBackground = value))
+
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putInt(PREF_KEY_COLOR_BACK+themeIndex, value.toArgb())
         prefEditor.apply()
@@ -484,7 +524,7 @@ class SettingsViewModel(
         changeColorText(themeIndex, defaultColors[themeIndex].colorsText)
     }
     fun changeColorText(themeIndex: Int, value: Color) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(colorsText = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(colorsText = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putInt(PREF_KEY_COLOR_TEXT+themeIndex, value.toArgb())
         prefEditor.apply()
@@ -493,7 +533,7 @@ class SettingsViewModel(
         changeColorLink(themeIndex, defaultColors[themeIndex].colorsLink)
     }
     fun changeColorLink(themeIndex: Int, value: Color) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(colorsLink = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(colorsLink = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putInt(PREF_KEY_COLOR_LINKTEXT+themeIndex, value.toArgb())
         prefEditor.apply()
@@ -502,49 +542,49 @@ class SettingsViewModel(
         changeColorInfo(themeIndex, defaultColors[themeIndex].colorsInfo)
     }
     fun changeColorInfo(themeIndex: Int, value: Color) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(colorsInfo = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(colorsInfo = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putInt(PREF_KEY_COLOR_INFOTEXT+themeIndex, value.toArgb())
         prefEditor.apply()
     }
     fun changeShowBackgroundImage(themeIndex: Int, value: Boolean) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(showBackgroundImage = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(showBackgroundImage = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putBoolean(PREF_KEY_SHOW_BACKGROUND_IMAGE+themeIndex, value)
         prefEditor.apply()
     }
     fun changeTileBackgroundImage(themeIndex: Int, value: Boolean) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(backgroundImageTiledRepeat = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(backgroundImageTiledRepeat = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putBoolean(PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT+themeIndex, value)
         prefEditor.apply()
     }
     fun changeBackgroundImage(themeIndex: Int, value: String) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(backgroundImageUri = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(backgroundImageUri = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putString(PREF_KEY_BACKGROUND_IMAGE_URI+themeIndex, value)
         prefEditor.apply()
     }
     fun changeMarginTop(themeIndex: Int, value: String) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(marginTop = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginTop = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putInt(PREF_KEY_MARGIN_TOP+themeIndex, value.toInt())
         prefEditor.apply()
     }
     fun changeMarginBottom(themeIndex: Int, value: String) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(marginBottom = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginBottom = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putInt(PREF_KEY_MARGIN_BOTTOM+themeIndex, value.toInt())
         prefEditor.apply()
     }
     fun changeMarginLeft(themeIndex: Int, value: String) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(marginLeft = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginLeft = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putInt(PREF_KEY_MARGIN_LEFT+themeIndex, value.toInt())
         prefEditor.apply()
     }
     fun changeMarginRight(themeIndex: Int, value: String) {
-        colors[themeIndex]!!.value = colors[themeIndex]!!.value.copy(marginRight = value)
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginRight = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putInt(PREF_KEY_MARGIN_RIGHT+themeIndex, value.toInt())
         prefEditor.apply()
@@ -561,9 +601,9 @@ class SettingsViewModel(
     }
 
     fun changeOneClick(zone: ScreenZone, action: String) {
-        tapOneAction.value = EnumMap(tapOneAction.value.map {
-            entry -> entry.key to if (zone == entry.key) action else entry.value
-        }.toMap())
+        tapOneAction.value = tapOneAction.value.map {
+            entry -> entry.key to if (zone == entry.key) Actions.valueOf(action) else entry.value
+        }.toMap()
 
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putString(getTapOneKey(zone), action)
@@ -571,18 +611,18 @@ class SettingsViewModel(
     }
 
     fun changeDoubleClick(zone: ScreenZone, action: String) {
-        tapDoubleAction.value = EnumMap(tapDoubleAction.value.map {
-                entry -> entry.key to if (zone == entry.key) action else entry.value
-        }.toMap())
+        tapDoubleAction.value = tapDoubleAction.value.map {
+                entry -> entry.key to if (zone == entry.key) Actions.valueOf(action) else entry.value
+        }.toMap()
 
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putString(getTapDoubleKey(zone), action)
         prefEditor.apply()
     }
     fun changeLongClick(zone: ScreenZone, action: String) {
-        tapLongAction.value = EnumMap(tapLongAction.value.map {
-                entry -> entry.key to if (zone == entry.key) action else entry.value
-        }.toMap())
+        tapLongAction.value = tapLongAction.value.map {
+                entry -> entry.key to if (zone == entry.key) Actions.valueOf(action) else entry.value
+        }.toMap()
 
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putString(getTapLongKey(zone), action)
@@ -603,24 +643,47 @@ class SettingsViewModel(
     }
 
     fun changeFontSize(size: Float) {
-        fontSize.floatValue = size
+        pageViewSettings.value = pageViewSettings.value.copy(textSize = size)
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putFloat(PREF_KEY_BOOK_TEXT_SIZE, size)
         prefEditor.apply()
     }
 
     fun changeLineSpacingMultiplier(value: Float) {
-        lineSpacingMultiplier.floatValue = value
+        pageViewSettings.value = pageViewSettings.value.copy(lineSpacingMultiplier = value)
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putString(PREF_KEY_BOOK_LINE_SPACING, value.toString())
         prefEditor.apply()
     }
 
     fun changeLetterSpacing(value: Float) {
-        letterSpacing.floatValue = value
+        pageViewSettings.value = pageViewSettings.value.copy(letterSpacing = value)
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putString(PREF_KEY_BOOK_LETTER_SPACING, value.toString())
         prefEditor.apply()
+    }
+
+    fun onFinishQuickMenuDialog(
+        textSize: Float,
+        lineSpacingMultiplier: Float,
+        letterSpacing: Float,
+        colorThemeIndex: Int) {
+
+        pageViewSettings.value = pageViewSettings.value.copy(
+            textSize = textSize,
+            lineSpacingMultiplier = lineSpacingMultiplier,
+            letterSpacing = letterSpacing
+        )
+        selectedColorTheme.intValue = colorThemeIndex
+        selectedColors.value = colors[colorThemeIndex]!!.value
+
+        val prefEditor: SharedPreferences.Editor = prefs.edit()
+        prefEditor.putFloat(PREF_KEY_BOOK_TEXT_SIZE, textSize)
+        prefEditor.putString(PREF_KEY_BOOK_LINE_SPACING, lineSpacingMultiplier.toString())
+        prefEditor.putString(PREF_KEY_BOOK_LETTER_SPACING, letterSpacing.toString())
+        prefEditor.putInt(PREF_KEY_COLOR_SELECTED_THEME_INDEX, colorThemeIndex)
+        prefEditor.apply()
+
     }
 }
 

@@ -1,6 +1,7 @@
 package com.kontranik.koreader.ui.fragments
 
 import android.content.Context
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +11,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.compose.ui.quickmenu.QuickMenuDialog
+import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
 
 
 class QuickMenuFragment : BottomSheetDialogFragment() {
@@ -34,6 +38,7 @@ class QuickMenuFragment : BottomSheetDialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
+        val settingsViewModel = ViewModelProvider(requireActivity(), AppViewModelProvider.Factory)[SettingsViewModel::class.java]
 
         return ComposeView(requireContext()).apply {
             setContent {
@@ -43,11 +48,6 @@ class QuickMenuFragment : BottomSheetDialogFragment() {
 
                 if (show)
                 QuickMenuDialog(
-                    onFinishQuickMenuDialog = { textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex ->
-                        mListener?.onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex)
-                        show = false
-                        dismiss()
-                    } ,
                     onClose = {
                         mListener?.onCancelQuickMenuDialog()
                         show = false
@@ -62,8 +62,8 @@ class QuickMenuFragment : BottomSheetDialogFragment() {
                         show = false
                         dismiss()
                     },
-                    onOpenBookInfo = { bookPath ->
-                        mListener?.onOpenBookInfoQuickMenuDialog(bookPath)
+                    onOpenBookInfo = {
+                        mListener?.onOpenBookInfoQuickMenuDialog("")
                         show = false
                         dismiss()
                     },
@@ -78,7 +78,14 @@ class QuickMenuFragment : BottomSheetDialogFragment() {
                     },
                     onChangeTextSizeQuickMenuDialog = { value ->
                         mListener?.onChangeTextSizeQuickMenuDialog(value)
-                    }
+                    },
+                    onFinishQuickMenuDialog = {  textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorThemeIndex: Int ->
+                        mListener?.onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex)
+                    },
+                    pageViewSettings = settingsViewModel.pageViewSettings.value,
+                    selectedFont = Typeface.DEFAULT,
+                    selectedColorTheme = 0
+
                 )
             }
         }

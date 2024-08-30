@@ -43,11 +43,13 @@ fun SettingsList(
     entries: List<String>,
     entryValues: List<String>,
     defaultValue: String,
+    defaultValueTitle: String? = null,
     @DrawableRes icon: Int? = null,
     onChange: (String) -> Unit,
     showDefaultValue: Boolean,
     modifier: Modifier = Modifier,
     show: Boolean = false,
+    enabled: Boolean = true
 ) {
     var showDropdown by rememberSaveable { mutableStateOf(show) }
     val scrollState = rememberLazyListState()
@@ -56,7 +58,7 @@ fun SettingsList(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .padding(paddingSmall)
-            .clickable { showDropdown = !showDropdown; },
+            .clickable { if (enabled) showDropdown = !showDropdown; },
     ) {
         icon?.let {
             Icon(painter = painterResource(id = it), contentDescription = title,
@@ -70,7 +72,7 @@ fun SettingsList(
                 modifier = Modifier
             )
             if (showDefaultValue) Text(
-                text = defaultValue,
+                text = defaultValueTitle ?: defaultValue,
                 modifier = Modifier
             )
         }
@@ -81,7 +83,7 @@ fun SettingsList(
                     entries = entries,
                     defaultPos = entryValues.indexOf(defaultValue),
                     onItemClick = { pos, _ ->
-                        onChange(entryValues[pos])
+                        if (enabled) onChange(entryValues[pos])
                         showDropdown = false
                     },
                     onClose = { showDropdown = false; },
@@ -184,6 +186,7 @@ private fun SettingsTextFieldPreview() {
             "entry3",
         ),
         defaultValue = "entry1",
+        defaultValueTitle = "entry_title",
         icon = R.drawable.ic_iconmonstr_paintbrush_10,
         showDefaultValue = true,
         onChange = {},

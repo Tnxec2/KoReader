@@ -72,10 +72,6 @@ class OpdsViewModell(
 
     private lateinit var overviewOpds: Opds
 
-    init {
-        start()
-    }
-
     fun start() {
         loadPrefs()
         load(OVERVIEW)
@@ -280,5 +276,15 @@ class OpdsViewModell(
         }
         savePrefs()
         load(OVERVIEW)
+    }
+
+    fun loadLink(link: Link) {
+        println("loadLink: $link")
+        link.href?.let {
+            if (it == "back")
+                goBack()
+            else
+                load(it)
+        }
     }
 }

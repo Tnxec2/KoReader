@@ -2,7 +2,7 @@ package com.kontranik.koreader.model
 
 import com.kontranik.koreader.database.model.Bookmark
 
-open class BookPosition(
+data class BookPosition(
         var section: Int = 0,
         var offSet: Int = 0
 ) {

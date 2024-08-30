@@ -6,25 +6,35 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
+import com.kontranik.koreader.compose.navigation.NavigationDestination
 import kotlinx.coroutines.launch
 
+object ColorThemeSettingsDestination : NavigationDestination {
+    override val route = "ColorThemeSettings"
+    override val titleRes = R.string.color_theme_header
+    const val THEME_INDEX = "themeIndex"
+    val routeWithArgs = "$route/{$THEME_INDEX}"
+}
 
 @Composable
 fun ColorThemeSettingsScreen(
     modifier: Modifier = Modifier,
-    themeIndex: Int,
-    title: String = stringResource(id = R.string.color_theme_indexed_header, themeIndex+1),
     drawerState: DrawerState,
     navigateBack: () -> Unit,
     settingsViewModel: SettingsViewModel,
+    colorThemeSettingsViewModel: ColorThemeSettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
+
+    val themeIndex by colorThemeSettingsViewModel.themeIndexState
 
     val colors by settingsViewModel.colors[themeIndex]!!
 
     ColorThemeSettingsContent(
-        title = title,
+        title = stringResource(id = R.string.color_theme_indexed_header, themeIndex+1),
         drawerState = drawerState,
         navigateBack = { coroutineScope.launch { navigateBack() }},
         modifier = modifier,

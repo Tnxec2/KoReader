@@ -1,5 +1,6 @@
 package com.kontranik.koreader.compose.ui.library.bytitle
 
+import android.net.Uri
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -45,6 +46,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
+import com.kontranik.koreader.compose.navigation.NavigationDestination
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
@@ -56,11 +58,18 @@ import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.ui.shared.ConfirmDialog
 import kotlinx.coroutines.launch
+
+object LibraryByTitleDestination : NavigationDestination {
+    override val route = "LibraryByTitle"
+    override val titleRes = R.string.books_by_title
+    const val AUTHOR_ID = "authorid"
+    val routeWithArgs = "$route?authorid={$AUTHOR_ID}"
+}
 
 @Composable
 fun LibraryByTitleScreen(
-    author: Author?,
     drawerState: DrawerState,
     navigateBack: () -> Unit,
     navigateToBook: (LibraryItemWithAuthors) -> Unit,
@@ -68,6 +77,7 @@ fun LibraryByTitleScreen(
     libraryViewModel: LibraryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -79,8 +89,10 @@ fun LibraryByTitleScreen(
         mutableStateOf("")
     }
 
-    LaunchedEffect(key1 = Unit) {
-        libraryViewModel.loadTitlePageInit(author)
+    val author by libraryViewModel.authorState
+
+    var confirmDeleteBook by remember {
+        mutableStateOf<Pair<Boolean, LibraryItemWithAuthors>?>(null)
     }
 
     Scaffold(
@@ -113,37 +125,37 @@ fun LibraryByTitleScreen(
                     Text(text = stringResource(id = R.string.by_author, it.asString()))
                 }
             }
-            Row(verticalAlignment = Alignment.CenterVertically,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(paddingSmall)) {
                 OutlinedTextField(
                     value = filter,
-                    onValueChange = { filter = it },
+                    onValueChange = {
+                        filter = it
+                        coroutineScope.launch {
+                            libraryViewModel.changeTitleSearchText(filter)
+                            listState.scrollToItem(0)
+                        }
+                    },
                     label = {
                         Text(text = stringResource(id = R.string.search_term))
-                    }
+                    },
+                    modifier = Modifier.weight(1f)
                 )
-                IconButton(onClick = {
+                IconButton(
+                    onClick = {
                     coroutineScope.launch {
                         filter = ""
                         libraryViewModel.changeTitleSearchText(filter)
                         listState.scrollToItem(0)
                     }
                 }) {
-                    Icon(painter = painterResource(id = R.drawable.baseline_backspace_24), contentDescription = stringResource(
-                        id = R.string.clear_search_text
-                    ))
-                }
-                IconButton(onClick = {
-                    coroutineScope.launch {
-                        libraryViewModel.changeTitleSearchText(filter)
-                        listState.scrollToItem(0)
-                    }
-                }) {
-                    Icon(painter = painterResource(id = R.drawable.baseline_search_24), contentDescription = stringResource(
-                        id = R.string.search_term
-                    ))
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_backspace_24),
+                        contentDescription = stringResource(id = R.string.clear_search_text)
+                    )
                 }
             }
 
@@ -155,10 +167,22 @@ fun LibraryByTitleScreen(
                         BooksItem(
                             item = it,
                             onClick = {
-                                navigateToBook(it)
+                                coroutineScope.launch {
+                                    val bookPathUri = it.libraryItem.path
+                                    try {
+                                        val inputStream =
+                                            context.contentResolver.openInputStream(
+                                                Uri.parse(bookPathUri)
+                                            )
+                                        inputStream?.close()
+                                        navigateToBook(it)
+                                    } catch (e: Exception) {
+                                        confirmDeleteBook = Pair(true, it)
+                                    }
+                                }
                             },
                             onDelete = {
-                                libraryViewModel.delete(it)
+                                confirmDeleteBook = Pair(false, it)
                             },
                             onUpdate = {
                                 libraryViewModel.updateLibraryItem(it)
@@ -168,6 +192,18 @@ fun LibraryByTitleScreen(
                             HorizontalDivider()
                     }
                 }
+            }
+
+            confirmDeleteBook?.let {
+                ConfirmDialog(
+                    title = if (it.first) "Book does not exist" else null,
+                    text = "Are you sure you want to delete this book \"${it.second.libraryItem.title}\" from library?",
+                    onDismissRequest = { confirmDeleteBook = null },
+                    onConfirmation = {
+                        confirmDeleteBook = null
+                        libraryViewModel.delete(it.second)
+                    }
+                )
             }
         }
     }

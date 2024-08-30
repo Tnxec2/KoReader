@@ -95,7 +95,7 @@ class FontPickerFragment :
                 TypefaceRecord(name = TypefaceRecord.SERIF),
                 TypefaceRecord(name = TypefaceRecord.MONO),
         )
-        TypefaceRecord.fonts.forEach { (name, _) -> println("loadFonts $name"); fontList.add(TypefaceRecord(name))  }
+        TypefaceRecord.internalFonts.forEach { name -> println("loadFonts $name"); fontList.add(TypefaceRecord(name))  }
 
         try {
             fonts = FontManager.enumerateFonts(requireContext(), showSystemFonts, showNotoFonts)

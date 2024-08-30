@@ -88,7 +88,7 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
                     KoReaderApplication.getContext().resources.getString(R.string.loading_book),
                     Toast.LENGTH_SHORT
                 ).show()
-                book.value = Book(KoReaderApplication.getContext(), PrefsHelper.bookPath!!)
+                book.value = Book(PrefsHelper.bookPath!!)
             }
         } catch (e: Exception) {
             Log.e("tag", e.stackTraceToString())
@@ -411,21 +411,24 @@ class ReaderActivityViewModel(private val mRepository: BookStatusRepository) : V
     private fun savePosition() {
         viewModelScope.launch {
             BooksRoomDatabase.databaseWriteExecutor.execute {
-                val bookStatus = mRepository.getBookStatusByPath(book.value!!.fileLocation)
+                book.value?.fileLocation?.let { file ->
+                    val bookStatus = mRepository.getBookStatusByPath(file)
 
-                if (bookStatus == null) {
-                    Log.d("savePosition", "bookstatus is null")
-                    mRepository.insert(BookStatus(book.value!!))
-                } else {
-                    Log.d(
-                        "savePosition",
-                        bookStatus.position_section.toString() + " " + bookStatus.position_offset
-                    )
-                    val bookPosition =
-                        if (book.value!!.curPage == null) BookPosition() else BookPosition(book.value!!.curPage!!.startBookPosition)
-                    bookStatus.updatePosition(bookPosition)
-                    mRepository.update(bookStatus)
+                    if (bookStatus == null) {
+                        Log.d("savePosition", "bookstatus is null")
+                        mRepository.insert(BookStatus(book.value!!))
+                    } else {
+                        Log.d(
+                            "savePosition",
+                            bookStatus.position_section.toString() + " " + bookStatus.position_offset
+                        )
+                        val bookPosition =
+                            BookPosition(book.value!!.curPage.startBookPosition)
+                        bookStatus.updatePosition(bookPosition)
+                        mRepository.update(bookStatus)
+                    }
                 }
+
             }
         }
     }

@@ -32,13 +32,17 @@ class BookInfoViewModell(
 
     var exit by mutableStateOf(false)
 
-    val bookPath: String? = savedStateHandle[BookInfoDestination.BOOK_PATH]
+    private val source: String = savedStateHandle[BookInfoDestination.BOOK_PATH] ?: "preview"
+
+    val bookPath = Uri.decode(source).replace('|','%')
+
 
     init {
-        //readBookInfo(bookPath)
+        readBookInfo(bookPath)
     }
 
     fun readBookInfo(bookPath: String?) {
+        println(bookPath)
         viewModelScope.launch {
             exit = false
             bookPath?.let { path ->
@@ -67,7 +71,7 @@ class BookInfoViewModell(
 
                 canDeleteState = doc?.canWrite() == true
 
-                val ebookHelper = EbookHelper.getHelper(context, path)
+                val ebookHelper = EbookHelper.getHelper(path)
 
                 if ( ebookHelper == null) exit = true
 

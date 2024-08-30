@@ -33,17 +33,13 @@ class BookInfoFragment: Fragment()  {
             setContent {
                 BookInfoScreen(
                     drawerState = DrawerState(DrawerValue.Closed),
-                    bookUri = bookPath,
                     navigateBack = {
                         requireActivity().supportFragmentManager.popBackStack()
                     },
                     navigateToAuthor = { author ->
                         onClickAuthorItem(author)
                                        },
-                    onReadBook = { bookPath ->
-                        mListener?.onBookInfoFragmentReadBook(bookPath)
-                        requireActivity().supportFragmentManager.popBackStack()
-                    },
+                    navigateToReader = {},
                     onDeleteBook = { bookPath ->
                         mListener?.onBookInfoFragmentDeleteBook(bookPath)
                         requireActivity().supportFragmentManager.popBackStack()

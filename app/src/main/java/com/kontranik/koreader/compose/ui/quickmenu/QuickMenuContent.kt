@@ -35,7 +35,6 @@ import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.shared.FontSizeWidget
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickMenuDialogContent(
     themes: List<String>,
@@ -58,7 +57,11 @@ fun QuickMenuDialogContent(
     modifier: Modifier = Modifier
 ) {
 
-        Column(modifier.padding(horizontal =  paddingMedium)) {
+        Column(
+            modifier
+                .padding(horizontal =  paddingMedium)
+                .padding(top = paddingSmall)
+        ) {
             Row(Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(id = R.string.color_theme),
@@ -183,7 +186,7 @@ private fun QuickMenuContentPreview() {
     }
     var colorTheme by remember { mutableStateOf(themes[0]) }
 
-    var textSize by remember { mutableFloatStateOf(14f) }
+    var textSize by remember { mutableFloatStateOf(34f) }
 
     val itemsLineSpacing by remember { mutableStateOf(getLineSpacings().map { it.toString() }) }
     var lineSpacingMultiplier by remember { mutableFloatStateOf(itemsLineSpacing[0].toFloat()) }

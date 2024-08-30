@@ -42,4 +42,8 @@ class AuthorsRepository(private val mAuthorDao: AuthorDao) {
     fun getByName(firstname: String?, middlename: String?, lastname: String?): List<Author> {
         return mAuthorDao.getByName(firstname, middlename, lastname)
     }
+
+    fun getById(authorId: String): List<Author?> {
+        return mAuthorDao.getById(authorId)
+    }
 }

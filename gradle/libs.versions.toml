@@ -4,6 +4,7 @@ androidxJunitVersion = "1.1.5"
 appcompat = "1.6.1"
 colorpicker = "3.1.0"
 composeVersion = "1.6.8"
+activityComposeVersion = "1.9.1"
 constraintlayout = "2.1.4"
 coreKtx = "1.10.1"
 espressoCore = "3.5.1"
@@ -68,7 +69,7 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 slf4j-android = { module = "org.slf4j:slf4j-android", version.ref = "slf4jAndroid" }
 
 
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "composeVersion" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
 androidx-compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "composeVersion" }
 androidx-compose-foundation-layout = { module = "androidx.compose.foundation:foundation-layout", version.ref = "composeVersion" }
 androidx-compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "composeVersion" }

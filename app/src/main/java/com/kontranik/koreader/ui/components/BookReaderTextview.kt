@@ -1,28 +1,24 @@
 package com.kontranik.koreader.ui.components
 
-import android.R
+
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Point
-import android.text.Spannable
+import android.text.SpannedString
 import android.text.style.ImageSpan
 import android.text.style.URLSpan
-import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.LifecycleOwner
+import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.model.ScreenZone
 import com.kontranik.koreader.utils.OnSwipeTouchListener
-import com.kontranik.koreader.utils.PrefsHelper
 
-class BookReaderTextview: AppCompatTextView {
-
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
-
-    constructor(context: Context, attrs: AttributeSet?) :
-        this(context, attrs, R.attr.textViewStyle)
-
-    constructor(context: Context) : super(context)
-
+class BookReaderTextview(
+    context: Context,
+    val bookReaderViewModel: BookReaderViewModel):
+    AppCompatTextView(context) {
 
     private var listener: BookReaderTextviewListener? = null
 
@@ -32,6 +28,18 @@ class BookReaderTextview: AppCompatTextView {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initUi() {
+
+        bookReaderViewModel.pageViewContent.observe(context as LifecycleOwner) {
+            text = it
+        }
+        bookReaderViewModel.pageViewColorSettings.observe(context as LifecycleOwner) {
+            setTextColor(it.colorsText.toArgb())
+            setLinkTextColor(it.colorsLink.toArgb())
+        }
+        bookReaderViewModel.pageViewSettings.observe(context as LifecycleOwner) {
+            changeSettings(it)
+        }
+
         setOnTouchListener(object :
             OnSwipeTouchListener(context) {
                 override fun onClick(point: Point) {
@@ -39,7 +47,7 @@ class BookReaderTextview: AppCompatTextView {
 
                     // Find the URL that was pressed
                     val off = getClickedOffset(point)
-                    val spannable = text as Spannable
+                    val spannable = text as SpannedString
                     val link = spannable.getSpans(off, off, URLSpan::class.java)
                     if (link.isNotEmpty()) {
                         // link clicked
@@ -80,7 +88,7 @@ class BookReaderTextview: AppCompatTextView {
 
                     // Find the Image that was pressed
                     val off = getClickedOffset(point)
-                    val spannable = text as Spannable
+                    val spannable = text as SpannedString
                     val image = spannable.getSpans(off, off, ImageSpan::class.java)
                     if (image.isNotEmpty()) {
                         listener?.onClickImageOnBookReaderTextview(image[0])
@@ -111,13 +119,13 @@ class BookReaderTextview: AppCompatTextView {
 
         when (tapType) {
             OnSwipeTouchListener.TapType.OneTap -> { // double tap
-                listener?.onTabActionOnBookReaderTextview(PrefsHelper.tapOneAction[zone])
+                listener?.onTapOnBookReaderTextview(zone)
             }
             OnSwipeTouchListener.TapType.DoubleTap -> { // double tap
-                listener?.onTabActionOnBookReaderTextview(PrefsHelper.tapDoubleAction[zone])
+                listener?.onDoubleTapOnBookReaderTextview(zone)
             }
             OnSwipeTouchListener.TapType.LongTap -> { // long tap
-                listener?.onTabActionOnBookReaderTextview(PrefsHelper.tapLongAction[zone])
+                listener?.onLongTapOnBookReaderTextview(zone)
             }
         }
     }
@@ -128,7 +136,9 @@ class BookReaderTextview: AppCompatTextView {
 
     interface BookReaderTextviewListener {
         fun onClickLinkOnBookReaderTextview(url: String)
-        fun onTabActionOnBookReaderTextview(tapAction: String?)
+        fun onTapOnBookReaderTextview(zone: ScreenZone)
+        fun onDoubleTapOnBookReaderTextview(zone: ScreenZone)
+        fun onLongTapOnBookReaderTextview(zone: ScreenZone)
         fun onSwipeLeftOnBookReaderTextview()
         fun onSwipeRightOnBookReaderTextview()
         fun onSlideUpOnBookReaderTextView(point: Point)
@@ -140,25 +150,17 @@ class BookReaderTextview: AppCompatTextView {
         this.listener  = listener
     }
 
+    fun removeListener() {
+        this.listener = null
+    }
+
     fun changeSettings(pageViewSettings: PageViewSettings) {
         textSize = pageViewSettings.textSize
         letterSpacing = pageViewSettings.letterSpacing
         typeface = pageViewSettings.typeFace
-        println("changeSettings. typeface: ${typeface.style} / $typeface")
         setLineSpacing(
             lineSpacingExtra,
             pageViewSettings.lineSpacingMultiplier
-        )
-        val density = this.resources.displayMetrics.density
-        val marginTopPixel = (pageViewSettings.marginTop * density).toInt()
-        val marginBottomPixel = (pageViewSettings.marginBottom * density).toInt()
-        val marginLeftPixel = (pageViewSettings.marginLeft * density).toInt()
-        val marginRightPixel = (pageViewSettings.marginRight * density).toInt()
-        setPadding(
-            marginLeftPixel,
-            marginTopPixel,
-            marginRightPixel,
-            marginBottomPixel
         )
     }
 }

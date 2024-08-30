@@ -110,6 +110,7 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
     }
 
     override fun getBookInfoTemporary(contentUri: String): BookInfo? {
+        println("getBookInfoTemporary ${Uri.parse(contentUri)}")
         val tempReader = FB2Reader(context.filesDir.absolutePath, contentUri)
         val fileInputStream = context.contentResolver.openInputStream(Uri.parse(contentUri)) ?: return null
         val tempScheme = tempReader.readScheme(fileInputStream)

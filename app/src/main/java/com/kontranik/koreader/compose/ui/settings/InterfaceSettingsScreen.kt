@@ -2,6 +2,7 @@ package com.kontranik.koreader.compose.ui.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -84,7 +85,7 @@ fun InterfaceContent(
             SettingsTitle(text = stringResource(id = R.string.interface_header))
 
             LazyColumn(
-                Modifier
+                Modifier.fillMaxWidth()
             ) {
                 item {
                     SettingsList(
@@ -95,6 +96,7 @@ fun InterfaceContent(
                         icon = R.drawable.ic_baseline_preview_24,
                         onChange = { onChangeInterfaceTheme(it) },
                         showDefaultValue = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 item {
@@ -106,6 +108,7 @@ fun InterfaceContent(
                         icon = R.drawable.ic_baseline_brightness_medium_24,
                         onChange = { onChangeBrightness(it) },
                         showDefaultValue = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 item {
@@ -117,6 +120,7 @@ fun InterfaceContent(
                         icon = R.drawable.ic_baseline_screen_rotation_24,
                         onChange = { onChangeOrientation(it) },
                         showDefaultValue = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }

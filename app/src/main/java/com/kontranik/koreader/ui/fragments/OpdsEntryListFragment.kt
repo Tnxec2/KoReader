@@ -19,8 +19,7 @@ import com.kontranik.koreader.opds.model.Link
 
 
 class OpdsEntryListFragment :
-    Fragment(),
-    OpdsEntryDetailsFragment.OpdsEntryDetailsFragmentLinkClickListener {
+    Fragment() {
 
     lateinit var opdsViewModell: OpdsViewModell
 
@@ -36,31 +35,12 @@ class OpdsEntryListFragment :
                 OpdsListScreen(
                     drawerState = DrawerState(DrawerValue.Closed),
                     navigateBack = { requireActivity().supportFragmentManager.popBackStack() },
-                    openOpdsEntryDetails = { entry, startUrl ->  openOpdsEntryDetails(entry, startUrl)},
                     opdsViewModell = opdsViewModell
                 )
             }
         }
     }
 
-    private fun openOpdsEntryDetails(entry: Entry, startUrl: String) {
-        val fragment = OpdsEntryDetailsFragment.newInstance(entry, startUrl)
-        fragment.setListener(this)
-        requireActivity().supportFragmentManager.beginTransaction()
-            .add(R.id.fragment_container_view, fragment, "fragment_opds_details")
-            .addToBackStack("fragment_opds_details")
-            .commit()
-    }
-
-    override fun onClickOpdsEntryLink(link: Link) {
-        Log.d("OPDS List", "clicked opds entry link: $link")
-        link.href?.let {
-            if (it == "back")
-                opdsViewModell.goBack()
-            else
-                opdsViewModell.load(it)
-        }
-    }
 
     companion object {
         fun newInstance(): OpdsEntryListFragment {

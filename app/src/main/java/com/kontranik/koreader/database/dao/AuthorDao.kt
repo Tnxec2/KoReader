@@ -64,6 +64,9 @@ interface AuthorDao {
             "${AuthorHelper.COLUMN_LASTNAME} = :lastname or (${AuthorHelper.COLUMN_LASTNAME} is null and :lastname is null) ")
     fun getByName(firstname: String?, middlename: String?, lastname: String?): List<Author>
 
+    @Query("SELECT * FROM ${AuthorHelper.TABLE} WHERE authorid = :authorId")
+    fun getById(authorId: String): List<Author?>
+
     @get:Query("SELECT SUBSTR(${AuthorHelper.COLUMN_FIRSTNAME}, 0, 1) as firstchar FROM ${AuthorHelper.TABLE} ORDER BY firstchar")
     val getAllGroupedAuthors: LiveData<List<String>>
 }
