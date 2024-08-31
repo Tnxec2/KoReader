@@ -13,10 +13,10 @@ import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Log
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.content.res.ResourcesCompat
 import com.kontranik.koreader.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -160,8 +160,9 @@ object ImageUtils {
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 
-    fun drawableFromUrl(url: String?, startUrl: String?): Bitmap? {
+    suspend fun drawableFromUrl(url: String?, startUrl: String?): Bitmap? {
         if (url  == null) return null
+
         Log.d("NIK", url)
         try {
             if (url.startsWith("data:image")) {
@@ -173,11 +174,14 @@ object ImageUtils {
                 return BitmapFactory.decodeByteArray(imagedata, 0, imagedata.size)
             }
 
-            val connection = URL(UrlHelper.getUrl(url, startUrl)).openConnection() as HttpURLConnection
-            connection.setRequestProperty("User-agent", "Mozilla/4.0")
-            connection.connect()
-            val input = connection.inputStream
-            return BitmapFactory.decodeStream(input)
+            val bitmap = withContext(Dispatchers.IO) {
+                val connection = URL(UrlHelper.getUrl(url, startUrl)).openConnection() as HttpURLConnection
+                connection.setRequestProperty("User-agent", "Mozilla/4.0")
+                connection.connect()
+
+                BitmapFactory.decodeStream(connection.inputStream)
+            }
+            return bitmap
         } catch (e: Exception) {
             e.printStackTrace()
             return null

@@ -1,4 +1,4 @@
-package com.kontranik.koreader.ui.components
+package com.kontranik.koreader.compose.ui.reader
 
 
 import android.annotation.SuppressLint
@@ -10,7 +10,6 @@ import android.text.style.URLSpan
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.LifecycleOwner
-import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.model.ScreenZone
 import com.kontranik.koreader.utils.OnSwipeTouchListener

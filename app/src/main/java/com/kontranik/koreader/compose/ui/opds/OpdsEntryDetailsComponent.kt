@@ -1,6 +1,5 @@
 package com.kontranik.koreader.compose.ui.opds
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -36,9 +35,7 @@ import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.Link
 import com.kontranik.koreader.opds.model.OpdsTypes
 import com.kontranik.koreader.utils.ImageUtils
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 @Composable
@@ -64,11 +61,14 @@ fun OpdsEntryDetailsContent(
         coroutineScope.launch {
             val tempRels = hashMapOf<String, List<Link>>()
 
-            entry.otherLinks?.sortedBy { link: Link -> link.rel }
-                ?.groupBy { it.rel }
-                ?.forEach { (rel, links) ->
-                    tempRels[OpdsTypes.mapRel(rel)] = links
-                }
+            entry.otherLinks?.let { otherLinks ->
+                otherLinks
+                    .sortedBy{ link: Link -> link.rel }
+                    .groupBy { it.rel }
+                    .forEach { (rel, links) ->
+                        tempRels[OpdsTypes.mapRel(rel)] = links
+                    }
+            }
             rels.value = tempRels
 
             try {

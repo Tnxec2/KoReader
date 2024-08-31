@@ -16,8 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
@@ -26,9 +24,7 @@ import com.kontranik.koreader.compose.ui.settings.Actions
 import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
 import com.kontranik.koreader.compose.ui.settings.TextType
 import com.kontranik.koreader.model.ScreenZone
-import com.kontranik.koreader.ui.components.BookReaderTextview
-import com.kontranik.koreader.ui.components.BookReaderTextview.BookReaderTextviewListener
-import com.kontranik.koreader.utils.ImageUtils
+import com.kontranik.koreader.compose.ui.reader.BookReaderTextview.BookReaderTextviewListener
 import kotlinx.coroutines.launch
 
 @Composable

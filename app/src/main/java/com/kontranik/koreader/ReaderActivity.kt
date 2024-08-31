@@ -28,7 +28,7 @@ import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.database.model.Bookmark
 import com.kontranik.koreader.databinding.ActivityReaderMainBinding
 import com.kontranik.koreader.model.*
-import com.kontranik.koreader.ui.components.BookReaderTextview.BookReaderTextviewListener
+import com.kontranik.koreader.compose.ui.reader.BookReaderTextview.BookReaderTextviewListener
 import com.kontranik.koreader.ui.fragments.*
 import com.kontranik.koreader.utils.*
 import java.io.InputStream
@@ -268,10 +268,7 @@ class ReaderActivity :
     }
 
     private fun showImage(imageSpan: ImageSpan) {
-        val b: ByteArray = mReaderActivityViewModel.getImageByteArray(imageSpan) ?: return
-        val imageViewerFragment: ImageViewerFragment =
-            ImageViewerFragment.newInstance(b, PrefsHelper.isDarkMode())
-        imageViewerFragment.show(supportFragmentManager, "fragment_imageviewfragment")
+
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {

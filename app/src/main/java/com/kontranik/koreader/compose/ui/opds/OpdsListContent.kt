@@ -92,6 +92,7 @@ fun OpdsListContent(
     val entryEditPos = remember { mutableStateOf<Int?>(null) }
     val entryEditDetails = remember { mutableStateOf(EntryEditDetails()) }
 
+    val showSearchInputDialog = remember { mutableStateOf(false) }
 
     Scaffold(
         snackbarHost = {
@@ -103,10 +104,10 @@ fun OpdsListContent(
                 drawerState = drawerState,
                 navigationIcon = {
                     IconButton(onClick = {
-                        if (entryDetails.value != null)
-                            entryDetails.value == null
-                        else
+                        if (entryDetails.value == null)
                             coroutineScope.launch { navigateBack() }
+                        else
+                            entryDetails.value = null
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -122,7 +123,7 @@ fun OpdsListContent(
                             icon = R.drawable.baseline_search_24,
                             description = R.string.search,
                             onClick = {
-                                // todo: search
+                                showSearchInputDialog.value = true
                             }
                         ))
                     if (canAdd.value)
@@ -158,6 +159,8 @@ fun OpdsListContent(
                 contentIcon = contentIcon,
                 searchTerm = searchTerm,
                 onSearch = { onSearch() },
+                showSearchInputDialog = showSearchInputDialog.value,
+                onCloseSearchInputDialog = {showSearchInputDialog.value = false},
                 entrysState = entrysState,
                 startUrl = startUrl,
                 onDelete = onDelete,
@@ -200,8 +203,10 @@ fun OpdsList(
     contentSubTitle: MutableState<String?>,
     contentAuthor: MutableState<String?>,
     contentIcon: MutableState<ImageBitmap?>,
+    showSearchInputDialog: Boolean,
     searchTerm: MutableState<String>,
     onSearch: () -> Unit,
+    onCloseSearchInputDialog: () -> Unit,
     entrysState: MutableState<List<Entry>>,
     startUrl: MutableState<String>,
     onDelete: (Int) -> Unit,
@@ -218,7 +223,7 @@ fun OpdsList(
     val showDeleteConfirmationDialog = remember { mutableStateOf(false) }
     val entryDeletePos = remember { mutableStateOf<Int?>(null) }
 
-    val showSearchInputDialog = remember { mutableStateOf(false) }
+
 
     Column(modifier) {
         Row(
@@ -322,14 +327,14 @@ fun OpdsList(
             }
         )
 
-        if (showSearchInputDialog.value) CustomInputDialog(
+        if (showSearchInputDialog) CustomInputDialog(
             label = stringResource(id = R.string.search_term),
             onSave = {
-                showSearchInputDialog.value = false
+                onCloseSearchInputDialog()
                 onSearch()
             },
             onClose = {
-                showSearchInputDialog.value = false
+                onCloseSearchInputDialog()
             },
             initText = searchTerm.value,
             onChange = {
