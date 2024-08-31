@@ -134,7 +134,7 @@ fun OpdsEntryDetailsContent(
                 rel.value.map { link ->
                     item {
                         Text(
-                            text = link.title ?: "",
+                            text = link.getTitle()?.toString() ?: "",
                             fontSize = 18.sp,
                             style = TextStyle(
                                 textDecoration = TextDecoration.Underline
