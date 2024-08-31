@@ -1,5 +1,7 @@
 package com.kontranik.koreader.compose.ui.reader
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.text.style.ImageSpan
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
@@ -24,6 +28,7 @@ import com.kontranik.koreader.compose.ui.settings.TextType
 import com.kontranik.koreader.model.ScreenZone
 import com.kontranik.koreader.ui.components.BookReaderTextview
 import com.kontranik.koreader.ui.components.BookReaderTextview.BookReaderTextviewListener
+import com.kontranik.koreader.utils.ImageUtils
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,6 +63,14 @@ fun BookReaderScreen(
         mutableStateOf(false)
     }
 
+    val showGotoDialog = remember {
+        mutableStateOf(false)
+    }
+
+    val imageBitmap = remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+
     fun tap(tapAction: Actions?) {
         println("tap. tapAction: $tapAction")
         when (tapAction) {
@@ -74,7 +87,7 @@ fun BookReaderScreen(
                 corutineScope.launch { navigateToMainMenu() }
             }
             Actions.GoTo -> {
-                // todo: openGotoMenu()
+                showGotoDialog.value = true
             }
             Actions.Bookmarks -> {
                 corutineScope.launch { navigateToBookmarks() }
@@ -129,16 +142,39 @@ fun BookReaderScreen(
                     //
                 }
                 override fun onClickImageOnBookReaderTextview(imageSpan: ImageSpan) {
-                    // todo: open image
+                    bookReaderViewModel.getImageByteArray(imageSpan)?.let { byteArray ->
+
+                        imageBitmap.value = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                    }
                 }
             }
         )
     }
 
     BookReaderContainer(
-
         backgroundColor = backgroundColor,
-        showQuickMenu = showQuickMenu,
+
+        imageBitmap = imageBitmap.value,
+        isDarkMode = settingsViewModel.isDarkMode(context),
+        onCloseImage = { imageBitmap.value = null },
+
+        showGotoDialog = showGotoDialog.value,
+        onCloseGotoDialog = { showGotoDialog.value = false},
+        gotoPage = { corutineScope.launch {
+                showGotoDialog.value = false
+                bookReaderViewModel.goToPage(it)
+            }
+        },
+        gotoSection = { corutineScope.launch {
+            showGotoDialog.value = false
+            bookReaderViewModel.goToSection(it)
+        }},
+        currentSection = bookReaderViewModel.book.value?.getCurSection(),
+        currentPage = bookReaderViewModel.book.value?.getCurTextPage(),
+        sectionList = bookReaderViewModel.book.value?.getPageScheme()?.sections,
+        maxPage = bookReaderViewModel.book.value?.getPageScheme()?.countTextPages,
+
+        showQuickMenu = showQuickMenu.value,
         onCancelQuickMenuDialog = {
             bookReaderViewModel.pageViewSettings.value = pageViewSettings.value.copy()
             bookReaderViewModel.pageViewColorSettings.value = colors.copy()
@@ -188,7 +224,6 @@ fun BookReaderScreen(
         onClickInfoLeft = {},
         onClickInfoMiddle = {},
         onClickInfoRight = {},
-        modifier = modifier,
         textView = {
             AndroidView(
                 factory={ ctx ->

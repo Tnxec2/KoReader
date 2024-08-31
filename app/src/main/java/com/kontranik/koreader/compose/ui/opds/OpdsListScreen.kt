@@ -28,55 +28,56 @@ fun OpdsListScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-
-        OpdsListContent(
-            drawerState = drawerState,
-            entrysState = opdsViewModell.opdsEntryList,
-            startUrl = opdsViewModell.startUrl,
-            navigateBack = { navigateBack() },
-            canAdd = opdsViewModell.canAdd,
-            canSearch = opdsViewModell.canSearch,
-            canReload = opdsViewModell.canReload,
-            contentTitle = opdsViewModell.contentTitle,
-            contentAuthor = opdsViewModell.contentAuthor,
-            contentIcon = opdsViewModell.contentIcon,
-            contentSubTitle = opdsViewModell.contentSubTitle,
-            searchTerm = opdsViewModell.searchTerm,
-            reloadPage = { opdsViewModell.reloadPage() },
-            loadLink = {
-                coroutineScope.launch {
-                    opdsViewModell.loadLink(link = it)
-                }
-            },
-            download = { e, link ->
-                coroutineScope.launch {
-                    downloadOpdsEntry(e, link, opdsViewModell.startUrl.value)
-                }
-            },
-            openInBrowser = { link ->
-                coroutineScope.launch {
-                    link.href?.let {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(UrlHelper.getUrl(it, startUrl = opdsViewModell.startUrl.value))
+    OpdsListContent(
+        drawerState = drawerState,
+        entrysState = opdsViewModell.opdsEntryList,
+        startUrl = opdsViewModell.startUrl,
+        navigateBack = { navigateBack() },
+        canAdd = opdsViewModell.canAdd,
+        canSearch = opdsViewModell.canSearch,
+        canReload = opdsViewModell.canReload,
+        contentTitle = opdsViewModell.contentTitle,
+        contentAuthor = opdsViewModell.contentAuthor,
+        contentIcon = opdsViewModell.contentIcon,
+        contentSubTitle = opdsViewModell.contentSubTitle,
+        searchTerm = opdsViewModell.searchTerm,
+        reloadPage = { opdsViewModell.reloadPage() },
+        loadLink = {
+            coroutineScope.launch {
+                opdsViewModell.loadLink(link = it)
+            }
+        },
+        download = { e, link ->
+            coroutineScope.launch {
+                downloadOpdsEntry(e, link, opdsViewModell.startUrl.value)
+            }
+        },
+        openInBrowser = { link ->
+            coroutineScope.launch {
+                link.href?.let {
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(
+                                UrlHelper.getUrl(
+                                    it,
+                                    startUrl = opdsViewModell.startUrl.value
+                                )
                             )
                         )
-                    }
+                    )
                 }
-            },
-            modifier = modifier,
-            onSearch = {
-                opdsViewModell.search()
-            },
-            onDelete = { pos ->
-                opdsViewModell.opdslistItemDelete(pos)
-            },
-            onSaveOpdsOverviewEntry = { pos, title, url ->
-                opdsViewModell.saveOpdsOverviewEntry(pos, title, url)
-            },
-        )
-
-
-
+            }
+        },
+        modifier = modifier,
+        onSearch = {
+            opdsViewModell.search()
+        },
+        onDelete = { pos ->
+            opdsViewModell.opdslistItemDelete(pos)
+        },
+        onSaveOpdsOverviewEntry = { pos, title, url ->
+            opdsViewModell.saveOpdsOverviewEntry(pos, title, url)
+        },
+    )
 }

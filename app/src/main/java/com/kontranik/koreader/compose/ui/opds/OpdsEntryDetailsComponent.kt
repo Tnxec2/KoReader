@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -36,6 +37,7 @@ import com.kontranik.koreader.opds.model.Link
 import com.kontranik.koreader.opds.model.OpdsTypes
 import com.kontranik.koreader.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
@@ -48,6 +50,7 @@ fun OpdsEntryDetailsContent(
     openInBrowser: (Link) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val coroutineScope = rememberCoroutineScope()
 
     val cover = remember {
         mutableStateOf<ImageBitmap?>(null)
@@ -58,27 +61,25 @@ fun OpdsEntryDetailsContent(
     }
 
     LaunchedEffect(key1 = Unit) {
-        val tempRels = hashMapOf<String, List<Link>>()
+        coroutineScope.launch {
+            val tempRels = hashMapOf<String, List<Link>>()
 
-        entry.otherLinks?.sortedBy { link: Link -> link.rel }
-            ?.groupBy { it.rel }
-            ?.forEach { (rel, links) ->
-                tempRels[OpdsTypes.mapRel(rel)] = links
-            }
-        rels.value = tempRels
-
-        var icon: Bitmap? = null
-        try {
-            if (entry.image?.href != null) {
-                icon = ImageUtils.drawableFromUrl(entry.image.href, startUrl)
-            }
-            withContext(Dispatchers.Main) {
-                if (icon != null) {
-                    cover.value = icon.asImageBitmap()
+            entry.otherLinks?.sortedBy { link: Link -> link.rel }
+                ?.groupBy { it.rel }
+                ?.forEach { (rel, links) ->
+                    tempRels[OpdsTypes.mapRel(rel)] = links
                 }
+            rels.value = tempRels
+
+            try {
+                entry.image?.href?.let { href ->
+                    ImageUtils.drawableFromUrl(href, startUrl)?.let {
+                        cover.value = it.asImageBitmap()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 

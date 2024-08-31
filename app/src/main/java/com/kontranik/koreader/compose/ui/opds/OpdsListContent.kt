@@ -1,8 +1,5 @@
 package com.kontranik.koreader.compose.ui.opds
 
-import android.content.Intent
-import android.net.Uri
-import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -12,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -28,11 +26,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -56,7 +52,6 @@ import com.kontranik.koreader.opds.model.EntryEditDetails
 import com.kontranik.koreader.opds.model.Link
 import com.kontranik.koreader.opds.model.toEntryEditDetails
 import com.kontranik.koreader.utils.ImageUtils
-import com.kontranik.koreader.utils.UrlHelper
 import kotlinx.coroutines.launch
 
 
@@ -88,9 +83,8 @@ fun OpdsListContent(
     val listState = rememberLazyListState()
 
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
 
-    var entryDetails by remember {
+    val entryDetails = remember {
         mutableStateOf<Entry?>(null)
     }
 
@@ -98,10 +92,6 @@ fun OpdsListContent(
     val entryEditPos = remember { mutableStateOf<Int?>(null) }
     val entryEditDetails = remember { mutableStateOf(EntryEditDetails()) }
 
-    val showDeleteConfirmationDialog = remember { mutableStateOf(false) }
-    val entryDeletePos = remember { mutableStateOf<Int?>(null) }
-
-    val showSearchInputDialog = remember { mutableStateOf(false) }
 
     Scaffold(
         snackbarHost = {
@@ -109,10 +99,15 @@ fun OpdsListContent(
         },
         topBar = {
             AppBar(
-                title = R.string.opds,
+                title = if (entryDetails.value != null) R.string.opds_entry_details else R.string.opds,
                 drawerState = drawerState,
                 navigationIcon = {
-                    IconButton(onClick = { coroutineScope.launch { navigateBack() } }) {
+                    IconButton(onClick = {
+                        if (entryDetails.value != null)
+                            entryDetails.value == null
+                        else
+                            coroutineScope.launch { navigateBack() }
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(
@@ -153,133 +148,37 @@ fun OpdsListContent(
         },
         modifier = modifier.fillMaxSize(),
     ) { padding ->
-        Column(Modifier.padding(padding)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(paddingMedium)
-            ) {
-                contentIcon.value?.let {
-                    Image(
-                        bitmap = it,
-                        contentDescription = stringResource(id = R.string.opds_icon),
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.size(50.dp, 100.dp)
-                    )
-                }
-                Column(
-                    Modifier
-                        .weight(1f)
-                        .padding(start = paddingSmall)) {
-                    contentTitle.value?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    contentSubTitle.value?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                    contentAuthor.value?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            }
-
-            LazyColumn(state = listState) {
-                itemsIndexed(
-                    items = entrysState.value,
-                    key = {
-                            index, item -> index.toString() + item.title
-                    }
-                ) { index, item ->
-                    OpdsItem(
-                        entry = item,
-                        startUrl = startUrl.value,
-                        onClick = {
-                            if (item.clickLink != null) {
-                                item.clickLink.href?.let {
-                                    loadLink(item.clickLink)
-                                }
-                            } else {
-                                entryDetails = item
-                            }
-                        },
-                        onDelete = {
-                            onDelete(index)
-                        },
-                        onEdit = {
-                            entryEditDetails.value = item.toEntryEditDetails()
-                            entryEditPos.value = index
-                            showEditDialog.value = true
-                        }
-                    )
-                    if (index < entrysState.value.size - 1)
-                        HorizontalDivider()
-                }
-
-            }
-
-            if (showEditDialog.value) OpdsOverviewEntryEditDialog(
-                editDetailsMutableState = entryEditDetails,
-                onSave = {
+        
+        if (entryDetails.value == null) {
+            OpdsList(
+                listState = listState,
+                contentTitle = contentTitle,
+                contentSubTitle = contentSubTitle,
+                contentAuthor = contentAuthor,
+                contentIcon = contentIcon,
+                searchTerm = searchTerm,
+                onSearch = { onSearch() },
+                entrysState = entrysState,
+                startUrl = startUrl,
+                onDelete = onDelete,
+                loadLink = loadLink,
+                showEditDialog = showEditDialog,
+                entryEditPos = entryEditPos,
+                entryEditDetails = entryEditDetails,
+                openDetails = { entryDetails.value = it },
+                onSaveOpdsOverviewEntry = { pos: Int, title: String, url: String ->
                     coroutineScope.launch {
-                        entryEditPos.value?.let {
-                            onSaveOpdsOverviewEntry(it, entryEditDetails.value.title, entryEditDetails.value.url)
-                        }
+                        onSaveOpdsOverviewEntry(pos, title, url)
                     }
                 },
-                onClose = {
-                    showEditDialog.value = false
-                    entryEditDetails.value = EntryEditDetails()
-                    entryEditPos.value = null
-                }
+                modifier = Modifier.padding(padding)
             )
-
-            if (showDeleteConfirmationDialog.value) ConfirmDialog(
-                title = stringResource(id = R.string.opds_item_delete),
-                text = stringResource(id = R.string.sure_delete_opds_item),
-                onDismissRequest = {
-                    showDeleteConfirmationDialog.value = false
-                    entryDeletePos.value = null
-                },
-                onConfirmation = {
-                    showDeleteConfirmationDialog.value = false
-                    entryDeletePos.value?.let { onDelete(it) }
-                    entryDeletePos.value = null
-                }
-            )
-
-            if (showSearchInputDialog.value) CustomInputDialog(
-                label = stringResource(id = R.string.search_term),
-                onSave = {
-                    showSearchInputDialog.value = false
-                    onSearch()
-                },
-                onClose = {
-                    showSearchInputDialog.value = false
-                },
-                initText = searchTerm.value,
-                onChange = {
-                    searchTerm.value = it
-                }
-            )
-        }
-
-        entryDetails?.let { entry ->
-            OpdsEntryDetailsDialog(
-                onClose = { entryDetails = null },
-                entry = entry,
+        } else {
+            OpdsEntryDetailsContent(
+                entry = entryDetails.value!!,
                 navigateToOpdsEntryLink = { link ->
                     loadLink(link)
-                    entryDetails = null
+                    entryDetails.value = null
                 },
                 download = { e, link ->
                     download(e, link)
@@ -287,9 +186,156 @@ fun OpdsListContent(
                 openInBrowser = { link ->
                     openInBrowser(link)
                 },
-                startUrl = startUrl.value
+                startUrl = startUrl.value,
+                modifier = Modifier.padding(padding)
             )
         }
+    }
+
+}
+
+@Composable
+fun OpdsList(
+    contentTitle: MutableState<String?>,
+    contentSubTitle: MutableState<String?>,
+    contentAuthor: MutableState<String?>,
+    contentIcon: MutableState<ImageBitmap?>,
+    searchTerm: MutableState<String>,
+    onSearch: () -> Unit,
+    entrysState: MutableState<List<Entry>>,
+    startUrl: MutableState<String>,
+    onDelete: (Int) -> Unit,
+    loadLink: (Link) -> Unit,
+    showEditDialog: MutableState<Boolean>,
+    entryEditPos: MutableState<Int?>,
+    entryEditDetails: MutableState<EntryEditDetails>,
+    onSaveOpdsOverviewEntry: (pos: Int, title: String, url: String) -> Unit,
+    openDetails: (Entry) -> Unit,
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),) {
+
+
+    val showDeleteConfirmationDialog = remember { mutableStateOf(false) }
+    val entryDeletePos = remember { mutableStateOf<Int?>(null) }
+
+    val showSearchInputDialog = remember { mutableStateOf(false) }
+
+    Column(modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(paddingMedium)
+        ) {
+            contentIcon.value?.let {
+                Image(
+                    bitmap = it,
+                    contentDescription = stringResource(id = R.string.opds_icon),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(50.dp, 100.dp)
+                )
+            }
+            Column(
+                Modifier
+                    .weight(1f)
+                    .padding(start = paddingSmall)) {
+                contentTitle.value?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+                contentSubTitle.value?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                contentAuthor.value?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
+
+        LazyColumn(state = listState) {
+            itemsIndexed(
+                items = entrysState.value,
+                key = {
+                        index, item -> index.toString() + item.title
+                }
+            ) { index, item ->
+                OpdsItem(
+                    entry = item,
+                    startUrl = startUrl.value,
+                    onClick = {
+                        if (item.clickLink != null) {
+                            item.clickLink.href?.let {
+                                loadLink(item.clickLink)
+                            }
+                        } else {
+                            openDetails(item)
+                        }
+                    },
+                    onDelete = {
+                        onDelete(index)
+                    },
+                    onEdit = {
+                        entryEditDetails.value = item.toEntryEditDetails()
+                        entryEditPos.value = index
+                        showEditDialog.value = true
+                    }
+                )
+                if (index < entrysState.value.size - 1)
+                    HorizontalDivider()
+            }
+
+        }
+
+        if (showEditDialog.value) OpdsOverviewEntryEditDialog(
+            editDetailsMutableState = entryEditDetails,
+            onSave = {
+                entryEditPos.value?.let {
+                    onSaveOpdsOverviewEntry(it, entryEditDetails.value.title, entryEditDetails.value.url)
+                }
+            },
+            onClose = {
+                showEditDialog.value = false
+                entryEditDetails.value = EntryEditDetails()
+                entryEditPos.value = null
+            }
+        )
+
+        if (showDeleteConfirmationDialog.value) ConfirmDialog(
+            title = stringResource(id = R.string.opds_item_delete),
+            text = stringResource(id = R.string.sure_delete_opds_item),
+            onDismissRequest = {
+                showDeleteConfirmationDialog.value = false
+                entryDeletePos.value = null
+            },
+            onConfirmation = {
+                showDeleteConfirmationDialog.value = false
+                entryDeletePos.value?.let { onDelete(it) }
+                entryDeletePos.value = null
+            }
+        )
+
+        if (showSearchInputDialog.value) CustomInputDialog(
+            label = stringResource(id = R.string.search_term),
+            onSave = {
+                showSearchInputDialog.value = false
+                onSearch()
+            },
+            onClose = {
+                showSearchInputDialog.value = false
+            },
+            initText = searchTerm.value,
+            onChange = {
+                searchTerm.value = it
+            }
+        )
     }
 
 }

@@ -349,4 +349,25 @@ class BookReaderViewModel(
     fun loadNote(url: String){
         note.value = book.value?.getNote(url)
     }
+
+    fun goToSection(section: Int) {
+        goToPage(
+            Page(null, BookPosition(section = section), BookPosition())
+        )
+    }
+
+    fun goToPage(page: Int) {
+        goToPage(
+            Page(
+                null,
+                book.value!!.ebookHelper!!.pageScheme.getBookPositionForPage(page),
+                BookPosition()
+            ))
+    }
+
+    private fun goToPage(page: Page) {
+        book.value?.curPage = page
+        recalcCurrentPage()
+        savePositionForBook()
+    }
 }

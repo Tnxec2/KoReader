@@ -39,7 +39,6 @@ class ReaderActivity :
     AppCompatActivity(),
     QuickMenuFragment.QuickMenuDialogListener,
     BookmarkListFragment.BookmarkListDialogListener,
-    GotoMenuFragment.GotoMenuDialogListener,
     BookReaderTextviewListener {
 
     private lateinit var binding: ActivityReaderMainBinding
@@ -523,26 +522,9 @@ class ReaderActivity :
     }
 
     private fun openGotoMenu() {
-        if (mReaderActivityViewModel.book.value == null
-            || mReaderActivityViewModel.book.value?.curPage == null) return
-        val gotoMenuFragment: GotoMenuFragment =
-            GotoMenuFragment
-                .newInstance(
-                    mReaderActivityViewModel.book.value!!.curPage!!.endBookPosition.section,
-                    mReaderActivityViewModel.book.value!!.getCurTextPage(),
-                    mReaderActivityViewModel.book.value!!.getPageScheme()!!.countTextPages,
-                    mReaderActivityViewModel.book.value!!.getPageScheme()!!.sections.toTypedArray()
-                )
-        gotoMenuFragment.show(supportFragmentManager, "fragment_goto_menu")
+
     }
 
-    override fun onFinishGotoMenuDialogPage(page: Int) {
-        mReaderActivityViewModel.goToPage(binding.textViewPageview, page)
-    }
-
-    override fun onFinishGotoMenuDialogSection(section: Int) {
-        mReaderActivityViewModel.goToSection(binding.textViewPageview, section)
-    }
 
     private fun setColorTheme(colorSettings: PageViewColorSettings) {
         if (colorSettings.showBackgroundImage

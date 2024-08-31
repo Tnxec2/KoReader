@@ -69,7 +69,7 @@ object ImageUtils {
     }
 
     @JvmStatic
-    fun invertAndTint(src: Bitmap, tintColor: Int?): Bitmap? {
+    fun invertAndTint(src: Bitmap, tintColor: Int?): Bitmap {
         val height = src.height
         val width = src.width
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

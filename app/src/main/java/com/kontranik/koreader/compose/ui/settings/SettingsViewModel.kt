@@ -2,6 +2,7 @@ package com.kontranik.koreader.compose.ui.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import androidx.annotation.IntegerRes
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -10,12 +11,15 @@ import androidx.compose.ui.graphics.toArgb
 
 import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
+import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.defaultLetterSpacing
 import com.kontranik.koreader.compose.theme.defaultLineSpacingMultiplier
 import com.kontranik.koreader.compose.theme.defaultTextSize
 import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.model.ScreenZone
+import com.kontranik.koreader.utils.PrefsHelper
+import com.kontranik.koreader.utils.PrefsHelper.Companion
 
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.MONO
@@ -684,6 +688,21 @@ class SettingsViewModel(
         prefEditor.putInt(PREF_KEY_COLOR_SELECTED_THEME_INDEX, colorThemeIndex)
         prefEditor.apply()
 
+    }
+
+    fun isDarkMode(context: Context): Boolean {
+        println("${interfaceTheme.value} ${context.resources?.configuration?.uiMode?.and(
+            Configuration.UI_MODE_NIGHT_MASK)}")
+        return when (interfaceTheme.value) {
+            "Light" -> false
+            "Dark" -> true
+            else -> when (context.resources?.configuration?.uiMode?.and(
+                Configuration.UI_MODE_NIGHT_MASK)) {
+                Configuration.UI_MODE_NIGHT_YES -> true
+                Configuration.UI_MODE_NIGHT_NO -> false
+                else -> false
+            }
+        }
     }
 }
 
