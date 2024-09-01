@@ -29,6 +29,9 @@ class LibraryItemRepository(private val mLibraryItemDao: LibraryItemDao) {
     @WorkerThread
     fun getByPath(path: String): List<LibraryItem> = mLibraryItemDao.getByPath(path)
 
+    @WorkerThread
+    fun getByPathWithAuthors(path: String): List<LibraryItemWithAuthors> = mLibraryItemDao.getByPathWithAuthors(path)
+
     fun pageLibraryItem(author: Author?, searchText: String?): PagingSource<Int, LibraryItemWithAuthors> {
         return mLibraryItemDao.getPage(author, searchText)
     }

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDetails
 import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.BookStatus
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
@@ -61,5 +62,17 @@ fun LibraryItemWithAuthors.toBookInfoComposable(cover: Bitmap): BookInfoComposab
         path = URLDecoder.decode(libraryItem.path),
         authors = authors.toMutableList(),
         authorsAsString = authors.joinToString("; ", transform = { it.asString() }),
+    )
+}
+
+fun LibraryItemWithAuthors.toBookInfoDetails(cover: Bitmap?, annotation: String): BookInfoDetails {
+    return BookInfoDetails(
+        title = libraryItem.title ?: "",
+        cover = cover,
+        authors = authors.toList(),
+        allAuthors = authors.joinToString("; ", transform = { it.asString() }),
+        filename = libraryItem.path,
+        path = libraryItem.path,
+        annotation = annotation
     )
 }

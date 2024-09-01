@@ -44,6 +44,7 @@ object AppViewModelProvider {
         initializer {
             BookInfoViewModell(
                 this.createSavedStateHandle(),
+                koReaderApplication().container.libraryItemRepository,
                 koReaderApplication().applicationContext
             )
         }

@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.compose.ui.shared.ConfirmDialog
@@ -44,11 +43,11 @@ import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.navigation.NavigationDestination
 import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLandscapeLightDark
-import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
+import com.kontranik.koreader.database.BookStatusViewModel
 import kotlinx.coroutines.launch
 
 
@@ -64,24 +63,28 @@ fun BookInfoScreen(
     drawerState: DrawerState,
     navigateBack: () -> Unit,
     navigateToReader: () -> Unit,
-    navigateToAuthor: (author: Author) -> Unit,
-    onDeleteBook: (bookUri: String)-> Unit,
+    navigateToAuthor: (authorId: Long) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: BookInfoViewModell = viewModel(factory = AppViewModelProvider.Factory),
+    bookInfoViewModell: BookInfoViewModell = viewModel(factory = AppViewModelProvider.Factory),
     bookReaderViewModel: BookReaderViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    bookStatusViewModel: BookStatusViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
 
     val coroutineScope = rememberCoroutineScope()
 
-    val bookInfoDetails = viewModel.bookInfoUiState.bookInfoDetails
-    val canDeleteState = viewModel.canDeleteState
+    val bookInfoDetails = bookInfoViewModell.bookInfoUiState.value.bookInfoDetails
+    val canDeleteState = bookInfoViewModell.canDeleteState
 
     var showDeleteDilaog by remember {
         mutableStateOf(false)
     }
 
-    LaunchedEffect(key1 = viewModel.exit) {
-        if (viewModel.exit) coroutineScope.launch { navigateBack() }
+    LaunchedEffect(key1 = bookInfoViewModell.exit) {
+        if (bookInfoViewModell.exit) coroutineScope.launch { navigateBack() }
+    }
+
+    LaunchedEffect(key1 = bookInfoDetails) {
+        bookInfoViewModell.readLibraryInfo()
     }
 
     if (showDeleteDilaog) {
@@ -89,7 +92,11 @@ fun BookInfoScreen(
             title = "Delete Book",
             text = stringResource(R.string.sure_delete_book),
             onDismissRequest = { showDeleteDilaog = false },
-            onConfirmation = { onDeleteBook(viewModel.bookPath) })
+            onConfirmation = {
+                coroutineScope.launch {
+                    bookStatusViewModel.deleteByPath(bookInfoViewModell.bookPath)
+                }
+            })
     }
 
     Scaffold(
@@ -113,7 +120,7 @@ fun BookInfoScreen(
                 }
                 IconButton(onClick = {
                     coroutineScope.launch {
-                        bookReaderViewModel.changePath(viewModel.bookPath)
+                        bookReaderViewModel.changePath(bookInfoViewModell.bookPath)
                         navigateToReader()
                     }
                 }) {
@@ -178,7 +185,9 @@ fun BookInfoScreen(
                                     .fillMaxWidth()
                                     .padding(bottom = paddingSmall)
                                     .clickable {
-                                        coroutineScope.launch { navigateToAuthor(author) }
+                                        coroutineScope.launch {
+                                            author.id?.let { navigateToAuthor(it) }
+                                        }
                                     }
                             )
                         }
@@ -194,16 +203,12 @@ fun BookInfoScreen(
 @PreviewPortraitLandscapeLightDark
 @Composable
 private fun BookInfoScreenPreview() {
-    val context = LocalContext.current
-
     AppTheme {
         BookInfoScreen(
             drawerState = DrawerState(DrawerValue.Closed),
             navigateBack = {},
             navigateToAuthor = {},
-            onDeleteBook = { },
             navigateToReader = { },
-            viewModel = BookInfoViewModell(SavedStateHandle(),  context)
         )
     }
 }

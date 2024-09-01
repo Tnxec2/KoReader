@@ -9,7 +9,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -41,20 +40,14 @@ import java.util.Locale
 import kotlin.math.min
 
 
-data class PageLoaderToken(
-    var pageSize: IntSize = IntSize(0, 0),
-)
-
 class BookReaderViewModel(
-    private val mRepository: BookStatusRepository,
-    private val mBookmarkRepository: BookmarksRepository
+    private val bookStatusRepository: BookStatusRepository,
+    private val bookmarkRepository: BookmarksRepository
 ) : ViewModel()  {
 
     val book = MutableLiveData<Book?>(null)
 
     private var pageLoader = PageLoader()
-
-    val pageLoaderToken = PageLoaderToken()
 
     private var changingPage = false
 
@@ -71,7 +64,7 @@ class BookReaderViewModel(
     private val path = MutableLiveData<String>()
     val savedBookStatus: LiveData<BookStatus?> = path.switchMap<String?, BookStatus?> {
         it?.let { it1 ->
-            mRepository.getLiveDataBookStatusByPath(it1)
+            bookStatusRepository.getLiveDataBookStatusByPath(it1)
         }
     }
 
@@ -116,6 +109,19 @@ class BookReaderViewModel(
                     Toast.LENGTH_SHORT
                 ).show()
                 book.value = Book(bookPath.value!!)
+                book.value?.let { book ->
+                    viewModelScope.launch {
+                        BooksRoomDatabase.databaseWriteExecutor.execute {
+                            val bookStatus = bookStatusRepository.getBookStatusByPath(book.fileLocation)
+                            if (bookStatus != null) {
+                                bookStatusRepository.updateLastOpenTime(bookStatus.id, Date().time)
+                            } else {
+                                bookStatusRepository.insert(BookStatus(book))
+                            }
+                        }
+                    }
+                }
+
             }
         } catch (e: Exception) {
             Log.e("tag", e.stackTraceToString())
@@ -291,11 +297,11 @@ class BookReaderViewModel(
         viewModelScope.launch {
             BooksRoomDatabase.databaseWriteExecutor.execute {
                 book.value?.fileLocation?.let {
-                    val bookStatus = mRepository.getBookStatusByPath(it)
+                    val bookStatus = bookStatusRepository.getBookStatusByPath(it)
 
                     if (bookStatus == null) {
                         Log.d("savePosition", "bookstatus is null")
-                        mRepository.insert(BookStatus(book.value!!))
+                        bookStatusRepository.insert(BookStatus(book.value!!))
                     } else {
                         Log.d(
                             "savePosition",
@@ -304,7 +310,7 @@ class BookReaderViewModel(
                         val bookPosition =
                             BookPosition(book.value!!.curPage.startBookPosition)
                         bookStatus.updatePosition(bookPosition)
-                        mRepository.update(bookStatus)
+                        bookStatusRepository.update(bookStatus)
                     }
                 }
             }
@@ -323,7 +329,7 @@ class BookReaderViewModel(
     }
 
     fun addBookmark(pageText: String) {
-        mBookmarkRepository.insert(
+        bookmarkRepository.insert(
             getBookmarkForCurrentPosition(pageText)
         )
     }

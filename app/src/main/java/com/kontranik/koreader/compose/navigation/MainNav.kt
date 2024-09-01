@@ -38,6 +38,7 @@ import com.kontranik.koreader.compose.ui.settings.TapZonesLongClickSettingsScree
 import com.kontranik.koreader.compose.ui.settings.TapZonesOneClickSettingsScreen
 import com.kontranik.koreader.compose.ui.settings.TapZonesSettingsScreen
 import com.kontranik.koreader.compose.ui.settings.TextSettingsScreen
+import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.model.Author
 
 
@@ -46,6 +47,7 @@ fun NavGraphBuilder.mainGraph(
     navController: NavHostController,
     settingsViewModel: SettingsViewModel,
     bookReaderViewModel: BookReaderViewModel,
+    bookStatusViewModel: BookStatusViewModel,
     opdsViewModell: OpdsViewModell
 ) {
 
@@ -202,9 +204,11 @@ fun NavGraphBuilder.mainGraph(
                         restoreState = false
                     }
                 },
-                navigateToAuthor = { author: Author ->  },
-                onDeleteBook = { path -> },
-                bookReaderViewModel = bookReaderViewModel
+                navigateToAuthor = { authorId: Long ->
+                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}")
+                },
+                bookReaderViewModel = bookReaderViewModel,
+                bookStatusViewModel = bookStatusViewModel,
             )
         }
 

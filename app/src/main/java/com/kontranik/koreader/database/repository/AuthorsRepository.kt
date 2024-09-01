@@ -1,14 +1,10 @@
 package com.kontranik.koreader.database.repository
 
 import androidx.annotation.WorkerThread
-import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
-import androidx.room.Transaction
 import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.dao.AuthorDao
 import com.kontranik.koreader.database.model.Author
-import com.kontranik.koreader.database.model.LibraryItem
-import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 
 
 class AuthorsRepository(private val mAuthorDao: AuthorDao) {

@@ -98,6 +98,9 @@ interface LibraryItemDao {
     @Query("SELECT * FROM ${LibraryItemHelper.TABLE} WHERE ${LibraryItemHelper.COLUMN_PATH} = :path")
     fun getByPath(path: String): List<LibraryItem>
 
+    @Query("SELECT * FROM ${LibraryItemHelper.TABLE} WHERE ${LibraryItemHelper.COLUMN_PATH} = :path")
+    fun getByPathWithAuthors(path: String): List<LibraryItemWithAuthors>
+
     @Transaction
     @Query("SELECT * FROM ${LibraryItemHelper.TABLE} where ${LibraryItemHelper.COLUMN_TITLE} LIKE :titleStart")
     fun getByTitleStart(titleStart: String): Flow<List<LibraryItemWithAuthors>>

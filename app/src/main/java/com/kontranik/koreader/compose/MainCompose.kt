@@ -9,6 +9,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +27,7 @@ import com.kontranik.koreader.compose.ui.opds.OpdsViewModell
 import com.kontranik.koreader.compose.ui.reader.BookReaderScreen
 import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
+import com.kontranik.koreader.database.BookStatusViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -63,7 +65,12 @@ fun MainCompose(
 
     val settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val bookReaderViewModel: BookReaderViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val bookStatusViewModel: BookStatusViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val opdsViewModell: OpdsViewModell = viewModel(factory = AppViewModelProvider.Factory)
+
+    LaunchedEffect(key1 = Unit) {
+        bookStatusViewModel.cleanup(context)
+    }
 
     AppTheme(
         darkTheme = settingsViewModel.isDarkMode(context)
@@ -74,7 +81,7 @@ fun MainCompose(
                 navController,
                 startDestination = NavRoutes.MainRoute.name
             ) {
-                mainGraph(drawerState, navController, settingsViewModel, bookReaderViewModel, opdsViewModell)
+                mainGraph(drawerState, navController, settingsViewModel, bookReaderViewModel, bookStatusViewModel, opdsViewModell)
             }
         }
     }

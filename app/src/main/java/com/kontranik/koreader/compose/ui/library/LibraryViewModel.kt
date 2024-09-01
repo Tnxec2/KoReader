@@ -56,7 +56,6 @@ class LibraryViewModel(
     val authorState = mutableStateOf<Author?>(null)
 
     init {
-
         authorId?.let {
             BooksRoomDatabase.databaseWriteExecutor.execute {
                 authorsRepository.getById(it).firstOrNull().let { author ->
@@ -419,5 +418,14 @@ class LibraryViewModel(
     }
     private fun readBookInfo(contentUriPath: String): BookInfo? {
         return EbookHelper.getBookInfoTemporary(contentUriPath)
+    }
+
+    fun getAuthorByName(firstname: String?, middlename: String?, lastname: String?): Author? {
+        return authorsRepository.getByName(firstname, middlename, lastname).firstOrNull()
+    }
+
+    fun getLibraryItemByPath(path: String): LibraryItemWithAuthors? {
+        val item = libraryItemRepository.getByPathWithAuthors(path)
+        return item.firstOrNull()
     }
 }

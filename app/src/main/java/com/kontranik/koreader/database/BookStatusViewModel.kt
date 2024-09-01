@@ -83,13 +83,3 @@ class BookStatusViewModel(private val mRepository: BookStatusRepository) : ViewM
         }
     }
 }
-
-class BookStatusViewModelFactory(private val repository: BookStatusRepository) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(BookStatusViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return BookStatusViewModel(repository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
