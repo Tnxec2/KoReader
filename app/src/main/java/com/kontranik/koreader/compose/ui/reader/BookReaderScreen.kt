@@ -223,9 +223,9 @@ fun BookReaderScreen(
             end = Dp(colors.marginRight.toFloat()),
         ),
 
-        onClickInfoLeft = {},
-        onClickInfoMiddle = {},
-        onClickInfoRight = {},
+        onClickInfoLeft = { showGotoDialog.value = true },
+        onClickInfoMiddle = { showGotoDialog.value = true },
+        onClickInfoRight = { showGotoDialog.value = true },
         textView = {
             AndroidView(
                 factory={ ctx ->
