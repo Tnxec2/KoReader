@@ -2,27 +2,16 @@ package com.kontranik.koreader.compose.ui.opds
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
 import android.util.Log
-import android.view.View
 import android.widget.Toast
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
-import com.kontranik.koreader.database.model.Author
-import com.kontranik.koreader.database.model.mocupAuthors
-import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.opds.LoadOpds
 import com.kontranik.koreader.opds.model.BACK
 import com.kontranik.koreader.opds.model.Entry
@@ -34,7 +23,6 @@ import com.kontranik.koreader.opds.model.SearchUrlTypes
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.UrlHelper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParserException
@@ -43,8 +31,28 @@ import java.net.MalformedURLException
 
 const val OVERVIEW = "OVERVIEW"
 
-const val PREFS_FILE = "OpdsActivitySettings"
-const val PREF_OPDS_OVERVIEW = "OPDS_OVERVIEW"
+val OPDS_LIST = listOf<Entry>(
+    Entry(
+        title = "Project Gutenberg",
+        clickLink = Link("Project Gutenberg", "https://www.gutenberg.org/ebooks.opds/")
+    ),
+    Entry(
+        title = "Flibusta",
+        clickLink = Link( "Flibusta", "https://flibusta.is/opds/")
+    ),
+    Entry(
+        title = "Qumran DE, Izzy\'s freie Bibliotek",
+        clickLink = Link("Qumran DE, Izzy\'s freie Bibliotek" ,"https://ebooks.qumran.org/opds/?lang=de")
+    ),
+    Entry(
+            title = "Qumran EN, Izzy\'s Free Library",
+    clickLink = Link("Qumran EN, Izzy\'s Free Library", "https://ebooks.qumran.org/opds/?lang=en")
+    ),
+)
+
+
+const val OPDS_PREFS_FILE = "OpdsActivitySettings"
+const val OPDS_PREF_OPDS_OVERVIEW = "OPDS_OVERVIEW"
 
 class OpdsViewModell(
     savedStateHandle: SavedStateHandle,
@@ -80,9 +88,9 @@ class OpdsViewModell(
     private fun loadPrefs() {
         val settings = KoReaderApplication.getContext()
             .getSharedPreferences(
-                com.kontranik.koreader.ui.fragments.PREFS_FILE,
+                OPDS_PREFS_FILE,
                 Context.MODE_PRIVATE)
-        val eP = settings.getStringSet(PREF_OPDS_OVERVIEW, null)
+        val eP = settings.getStringSet(OPDS_PREF_OPDS_OVERVIEW, null)
         overviewOpds = eP?.let { Opds(
             title = KoReaderApplication.getContext().resources.getString(R.string.opds_overview),
             subtitle = null,
@@ -91,7 +99,7 @@ class OpdsViewModell(
         ) } ?:  Opds(
             title = KoReaderApplication.getContext().resources.getString(R.string.opds_overview),
             subtitle = null,
-            entries = parseOpdsListResource(),
+            entries = OPDS_LIST.toMutableList(),
             links = emptyList()
         )
     }
@@ -99,25 +107,16 @@ class OpdsViewModell(
     private fun savePrefs() {
         val settings = KoReaderApplication.getContext()
             .getSharedPreferences(
-                com.kontranik.koreader.ui.fragments.PREFS_FILE,
+                OPDS_PREFS_FILE,
                 Context.MODE_PRIVATE)
         val prefEditor = settings.edit()
 
         if ( overviewOpds.entries.isNotEmpty() ) {
-            prefEditor.putStringSet(PREF_OPDS_OVERVIEW, overviewOpds.entries.map { e -> "${e.title}|${e.clickLink?.href}" }.toMutableSet())
+            prefEditor.putStringSet(OPDS_PREF_OPDS_OVERVIEW, overviewOpds.entries.map { e -> "${e.title}|${e.clickLink?.href}" }.toMutableSet())
         } else {
-            prefEditor.remove(PREF_OPDS_OVERVIEW)
+            prefEditor.remove(OPDS_PREF_OPDS_OVERVIEW)
         }
         prefEditor.apply()
-    }
-
-    private fun parseOpdsListResource(): MutableList<Entry> {
-        val stringArray = KoReaderApplication.getContext().resources.getStringArray(R.array.opds_list)
-        val outputArray = mutableListOf<Entry>()
-        for (entry in stringArray) {
-            outputArray.add(splitEntry(entry))
-        }
-        return outputArray
     }
 
     private fun splitEntry(s: String): Entry {
@@ -148,7 +147,7 @@ class OpdsViewModell(
         load(openedLink ?: OVERVIEW)
     }
 
-    fun load(url: String, back: Boolean = false) {
+    private fun load(url: String, back: Boolean = false) {
         if (url == OVERVIEW) {
             canAdd.value = true
             canSearch.value = false
@@ -257,7 +256,7 @@ class OpdsViewModell(
         else opdsEntryList.value = listOf()
     }
 
-    fun goBack() {
+    private fun goBack() {
         if (navigationHistory.isNotEmpty()) {
             val url = navigationHistory.removeLast()
             load(url, true)

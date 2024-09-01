@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import androidx.annotation.IntegerRes
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 
 import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
@@ -18,13 +21,12 @@ import com.kontranik.koreader.compose.theme.defaultLineSpacingMultiplier
 import com.kontranik.koreader.compose.theme.defaultTextSize
 import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.model.ScreenZone
-import com.kontranik.koreader.utils.PrefsHelper
-import com.kontranik.koreader.utils.PrefsHelper.Companion
 
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.MONO
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.SANSSERIF
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.SERIF
+import java.util.Locale
 
 const val PREFS_FILE = "KOREADER"
 
@@ -230,6 +232,81 @@ val defaultTapZoneLongBottomLeft = Actions.None
 val defaultTapZoneLongBottomCenter = Actions.None
 val defaultTapZoneLongBottomRight = Actions.None
 
+
+val interface_entries = arrayOf(
+    R.string.InterfaceLight,
+    R.string.InterfaceDark,
+    R.string.InterfaceAutoSystem)
+val interface_values = arrayOf(
+    "Light",
+    "Dark",
+    "Auto")
+
+
+val brightness_entries = arrayOf(
+    R.string.brightness_values_system,
+    R.string.brightness_values_manual)
+
+val brightness_values = arrayOf(
+    "System",
+    "Manual")
+
+val orientation_enties = arrayOf(
+    R.string.orientation_values_sensor,
+    R.string.orientation_values_portrait,
+    R.string.orientation_values_portrait_sensor,
+    R.string.orientation_values_landscape,
+    R.string.orientation_values_landscape_sensor,
+)
+val orientation_values = arrayOf(
+    "Sensor",
+    "Portrait",
+    "PortraitSensor",
+    "Landscape",
+    "LandscapeSensor"
+)
+
+val selected_theme_entries = arrayOf(
+    R.string.color_theme1_header,
+    R.string.color_theme2_header,
+    R.string.color_theme3_header,
+    R.string.color_theme4_header,
+    R.string.color_theme5_header,
+)
+
+val tapzonen_entries = arrayOf(
+    R.string.tapzones_activity_none,
+    R.string.tapzones_activity_page_prev,
+    R.string.tapzones_activity_page_next,
+    R.string.tapzones_activity_quick_menu,
+    R.string.tapzones_activity_main_menu,
+    R.string.tapzones_activity_goto,
+    R.string.tapzones_activity_bookmarks,
+)
+val tapzonen_values = arrayOf(
+    "None",
+    "PagePrev",
+    "PageNext",
+    "QuickMenu",
+    "MainMenu",
+    "GoTo",
+    "Bookmarks"
+)
+
+val line_spacing_values = arrayOf(1f, 1.15f, 1.5f, 2.0f, 2.5f, 3.0f)
+val line_spacing_values_string = line_spacing_values.map { it.toString() }
+val line_spacing_entries = line_spacing_values.map { "%.2f".format(Locale.getDefault(), it) }
+
+val letter_spacing_values = arrayOf(0f, 0.01f, 0.05f, 0.1f, 0.15f, 0.2f, 0.25f, 0.3f)
+val letter_spacing_values_string = letter_spacing_values.map { it.toString() }
+val letter_spacing_entries = letter_spacing_values.map { "%.2f".format(Locale.getDefault(), it) }
+
+@Composable
+fun getStringArrayFromResourceArray(res: Array<Int>): List<String> {
+    return res.map {
+        stringResource(id = it)
+    }
+}
 
 class SettingsViewModel(
     context: Context

@@ -8,9 +8,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kontranik.koreader.compose.ui.bookinfo.BookInfoViewModell
 import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.BookmarksViewModel
-import com.kontranik.koreader.ui.fragments.FileChooseFragmentViewModel
 import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.compose.ui.opds.OpdsViewModell
+import com.kontranik.koreader.compose.ui.openfile.OpenFileViewModel
 import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import com.kontranik.koreader.compose.ui.settings.ColorThemeSettingsViewModel
 import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
@@ -25,12 +25,6 @@ object AppViewModelProvider {
             BookReaderViewModel(
                 koReaderApplication().container.bookStatusRepository,
                 koReaderApplication().container.bookmarksRepository,
-            )
-        }
-
-        initializer {
-            ReaderActivityViewModel(
-                koReaderApplication().container.bookStatusRepository
             )
         }
 
@@ -68,7 +62,7 @@ object AppViewModelProvider {
         }
 
         initializer {
-            FileChooseFragmentViewModel(
+            OpenFileViewModel(
                 koReaderApplication().applicationContext
             )
         }

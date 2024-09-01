@@ -356,13 +356,10 @@ private fun OpdsContentPreview() {
         )
     }
 
-    val array = stringArrayResource(id = R.array.opds_list)
 
     val entrysState = remember {
         mutableStateOf(
-            array.map {
-                Entry(title = it.split("|").first())
-            }
+            OPDS_LIST
         )
     }
 

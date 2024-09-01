@@ -2,11 +2,9 @@ package com.kontranik.koreader.model
 
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.widget.TextView
 import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.utils.ImageUtils
-import com.kontranik.koreader.utils.PageLoader
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Attributes
 import org.jsoup.nodes.Document
@@ -18,7 +16,6 @@ class Book(var fileLocation: String) {
 
     var curPage: Page = Page(null, BookPosition())
     internal var ebookHelper: EbookHelper? = null
-    private var pageLoader: PageLoader = PageLoader( this)
 
     init {
         ebookHelper = EbookHelper.getHelper(fileLocation)
@@ -26,6 +23,8 @@ class Book(var fileLocation: String) {
         ebookHelper?.readBook()
 
     }
+
+
 
     fun getPageBody(page: Int): String? {
         val aSection = ebookHelper?.getPage(page) ?: return null
@@ -113,21 +112,7 @@ class Book(var fileLocation: String) {
         return null
     }
 
-    fun getCur(pageView: TextView, recalc: Boolean): Page? {
-        return pageLoader.getPage(pageView, BookPosition(curPage.startBookPosition), false, recalc)
-    }
 
-    fun getNext(pageView: TextView): Page? {
-        val bookPosition =  BookPosition(curPage.endBookPosition.section, offSet = curPage.endBookPosition.offSet+1)
-        bookPosition.offSet += 1
-        return pageLoader.getPage(pageView, BookPosition(bookPosition), revers = false, recalc = false)
-    }
-
-    fun getPrev(pageView: TextView): Page? {
-        val bookPosition =  BookPosition(curPage.startBookPosition)
-        bookPosition.offSet -= 1
-        return pageLoader.getPage(pageView, BookPosition(bookPosition), revers = true, recalc = false)
-    }
 
     fun getPageScheme(): BookPageScheme? {
         return ebookHelper?.pageScheme

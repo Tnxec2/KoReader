@@ -26,13 +26,13 @@ import com.kontranik.koreader.database.model.BookStatus
 import com.kontranik.koreader.database.model.Bookmark
 import com.kontranik.koreader.database.repository.BookStatusRepository
 import com.kontranik.koreader.database.repository.BookmarksRepository
-import com.kontranik.koreader.model.Book2
+import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookPosition
 import com.kontranik.koreader.model.Page
 import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.ImageUtils
-import com.kontranik.koreader.utils.PageLoader2
+import com.kontranik.koreader.utils.PageLoader
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
@@ -50,9 +50,9 @@ class BookReaderViewModel(
     private val mBookmarkRepository: BookmarksRepository
 ) : ViewModel()  {
 
-    val book = MutableLiveData<Book2?>(null)
+    val book = MutableLiveData<Book?>(null)
 
-    private var pageLoader = PageLoader2()
+    private var pageLoader = PageLoader()
 
     val pageLoaderToken = PageLoaderToken()
 
@@ -115,7 +115,7 @@ class BookReaderViewModel(
                     KoReaderApplication.getContext().resources.getString(R.string.loading_book),
                     Toast.LENGTH_SHORT
                 ).show()
-                book.value = Book2(bookPath.value!!)
+                book.value = Book(bookPath.value!!)
             }
         } catch (e: Exception) {
             Log.e("tag", e.stackTraceToString())

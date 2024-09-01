@@ -13,7 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import com.kontranik.koreader.ReaderActivity
+import com.kontranik.koreader.compose.ui.settings.PREFS_FILE
 import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
 import com.kontranik.koreader.compose.ui.shared.getLetterSpacing
 import com.kontranik.koreader.compose.ui.shared.getLineSpacings
@@ -61,7 +61,7 @@ fun QuickMenuDialog(
     }
 
     LaunchedEffect(Unit) {
-        val settings = context.getSharedPreferences(ReaderActivity.PREFS_FILE, AppCompatActivity.MODE_PRIVATE)
+        val settings = context.getSharedPreferences(PREFS_FILE, AppCompatActivity.MODE_PRIVATE)
         bookPath = settings?.getString(PREF_BOOK_PATH, null)
     }
 

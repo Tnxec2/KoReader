@@ -90,8 +90,8 @@ fun InterfaceContent(
                 item {
                     SettingsList(
                         title = stringResource(id = R.string.interface_theme_title),
-                        entries = stringArrayResource(id = R.array.interface_entries).toList(),
-                        entryValues = stringArrayResource(id = R.array.interface_values).toList(),
+                        entries = getStringArrayFromResourceArray(res = interface_entries),
+                        entryValues = interface_values.toList(),
                         defaultValue = interfaceTheme,
                         icon = R.drawable.ic_baseline_preview_24,
                         onChange = { onChangeInterfaceTheme(it) },
@@ -102,8 +102,8 @@ fun InterfaceContent(
                 item {
                     SettingsList(
                         title = stringResource(id = R.string.brightness_title),
-                        entries = stringArrayResource(id = R.array.brightness_entries).toList(),
-                        entryValues = stringArrayResource(id = R.array.brightness_values).toList(),
+                        entries = getStringArrayFromResourceArray(res = brightness_entries),
+                        entryValues = brightness_values.toList(),
                         defaultValue = brightness,
                         icon = R.drawable.ic_baseline_brightness_medium_24,
                         onChange = { onChangeBrightness(it) },
@@ -114,8 +114,8 @@ fun InterfaceContent(
                 item {
                     SettingsList(
                         title = stringResource(id = R.string.orientation_title),
-                        entries = stringArrayResource(id = R.array.orientation_enties).toList(),
-                        entryValues = stringArrayResource(id = R.array.orientation_values).toList(),
+                        entries = getStringArrayFromResourceArray(res = orientation_enties),
+                        entryValues = orientation_values.toList(),
                         defaultValue = orientation,
                         icon = R.drawable.ic_baseline_screen_rotation_24,
                         onChange = { onChangeOrientation(it) },

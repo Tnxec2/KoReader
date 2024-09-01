@@ -52,7 +52,6 @@ import com.kontranik.koreader.compose.ui.shared.ConfirmDialog
 import com.kontranik.koreader.compose.ui.shared.rememberBookInfoForFileItem
 import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.model.BookInfo
-import com.kontranik.koreader.ui.fragments.FileChooseFragmentViewModel
 import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.utils.FileItem
 import com.kontranik.koreader.utils.ImageEnum
@@ -66,7 +65,7 @@ fun OpenFileScreen(
     navigateBack: () -> Unit,
     navigateToBookInfo: (bookPath: String) -> Unit,
     modifier: Modifier = Modifier,
-    fileChooseFragmentViewModel: FileChooseFragmentViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    fileChooseFragmentViewModel: OpenFileViewModel = viewModel(factory = AppViewModelProvider.Factory),
     libraryViewModel: LibraryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val context = LocalContext.current

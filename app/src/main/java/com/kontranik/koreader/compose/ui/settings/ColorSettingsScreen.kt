@@ -89,9 +89,9 @@ fun ColorSettingsContent(
 
                     SettingsList(
                         title = stringResource(id = R.string.interface_theme_title),
-                        entries = stringArrayResource(id = R.array.selected_theme_entries).toList(),
-                        entryValues = stringArrayResource(id = R.array.selected_theme_entries).mapIndexed { index, s ->  index.toString() },
-                        defaultValue = stringArrayResource(id = R.array.selected_theme_entries)[selectedTheme],
+                        entries = getStringArrayFromResourceArray(res = selected_theme_entries),
+                        entryValues =  selected_theme_entries.mapIndexed { index, s ->  index.toString() },
+                        defaultValue = getStringArrayFromResourceArray(res = selected_theme_entries)[selectedTheme],
                         icon = R.drawable.ic_iconmonstr_paintbrush_10,
                         onChange = { onChangeSelectedTheme(it) },
                         showDefaultValue = true,

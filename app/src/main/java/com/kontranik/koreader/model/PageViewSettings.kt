@@ -7,7 +7,6 @@ import com.kontranik.koreader.compose.theme.defaultLineSpacingMultiplier
 import com.kontranik.koreader.compose.theme.defaultTextSize
 import com.kontranik.koreader.compose.ui.settings.PREF_DEFAULT_MARGIN
 import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
-import com.kontranik.koreader.utils.PrefsHelper
 
 data class PageViewSettings(
     var textSize: Float = defaultTextSize,

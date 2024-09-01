@@ -1,20 +1,19 @@
-package com.kontranik.koreader.ui.fragments
+package com.kontranik.koreader.compose.ui.openfile
 
 import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.FileItem
 
-const val PREFS_FILE = "OpenFileActivitySettings"
-const val PREF_LAST_PATH = "LastPath"
-const val PREF_EXTERNAL_PATHS = "ExternalPaths"
+const val OPENFILE_PREFS_FILE = "OpenFileActivitySettings"
+const val OPENFILE_LAST_PATH = "LastPath"
+const val OPENFILE_EXTERNAL_PATHS = "ExternalPaths"
 
-class FileChooseFragmentViewModel(
+class OpenFileViewModel(
     val context: Context) : ViewModel()  {
     private var externalPaths = mutableListOf<String>()
     private var selectedDocumentFileUriString: String? = null
@@ -36,18 +35,18 @@ class FileChooseFragmentViewModel(
     private fun loadPrefs() {
         val settings = context
             .getSharedPreferences(
-                PREFS_FILE,
+                OPENFILE_PREFS_FILE,
                 Context.MODE_PRIVATE)
 
-        if ( settings!!.contains(PREF_LAST_PATH) ) {
-            this.lastPath = settings.getString(PREF_LAST_PATH, null)
+        if ( settings!!.contains(OPENFILE_LAST_PATH) ) {
+            this.lastPath = settings.getString(OPENFILE_LAST_PATH, null)
             extractDirectory()
         }
 
-        if ( settings.contains(PREF_EXTERNAL_PATHS)) {
+        if ( settings.contains(OPENFILE_EXTERNAL_PATHS)) {
             // settings!!.edit().remove(PREF_EXTERNAL_PATHS).apply()
 
-            val eP = settings.getStringSet(PREF_EXTERNAL_PATHS, null)
+            val eP = settings.getStringSet(OPENFILE_EXTERNAL_PATHS, null)
             if ( eP != null) {
                 externalPaths = eP.toMutableList()
             } else {
@@ -71,21 +70,21 @@ class FileChooseFragmentViewModel(
     fun savePrefsOpenedBook(uriString: String) {
         val settings = context
             .getSharedPreferences(
-                PREFS_FILE,
+                OPENFILE_PREFS_FILE,
                 Context.MODE_PRIVATE)
         val prefEditor = settings.edit()
-        prefEditor!!.putString(PREF_LAST_PATH, uriString)
+        prefEditor!!.putString(OPENFILE_LAST_PATH, uriString)
         prefEditor.apply()
     }
 
     private fun savePrefsExternalPaths() {
         val settings = context
             .getSharedPreferences(
-                PREFS_FILE,
+                OPENFILE_PREFS_FILE,
                 Context.MODE_PRIVATE)
         val prefEditor = settings.edit()
 
-        prefEditor.putStringSet(PREF_EXTERNAL_PATHS, externalPaths.toMutableSet())
+        prefEditor.putStringSet(OPENFILE_EXTERNAL_PATHS, externalPaths.toMutableSet())
         prefEditor.apply()
     }
 

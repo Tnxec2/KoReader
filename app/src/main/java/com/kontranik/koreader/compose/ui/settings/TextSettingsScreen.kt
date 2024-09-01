@@ -128,8 +128,8 @@ fun TextSettingsContent(
 
                             SettingsList(
                                 title = stringResource(id = R.string.linespacing_title),
-                                entries = stringArrayResource(id = R.array.line_spacing_entries).toList(),
-                                entryValues = stringArrayResource(id = R.array.line_spacing_values).toList(),
+                                entries =  line_spacing_entries,
+                                entryValues = line_spacing_values_string,
                                 defaultValue = lineSpacingMultiplier.toString(),
                                 icon = R.drawable.ic_baseline_format_line_spacing_24,
                                 onChange = { onChangeLineSpacingMultiplier(it.toFloat()) },
@@ -137,8 +137,8 @@ fun TextSettingsContent(
                             )
                             SettingsList(
                                 title = stringResource(id = R.string.letterspacing_title),
-                                entries = stringArrayResource(id = R.array.letter_spacing_entries).toList(),
-                                entryValues = stringArrayResource(id = R.array.letter_spacing_values).toList(),
+                                entries = letter_spacing_entries,
+                                entryValues = letter_spacing_values_string,
                                 defaultValue = letterSpacing.toString(),
                                 icon = R.drawable.ic_letter_spacing,
                                 onChange = { onChangeLetterSpacing(it.toFloat()) },

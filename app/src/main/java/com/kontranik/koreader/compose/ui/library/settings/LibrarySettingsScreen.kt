@@ -57,8 +57,8 @@ import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.compose.theme.AppTheme
 import kotlinx.coroutines.launch
 
-const val PREFS_FILE = "LibraryActivitySettings"
-const val PREF_SCAN_POINTS = "LibraryScanPoints"
+const val LIBRARY_PREFS_FILE = "LibraryActivitySettings"
+const val LIBRARY_PREF_SCAN_POINTS = "LibraryScanPoints"
 
 @Composable
 fun LibrarySettingsScreen(
@@ -71,7 +71,7 @@ fun LibrarySettingsScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val settings = context.getSharedPreferences(
-        PREFS_FILE,
+        LIBRARY_PREFS_FILE,
         Context.MODE_PRIVATE)
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -91,9 +91,9 @@ fun LibrarySettingsScreen(
         val prefEditor = settings.edit()
 
         if ( scanPointList.value.isNotEmpty()) {
-            prefEditor.putStringSet(PREF_SCAN_POINTS, scanPointList.value.toMutableSet())
+            prefEditor.putStringSet(LIBRARY_PREF_SCAN_POINTS, scanPointList.value.toMutableSet())
         } else {
-            prefEditor.remove(PREF_SCAN_POINTS)
+            prefEditor.remove(LIBRARY_PREF_SCAN_POINTS)
         }
         prefEditor.apply()
     }
@@ -112,8 +112,8 @@ fun LibrarySettingsScreen(
          })
 
     LaunchedEffect(key1 = Unit) {
-        if ( settings.contains(PREF_SCAN_POINTS)) {
-            scanPointList.value = settings.getStringSet(PREF_SCAN_POINTS, null) ?: setOf()
+        if ( settings.contains(LIBRARY_PREF_SCAN_POINTS)) {
+            scanPointList.value = settings.getStringSet(LIBRARY_PREF_SCAN_POINTS, null) ?: setOf()
         }
         libraryViewModel.createNotificationChannel(context)
     }

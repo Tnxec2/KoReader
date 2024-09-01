@@ -109,8 +109,8 @@ fun TapZonesClickSettingsContent(
                 items(items) { item ->
                     SettingsList(
                         title = stringResource(id = item.title),
-                        entries = stringArrayResource(id = R.array.tapzonen_entries).toList(),
-                        entryValues = stringArrayResource(id = R.array.tapzonen_values).toList(),
+                        entries = getStringArrayFromResourceArray(res = tapzonen_entries),
+                        entryValues = tapzonen_values.toList(),
                         defaultValue = item.defaultValue,
                         defaultValueTitle = item.defaultValueTitle,
                         onChange = item.onChange,
