@@ -10,10 +10,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -112,10 +114,12 @@ private fun BookInfoContentPreview() {
     val viewModel = BookInfoViewModell(SavedStateHandle(), context)
     val bookInfoDetails = viewModel.bookInfoUiState.bookInfoDetails
     AppTheme {
-        BookInfoContent(
-            bookInfoDetails = bookInfoDetails,
+        Surface {
+            BookInfoContent(
+                bookInfoDetails = bookInfoDetails,
 
-            navigateToAuthor = {},
-        )
+                navigateToAuthor = {},
+            )
+        }
     }
 }

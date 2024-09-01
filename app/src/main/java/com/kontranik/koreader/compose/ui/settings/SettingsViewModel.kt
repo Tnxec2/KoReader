@@ -687,7 +687,6 @@ class SettingsViewModel(
         prefEditor.putString(PREF_KEY_BOOK_LETTER_SPACING, letterSpacing.toString())
         prefEditor.putInt(PREF_KEY_COLOR_SELECTED_THEME_INDEX, colorThemeIndex)
         prefEditor.apply()
-
     }
 
     fun isDarkMode(context: Context): Boolean {

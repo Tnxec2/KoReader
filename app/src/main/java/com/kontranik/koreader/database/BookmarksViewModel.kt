@@ -24,9 +24,7 @@ class BookmarksViewModel(
         loadBookmarks(bookmark.path)
     }
 
-    private val source: String? = savedStateHandle[BookInfoDestination.BOOK_PATH]
-
-    val bookPath = Uri.decode(source).replace('|','%')
+    private val source: String? = savedStateHandle[BoomkmarksScreenDestination.PATH_ARG]
 
     private val mPath = MutableLiveData<String?>()
     var mAllBookmarks: Flow<List<Bookmark>> = mPath.asFlow().transform { path ->
@@ -49,7 +47,9 @@ class BookmarksViewModel(
 
     init {
         viewModelScope.launch {
-            loadBookmarks(bookPath)
+            source?.let {
+                loadBookmarks(Uri.decode(it).replace('|', '%'))
+            }
         }
     }
 

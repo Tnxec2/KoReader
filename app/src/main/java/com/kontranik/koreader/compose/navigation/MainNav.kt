@@ -57,7 +57,10 @@ fun NavGraphBuilder.mainGraph(
             BookReaderScreen(
                 drawerState = drawerState,
                 navigateToMainMenu = { navController.navigate(NavOptions.MainMenu.name)},
-                navigateToBookmarks = { navController.navigate(NavOptions.Bookmarks.name) },
+                navigateToBookmarks = { path ->
+                    val encoded = Uri.encode(path.replace('%','|'))
+                    navController.navigate("${BoomkmarksScreenDestination.route}?path=${encoded}")
+                },
                 navigateToBookInfo = { path: String ->
                     val encoded = Uri.encode(path.replace('%','|'))
                     navController.navigate("${BookInfoDestination.route}?path=${encoded}")
@@ -296,13 +299,11 @@ fun NavGraphBuilder.mainGraph(
 enum class NavOptions {
     BookReader,
     MainMenu,
-    Bookmarks,
     OpenFile,
     LastOpened,
     Library,
     LibrarySettings,
     OPDS,
-    OpdsEntryDetails,
     Settings,
     InterfaceSettings,
     ColorSettings,

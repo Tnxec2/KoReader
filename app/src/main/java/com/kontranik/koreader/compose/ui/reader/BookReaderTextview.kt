@@ -31,7 +31,9 @@ class BookReaderTextview(
         bookReaderViewModel.pageViewContent.observe(context as LifecycleOwner) {
             text = it
         }
-        bookReaderViewModel.pageViewColorSettings.observe(context as LifecycleOwner) {
+
+
+        bookReaderViewModel.themeColors.observe(context as LifecycleOwner) {
             setTextColor(it.colorsText.toArgb())
             setLinkTextColor(it.colorsLink.toArgb())
         }
@@ -158,8 +160,8 @@ class BookReaderTextview(
         letterSpacing = pageViewSettings.letterSpacing
         typeface = pageViewSettings.typeFace
         setLineSpacing(
-            lineSpacingExtra,
-            pageViewSettings.lineSpacingMultiplier
+            1f,
+            pageViewSettings.lineSpacingMultiplier,
         )
     }
 }

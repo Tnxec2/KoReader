@@ -3,16 +3,12 @@ package com.kontranik.koreader.compose.ui.reader
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.BatteryManager
-import android.text.TextPaint
 import android.text.style.ImageSpan
 import android.util.Log
-import android.util.TypedValue
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -24,7 +20,6 @@ import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.ui.settings.PREFS_FILE
 import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
 import com.kontranik.koreader.compose.ui.settings.PREF_SCREEN_BRIGHTNESS
-import com.kontranik.koreader.compose.ui.settings.ThemeColors
 import com.kontranik.koreader.compose.ui.settings.defaultColors
 import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.model.BookStatus
@@ -48,8 +43,6 @@ import kotlin.math.min
 
 data class PageLoaderToken(
     var pageSize: IntSize = IntSize(0, 0),
-    var lineSpacingMultiplier: Float = 1f,
-    var lineSpacingExtra: Float = 1f,
 )
 
 class BookReaderViewModel(
@@ -68,10 +61,10 @@ class BookReaderViewModel(
     val bookPath = MutableLiveData<String?>(null)
 
     var pageViewContent: MutableLiveData<CharSequence?> = MutableLiveData()
-    var pageViewSettings: MutableLiveData<PageViewSettings> = MutableLiveData(
+    var pageViewSettings = MutableLiveData(
         PageViewSettings()
     )
-    var pageViewColorSettings: MutableLiveData<ThemeColors> = MutableLiveData(
+    var themeColors = MutableLiveData(
         defaultColors.first()
     )
 
@@ -145,31 +138,31 @@ class BookReaderViewModel(
         }
     }
 
-    fun getCur(recalc: Boolean): Page? {
-        return pageLoader.getPage(book.value, getTextPaint(), pageLoaderToken, BookPosition(book.value!!.curPage.startBookPosition), false, recalc)
-    }
-
-    private fun getTextPaint(): TextPaint {
-        val myTextPaint = TextPaint()
-        myTextPaint.isAntiAlias = true
-        myTextPaint.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-            pageViewSettings.value!!.textSize, KoReaderApplication.getContext().resources.displayMetrics
-        );
-        myTextPaint.color = pageViewColorSettings.value!!.colorsText.toArgb()
-        return myTextPaint
+    private fun getCur(recalc: Boolean): Page? {
+        return getPage(BookPosition(book.value!!.curPage.startBookPosition),false, recalc)
     }
 
     private fun getNext(): Page? {
         val bookPosition =  BookPosition(book.value!!.curPage.endBookPosition.section, offSet = book.value!!.curPage.endBookPosition.offSet+1)
         bookPosition.offSet += 1
-        return pageLoader.getPage(book.value, getTextPaint(), pageLoaderToken, BookPosition(bookPosition), revers = false, recalc = false)
+        return getPage(BookPosition(bookPosition), revers = false, recalc = false)
     }
 
     private fun getPrev(): Page? {
         println("getPrev")
         val bookPosition =  BookPosition(book.value!!.curPage.startBookPosition)
         bookPosition.offSet -= 1
-        return pageLoader.getPage(book.value, getTextPaint(), pageLoaderToken, BookPosition(bookPosition), revers = true, recalc = false)
+        return getPage(BookPosition(bookPosition), revers = true, recalc = false)
+    }
+
+    private fun getPage(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page? {
+        return pageLoader.getPage(
+            book.value,
+            pageViewSettings.value!!,
+            themeColors.value!!,
+            BookPosition(bookPosition),
+            revers = revers,
+            recalc = recalc)
     }
 
     private fun updateView(page: Page?) {

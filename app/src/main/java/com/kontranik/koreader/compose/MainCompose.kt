@@ -65,7 +65,9 @@ fun MainCompose(
     val bookReaderViewModel: BookReaderViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val opdsViewModell: OpdsViewModell = viewModel(factory = AppViewModelProvider.Factory)
 
-    AppTheme {
+    AppTheme(
+        darkTheme = settingsViewModel.isDarkMode(context)
+    ) {
         Surface {
             BackHandler(enabled = true, onBack = closeDrawer)
             NavHost(

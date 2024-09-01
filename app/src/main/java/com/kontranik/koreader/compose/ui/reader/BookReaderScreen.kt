@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 fun BookReaderScreen(
     drawerState: DrawerState,
     navigateToMainMenu: () -> Unit,
-    navigateToBookmarks: () -> Unit,
+    navigateToBookmarks: (path: String) -> Unit,
     navigateToBookInfo: (String) -> Unit,
     settingsViewModel: SettingsViewModel,
     bookReaderViewModel: BookReaderViewModel,
@@ -48,7 +48,7 @@ fun BookReaderScreen(
     val colors by settingsViewModel.selectedColors
 
     LaunchedEffect(key1 = colors) {
-        bookReaderViewModel.pageViewColorSettings.value = colors.copy()
+        bookReaderViewModel.themeColors.value = colors.copy()
     }
 
     var backgroundColor by remember {
@@ -86,7 +86,9 @@ fun BookReaderScreen(
                 showGotoDialog.value = true
             }
             Actions.Bookmarks -> {
-                corutineScope.launch { navigateToBookmarks() }
+                corutineScope.launch {
+                    bookReaderViewModel.bookPath.value?.let { navigateToBookmarks(it) }
+                }
             }
             else -> {
             }
@@ -173,7 +175,7 @@ fun BookReaderScreen(
         showQuickMenu = showQuickMenu.value,
         onCancelQuickMenuDialog = {
             bookReaderViewModel.pageViewSettings.value = pageViewSettings.value.copy()
-            bookReaderViewModel.pageViewColorSettings.value = colors.copy()
+            bookReaderViewModel.themeColors.value = colors.copy()
             backgroundColor = colors.colorBackground
             showQuickMenu.value = false
         },
@@ -183,14 +185,18 @@ fun BookReaderScreen(
         },
         onShowBookmarklistQuickMenuDialog = {
             showQuickMenu.value = false
-            navigateToBookmarks()
+            corutineScope.launch {
+                bookReaderViewModel.bookPath.value?.let {
+                    navigateToBookmarks(it)
+                }
+            }
         },
         onOpenBookInfoQuickMenuDialog = {
             showQuickMenu.value = false
             bookReaderViewModel.bookPath.value?.let { navigateToBookInfo(it) }
         },
         onChangeColorThemeQuickMenuDialog = { _: String, colorThemeIndex: Int ->
-            bookReaderViewModel.pageViewColorSettings.value = settingsViewModel.colors[colorThemeIndex]!!.value
+            bookReaderViewModel.themeColors.value = settingsViewModel.colors[colorThemeIndex]!!.value
             backgroundColor = settingsViewModel.colors[colorThemeIndex]!!.value.colorBackground
         },
         onChangeTextSizeQuickMenuDialog = { textSize ->
@@ -232,10 +238,12 @@ fun BookReaderScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .onGloballyPositioned {
-                        if (bookReaderViewModel.pageLoaderToken.pageSize.width != it.size.width ||
-                            bookReaderViewModel.pageLoaderToken.pageSize.height != it.size.height
+                        if (bookReaderViewModel.pageViewSettings.value!!.pageSize.width != it.size.width ||
+                            bookReaderViewModel.pageViewSettings.value!!.pageSize.height != it.size.height
                         ) {
-                            bookReaderViewModel.pageLoaderToken.pageSize = it.size
+                            bookReaderViewModel.pageViewSettings.value =
+                                bookReaderViewModel.pageViewSettings.value!!.copy(
+                                    pageSize = it.size)
                             bookReaderViewModel.recalcCurrentPage()
                         }
                     }

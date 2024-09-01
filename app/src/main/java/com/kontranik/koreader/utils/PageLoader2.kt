@@ -1,25 +1,33 @@
 package com.kontranik.koreader.utils
 
-import android.text.TextPaint
 import android.util.Log
-import android.widget.TextView
-import com.kontranik.koreader.compose.ui.reader.PageLoaderToken
+import com.kontranik.koreader.compose.ui.settings.ThemeColors
 import com.kontranik.koreader.model.Book2
 import com.kontranik.koreader.model.BookPosition
 import com.kontranik.koreader.model.Page
+import com.kontranik.koreader.model.PageViewSettings
 import kotlin.math.max
 
 class PageLoader2 : PageSplitterHtml2(){
 
     private lateinit var book: Book2
-    private var painter: TextPaint = TextPaint()
-    private var pageLoaderToken: PageLoaderToken = PageLoaderToken()
 
-    fun getPage(book2: Book2?, textPaint: TextPaint, mPageLoaderToken: PageLoaderToken, bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page? {
+    private lateinit var mPageViewSettings: PageViewSettings
+    private lateinit var mColors: ThemeColors
+
+    fun getPage(
+        book2: Book2?,
+        pageViewSettings: PageViewSettings,
+        colors: ThemeColors,
+        bookPosition: BookPosition,
+        revers: Boolean,
+        recalc: Boolean): Page? {
+
         if (book2 == null) return null
+
+        mPageViewSettings = pageViewSettings.copy()
         book = book2
-        painter = textPaint
-        pageLoaderToken = mPageLoaderToken
+        mColors = colors.copy()
 
         Log.d(TAG, "PageLoader.getPage:  $bookPosition , revers = $revers, recalc = $recalc")
 
@@ -90,8 +98,13 @@ class PageLoader2 : PageSplitterHtml2(){
         if (section >= 0 && section <= book.getPageScheme()!!.sectionCount) {
             val html = book.getPageBody(section)
             if ( html != null) {
-                splitPages(painter, pageLoaderToken,
-                    book, section, html, reloadFonts = recalc)
+                splitPages(
+                    pageViewSettings = mPageViewSettings,
+                    themeColors = mColors,
+                    book = book,
+                    section = section,
+                    html =  html,
+                    reloadFonts = recalc)
             }
         }
     }
