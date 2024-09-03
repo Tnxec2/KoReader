@@ -7,7 +7,7 @@ import android.graphics.Point
 import android.text.SpannedString
 import android.text.style.ImageSpan
 import android.text.style.URLSpan
-import android.widget.TextView
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.LifecycleOwner
 import com.kontranik.koreader.model.PageViewSettings
@@ -17,7 +17,7 @@ import com.kontranik.koreader.utils.OnSwipeTouchListener
 class BookReaderTextview(
     context: Context,
     val bookReaderViewModel: BookReaderViewModel):
-    TextView(context) {
+    AppCompatTextView(context) {
 
     private var listener: BookReaderTextviewListener? = null
 
