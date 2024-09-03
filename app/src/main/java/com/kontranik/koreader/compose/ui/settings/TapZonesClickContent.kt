@@ -20,8 +20,10 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
+import com.kontranik.koreader.compose.ui.settings.elements.SettingsCard
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsList
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsTitle
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLight
@@ -101,23 +103,38 @@ fun TapZonesClickSettingsContent(
                 .fillMaxSize()
         ) {
 
-            SettingsTitle(text = title)
-
             LazyColumn(
-                Modifier.fillMaxWidth()
+                Modifier
             ) {
-                items(items) { item ->
-                    SettingsList(
-                        title = stringResource(id = item.title),
-                        entries = getStringArrayFromResourceArray(res = tapzonen_entries),
-                        entryValues = tapzonen_values.toList(),
-                        defaultValue = item.defaultValue,
-                        defaultValueTitle = item.defaultValueTitle,
-                        onChange = item.onChange,
-                        showDefaultValue = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = item.enabled,
+                item {
+                    SettingsTitle(
+                        text = title,
+                        modifier = Modifier.padding(bottom = paddingSmall)
                     )
+                }
+
+                item {
+                    SettingsCard(
+                        modifier = Modifier.padding(bottom = paddingMedium)
+                    ) {
+                        Column(
+                            Modifier.fillMaxWidth()
+                        ) {
+                            items.map { item ->
+                                SettingsList(
+                                    title = stringResource(id = item.title),
+                                    entries = getStringArrayFromResourceArray(res = tapzonen_entries),
+                                    entryValues = tapzonen_values.toList(),
+                                    defaultValue = item.defaultValue,
+                                    defaultValueTitle = item.defaultValueTitle,
+                                    onChange = item.onChange,
+                                    showDefaultValue = true,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = item.enabled,
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

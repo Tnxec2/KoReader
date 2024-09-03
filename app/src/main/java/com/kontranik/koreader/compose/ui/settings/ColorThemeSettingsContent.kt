@@ -37,6 +37,7 @@ import com.kontranik.koreader.compose.ui.settings.elements.SettingsButton
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsCard
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsCheckbox
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsColor
+import com.kontranik.koreader.compose.ui.settings.elements.SettingsImagePickerButton
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsTextField
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsTitle
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLight
@@ -44,42 +45,7 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 
 
-fun readFileName(backgroundImagePath: String?, context: Context): String {
-    var fileName = "none"
-    if (backgroundImagePath != null) {
-        val uri = Uri.parse(backgroundImagePath)
-        try {
-            context.contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-            uri?.let {
-                if (it.scheme.equals("file")) {
-                    fileName = it.lastPathSegment.toString()
-                } else {
-                    var cursor: Cursor? = null
-                    try {
-                        cursor = context.contentResolver.query(
-                            it, arrayOf(
-                                MediaStore.Images.ImageColumns.DISPLAY_NAME
-                            ), null, null, null
-                        )
-                        if (cursor != null && cursor.moveToFirst()) {
-                            val index =
-                                cursor.getColumnIndex(MediaStore.Images.ImageColumns.DISPLAY_NAME)
-                            if (index >= 0) fileName = cursor.getString(index)
-                        }
-                    } finally {
-                        cursor?.close()
-                    }
-                }
-            }
-        } catch (_: Exception) {
 
-        }
-    }
-    return fileName
-}
 
 @Composable
 fun ColorThemeSettingsContent(
@@ -114,23 +80,9 @@ fun ColorThemeSettingsContent(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
 ) {
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    val backgroundImageFileName = remember {
-        mutableStateOf("none")
-    }
 
-    val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri ->
-            onChangeBackgroundImage(uri)
-        }
-    )
-
-    LaunchedEffect(key1 = backgroundImage) {
-        backgroundImageFileName.value = readFileName(backgroundImage, context)
-    }
 
     Scaffold(
         topBar = {
@@ -203,15 +155,11 @@ fun ColorThemeSettingsContent(
                             SettingsCheckbox(value = tileBackgroundImage,
                                 label = stringResource(id = R.string.repeat_tiled_image),
                                 onChange = onChangeTileBackgroundImage)
-                            SettingsButton(
+                            SettingsImagePickerButton(
                                 title = stringResource(id = R.string.color_theme_selected_image),
-                                defaultValue = backgroundImageFileName.value,
-                                onClick = {
-                                    coroutineScope.launch {
-                                        imagePicker.launch("image/*")
-                                    }
-                                },
-                                showDefaultValue = true
+                                onChangeImageUri = { onChangeBackgroundImage(it) },
+                                imageUri = backgroundImage,
+                                showImageUriValue = true
                             )
                         }
                     }

@@ -11,8 +11,8 @@ import com.kontranik.koreader.compose.theme.paddingMedium
 
 @Composable
 fun SettingsCard(
-    title: String?,
     modifier: Modifier = Modifier,
+    title: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(modifier = modifier) {

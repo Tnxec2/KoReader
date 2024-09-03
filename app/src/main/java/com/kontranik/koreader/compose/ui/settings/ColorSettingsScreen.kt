@@ -22,9 +22,11 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsButton
+import com.kontranik.koreader.compose.ui.settings.elements.SettingsCard
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsList
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsTitle
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLandscapeLightDark
@@ -43,11 +45,17 @@ fun ColorSettingsScreen(
 
     ColorSettingsContent(
         drawerState = drawerState,
-        navigateBack = { coroutineScope.launch { navigateBack() }},
+        navigateBack = { coroutineScope.launch { navigateBack() } },
         modifier = modifier,
         selectedTheme = settingsViewModel.selectedColorTheme.intValue,
-        onChangeSelectedTheme = {coroutineScope.launch { settingsViewModel.changeselectedColorTheme(it.toInt()) }},
-        navigateToTheme = {coroutineScope.launch { navigateToTheme(it) } }
+        onChangeSelectedTheme = {
+            coroutineScope.launch {
+                settingsViewModel.changeselectedColorTheme(
+                    it.toInt()
+                )
+            }
+        },
+        navigateToTheme = { coroutineScope.launch { navigateToTheme(it) } }
     )
 }
 
@@ -67,10 +75,15 @@ fun ColorSettingsContent(
                 title = R.string.settings,
                 drawerState = drawerState,
                 navigationIcon = {
-                    IconButton(onClick = {  navigateBack() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = { navigateBack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
-                },) }
+                },
+            )
+        }
     ) { padding ->
         Column(
             modifier
@@ -79,38 +92,55 @@ fun ColorSettingsContent(
                 .fillMaxSize()
         ) {
 
-            SettingsTitle(text = stringResource(id = R.string.color_theme))
-
             LazyColumn(
-                Modifier.fillMaxWidth()
+                Modifier
             ) {
+                item {
+                    SettingsTitle(
+                        text = stringResource(id = R.string.color_theme),
+                        modifier = Modifier.padding(bottom = paddingSmall)
+                    )
+                }
 
                 item {
-
-                    SettingsList(
-                        title = stringResource(id = R.string.interface_theme_title),
-                        entries = getStringArrayFromResourceArray(res = selected_theme_entries),
-                        entryValues =  selected_theme_entries.mapIndexed { index, s ->  index.toString() },
-                        defaultValue = getStringArrayFromResourceArray(res = selected_theme_entries)[selectedTheme],
-                        icon = R.drawable.ic_iconmonstr_paintbrush_10,
-                        onChange = { onChangeSelectedTheme(it) },
-                        showDefaultValue = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    SettingsCard(
+                        title = stringResource(id = R.string.select_theme),
+                        modifier = Modifier.padding(bottom = paddingMedium)
+                    ) {
+                        Column {
+                            SettingsList(
+                                title = stringResource(id = R.string.interface_theme_title),
+                                entries = getStringArrayFromResourceArray(res = selected_theme_entries),
+                                entryValues = selected_theme_entries.mapIndexed { index, s -> index.toString() },
+                                defaultValue = getStringArrayFromResourceArray(res = selected_theme_entries)[selectedTheme],
+                                icon = R.drawable.ic_iconmonstr_paintbrush_10,
+                                onChange = { onChangeSelectedTheme(it) },
+                                showDefaultValue = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
                 }
 
-                items((0..4).toList() ) { index ->
-                    SettingsButton(
-                        title = stringResource(id = R.string.color_theme_indexed_header, index+1),
-                        defaultValue = null,
-                        onClick = { navigateToTheme(index) },
-                        showDefaultValue = false,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                item {
+                    SettingsCard(title = stringResource(id = R.string.select_theme)) {
+                        Column {
+                            (0..4).toList().map { index ->
+                                SettingsButton(
+                                    title = stringResource(
+                                        id = R.string.color_theme_indexed_header,
+                                        index + 1
+                                    ),
+                                    defaultValue = null,
+                                    onClick = { navigateToTheme(index) },
+                                    showDefaultValue = false,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
                 }
-
             }
-
         }
     }
 }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DrawerState
@@ -22,14 +21,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
-import com.kontranik.koreader.compose.ui.settings.elements.SettingsButton
-import com.kontranik.koreader.compose.ui.settings.elements.SettingsList
+import com.kontranik.koreader.compose.ui.settings.elements.SettingsCard
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsTitle
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLandscapeLightDark
 import kotlinx.coroutines.launch
@@ -48,7 +46,7 @@ fun TapZonesSettingsScreen(
 
     TapZonesSettingsContent(
         drawerState = drawerState,
-        navigateBack = { coroutineScope.launch { navigateBack() }},
+        navigateBack = { coroutineScope.launch { navigateBack() } },
         modifier = modifier,
         navigateToSettingsTapZonesOneClick = navigateToSettingsTapZonesOneClick,
         navigateToSettingsTapZonesDoubleClick = navigateToSettingsTapZonesDoubleClick,
@@ -67,8 +65,16 @@ fun TapZonesSettingsContent(
 ) {
     val settingsItems = listOf(
         SettingsItem(R.string.tapzones_one_click_header, null, navigateToSettingsTapZonesOneClick),
-        SettingsItem(R.string.tapzones_double_click_header, null, navigateToSettingsTapZonesDoubleClick),
-        SettingsItem(R.string.tapzones_long_click_header, null, navigateToSettingsTapZonesLongClick),
+        SettingsItem(
+            R.string.tapzones_double_click_header,
+            null,
+            navigateToSettingsTapZonesDoubleClick
+        ),
+        SettingsItem(
+            R.string.tapzones_long_click_header,
+            null,
+            navigateToSettingsTapZonesLongClick
+        ),
     )
 
     Scaffold(
@@ -77,10 +83,15 @@ fun TapZonesSettingsContent(
                 title = R.string.settings,
                 drawerState = drawerState,
                 navigationIcon = {
-                    IconButton(onClick = {  navigateBack() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = { navigateBack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
-                },) }
+                },
+            )
+        }
     ) { padding ->
         Column(
             modifier
@@ -88,30 +99,45 @@ fun TapZonesSettingsContent(
                 .padding(paddingSmall)
                 .fillMaxSize()
         ) {
-
-            SettingsTitle(text = stringResource(id = R.string.tapzones_header))
-
             LazyColumn(
-                modifier
-                    .fillMaxSize()
-                    .padding(paddingSmall)
+                Modifier
             ) {
-                items(settingsItems) { item ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(paddingSmall)
-                            .clickable { item.onClick() }
+                item {
+                    SettingsTitle(
+                        text = stringResource(id = R.string.tapzones_header),
+                        modifier = Modifier.padding(bottom = paddingSmall)
+                    )
+                }
+
+                item {
+                    SettingsCard(
+                        modifier = Modifier.padding(bottom = paddingMedium)
                     ) {
-                        item.drawable?.let {
-                            Icon(painter = painterResource(id = it),
-                                contentDescription = stringResource(id = item.title),
-                                modifier = Modifier.padding(paddingSmall)
-                            )
+                        Column {
+                            settingsItems.map { item ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(paddingSmall)
+                                        .clickable { item.onClick() }
+                                ) {
+                                    item.drawable?.let {
+                                        Icon(
+                                            painter = painterResource(id = it),
+                                            contentDescription = stringResource(id = item.title),
+                                            modifier = Modifier.padding(paddingSmall)
+                                        )
+                                    }
+                                    Text(
+                                        text = stringResource(id = item.title),
+                                        modifier = Modifier
+                                            .padding(paddingSmall)
+                                            .weight(1f)
+                                    )
+                                }
+                            }
                         }
-                        Text(text = stringResource(id = item.title),
-                            modifier = Modifier.padding(paddingSmall).weight(1f))
                     }
                 }
             }

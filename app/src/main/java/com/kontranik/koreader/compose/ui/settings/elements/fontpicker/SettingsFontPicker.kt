@@ -1,4 +1,4 @@
-package com.kontranik.koreader.compose.ui.settings
+package com.kontranik.koreader.compose.ui.settings.elements.fontpicker
 
 import android.graphics.Typeface
 import androidx.compose.foundation.clickable
@@ -12,14 +12,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.kontranik.koreader.R
-import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 

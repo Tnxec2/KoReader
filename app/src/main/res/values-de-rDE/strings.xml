@@ -205,4 +205,5 @@
     <string name="sure_delete_opds_item">are you sure delete this opds entry</string>
     <string name="margins">Margins</string>
     <string name="colors">Colors</string>
+    <string name="select_theme">Select color theme</string>
 </resources>

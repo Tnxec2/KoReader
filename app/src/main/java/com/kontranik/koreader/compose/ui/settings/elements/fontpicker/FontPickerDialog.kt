@@ -1,4 +1,4 @@
-package com.kontranik.koreader.compose.ui.settings
+package com.kontranik.koreader.compose.ui.settings.elements.fontpicker
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
@@ -32,6 +31,7 @@ import com.kontranik.koreader.compose.ui.settings.elements.SettingsCard
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsCheckbox
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsList
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsTitle
+import com.kontranik.koreader.compose.ui.settings.elements.fontpicker.SettingsFontPicker
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLight
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord
 import kotlinx.coroutines.launch
