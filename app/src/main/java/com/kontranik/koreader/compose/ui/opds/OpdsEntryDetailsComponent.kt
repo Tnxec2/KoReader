@@ -89,16 +89,6 @@ fun OpdsEntryDetailsContent(
             item {
                 Card {
                     Column(Modifier.padding(paddingSmall)) {
-                        cover.value?.let {
-                            Image(
-                                bitmap = it,
-                                contentDescription = entry.title,
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-                        }
-
                         Text(
                             text = entry.title,
                             style = MaterialTheme.typography.titleLarge
@@ -107,6 +97,15 @@ fun OpdsEntryDetailsContent(
                             Text(
                                 text = it.toString(),
                                 style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        cover.value?.let {
+                            Image(
+                                bitmap = it,
+                                contentDescription = entry.title,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .fillMaxWidth()
                             )
                         }
                     }
