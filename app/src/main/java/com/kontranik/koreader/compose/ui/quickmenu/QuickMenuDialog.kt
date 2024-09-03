@@ -1,7 +1,7 @@
 package com.kontranik.koreader.compose.ui.quickmenu
 
+import android.content.Context
 import android.graphics.Typeface
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
@@ -61,7 +61,7 @@ fun QuickMenuDialog(
     }
 
     LaunchedEffect(Unit) {
-        val settings = context.getSharedPreferences(PREFS_FILE, AppCompatActivity.MODE_PRIVATE)
+        val settings = context.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
         bookPath = settings?.getString(PREF_BOOK_PATH, null)
     }
 

@@ -1,8 +1,8 @@
 package com.kontranik.koreader.compose.ui.mainmenu
 
+import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -62,7 +62,7 @@ fun MainMenuScreen(
     val bookPath = rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(key1 = Unit) {
-        val prefs = context.getSharedPreferences(PREFS_FILE, AppCompatActivity.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
 
         if ( prefs.contains(PREF_BOOK_PATH) ) {
             bookPath.value = prefs.getString(PREF_BOOK_PATH, null)

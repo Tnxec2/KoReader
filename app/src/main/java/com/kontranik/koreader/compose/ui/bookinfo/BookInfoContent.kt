@@ -1,6 +1,5 @@
 package com.kontranik.koreader.compose.ui.bookinfo
 
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -110,7 +109,7 @@ private fun BookInfoContentPreview() {
     val mocupBookInfo = BookInfo(
         title = "Book title",
         authors = mocupAuthors,
-        cover = AppCompatResources.getDrawable(context, R.drawable.book_mockup)
+        cover = context.getDrawable(R.drawable.book_mockup)
             ?.let { ImageUtils.drawableToBitmap(it) },
         filename = "filename",
         path = "path",

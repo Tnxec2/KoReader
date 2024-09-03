@@ -1,7 +1,6 @@
 package com.kontranik.koreader.compose.ui.reader
 
 import android.graphics.Bitmap
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Column
@@ -111,7 +110,7 @@ fun ImageViewer(
 @Composable
 private fun ImageViewerPreview() {
     val context = LocalContext.current
-    val bitmap = AppCompatResources.getDrawable(context, R.drawable.book_mockup)!!.let { ImageUtils.drawableToBitmap(it)}
+    val bitmap = context.getDrawable(R.drawable.book_mockup)!!.let { ImageUtils.drawableToBitmap(it)}
     AppTheme {
         Surface {
             ImageViewer(

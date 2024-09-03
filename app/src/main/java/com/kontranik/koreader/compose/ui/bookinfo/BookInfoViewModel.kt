@@ -3,26 +3,19 @@ package com.kontranik.koreader.compose.ui.bookinfo
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.documentfile.provider.DocumentFile
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kontranik.koreader.KoReaderApplication
-import com.kontranik.koreader.R
 import com.kontranik.koreader.database.model.Author
-import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.database.repository.LibraryItemRepository
 import com.kontranik.koreader.model.BookInfo
-import com.kontranik.koreader.model.toBookInfoComposable
 import com.kontranik.koreader.model.toBookInfoDetails
 import com.kontranik.koreader.parser.EbookHelper
-import com.kontranik.koreader.utils.ImageUtils
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class BookInfoViewModell(

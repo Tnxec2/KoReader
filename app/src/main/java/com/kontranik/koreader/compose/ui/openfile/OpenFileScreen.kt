@@ -1,7 +1,6 @@
 package com.kontranik.koreader.compose.ui.openfile
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -286,7 +285,7 @@ fun FileMenuItem(
 @Composable
 private fun FileMenuItemPreview() {
     val context = LocalContext.current
-    val bitmap = AppCompatResources.getDrawable(context, R.drawable.book_mockup)?.let { ImageUtils.drawableToBitmap(it)}
+    val bitmap = context.getDrawable(R.drawable.book_mockup)?.let { ImageUtils.drawableToBitmap(it)}
     AppTheme {
         Surface {
         FileMenuItem(

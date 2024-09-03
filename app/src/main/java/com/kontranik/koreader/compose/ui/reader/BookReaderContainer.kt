@@ -125,15 +125,17 @@ fun BookReaderContainer(
 
 
     LaunchedEffect(key1 = colors) {
-        val uri = Uri.parse(colors.backgroundImageUri)
-        try {
-            val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-            val bitmap = BitmapDrawable(context.resources, inputStream)
-            if (colors.backgroundImageTiledRepeat)
-                bitmap.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
-            backgroundImage.value = bitmap.bitmap.asImageBitmap()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        colors.backgroundImageUri?.let {
+            val uri = Uri.parse(colors.backgroundImageUri)
+            try {
+                val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+                val bitmap = BitmapDrawable(context.resources, inputStream)
+                if (colors.backgroundImageTiledRepeat)
+                    bitmap.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+                backgroundImage.value = bitmap.bitmap.asImageBitmap()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

@@ -1,7 +1,6 @@
 package com.kontranik.koreader.compose.ui.library.bytitle
 
 import android.net.Uri
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -277,7 +276,7 @@ fun BooksItem(
 @Composable
 private fun BooksItemPreview() {
     val context = LocalContext.current
-    val bitmap = AppCompatResources.getDrawable(context, R.drawable.book_mockup)?.let { ImageUtils.getBytes(ImageUtils.drawableToBitmap(it)) }
+    val bitmap = context.getDrawable(R.drawable.book_mockup)?.let { ImageUtils.getBytes(ImageUtils.drawableToBitmap(it)) }
     AppTheme {
         Surface {
             BooksItem(

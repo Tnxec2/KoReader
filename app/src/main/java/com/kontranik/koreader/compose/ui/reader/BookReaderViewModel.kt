@@ -5,9 +5,6 @@ import android.graphics.Bitmap
 import android.os.BatteryManager
 import android.text.style.ImageSpan
 import android.util.Log
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -204,7 +201,7 @@ class BookReaderViewModel(
 
     private fun updateSystemStatus() {
         val simpleDateFormatTime = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val bm = KoReaderApplication.getContext().getSystemService(AppCompatActivity.BATTERY_SERVICE) as BatteryManager
+        val bm = KoReaderApplication.getContext().getSystemService(Context.BATTERY_SERVICE) as BatteryManager
         val batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         val strTime: String = simpleDateFormatTime.format(Date().time)
         infoTextSystemstatus.value =
@@ -226,7 +223,7 @@ class BookReaderViewModel(
     private fun loadPrefs() {
         val settings = KoReaderApplication.getContext().getSharedPreferences(
             PREFS_FILE,
-            AppCompatActivity.MODE_PRIVATE
+            Context.MODE_PRIVATE
         )
         bookPath.value = settings.getString(PREF_BOOK_PATH, null)
         screenBrightnessLevel = settings.getFloat(PREF_SCREEN_BRIGHTNESS, 1f)
@@ -236,7 +233,7 @@ class BookReaderViewModel(
         bookPath.value = path
         val settings = KoReaderApplication.getContext().getSharedPreferences(
             PREFS_FILE,
-            AppCompatActivity.MODE_PRIVATE
+            Context.MODE_PRIVATE
         )
         val prefEditor = settings.edit()
         prefEditor.putString(PREF_BOOK_PATH, bookPath.value)
@@ -246,7 +243,7 @@ class BookReaderViewModel(
     fun savePrefs() {
         val settings = KoReaderApplication.getContext().getSharedPreferences(
             PREFS_FILE,
-            AppCompatActivity.MODE_PRIVATE
+            Context.MODE_PRIVATE
         )
         val prefEditor = settings.edit()
         prefEditor.putString(PREF_BOOK_PATH, bookPath.value)
@@ -258,7 +255,7 @@ class BookReaderViewModel(
     private fun removePathFromPrefs() {
         val settings = KoReaderApplication.getContext().getSharedPreferences(
             PREFS_FILE,
-            AppCompatActivity.MODE_PRIVATE
+            Context.MODE_PRIVATE
         )
         val prefEditor = settings.edit()
         prefEditor.remove(PREF_BOOK_PATH)

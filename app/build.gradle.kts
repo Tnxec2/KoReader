@@ -13,8 +13,8 @@ android {
         applicationId = "com.kontranik.koreader"
         minSdk = 26
         targetSdk = 34
-        versionCode = 11
-        versionName = "1.4.4"
+        versionCode = 12
+        versionName = "1.5.0"
         setProperty("archivesBaseName", "$applicationId-v$versionCode($versionName)")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -87,23 +87,12 @@ dependencies {
     // Navigation
     // Jetpack Compose Integration
     implementation(libs.androidx.navigation.compose)
-    // implementation(libs.androidx.hilt.navigation.compose)
 
+    implementation("androidx.documentfile:documentfile:1.0.1")
 
-    implementation("androidx.fragment:fragment-ktx:1.5.2") // use Compose with Fragments
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-
-    implementation(libs.androidx.material.material)
-    implementation(libs.androidx.recyclerview)
-
-    // For control over item selection of both touch and mouse driven selection
-    implementation(libs.androidx.recyclerview.selection)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.legacy.support.v4)
     implementation(libs.androidx.preference.ktx)
 
-    implementation(libs.gson)
+    // implementation(libs.gson)
 
     implementation("nl.siegmann.epublib:epublib-core:3.1") {
         exclude(group = "org.slf4j")
@@ -111,14 +100,10 @@ dependencies {
     }
     implementation(libs.slf4j.android)
 
-    implementation(libs.imagezoom)
-
     implementation(libs.jackson.databind)
 
     implementation(libs.jsoup)
-    //implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version")
 
-    implementation(libs.colorpicker)
 
     implementation("com.github.skydoves:colorpicker-compose:1.1.2") // compose
 

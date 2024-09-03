@@ -3,8 +3,6 @@ package com.kontranik.koreader.compose.ui.settings
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
-import androidx.annotation.IntegerRes
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -14,7 +12,6 @@ import androidx.compose.ui.res.stringResource
 
 import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
-import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.defaultLetterSpacing
 import com.kontranik.koreader.compose.theme.defaultLineSpacingMultiplier

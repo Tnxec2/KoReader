@@ -1,6 +1,5 @@
 package com.kontranik.koreader.compose.ui.opds
 
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -353,7 +352,7 @@ private fun OpdsContentPreview() {
     val context = LocalContext.current
     val bitmap = remember {
         mutableStateOf(
-            AppCompatResources.getDrawable(context, R.drawable.book_mockup)?.
+            context.getDrawable(R.drawable.book_mockup)?.
             let { ImageUtils.drawableToBitmap(it).asImageBitmap() }
         )
     }
