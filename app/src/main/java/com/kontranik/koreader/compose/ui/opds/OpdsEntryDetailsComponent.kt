@@ -3,10 +3,12 @@ package com.kontranik.koreader.compose.ui.opds
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -84,81 +86,93 @@ fun OpdsEntryDetailsContent(
     }
 
         LazyColumn(modifier.padding(paddingSmall)) {
-            cover.value?.let {
-                item {
-                    Image(
-                        bitmap = it,
-                        contentDescription = entry.title,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                }
-            }
             item {
-                Text(
-                    text = entry.title,
-                    style = MaterialTheme.typography.titleLarge
-                )
-            }
-            item {
-                entry.author?.let {
-                    Text(
-                        text = it.toString(),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
-            item {
-                entry.content?.let {
-                    Html(text = it.data)
-                }
-            }
-            item {
-                if (rels.value.values.isNotEmpty())
-                    Text(
-                        text = stringResource(id = R.string.links),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(bottom = paddingSmall)
-                    )
-            }
-            rels.value.mapKeys { rel ->
-                item {
-                    Text(
-                        text = rel.key,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = paddingSmall)
-                    )
-                }
+                Card {
+                    Column(Modifier.padding(paddingSmall)) {
+                        cover.value?.let {
+                            Image(
+                                bitmap = it,
+                                contentDescription = entry.title,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                        }
 
-                rel.value.map { link ->
-                    item {
                         Text(
-                            text = link.getTitle()?.toString() ?: "",
-                            fontSize = 18.sp,
-                            style = TextStyle(
-                                textDecoration = TextDecoration.Underline
-                            ),
-                            modifier = Modifier
-                                .heightIn(min = 30.dp)
-                                .fillMaxWidth()
-                                .padding(bottom = paddingSmall)
-                                .clickable {
-                                    Log.d("ENTRYLINK", "clicked entry.otherLinks: $link")
-                                    if (link.isCatalogEntry()) {
-                                        navigateToOpdsEntryLink(link)
-                                    } else if (link.isDownloadable()) {
-                                        download(entry, link)
-                                    } else {
-                                        openInBrowser(link)
-                                    }
-                                }
+                            text = entry.title,
+                            style = MaterialTheme.typography.titleLarge
                         )
+                        entry.author?.let {
+                            Text(
+                                text = it.toString(),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
+                }
+            }
+            item {
+                Card(Modifier.padding(top = paddingSmall)) {
+                    Column(
+                        Modifier.padding(paddingSmall)
+                    ) {
+                        entry.content?.let {
+                            Html(text = it.data)
+                        }
+                    }
+                }
+            }
+            item {
+                Card(Modifier.padding(top = paddingSmall)) {
+                    Column(
+                        Modifier.padding(paddingSmall)
+                    ) {
+
+                        if (rels.value.values.isNotEmpty())
+                            Text(
+                                text = stringResource(id = R.string.links),
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(bottom = paddingSmall)
+                            )
+
+                        rels.value.mapKeys { rel ->
+                            Text(
+                                text = rel.key,
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = paddingSmall)
+                            )
+
+
+                            rel.value.map { link ->
+                                Text(
+                                    text = link.getTitle()?.toString() ?: "",
+                                    fontSize = 18.sp,
+                                    style = TextStyle(
+                                        textDecoration = TextDecoration.Underline
+                                    ),
+                                    modifier = Modifier
+                                        .heightIn(min = 30.dp)
+                                        .fillMaxWidth()
+                                        .padding(bottom = paddingSmall)
+                                        .clickable {
+                                            Log.d("ENTRYLINK", "clicked entry.otherLinks: $link")
+                                            if (link.isCatalogEntry()) {
+                                                navigateToOpdsEntryLink(link)
+                                            } else if (link.isDownloadable()) {
+                                                download(entry, link)
+                                            } else {
+                                                openInBrowser(link)
+                                            }
+                                        }
+                                )
+                            }
+
+                        }
                     }
                 }
             }
         }
-
 }
 
 

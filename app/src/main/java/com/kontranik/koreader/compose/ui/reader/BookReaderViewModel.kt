@@ -51,8 +51,6 @@ class BookReaderViewModel(
 
     private var changingPage = false
 
-    val bookPath = MutableLiveData<String?>(null)
-
     var pageViewContent: MutableLiveData<CharSequence?> = MutableLiveData()
     var pageViewSettings = MutableLiveData(
         PageViewSettings()
@@ -61,8 +59,8 @@ class BookReaderViewModel(
         defaultColors.first()
     )
 
-    private val path = MutableLiveData<String>()
-    val savedBookStatus: LiveData<BookStatus?> = path.switchMap<String?, BookStatus?> {
+    val bookPath = MutableLiveData<String?>(null)
+    private val savedBookStatus: LiveData<BookStatus?> = bookPath.switchMap {
         it?.let { it1 ->
             bookStatusRepository.getLiveDataBookStatusByPath(it1)
         }
@@ -81,8 +79,8 @@ class BookReaderViewModel(
     init {
         loadPrefs()
 
-        book.observeForever {
-            path.value = book.value?.fileLocation
+        savedBookStatus.observeForever {
+            goToPositionByBookStatus(savedBookStatus.value)
         }
     }
 
@@ -91,23 +89,18 @@ class BookReaderViewModel(
             updateView(getCur(recalc = true))
     }
 
-    fun loadBook(context: Context) {
+    private fun loadBook() {
         try {
-            println("loadBook. path = ${bookPath.value}")
             if (bookPath.value != null && book.value?.fileLocation != bookPath.value ) {
                 if (!FileHelper.contentFileExist(KoReaderApplication.getContext(), bookPath.value)) {
-                    Toast.makeText(
-                        context,
-                        KoReaderApplication.getContext().resources.getString(R.string.can_not_load_book, bookPath.value),
-                        Toast.LENGTH_LONG
-                    ).show()
+//                    Toast.makeText(
+//                        context,
+//                        KoReaderApplication.getContext().resources.getString(R.string.can_not_load_book, bookPath.value),
+//                        Toast.LENGTH_LONG
+//                    ).show()
                     return
                 }
-                Toast.makeText(
-                    context,
-                    KoReaderApplication.getContext().resources.getString(R.string.loading_book),
-                    Toast.LENGTH_SHORT
-                ).show()
+
                 book.value = Book(bookPath.value!!)
                 book.value?.let { book ->
                     viewModelScope.launch {
@@ -121,15 +114,15 @@ class BookReaderViewModel(
                         }
                     }
                 }
-
             }
         } catch (e: Exception) {
             Log.e("tag", e.stackTraceToString())
         }
     }
 
-    fun goToPositionByBookStatus(pageView: TextView, bookStatus: BookStatus?) {
+    private fun goToPositionByBookStatus(bookStatus: BookStatus?) {
         Log.d("goToPositionByBookStat.", "bookstatus: $bookStatus")
+        loadBook()
         if (book.value != null) {
             val startPosition: BookPosition = if (bookStatus == null) {
                 BookPosition()

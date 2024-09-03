@@ -19,12 +19,8 @@ class Book(var fileLocation: String) {
 
     init {
         ebookHelper = EbookHelper.getHelper(fileLocation)
-        println("Book. ebookHelper = ${ebookHelper.toString()}")
         ebookHelper?.readBook()
-
     }
-
-
 
     fun getPageBody(page: Int): String? {
         val aSection = ebookHelper?.getPage(page) ?: return null

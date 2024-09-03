@@ -63,7 +63,6 @@ fun BookReaderContainer(
     infoMiddle: String,
     infoRight: String,
     colors: ThemeColors,
-    paddingValues: PaddingValues,
     pageViewSettings: PageViewSettings,
     selectedTheme: Int,
     selectedFont: Typeface,
@@ -78,13 +77,9 @@ fun BookReaderContainer(
             Modifier
                 .padding(padding)
                 .background(backgroundColor)
-                .padding(paddingValues)
                 .fillMaxWidth()
         ) {
-            textView.invoke(this).apply {
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f) }
+            textView.invoke(this)
 
             InfoArea(
                 left = infoLeft,
@@ -94,6 +89,7 @@ fun BookReaderContainer(
                 onClickMiddle = { onClickInfoMiddle() },
                 onClickRight = { onClickInfoRight() },
                 textColor = colors.colorsInfo,
+                modifier = Modifier.padding(horizontal = paddingSmall)
             )
         }
 
@@ -179,8 +175,6 @@ fun BookReaderContainer(
 @Preview
 @Composable
 private fun BookReaderContainerPreview() {
-    val context = LocalContext.current
-    val bitmap = AppCompatResources.getDrawable(context, R.drawable.book_mockup)!!.let { ImageUtils.drawableToBitmap(it)}
 
     AppTheme {
         BookReaderContainer(
@@ -194,7 +188,6 @@ private fun BookReaderContainerPreview() {
                     .weight(1f)
                     .fillMaxWidth()
             )},
-            paddingValues = PaddingValues(paddingSmall),
             onClickInfoLeft = {},
             onClickInfoMiddle = {},
             onClickInfoRight = {},
@@ -210,7 +203,7 @@ private fun BookReaderContainerPreview() {
                 backgroundImageTiledRepeat = false,
                 backgroundImageUri = null,
                 ),
-            showQuickMenu = true,
+            showQuickMenu = false,
             showGotoDialog = false,
             onChangeTextSizeQuickMenuDialog = { _ -> },
             onChangeLineSpacingQuickMenuDialog = { _ ->},
@@ -228,16 +221,13 @@ private fun BookReaderContainerPreview() {
             note = null,
             onCloseNote = {},
             onCloseGotoDialog = {},
-
             gotoPage = {},
             gotoSection = {},
-
             sectionList = listOf(),
             maxPage = 10,
             currentPage = 0,
             currentSection = 1,
-
-            imageBitmap = bitmap,
+            imageBitmap = null,
             isDarkMode = false,
             onCloseImage = {},
         )

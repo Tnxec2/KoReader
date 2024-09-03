@@ -87,18 +87,6 @@ fun BookInfoScreen(
         bookInfoViewModell.readLibraryInfo()
     }
 
-    if (showDeleteDilaog) {
-        ConfirmDialog(
-            title = "Delete Book",
-            text = stringResource(R.string.sure_delete_book),
-            onDismissRequest = { showDeleteDilaog = false },
-            onConfirmation = {
-                coroutineScope.launch {
-                    bookStatusViewModel.deleteByPath(bookInfoViewModell.bookPath)
-                }
-            })
-    }
-
     Scaffold(
         topBar = {
             AppBar (
@@ -135,80 +123,23 @@ fun BookInfoScreen(
          },
         modifier = modifier.fillMaxSize(),
     ) { padding ->
-        Column(
-            Modifier
-                .padding(padding)
-                .padding(paddingSmall)
-                .fillMaxWidth()
-        ) {
-            Column(modifier = modifier
-                .verticalScroll(rememberScrollState())
-            ) {
-                bookInfoDetails.cover?.let {
-                    Image(
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = bookInfoDetails.title,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Text(text = bookInfoDetails.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(paddingSmall)
-                )
-                Text(text = bookInfoDetails.allAuthors,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(paddingSmall)
-                )
 
-                Card(modifier = Modifier.padding(bottom = paddingMedium)) {
-                    AndroidView(factory = { ctx ->
-                        TextView(ctx).apply {
-                            text = HtmlCompat.fromHtml(bookInfoDetails.annotation, HtmlCompat.FROM_HTML_MODE_LEGACY)
-                        }
-                    }, modifier = Modifier.padding(paddingMedium))
-                }
-
-                Card(modifier = Modifier.padding(bottom = paddingMedium)) {
-                    Column(modifier = Modifier.padding(paddingMedium)) {
-                        bookInfoDetails.authors.map { author ->
-                            Text(
-                                text = author.asString(),
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = paddingSmall)
-                                    .clickable {
-                                        coroutineScope.launch {
-                                            author.id?.let { navigateToAuthor(it) }
-                                        }
-                                    }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-}
-
-@PreviewPortraitLandscapeLightDark
-@Composable
-private fun BookInfoScreenPreview() {
-    AppTheme {
-        BookInfoScreen(
-            drawerState = DrawerState(DrawerValue.Closed),
-            navigateBack = {},
-            navigateToAuthor = {},
-            navigateToReader = { },
+        BookInfoContent(
+            bookInfoDetails = bookInfoDetails,
+            navigateToAuthor = navigateToAuthor ,
+            modifier = Modifier.padding(padding)
         )
+
+        if (showDeleteDilaog) {
+            ConfirmDialog(
+                title = "Delete Book",
+                text = stringResource(R.string.sure_delete_book),
+                onDismissRequest = { showDeleteDilaog = false },
+                onConfirmation = {
+                    coroutineScope.launch {
+                        bookStatusViewModel.deleteByPath(bookInfoViewModell.bookPath)
+                    }
+                })
+        }
     }
 }

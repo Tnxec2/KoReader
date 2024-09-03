@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +32,7 @@ import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
+import com.kontranik.koreader.compose.ui.shared.Html
 import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.utils.ImageUtils
@@ -40,55 +42,51 @@ import kotlinx.coroutines.launch
 @Composable
 fun BookInfoContent(
     bookInfoDetails: BookInfoDetails,
-    navigateToAuthor: (author: Author) -> Unit,
+    navigateToAuthor: (authorId: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-
     val coroutineScope = rememberCoroutineScope()
 
-    Column(
-        Modifier
-            .padding(paddingSmall)
-            .fillMaxWidth()
-    ) {
+
         Column(
             modifier = modifier
+                .padding(paddingSmall)
+                .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
         ) {
-            bookInfoDetails.cover?.let {
-                Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = bookInfoDetails.title,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            Text(
-                text = bookInfoDetails.title,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(paddingSmall)
-            )
-            Text(
-                text = bookInfoDetails.allAuthors,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(paddingSmall)
-            )
-
-            Card(modifier = Modifier.padding(bottom = paddingMedium)) {
-                AndroidView(factory = { ctx ->
-                    TextView(ctx).apply {
-                        text = HtmlCompat.fromHtml(
-                            bookInfoDetails.annotation,
-                            HtmlCompat.FROM_HTML_MODE_LEGACY
+            Card {
+                Column(Modifier.padding(paddingMedium)) {
+                    Text(
+                        text = bookInfoDetails.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(paddingSmall)
+                    )
+                    Text(
+                        text = bookInfoDetails.allAuthors,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(paddingSmall)
+                    )
+                    bookInfoDetails.cover?.let {
+                        Image(
+                            bitmap = it.asImageBitmap(),
+                            contentDescription = bookInfoDetails.title,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
-                }, modifier = Modifier.padding(paddingMedium))
-            }
+                }
 
+            }
+            Card(modifier = Modifier.padding(vertical = paddingMedium)) {
+                Html(
+                    bookInfoDetails.annotation,
+                    modifier = Modifier.padding(paddingMedium)
+                )
+            }
             Card(modifier = Modifier.padding(bottom = paddingMedium)) {
                 Column(modifier = Modifier.padding(paddingMedium)) {
                     bookInfoDetails.authors.filter { it.id != null }.map { author ->
@@ -101,14 +99,16 @@ fun BookInfoContent(
                                 .fillMaxWidth()
                                 .padding(bottom = paddingSmall)
                                 .clickable {
-                                    coroutineScope.launch { navigateToAuthor(author) }
+                                    coroutineScope.launch {
+                                        author.id?.let { navigateToAuthor(it) }
+                                    }
                                 }
                         )
                     }
                 }
             }
         }
-    }
+
 
 }
 

@@ -6,6 +6,7 @@ import android.graphics.Point
 import android.text.style.ImageSpan
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +36,6 @@ fun BookReaderScreen(
     navigateToBookInfo: (String) -> Unit,
     settingsViewModel: SettingsViewModel,
     bookReaderViewModel: BookReaderViewModel,
-    modifier: Modifier = Modifier
 ) {
     val corutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -100,17 +100,12 @@ fun BookReaderScreen(
             BookReaderTextview(context, bookReaderViewModel)
         )
     }
-
-    val savedBookStatusStats = bookReaderViewModel.savedBookStatus.observeAsState()
-    LaunchedEffect(key1 = savedBookStatusStats.value) {
-        bookReaderViewModel.goToPositionByBookStatus(textview.value, savedBookStatusStats.value)
-    }
-
-    LaunchedEffect(key1 = Unit) {
-        corutineScope.launch {
-            bookReaderViewModel.loadBook(context)
-        }
-    }
+//
+//    LaunchedEffect(key1 = Unit) {
+//        corutineScope.launch {
+//            bookReaderViewModel.loadBook(context)
+//        }
+//    }
 
     LaunchedEffect(key1 = textview.value) {
         textview.value.setListener(
@@ -216,13 +211,6 @@ fun BookReaderScreen(
         infoMiddle = bookReaderViewModel.infoTextRight.observeAsState("").value.toString(),
         infoRight = bookReaderViewModel.infoTextSystemstatus.observeAsState("").value.toString(),
         colors = colors,
-        paddingValues = PaddingValues(
-            top = Dp(colors.marginTop.toFloat()),
-            bottom = Dp(colors.marginBottom.toFloat()),
-            start = Dp(colors.marginLeft.toFloat()),
-            end = Dp(colors.marginRight.toFloat()),
-        ),
-
         onClickInfoLeft = { showGotoDialog.value = true },
         onClickInfoMiddle = { showGotoDialog.value = true },
         onClickInfoRight = { showGotoDialog.value = true },
@@ -237,6 +225,12 @@ fun BookReaderScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
+                    .padding(
+                        top = Dp(colors.marginTop.toFloat()),
+                        bottom = Dp(colors.marginBottom.toFloat()),
+                        start = Dp(colors.marginLeft.toFloat()),
+                        end = Dp(colors.marginRight.toFloat())
+                    )
                     .onGloballyPositioned {
                         if (bookReaderViewModel.pageViewSettings.value!!.pageSize.width != it.size.width ||
                             bookReaderViewModel.pageViewSettings.value!!.pageSize.height != it.size.height
