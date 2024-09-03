@@ -206,4 +206,5 @@
     <string name="margins">Margins</string>
     <string name="colors">Colors</string>
     <string name="select_theme">Select color theme</string>
+    <string name="stretch_background_image">Stretch background image</string>
 </resources>

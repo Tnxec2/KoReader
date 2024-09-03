@@ -84,10 +84,14 @@ fun OpdsOverviewEntryEditDialog(
 
                 Spacer(modifier = Modifier.weight(1f))
 
+
                 OutlinedButton(
                     onClick = {
                         onSave()
-                    }
+                    },
+                    enabled = editDetailsMutableState.value.url.isNotEmpty()
+                            &&
+                            editDetailsMutableState.value.title.isNotEmpty()
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Check,

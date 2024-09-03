@@ -1,51 +1,89 @@
 package com.kontranik.koreader.compose.ui.settings.elements
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.paddingSmall
 import kotlinx.coroutines.launch
 import java.lang.Exception
+
+/**
+ * Usage
+ *
+ * define rememberLauncher:
+ *
+ *     val filePickerNormalTransactions = rememberLauncherForActivityResult(
+ *         contract = GetFileToOpen(),
+ *         onResult = { uri ->
+ *             uri?.let {
+ *                 scope.launch {
+ *                     // process uri
+ *                 }
+ *             }
+ *         })
+ *
+ * start launcher:
+ *      filePickerNormalTransactions.launch("text/*")
+ *      or
+ *      filePickerDatabaseRestore.launch("*/*")
+ */
+class getImageToOpen(): ActivityResultContract<String, Uri?>() {
+
+    override fun createIntent(context: Context, input: String): Intent {
+        return Intent(Intent.ACTION_GET_CONTENT).apply {
+                addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+        }
+    }
+
+    override fun getSynchronousResult(
+        context: Context,
+        input: String
+    ): SynchronousResult<Uri?>? = null
+
+    override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
+        return intent.takeIf {
+            resultCode == Activity.RESULT_OK
+        }?.getClipDataUris()
+    }
+
+    internal companion object {
+        internal fun Intent.getClipDataUris(): Uri? {
+            // Use a LinkedHashSet to maintain any ordering that may be
+            // present in the ClipData
+            return data
+        }
+    }
+
+}
 
 fun readFileName(backgroundImagePath: String?, context: Context): String {
     var fileName = "none"
@@ -102,11 +140,21 @@ fun SettingsImagePickerButton(
     }
 
     val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
+        contract = ActivityResultContracts.OpenDocument(),
         onResult = { uri ->
-            onChangeImageUri(uri)
+            uri?.let {
+                context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                onChangeImageUri(uri)
+            }
+
         }
     )
+
+//    val imagePickerNew  = rememberLauncherForActivityResult(
+//        contract = getImageToOpen(),
+//        onResult = { uri ->
+//            onChangeImageUri(uri)
+//        })
 
     LaunchedEffect(key1 = imageUri) {
         backgroundImageFileName.value = readFileName(imageUri, context)
@@ -118,7 +166,7 @@ fun SettingsImagePickerButton(
             .padding(vertical = paddingSmall)
             .clickable {
                 coroutineScope.launch {
-                    imagePicker.launch("image/*")
+                    imagePicker.launch(arrayOf("image/*"))
                 }
             }
             .fillMaxWidth()
@@ -126,7 +174,7 @@ fun SettingsImagePickerButton(
         icon?.let{Icon(painter = painterResource(id = it), contentDescription = title,
             modifier = Modifier.padding(end = paddingSmall))}
 
-        Column(
+        Column(Modifier.weight(1f)
         ) {
             Text(
                 text = title,
@@ -137,6 +185,10 @@ fun SettingsImagePickerButton(
                 text = imageUri ?: "None",
                 modifier = Modifier
             )
+        }
+
+        IconButton(onClick = { onChangeImageUri(null) }) {
+            Icon(imageVector = Icons.Filled.Delete, contentDescription = "delete image")
         }
     }
 }

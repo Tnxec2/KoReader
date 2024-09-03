@@ -131,7 +131,7 @@ fun OpdsListContent(
                             icon = R.drawable.baseline_add_24,
                             description = R.string.add_opds,
                             onClick = {
-                                entryEditPos.value = null
+                                entryEditPos.value = entrysState.value.size
                                 entryEditDetails.value = EntryEditDetails()
                                 showEditDialog.value = true
                             }
@@ -305,6 +305,8 @@ fun OpdsList(
                 entryEditPos.value?.let {
                     onSaveOpdsOverviewEntry(it, entryEditDetails.value.title, entryEditDetails.value.url)
                 }
+                showEditDialog.value = false
+                entryEditPos.value = null
             },
             onClose = {
                 showEditDialog.value = false

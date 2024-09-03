@@ -68,6 +68,8 @@ fun ColorThemeSettingsContent(
     onChangeBackgroundImage:  (Uri?) -> Unit,
     tileBackgroundImage: Boolean,
     onChangeTileBackgroundImage: (Boolean) -> Unit,
+    stetchBackgroundImage: Boolean,
+    onChangeStretchBackgroundImage: (Boolean) -> Unit,
     marginTop: String,
     onChangeMarginTop: (String) -> Unit,
     marginBottom: String,
@@ -155,6 +157,9 @@ fun ColorThemeSettingsContent(
                             SettingsCheckbox(value = tileBackgroundImage,
                                 label = stringResource(id = R.string.repeat_tiled_image),
                                 onChange = onChangeTileBackgroundImage)
+                            SettingsCheckbox(value = stetchBackgroundImage,
+                                label = stringResource(id = R.string.stretch_background_image),
+                                onChange = onChangeStretchBackgroundImage)
                             SettingsImagePickerButton(
                                 title = stringResource(id = R.string.color_theme_selected_image),
                                 onChangeImageUri = { onChangeBackgroundImage(it) },
@@ -229,7 +234,9 @@ private fun ColorThemeSettingsPreview() {
                 marginRight = "5",
                 onChangeMarginRight = {},
                 backgroundImage = null,
-                onChangeBackgroundImage = {}
+                onChangeBackgroundImage = {},
+                stetchBackgroundImage = true,
+                onChangeStretchBackgroundImage = {}
             )
         }
     }

@@ -49,13 +49,13 @@ fun SettingsButton(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .padding(vertical = paddingSmall)
             .clickable { onClick() }
     ) {
         icon?.let{Icon(painter = painterResource(id = it), contentDescription = title,
             modifier = Modifier.padding(end = paddingSmall))}
 
-        Column(
+        Column(Modifier
+            .padding(vertical = paddingSmall)
         ) {
             Text(
                 text = title,

@@ -55,6 +55,7 @@ const val PREF_KEY_COLOR_SELECTED_THEME_INDEX = "selected_theme_index"
 const val PREF_KEY_BACKGROUND_IMAGE_URI = "backgroundImageTheme"
 const val PREF_KEY_SHOW_BACKGROUND_IMAGE = "backgroundImageEnableTheme"
 const val PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT = "backgroundImageTileTheme"
+const val PREF_KEY_BACKGROUND_IMAGE_STRETCH = "backgroundImageStretchTheme"
 const val PREF_SCREEN_BRIGHTNESS = "ScreenBrightness"
 
 const val PREF_KEY_BOOK_FONT_NAME_NORMAL = "FontNameNormal"
@@ -113,6 +114,7 @@ data class ThemeColors(
     val colorsInfo: Color,
     val showBackgroundImage: Boolean,
     val backgroundImageTiledRepeat: Boolean,
+    val stetchBackgroundImage: Boolean,
     val backgroundImageUri: String?,
     val marginTop: String = PREF_DEFAULT_MARGIN.toString(),
     val marginBottom: String = PREF_DEFAULT_MARGIN.toString(),
@@ -129,6 +131,7 @@ val defaultColors = arrayOf(
         Color(0xFF5F4B32),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
+        stetchBackgroundImage = true,
         backgroundImageUri = null,
     ),
     ThemeColors(
@@ -138,6 +141,7 @@ val defaultColors = arrayOf(
         Color(0xFF000000),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
+        stetchBackgroundImage = true,
         backgroundImageUri = null,
     ),
     ThemeColors(
@@ -147,6 +151,7 @@ val defaultColors = arrayOf(
         Color(0xFFe57614),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
+        stetchBackgroundImage = true,
         backgroundImageUri = null,
     ),
     ThemeColors(
@@ -156,6 +161,7 @@ val defaultColors = arrayOf(
         Color(0xFF008705),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
+        stetchBackgroundImage = true,
         backgroundImageUri = null,
     ),
     ThemeColors(
@@ -165,6 +171,7 @@ val defaultColors = arrayOf(
         Color(0xFF8C8A83),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
+        stetchBackgroundImage = true,
         backgroundImageUri = null,
     ),
 )
@@ -541,6 +548,8 @@ class SettingsViewModel(
             prefs.getString(PREF_KEY_BACKGROUND_IMAGE_URI + colorThemeIndex, null)
         val backgroundImageTiledRepeat =
             prefs.getBoolean(PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT + colorThemeIndex, false)
+        val stetchBackgroundImage =
+            prefs.getBoolean(PREF_KEY_BACKGROUND_IMAGE_STRETCH + colorThemeIndex, true)
 
         return ThemeColors(
             colorBack,
@@ -549,6 +558,7 @@ class SettingsViewModel(
             colorInfoText,
             showBackgroundImage,
             backgroundImageTiledRepeat,
+            stetchBackgroundImage,
             backgroundImageUri,
             marginTop =  prefs.getInt(PREF_KEY_MARGIN_TOP, PREF_DEFAULT_MARGIN).toString(),
             marginBottom =  prefs.getInt(PREF_KEY_MARGIN_BOTTOM, PREF_DEFAULT_MARGIN).toString(),
@@ -638,6 +648,12 @@ class SettingsViewModel(
         changeColors(themeIndex, colors[themeIndex]!!.value.copy(backgroundImageTiledRepeat = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putBoolean(PREF_KEY_BACKGROUND_IMAGE_TILED_REPEAT+themeIndex, value)
+        prefEditor.apply()
+    }
+    fun changeStretchBackgroundImage(themeIndex: Int, value: Boolean) {
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(stetchBackgroundImage = value))
+        val prefEditor: SharedPreferences.Editor = prefs.edit()
+        prefEditor.putBoolean(PREF_KEY_BACKGROUND_IMAGE_STRETCH+themeIndex, value)
         prefEditor.apply()
     }
     fun changeBackgroundImage(themeIndex: Int, value: String) {

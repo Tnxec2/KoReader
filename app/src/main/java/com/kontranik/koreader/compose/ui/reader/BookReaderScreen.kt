@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.text.style.ImageSpan
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerState
@@ -63,7 +62,7 @@ fun BookReaderScreen(
         mutableStateOf(false)
     }
 
-    val imageBitmap = remember {
+    val inBookClickedImageBitmap = remember {
         mutableStateOf<Bitmap?>(null)
     }
 
@@ -136,8 +135,7 @@ fun BookReaderScreen(
                 }
                 override fun onClickImageOnBookReaderTextview(imageSpan: ImageSpan) {
                     bookReaderViewModel.getImageByteArray(imageSpan)?.let { byteArray ->
-
-                        imageBitmap.value = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                        inBookClickedImageBitmap.value = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
                     }
                 }
             }
@@ -147,9 +145,9 @@ fun BookReaderScreen(
     BookReaderContainer(
         backgroundColor = backgroundColor,
 
-        imageBitmap = imageBitmap.value,
+        clickedImageBitmap = inBookClickedImageBitmap.value,
         isDarkMode = settingsViewModel.isDarkMode(context),
-        onCloseImage = { imageBitmap.value = null },
+        onCloseImageView = { inBookClickedImageBitmap.value = null },
 
         showGotoDialog = showGotoDialog.value,
         onCloseGotoDialog = { showGotoDialog.value = false},

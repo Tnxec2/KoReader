@@ -9,13 +9,17 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 
 @Composable
-fun Html(text: String, modifier: Modifier = Modifier) {
+fun Html(
+    text: String,
+    modifier: Modifier = Modifier,
+    textSize: Float = 13f) {
     val textColor = MaterialTheme.colorScheme.onBackground
 
     AndroidView(factory = { context ->
         TextView(context).apply {
             setText(HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY))
             setTextColor(textColor.toArgb())
+            setTextSize(textSize)
         }
     }, modifier = modifier)
 }

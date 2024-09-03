@@ -3,6 +3,7 @@ package com.kontranik.koreader.compose.ui.settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
@@ -134,7 +136,7 @@ fun ColorSettingsContent(
                                     defaultValue = null,
                                     onClick = { navigateToTheme(index) },
                                     showDefaultValue = false,
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 30.dp)
                                 )
                             }
                         }

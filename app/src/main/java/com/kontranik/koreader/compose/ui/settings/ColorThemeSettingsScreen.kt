@@ -52,6 +52,8 @@ fun ColorThemeSettingsScreen(
         onSetDefaultColorInfoArea = { coroutineScope.launch { settingsViewModel.setDefaultColorInfo(themeIndex) }},
         tileBackgroundImage = colors.backgroundImageTiledRepeat,
         onChangeTileBackgroundImage = { coroutineScope.launch { settingsViewModel.changeTileBackgroundImage(themeIndex, it) }},
+        stetchBackgroundImage = colors.stetchBackgroundImage,
+        onChangeStretchBackgroundImage = { coroutineScope.launch { settingsViewModel.changeStretchBackgroundImage(themeIndex, it) }},
         showBackgroundImage = colors.showBackgroundImage,
         onChangeShowBackgroundImage ={ coroutineScope.launch { settingsViewModel.changeShowBackgroundImage(themeIndex, it) }},
         marginTop = colors.marginTop,
