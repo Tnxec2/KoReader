@@ -65,7 +65,7 @@ fun OpdsEntryDetailsContent(
 
             entry.otherLinks?.let { otherLinks ->
                 otherLinks
-                    .sortedBy{ link: Link -> link.rel }
+                    .sortedBy { link: Link -> link.rel }
                     .groupBy { it.rel }
                     .forEach { (rel, links) ->
                         tempRels[OpdsTypes.mapRel(rel)] = links
@@ -85,93 +85,97 @@ fun OpdsEntryDetailsContent(
         }
     }
 
-        LazyColumn(modifier.padding(paddingSmall)) {
-            item {
-                Card {
-                    Column(Modifier.padding(paddingSmall)) {
+    LazyColumn(modifier.padding(paddingSmall)) {
+        item {
+            Card {
+                Column(Modifier.padding(paddingSmall)) {
+                    Text(
+                        text = entry.title,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    entry.author?.let {
                         Text(
-                            text = entry.title,
-                            style = MaterialTheme.typography.titleLarge
+                            text = it.toString(),
+                            style = MaterialTheme.typography.titleMedium
                         )
-                        entry.author?.let {
-                            Text(
-                                text = it.toString(),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                        cover.value?.let {
-                            Image(
-                                bitmap = it,
-                                contentDescription = entry.title,
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-                        }
+                    }
+                    cover.value?.let {
+                        Image(
+                            bitmap = it,
+                            contentDescription = entry.title,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
                     }
                 }
             }
+        }
+        item {
+            Card(Modifier.padding(top = paddingSmall)) {
+                Column(
+                    Modifier.padding(paddingSmall)
+                ) {
+                    entry.content?.let {
+                        Html(text = it.data)
+                    }
+                }
+            }
+        }
+        if (rels.value.values.isNotEmpty())
             item {
                 Card(Modifier.padding(top = paddingSmall)) {
                     Column(
                         Modifier.padding(paddingSmall)
                     ) {
-                        entry.content?.let {
-                            Html(text = it.data)
-                        }
-                    }
-                }
-            }
-            item {
-                Card(Modifier.padding(top = paddingSmall)) {
-                    Column(
-                        Modifier.padding(paddingSmall)
-                    ) {
-
-                        if (rels.value.values.isNotEmpty())
+                        if (rels.value.values.isNotEmpty()) {
                             Text(
                                 text = stringResource(id = R.string.links),
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(bottom = paddingSmall)
                             )
 
-                        rels.value.mapKeys { rel ->
-                            Text(
-                                text = rel.key,
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(bottom = paddingSmall)
-                            )
-
-
-                            rel.value.map { link ->
+                            rels.value.mapKeys { rel ->
                                 Text(
-                                    text = link.getTitle()?.toString() ?: "",
-                                    fontSize = 18.sp,
-                                    style = TextStyle(
-                                        textDecoration = TextDecoration.Underline
-                                    ),
-                                    modifier = Modifier
-                                        .heightIn(min = 30.dp)
-                                        .fillMaxWidth()
-                                        .padding(bottom = paddingSmall)
-                                        .clickable {
-                                            Log.d("ENTRYLINK", "clicked entry.otherLinks: $link")
-                                            if (link.isCatalogEntry()) {
-                                                navigateToOpdsEntryLink(link)
-                                            } else if (link.isDownloadable()) {
-                                                download(entry, link)
-                                            } else {
-                                                openInBrowser(link)
-                                            }
-                                        }
+                                    text = rel.key,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(bottom = paddingSmall)
                                 )
-                            }
 
+
+                                rel.value.map { link ->
+                                    Text(
+                                        text = link.getTitle()?.toString() ?: "",
+                                        fontSize = 18.sp,
+                                        style = TextStyle(
+                                            textDecoration = TextDecoration.Underline
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier
+                                            .heightIn(min = 30.dp)
+                                            .fillMaxWidth()
+                                            .padding(bottom = paddingSmall)
+                                            .clickable {
+                                                Log.d(
+                                                    "ENTRYLINK",
+                                                    "clicked entry.otherLinks: $link"
+                                                )
+                                                if (link.isCatalogEntry()) {
+                                                    navigateToOpdsEntryLink(link)
+                                                } else if (link.isDownloadable()) {
+                                                    download(entry, link)
+                                                } else {
+                                                    openInBrowser(link)
+                                                }
+                                            }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
+    }
 }
 
 
@@ -197,10 +201,30 @@ private fun OpdsEntryDetailsContentPreview() {
                 ),
                 image = Link(title = "Cover", href = href),
                 otherLinks = listOf(
-                    Link(type = OpdsTypes.TYPE_LINK_ATOM_XML, title = "Link1", href = "", rel = OpdsTypes.REL_RELATED),
-                    Link(type = OpdsTypes.TYPE_LINK_ATOM_XML, title = "Link2", href = "", rel = OpdsTypes.REL_RELATED),
-                    Link(type = OpdsTypes.TYPE_APP_FB2, title = "FB2", href = "", rel = OpdsTypes.REL_OPEN_ACCESS),
-                    Link(type = OpdsTypes.TYPE_APP_EPUB, title = "EPUB", href = "", rel = OpdsTypes.REL_OPEN_ACCESS),
+                    Link(
+                        type = OpdsTypes.TYPE_LINK_ATOM_XML,
+                        title = "Link1",
+                        href = "",
+                        rel = OpdsTypes.REL_RELATED
+                    ),
+                    Link(
+                        type = OpdsTypes.TYPE_LINK_ATOM_XML,
+                        title = "Link2",
+                        href = "",
+                        rel = OpdsTypes.REL_RELATED
+                    ),
+                    Link(
+                        type = OpdsTypes.TYPE_APP_FB2,
+                        title = "FB2",
+                        href = "",
+                        rel = OpdsTypes.REL_OPEN_ACCESS
+                    ),
+                    Link(
+                        type = OpdsTypes.TYPE_APP_EPUB,
+                        title = "EPUB",
+                        href = "",
+                        rel = OpdsTypes.REL_OPEN_ACCESS
+                    ),
                 )
             )
 
