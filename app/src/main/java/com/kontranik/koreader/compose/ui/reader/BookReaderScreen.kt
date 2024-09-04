@@ -205,7 +205,10 @@ fun BookReaderScreen(
         onClickInfoRight = { showGotoDialog.value = true },
 
 
-        onSetTextview = { textview.value = it },
+        onSetTextview = {
+            textview.value.removeListener()
+            textview.value = it
+        },
         bookReaderViewModel = bookReaderViewModel,
         onChangeSize = { size ->
             if (bookReaderViewModel.pageViewSettings.value!!.pageSize.width != size.width ||
