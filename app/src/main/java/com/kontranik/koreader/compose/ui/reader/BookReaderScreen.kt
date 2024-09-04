@@ -4,8 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.text.style.ImageSpan
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,11 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.kontranik.koreader.compose.ui.settings.Actions
 import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
 import com.kontranik.koreader.compose.ui.settings.TextType
@@ -39,19 +33,21 @@ fun BookReaderScreen(
     val corutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    val bookPath by bookReaderViewModel.bookPath.observeAsState()
+
     val pageViewSettings = settingsViewModel.pageViewSettings
     LaunchedEffect(key1 = pageViewSettings.value) {
         bookReaderViewModel.pageViewSettings.value = pageViewSettings.value.copy()
     }
 
-    val colors by settingsViewModel.selectedColors
+    val savedColors by settingsViewModel.selectedColors
 
-    LaunchedEffect(key1 = colors) {
-        bookReaderViewModel.themeColors.value = colors.copy()
+    LaunchedEffect(key1 = savedColors) {
+        bookReaderViewModel.themeColors.value = savedColors.copy()
     }
 
-    var backgroundColor by remember {
-        mutableStateOf(colors.colorBackground)
+    var currentBackgroundColor by remember {
+        mutableStateOf(savedColors.colorBackground)
     }
 
     val showQuickMenu = remember {
@@ -86,7 +82,7 @@ fun BookReaderScreen(
             }
             Actions.Bookmarks -> {
                 corutineScope.launch {
-                    bookReaderViewModel.bookPath.value?.let { navigateToBookmarks(it) }
+                    bookPath?.let { navigateToBookmarks(it) }
                 }
             }
             else -> {
@@ -99,12 +95,6 @@ fun BookReaderScreen(
             BookReaderTextview(context, bookReaderViewModel)
         )
     }
-//
-//    LaunchedEffect(key1 = Unit) {
-//        corutineScope.launch {
-//            bookReaderViewModel.loadBook(context)
-//        }
-//    }
 
     LaunchedEffect(key1 = textview.value) {
         textview.value.setListener(
@@ -142,8 +132,9 @@ fun BookReaderScreen(
         )
     }
 
-    BookReaderContainer(
-        backgroundColor = backgroundColor,
+    BookReaderContent(
+        backgroundColor = currentBackgroundColor,
+        colors = savedColors,
 
         clickedImageBitmap = inBookClickedImageBitmap.value,
         isDarkMode = settingsViewModel.isDarkMode(context),
@@ -160,16 +151,16 @@ fun BookReaderScreen(
             showGotoDialog.value = false
             bookReaderViewModel.goToSection(it)
         }},
-        currentSection = bookReaderViewModel.book.value?.getCurSection(),
-        currentPage = bookReaderViewModel.book.value?.getCurTextPage(),
+        currentSection = bookReaderViewModel.getCurSection(),
+        currentPage = bookReaderViewModel.getCurTextPage(),
         sectionList = bookReaderViewModel.book.value?.getPageScheme()?.sections,
         maxPage = bookReaderViewModel.book.value?.getPageScheme()?.countTextPages,
 
         showQuickMenu = showQuickMenu.value,
         onCancelQuickMenuDialog = {
             bookReaderViewModel.pageViewSettings.value = pageViewSettings.value.copy()
-            bookReaderViewModel.themeColors.value = colors.copy()
-            backgroundColor = colors.colorBackground
+            bookReaderViewModel.themeColors.value = savedColors.copy()
+            currentBackgroundColor = savedColors.colorBackground
             showQuickMenu.value = false
         },
         onAddBookmarkQuickMenuDialog = {
@@ -179,18 +170,18 @@ fun BookReaderScreen(
         onShowBookmarklistQuickMenuDialog = {
             showQuickMenu.value = false
             corutineScope.launch {
-                bookReaderViewModel.bookPath.value?.let {
+                bookPath?.let {
                     navigateToBookmarks(it)
                 }
             }
         },
         onOpenBookInfoQuickMenuDialog = {
             showQuickMenu.value = false
-            bookReaderViewModel.bookPath.value?.let { navigateToBookInfo(it) }
+            bookPath?.let { navigateToBookInfo(it) }
         },
         onChangeColorThemeQuickMenuDialog = { _: String, colorThemeIndex: Int ->
             bookReaderViewModel.themeColors.value = settingsViewModel.colors[colorThemeIndex]!!.value
-            backgroundColor = settingsViewModel.colors[colorThemeIndex]!!.value.colorBackground
+            currentBackgroundColor = settingsViewModel.colors[colorThemeIndex]!!.value.colorBackground
         },
         onChangeTextSizeQuickMenuDialog = { textSize ->
             bookReaderViewModel.pageViewSettings.value = bookReaderViewModel.pageViewSettings.value?.copy(textSize = textSize)
@@ -205,42 +196,28 @@ fun BookReaderScreen(
             settingsViewModel.onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex)
             showQuickMenu.value = false
         },
+        
         infoLeft = bookReaderViewModel.infoTextLeft.observeAsState("").value.toString(),
         infoMiddle = bookReaderViewModel.infoTextRight.observeAsState("").value.toString(),
         infoRight = bookReaderViewModel.infoTextSystemstatus.observeAsState("").value.toString(),
-        colors = colors,
         onClickInfoLeft = { showGotoDialog.value = true },
         onClickInfoMiddle = { showGotoDialog.value = true },
         onClickInfoRight = { showGotoDialog.value = true },
-        textView = {
-            AndroidView(
-                factory={ ctx ->
-                    BookReaderTextview(ctx, bookReaderViewModel).apply{
-                        textview.value.removeListener()
-                        textview.value = this
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(
-                        top = Dp(colors.marginTop.toFloat()),
-                        bottom = Dp(colors.marginBottom.toFloat()),
-                        start = Dp(colors.marginLeft.toFloat()),
-                        end = Dp(colors.marginRight.toFloat())
-                    )
-                    .onGloballyPositioned {
-                        if (bookReaderViewModel.pageViewSettings.value!!.pageSize.width != it.size.width ||
-                            bookReaderViewModel.pageViewSettings.value!!.pageSize.height != it.size.height
-                        ) {
-                            bookReaderViewModel.pageViewSettings.value =
-                                bookReaderViewModel.pageViewSettings.value!!.copy(
-                                    pageSize = it.size)
-                            bookReaderViewModel.recalcCurrentPage()
-                        }
-                    }
-            )
+
+
+        onSetTextview = { textview.value = it },
+        bookReaderViewModel = bookReaderViewModel,
+        onChangeSize = { size ->
+            if (bookReaderViewModel.pageViewSettings.value!!.pageSize.width != size.width ||
+                bookReaderViewModel.pageViewSettings.value!!.pageSize.height != size.height
+            ) {
+                bookReaderViewModel.pageViewSettings.value =
+                    bookReaderViewModel.pageViewSettings.value!!.copy(
+                        pageSize = size)
+                bookReaderViewModel.recalcCurrentPage()
+            }
         },
+
         pageViewSettings = settingsViewModel.pageViewSettings.value,
         selectedFont = settingsViewModel.fonts.value[TextType.Normal]!!.getTypeface(),
         selectedTheme = settingsViewModel.selectedColorTheme.intValue,

@@ -14,7 +14,6 @@ import org.jsoup.parser.Tag
 
 class Book(var fileLocation: String) {
 
-    var curPage: Page = Page(null, BookPosition())
     internal var ebookHelper: EbookHelper? = null
 
     init {
@@ -114,17 +113,5 @@ class Book(var fileLocation: String) {
         return ebookHelper?.pageScheme
     }
 
-    fun getCurSection(): Int {
-        return curPage.endBookPosition.section
-    }
 
-    fun getCurTextPage(): Int {
-        var curTextPage = 0
-        for (i in 0 until curPage.endBookPosition.section) {
-            if (getPageScheme()?.scheme?.get(i) != null)
-                curTextPage += getPageScheme()!!.scheme[i]!!.countTextPages
-        }
-        curTextPage += ( curPage.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
-        return curTextPage
-    }
 }

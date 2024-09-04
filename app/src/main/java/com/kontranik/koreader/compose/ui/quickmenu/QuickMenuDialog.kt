@@ -18,7 +18,6 @@ import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
 import com.kontranik.koreader.compose.ui.shared.getLetterSpacing
 import com.kontranik.koreader.compose.ui.shared.getLineSpacings
 import com.kontranik.koreader.compose.ui.shared.getThemes
-import com.kontranik.koreader.model.PageViewSettings
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,14 +26,16 @@ fun QuickMenuDialog(
     onClose: () -> Unit,
     onAddBookmark: () -> Unit,
     onOpenBookmarks: () -> Unit,
+    selectedColorTheme: Int,
     onChangeColorThemeQuickMenuDialog: (colorTheme: String, colorThemeIndex: Int) -> Unit,
+    textSize: Float,
     onChangeTextSizeQuickMenuDialog: (textSize: Float) -> Unit,
+    lineSpacingMultiplier: Float,
     onChangeLineSpacingQuickMenuDialog: (lineSpacingMultiplier: Float) -> Unit,
-    onChangeLetterSpacingQuickMenuDialog: (lineSpacingMultiplier: Float) -> Unit,
+    letterSpacing: Float,
+    onChangeLetterSpacingQuickMenuDialog: (letterSpacing: Float) -> Unit,
     onFinishQuickMenuDialog: (textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorThemeIndex: Int) -> Unit,
     onOpenBookInfo: () -> Unit,
-    selectedColorTheme: Int,
-    pageViewSettings: PageViewSettings,
     selectedFont: Typeface
 ) {
     val context = LocalContext.current
@@ -46,18 +47,18 @@ fun QuickMenuDialog(
         mutableIntStateOf(selectedColorTheme)
     }
 
-    var textSize by remember { mutableFloatStateOf(
-        pageViewSettings.textSize
+    var textSizeState by remember { mutableFloatStateOf(
+        textSize
     ) }
 
     val itemsLineSpacing by remember {mutableStateOf(getLineSpacings().map{it.toString()})}
-    var lineSpacingMultiplier by remember {
-        mutableFloatStateOf(pageViewSettings.lineSpacingMultiplier)
+    var lineSpacingMultiplierState by remember {
+        mutableFloatStateOf(lineSpacingMultiplier)
     }
 
     val itemsLetterSpacing by remember {mutableStateOf(getLetterSpacing().map{it.toString()})}
-    var letterSpacing by remember {
-        mutableFloatStateOf(pageViewSettings.letterSpacing)
+    var letterSpacingState by remember {
+        mutableFloatStateOf(letterSpacing)
     }
 
     LaunchedEffect(Unit) {
@@ -66,7 +67,7 @@ fun QuickMenuDialog(
     }
 
     fun saveQuickSettings() {
-        onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex)
+        onFinishQuickMenuDialog(textSizeState, lineSpacingMultiplierState, letterSpacingState, colorThemeIndex)
         onClose()
     }
 
@@ -80,22 +81,22 @@ fun QuickMenuDialog(
                 colorThemeIndex = pos
                 onChangeColorThemeQuickMenuDialog(item, pos)
             },
-            textSize = textSize,
+            textSize = textSizeState,
             onChangeTextSize = {
-                textSize = it
+                textSizeState = it
                 onChangeTextSizeQuickMenuDialog(it)
            },
             selectedFont = selectedFont,
             itemsLineSpacing = itemsLineSpacing,
             itemsLetterSpacing = itemsLetterSpacing,
-            lineSpacingMultiplier = lineSpacingMultiplier,
+            lineSpacingMultiplier = lineSpacingMultiplierState,
             onChangeLineSpacing = {
-                lineSpacingMultiplier=it
+                lineSpacingMultiplierState=it
                 onChangeLineSpacingQuickMenuDialog(it)
             },
-            letterSpacing = letterSpacing,
+            letterSpacing = letterSpacingState,
             onChangeLetterSpacing = {
-                letterSpacing=it
+                letterSpacingState=it
                 onChangeLetterSpacingQuickMenuDialog(it)
             },
             onAddBookmark = {onAddBookmark()},

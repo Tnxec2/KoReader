@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 import com.kontranik.koreader.database.BookStatusHelper
 import com.kontranik.koreader.model.Book
 import com.kontranik.koreader.model.BookPosition
+import com.kontranik.koreader.model.Page
 import com.kontranik.koreader.utils.ImageUtils
 import java.util.*
 
@@ -23,13 +24,13 @@ class BookStatus(
     var cover: ByteArray? = null
 ) {
 
-    constructor(book: Book) : this(
+    constructor(book: Book, curPage: Page) : this(
         id = null,
         path = book.fileLocation,
         title = book.ebookHelper?.bookInfo?.title,
         authors = book.ebookHelper?.bookInfo?.authorsAsString(),
-        position_section = book.curPage.startBookPosition.section,
-        position_offset = book.curPage.startBookPosition.offSet,
+        position_section = curPage.startBookPosition.section,
+        position_offset = curPage.startBookPosition.offSet,
         cover = ImageUtils.getBytes(book.ebookHelper?.bookInfo?.cover)
     )
 

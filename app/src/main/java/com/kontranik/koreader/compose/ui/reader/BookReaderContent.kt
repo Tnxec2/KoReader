@@ -5,10 +5,8 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,37 +18,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.viewinterop.AndroidView
-import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.quickmenu.QuickMenuDialog
 import com.kontranik.koreader.compose.ui.settings.ThemeColors
-import com.kontranik.koreader.compose.ui.settings.defaultColors
 import com.kontranik.koreader.model.PageViewSettings
-import com.kontranik.koreader.utils.ImageUtils
 import java.io.InputStream
 
-inline fun <T : Any> Modifier.ifNotNull(value: T?, builder: (T) -> Modifier): Modifier =
-    then(if (value != null) builder(value) else Modifier)
-
 @Composable
-fun BookReaderContainer(
+fun BookReaderContent(
+    backgroundColor: Color,
+    colors: ThemeColors,
+
     note: String?,
     onCloseNote: () -> Unit,
-    backgroundColor: Color,
 
     clickedImageBitmap: Bitmap?,
     isDarkMode: Boolean,
@@ -66,6 +59,9 @@ fun BookReaderContainer(
     onCloseGotoDialog: () -> Unit,
 
     showQuickMenu: Boolean,
+    pageViewSettings: PageViewSettings,
+    selectedTheme: Int,
+    selectedFont: Typeface,
     onCancelQuickMenuDialog: () -> Unit,
     onAddBookmarkQuickMenuDialog: () -> Unit,
     onShowBookmarklistQuickMenuDialog: () -> Unit,
@@ -74,20 +70,18 @@ fun BookReaderContainer(
     onChangeTextSizeQuickMenuDialog: (textSize: Float) -> Unit,
     onChangeLineSpacingQuickMenuDialog: (lineSpacingMultiplier: Float) -> Unit,
     onChangeLetterSpacingQuickMenuDialog: (lineSpacingMultiplier: Float) -> Unit,
+    onFinishQuickMenuDialog: (textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorThemeIndex: Int) -> Unit,
 
-    textView: @Composable ColumnScope.() -> Unit,
+    bookReaderViewModel: BookReaderViewModel,
+    onSetTextview: (BookReaderTextview) -> Unit,
+    onChangeSize: (IntSize) -> Unit,
+
     infoLeft: String,
     infoMiddle: String,
     infoRight: String,
-    colors: ThemeColors,
-    pageViewSettings: PageViewSettings,
-    selectedTheme: Int,
-    selectedFont: Typeface,
-
     onClickInfoLeft: () -> Unit,
     onClickInfoMiddle: () -> Unit,
     onClickInfoRight: () -> Unit,
-    onFinishQuickMenuDialog: (textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorThemeIndex: Int) -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -111,14 +105,19 @@ fun BookReaderContainer(
     val painterModifier = if (colors.showBackgroundImage)
         backgroundImage.value?.let {
             if (colors.backgroundImageTiledRepeat)
-                imageBrush?.let { brush -> Modifier.background(backgroundColor).background(brush) }
+                imageBrush?.let { brush ->
+                    Modifier
+                        .background(backgroundColor)
+                        .background(brush) }
             else
-                Modifier.background(backgroundColor).paint(
-                    painter = BitmapPainter(it),
-                    alignment = Alignment.TopStart,
-                    contentScale = if (colors.stetchBackgroundImage) ContentScale.FillBounds else
-                    ContentScale.None
-                )
+                Modifier
+                    .background(backgroundColor)
+                    .paint(
+                        painter = BitmapPainter(it),
+                        alignment = Alignment.TopStart,
+                        contentScale = if (colors.stetchBackgroundImage) ContentScale.FillBounds else
+                            ContentScale.None
+                    )
         } ?: Modifier.background(backgroundColor)
         else
             Modifier.background(backgroundColor)
@@ -149,7 +148,22 @@ fun BookReaderContainer(
                 .fillMaxSize()
 
         ) {
-            textView.invoke(this)
+
+            AndroidView(
+                    factory={ ctx ->
+                        BookReaderTextview(ctx, bookReaderViewModel).apply{
+                            onSetTextview(this)
+                        }
+                    },
+                Modifier.fillMaxWidth()
+                    .weight(1f)
+                    .padding(top = Dp(colors.marginTop.toFloat()),
+                        bottom = Dp(colors.marginBottom.toFloat()),
+                        start = Dp(colors.marginLeft.toFloat()),
+                        end = Dp(colors.marginRight.toFloat())
+                    )
+                    .onGloballyPositioned { layoutCoordinates -> onChangeSize(layoutCoordinates.size) }
+                    )
 
             InfoArea(
                 left = infoLeft,
@@ -230,66 +244,12 @@ fun BookReaderContainer(
                 onChangeTextSizeQuickMenuDialog = { value ->
                     onChangeTextSizeQuickMenuDialog(value)
                 },
-                pageViewSettings = pageViewSettings,
+                selectedColorTheme = selectedTheme,
+                textSize = pageViewSettings.textSize,
+                lineSpacingMultiplier = pageViewSettings.lineSpacingMultiplier,
+                letterSpacing = pageViewSettings.letterSpacing,
                 selectedFont = selectedFont,
-                selectedColorTheme = selectedTheme
             )
         }
-    }
-
-        
-}
-
-@Preview
-@Composable
-private fun BookReaderContainerPreview() {
-
-    AppTheme {
-        BookReaderContainer(
-            textView =  {  AndroidView(
-                factory = {
-                    ctx -> TextView(ctx).apply {
-                        text = "book content"
-                    }
-                },
-                Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            )},
-            onClickInfoLeft = {},
-            onClickInfoMiddle = {},
-            onClickInfoRight = {},
-            infoLeft = "left",
-            infoMiddle = "center",
-            infoRight = "right",
-            colors = defaultColors.first(),
-            showQuickMenu = false,
-            showGotoDialog = false,
-            onChangeTextSizeQuickMenuDialog = { _ -> },
-            onChangeLineSpacingQuickMenuDialog = { _ ->},
-            onChangeColorThemeQuickMenuDialog = { _, _ ->},
-            onChangeLetterSpacingQuickMenuDialog = { _ ->},
-            onCancelQuickMenuDialog = {},
-            onFinishQuickMenuDialog = {_,_,_,_ ->},
-            onOpenBookInfoQuickMenuDialog = { ->},
-            onShowBookmarklistQuickMenuDialog = {},
-            onAddBookmarkQuickMenuDialog = {},
-            pageViewSettings = PageViewSettings(),
-            selectedFont = Typeface.DEFAULT,
-            selectedTheme = 0,
-            backgroundColor = defaultColors.first().colorBackground,
-            note = null,
-            onCloseNote = {},
-            onCloseGotoDialog = {},
-            gotoPage = {},
-            gotoSection = {},
-            sectionList = listOf(),
-            maxPage = 10,
-            currentPage = 0,
-            currentSection = 1,
-            clickedImageBitmap = null,
-            isDarkMode = false,
-            onCloseImageView = {},
-        )
     }
 }

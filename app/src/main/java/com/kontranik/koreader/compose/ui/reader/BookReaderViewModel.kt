@@ -6,11 +6,9 @@ import android.os.BatteryManager
 import android.text.style.ImageSpan
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
@@ -24,6 +22,7 @@ import com.kontranik.koreader.database.model.Bookmark
 import com.kontranik.koreader.database.repository.BookStatusRepository
 import com.kontranik.koreader.database.repository.BookmarksRepository
 import com.kontranik.koreader.model.Book
+import com.kontranik.koreader.model.BookPageScheme
 import com.kontranik.koreader.model.BookPosition
 import com.kontranik.koreader.model.Page
 import com.kontranik.koreader.model.PageViewSettings
@@ -44,12 +43,28 @@ class BookReaderViewModel(
 ) : ViewModel()  {
 
     val book = MutableLiveData<Book?>(null)
+    private var curPage = MutableLiveData(Page(startBookPosition = BookPosition()))
+
+    fun getCurSection(): Int {
+        return curPage.value!!.endBookPosition.section
+    }
+
+    fun getCurTextPage(): Int {
+        var curTextPage = 0
+        for (i in 0 until curPage.value!!.endBookPosition.section) {
+            if (book.value!!.getPageScheme()?.scheme?.get(i) != null)
+                curTextPage += book.value!!.getPageScheme()!!.scheme[i]!!.countTextPages
+        }
+        curTextPage += ( curPage.value!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
+        return curTextPage
+    }
 
     private var pageLoader = PageLoader()
 
     private var changingPage = false
 
     var pageViewContent: MutableLiveData<CharSequence?> = MutableLiveData()
+
     var pageViewSettings = MutableLiveData(
         PageViewSettings()
     )
@@ -58,12 +73,6 @@ class BookReaderViewModel(
     )
 
     val bookPath = MutableLiveData<String?>(null)
-    private val savedBookStatus = bookPath.switchMap {
-        it?.let { it1 ->
-            println("bookPath: $it1")
-            bookStatusRepository.getLiveDataBookStatusByPath(it1)
-        }
-    }.asFlow()
 
     var screenBrightnessLevel: Float = 1f
 
@@ -75,17 +84,25 @@ class BookReaderViewModel(
 
 
     init {
-        println("init viewmodel")
-        viewModelScope.launch {
+        KoReaderApplication.getApplicationScope().launch {
             bookPath.asFlow().collect {
-                println("collect bookpath: $bookPath")
-            }
-
-            savedBookStatus.collect {
-                println("collect savedBookStatus")
-                goToPositionByBookStatus(it)
+                println("collect bookpath $it")
+                it?.let { path ->
+                    loadBook(path)
+                }
             }
         }
+
+        book.observeForever {
+            getCur()?.let { curPage.postValue(it) }
+        }
+
+        viewModelScope.launch {
+            curPage.asFlow().collect {
+                updateView(it)
+            }
+        }
+
 
         loadPrefs()
     }
@@ -93,14 +110,14 @@ class BookReaderViewModel(
     fun recalcCurrentPage() {
         if (book.value != null) {
             println("recaltCurrentPage")
-            updateView(getCur(recalc = true))
+            getCur()?.let { curPage.postValue(it) }
         }
     }
 
-    private fun loadBook() {
+    private fun loadBook(path: String?) {
         try {
-            if (bookPath.value != null && book.value?.fileLocation != bookPath.value ) {
-                if (!FileHelper.contentFileExist(KoReaderApplication.getContext(), bookPath.value)) {
+            if (path != null && book.value?.fileLocation != path ) {
+                if (!FileHelper.contentFileExist(KoReaderApplication.getContext(), path)) {
 //                    Toast.makeText(
 //                        context,
 //                        KoReaderApplication.getContext().resources.getString(R.string.can_not_load_book, bookPath.value),
@@ -109,55 +126,48 @@ class BookReaderViewModel(
                     return
                 }
 
-                book.value = Book(bookPath.value!!)
-                book.value?.let { book ->
-                    viewModelScope.launch {
-                        BooksRoomDatabase.databaseWriteExecutor.execute {
-                            val bookStatus = bookStatusRepository.getBookStatusByPath(book.fileLocation)
-                            if (bookStatus != null) {
-                                bookStatusRepository.updateLastOpenTime(bookStatus.id, Date().time)
-                            } else {
-                                bookStatusRepository.insert(BookStatus(book))
-                            }
-                        }
+                val newBook = Book(path)
+
+                val status = bookStatusRepository.getBookStatusByPath(newBook.fileLocation)
+                if (status != null) {
+                    val bookStatus = bookStatusRepository.getBookStatusByPath(newBook.fileLocation)
+                    if (bookStatus != null) {
+                        bookStatusRepository.updateLastOpenTime(bookStatus.id, Date().time)
+                    } else {
+                        bookStatusRepository.insert(BookStatus(newBook, Page(null, BookPosition(), BookPosition())))
                     }
                 }
+
+                val startPosition: BookPosition = if (status == null) {
+                    BookPosition()
+                } else {
+                    BookPosition(status.position_section, status.position_offset)
+                }
+
+                curPage.postValue(Page(null, startPosition, BookPosition()))
+                book.postValue(newBook)
             }
         } catch (e: Exception) {
             Log.e("tag", e.stackTraceToString())
         }
     }
 
-    private fun goToPositionByBookStatus(bookStatus: BookStatus?) {
-        Log.d("goToPositionByBookStat.", "bookstatus: $bookStatus")
-        loadBook()
-        if (book.value != null) {
-            val startPosition: BookPosition = if (bookStatus == null) {
-                BookPosition()
-            } else {
-                BookPosition(bookStatus.position_section, bookStatus.position_offset)
-            }
-            Log.d("goToPositionByBookStat.", "startPosition: $startPosition")
-            book.value!!.curPage = Page(null, startPosition, BookPosition())
-            updateView(
-                getCur(recalc = true)
-            )
-        }
-    }
 
-    private fun getCur(recalc: Boolean): Page? {
-        return getPage(BookPosition(book.value!!.curPage.startBookPosition),false, recalc)
+
+    private fun getCur(): Page? {
+        return getPage(curPage.value!!.startBookPosition.copy(),revers = false, recalc = true)
     }
 
     private fun getNext(): Page? {
-        val bookPosition =  BookPosition(book.value!!.curPage.endBookPosition.section, offSet = book.value!!.curPage.endBookPosition.offSet+1)
+        val bookPosition =  BookPosition(curPage.value!!.endBookPosition.section,
+            offSet = curPage.value!!.endBookPosition.offSet+1)
         bookPosition.offSet += 1
         return getPage(BookPosition(bookPosition), revers = false, recalc = false)
     }
 
     private fun getPrev(): Page? {
         println("getPrev")
-        val bookPosition =  BookPosition(book.value!!.curPage.startBookPosition)
+        val bookPosition =  BookPosition(curPage.value!!.startBookPosition)
         bookPosition.offSet -= 1
         return getPage(BookPosition(bookPosition), revers = true, recalc = false)
     }
@@ -175,18 +185,17 @@ class BookReaderViewModel(
     private fun updateView(page: Page?) {
         println("updateView")
         if (page != null) {
-            book.value?.curPage = Page(page)
-            pageViewContent.value = page.content
+            pageViewContent.postValue(page.content)
         } else {
-            pageViewContent.value = KoReaderApplication.getContext().getString(R.string.no_page_content)
+            pageViewContent.postValue(KoReaderApplication.getContext().getString(R.string.no_page_content))
         }
         updateInfo()
     }
 
     private fun updateInfo() {
         if (book.value != null) {
-            val curSection = book.value!!.getCurSection()
-            val curTextPage = book.value!!.getCurTextPage()
+            val curSection = getCurSection()
+            val curTextPage = getCurTextPage()
 
             infoTextLeft.value =
                 KoReaderApplication.getContext().getString(
@@ -221,13 +230,13 @@ class BookReaderViewModel(
 
     private fun pageNext(): Boolean {
         if (book.value == null) return false
-        updateView(getNext())
+        getNext()?.let { curPage.postValue(it) }
         return true
     }
 
     private fun pagePrev(): Boolean {
         if (book.value == null) return false
-        updateView(getPrev())
+        getPrev()?.let { curPage.postValue(it) }
         return true
     }
 
@@ -237,28 +246,28 @@ class BookReaderViewModel(
             PREFS_FILE,
             Context.MODE_PRIVATE
         )
-        bookPath.value = settings.getString(PREF_BOOK_PATH, null)
+        bookPath.postValue(settings.getString(PREF_BOOK_PATH, null))
         screenBrightnessLevel = settings.getFloat(PREF_SCREEN_BRIGHTNESS, 1f)
     }
 
     fun changePath(path: String) {
-        bookPath.value = path
+        println("changePath")
         val settings = KoReaderApplication.getContext().getSharedPreferences(
             PREFS_FILE,
             Context.MODE_PRIVATE
         )
         val prefEditor = settings.edit()
-        prefEditor.putString(PREF_BOOK_PATH, bookPath.value)
+        prefEditor.putString(PREF_BOOK_PATH, path)
         prefEditor.apply()
+        bookPath.postValue(path)
     }
 
-    fun savePrefs() {
+    fun changeBrightness() {
         val settings = KoReaderApplication.getContext().getSharedPreferences(
             PREFS_FILE,
             Context.MODE_PRIVATE
         )
         val prefEditor = settings.edit()
-        prefEditor.putString(PREF_BOOK_PATH, bookPath.value)
         prefEditor.putFloat(
             PREF_SCREEN_BRIGHTNESS, screenBrightnessLevel)
         prefEditor.apply()
@@ -289,30 +298,23 @@ class BookReaderViewModel(
     }
 
     private fun savePositionForBook() {
-        if (bookPath.value != null
-            && book.value?.curPage != null) {
-            savePosition()
-        }
-    }
-
-    private fun savePosition() {
-        viewModelScope.launch {
+        if (bookPath.value != null && curPage.value != null) {
             BooksRoomDatabase.databaseWriteExecutor.execute {
-                book.value?.fileLocation?.let {
-                    val bookStatus = bookStatusRepository.getBookStatusByPath(it)
-
-                    if (bookStatus == null) {
-                        Log.d("BookReaderViewModel", "savePosition: bookstatus is null")
-                        bookStatusRepository.insert(BookStatus(book.value!!))
-                    } else {
-                        Log.d(
-                            "BookReaderViewModel",
-                            "savePosition: section: ${bookStatus.position_section}, offset: ${bookStatus.position_offset}"
-                        )
-                        val bookPosition =
-                            BookPosition(book.value!!.curPage.startBookPosition)
-                        bookStatus.updatePosition(bookPosition)
-                        bookStatusRepository.update(bookStatus)
+                bookPath.value?.let { path ->
+                    bookStatusRepository.getBookStatusByPath(path).let { bookStatus ->
+                        if (bookStatus == null) {
+                            Log.d("BookReaderViewModel", "savePosition: bookstatus is null, insert new")
+                            bookStatusRepository.insert(BookStatus(book.value!!, curPage.value!!))
+                        } else {
+                            Log.d(
+                                "BookReaderViewModel",
+                                "savePosition: section: ${bookStatus.position_section}, offset: ${bookStatus.position_offset}"
+                            )
+                            val bookPosition =
+                                BookPosition(curPage.value!!.startBookPosition)
+                            bookStatus.updatePosition(bookPosition)
+                            bookStatusRepository.update(bookStatus)
+                        }
                     }
                 }
             }
@@ -342,8 +344,8 @@ class BookReaderViewModel(
             text = if (pageText.length <= 100)
                 pageText else
                 pageText.substring(0, 100),
-            position_section = book.value!!.curPage.startBookPosition.section,
-            position_offset = book.value!!.curPage.startBookPosition.offSet,
+            position_section = curPage.value!!.startBookPosition.section,
+            position_offset = curPage.value!!.startBookPosition.offSet,
         )
     }
 
@@ -367,7 +369,7 @@ class BookReaderViewModel(
     }
 
     private fun goToPage(page: Page) {
-        book.value?.curPage = page
+        curPage.value = page
         recalcCurrentPage()
         savePositionForBook()
     }

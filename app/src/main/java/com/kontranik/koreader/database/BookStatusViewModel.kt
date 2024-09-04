@@ -15,18 +15,7 @@ const val LAST_OPENED_COUNT = 10
 
 class BookStatusViewModel(private val mRepository: BookStatusRepository) : ViewModel() {
 
-    fun updateLastOpenTime(book: Book) {
-        viewModelScope.launch {
-            BooksRoomDatabase.databaseWriteExecutor.execute {
-                val bookStatus = mRepository.getBookStatusByPath(book.fileLocation)
-                if (bookStatus != null) {
-                    mRepository.updateLastOpenTime(bookStatus.id, Date().time)
-                } else {
-                    mRepository.insert(BookStatus(book))
-                }
-            }
-        }
-    }
+
 
     private val path = MutableLiveData<String>()
     val savedBookStatus: LiveData<BookStatus?> = path.switchMap { getLiveDataBookStatusByPath(it) }
