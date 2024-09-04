@@ -42,22 +42,9 @@ class BookReaderViewModel(
     private val bookmarkRepository: BookmarksRepository
 ) : ViewModel()  {
 
+    val bookPath = MutableLiveData<String?>(null)
     val book = MutableLiveData<Book?>(null)
     private var curPage = MutableLiveData(Page(startBookPosition = BookPosition()))
-
-    fun getCurSection(): Int {
-        return curPage.value!!.endBookPosition.section
-    }
-
-    fun getCurTextPage(): Int {
-        var curTextPage = 0
-        for (i in 0 until curPage.value!!.endBookPosition.section) {
-            if (book.value!!.getPageScheme()?.scheme?.get(i) != null)
-                curTextPage += book.value!!.getPageScheme()!!.scheme[i]!!.countTextPages
-        }
-        curTextPage += ( curPage.value!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
-        return curTextPage
-    }
 
     private var pageLoader = PageLoader()
 
@@ -71,8 +58,6 @@ class BookReaderViewModel(
     var themeColors = MutableLiveData(
         defaultColors.first()
     )
-
-    val bookPath = MutableLiveData<String?>(null)
 
     var screenBrightnessLevel: Float = 1f
 
@@ -93,8 +78,10 @@ class BookReaderViewModel(
             }
         }
 
-        book.observeForever {
-            getCur()?.let { curPage.postValue(it) }
+        viewModelScope.launch {
+            book.asFlow().collect {
+                getCur()?.let { curPage.postValue(it) }
+            }
         }
 
         viewModelScope.launch {
@@ -103,13 +90,11 @@ class BookReaderViewModel(
             }
         }
 
-
         loadPrefs()
     }
 
     fun recalcCurrentPage() {
         if (book.value != null) {
-            println("recaltCurrentPage")
             getCur()?.let { curPage.postValue(it) }
         }
     }
@@ -152,10 +137,34 @@ class BookReaderViewModel(
         }
     }
 
-
-
     private fun getCur(): Page? {
         return getPage(curPage.value!!.startBookPosition.copy(),revers = false, recalc = true)
+    }
+
+    fun goToNextPage() {
+        if (changingPage) return
+        changingPage = true
+        if (pageNext()) savePositionForBook()
+        changingPage = false
+    }
+
+    fun doPagePrev() {
+        if (changingPage) return
+        changingPage = true
+        if (pagePrev()) savePositionForBook()
+        changingPage = false
+    }
+
+    private fun pageNext(): Boolean {
+        if (book.value == null) return false
+        getNext()?.let { curPage.postValue(it) }
+        return true
+    }
+
+    private fun pagePrev(): Boolean {
+        if (book.value == null) return false
+        getPrev()?.let { curPage.postValue(it) }
+        return true
     }
 
     private fun getNext(): Page? {
@@ -228,18 +237,6 @@ class BookReaderViewModel(
             KoReaderApplication.getContext().resources.getString(R.string.page_info_text_time, strTime, batLevel)
     }
 
-    private fun pageNext(): Boolean {
-        if (book.value == null) return false
-        getNext()?.let { curPage.postValue(it) }
-        return true
-    }
-
-    private fun pagePrev(): Boolean {
-        if (book.value == null) return false
-        getPrev()?.let { curPage.postValue(it) }
-        return true
-    }
-
     private fun loadPrefs() {
         println("loadPrefs")
         val settings = KoReaderApplication.getContext().getSharedPreferences(
@@ -281,20 +278,6 @@ class BookReaderViewModel(
         val prefEditor = settings.edit()
         prefEditor.remove(PREF_BOOK_PATH)
         prefEditor.apply()
-    }
-
-    fun goToNextPage() {
-        if (changingPage) return
-        changingPage = true
-        if (pageNext()) savePositionForBook()
-        changingPage = false
-    }
-
-    fun doPagePrev() {
-        if (changingPage) return
-        changingPage = true
-        if (pagePrev()) savePositionForBook()
-        changingPage = false
     }
 
     private fun savePositionForBook() {
@@ -372,5 +355,19 @@ class BookReaderViewModel(
         curPage.value = page
         recalcCurrentPage()
         savePositionForBook()
+    }
+
+    fun getCurSection(): Int {
+        return curPage.value!!.endBookPosition.section
+    }
+
+    fun getCurTextPage(): Int {
+        var curTextPage = 0
+        for (i in 0 until curPage.value!!.endBookPosition.section) {
+            if (book.value!!.getPageScheme()?.scheme?.get(i) != null)
+                curTextPage += book.value!!.getPageScheme()!!.scheme[i]!!.countTextPages
+        }
+        curTextPage += ( curPage.value!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
+        return curTextPage
     }
 }
