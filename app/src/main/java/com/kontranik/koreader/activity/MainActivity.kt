@@ -17,12 +17,12 @@ class MainActivity : ComponentActivity() {
 
         actionBar?.hide()
 
-        val windowInsetsController =
-            WindowCompat.getInsetsController(window, window.decorView)
-        // Configure the behavior of the hidden system bars.
-        windowInsetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
+//        val windowInsetsController =
+//            WindowCompat.getInsetsController(window, window.decorView)
+//        // Configure the behavior of the hidden system bars.
+//        windowInsetsController.systemBarsBehavior =
+//            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+//        windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
 
         enableEdgeToEdge()
         setContent {

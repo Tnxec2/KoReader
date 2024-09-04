@@ -780,8 +780,8 @@ class SettingsViewModel(
     }
 
     fun isDarkMode(context: Context): Boolean {
-        println("${interfaceTheme.value} ${context.resources?.configuration?.uiMode?.and(
-            Configuration.UI_MODE_NIGHT_MASK)}")
+//        println("${interfaceTheme.value} ${context.resources?.configuration?.uiMode?.and(
+//            Configuration.UI_MODE_NIGHT_MASK)}")
         return when (interfaceTheme.value) {
             "Light" -> false
             "Dark" -> true

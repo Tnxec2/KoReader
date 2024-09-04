@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.kontranik.koreader.KoReaderApplication
@@ -57,14 +58,14 @@ class BookReaderViewModel(
     )
 
     val bookPath = MutableLiveData<String?>(null)
-    private val savedBookStatus: LiveData<BookStatus?> = bookPath.switchMap {
+    private val savedBookStatus = bookPath.switchMap {
         it?.let { it1 ->
+            println("bookPath: $it1")
             bookStatusRepository.getLiveDataBookStatusByPath(it1)
         }
-    }
+    }.asFlow()
 
     var screenBrightnessLevel: Float = 1f
-
 
     var infoTextLeft: MutableLiveData<CharSequence?> = MutableLiveData()
     var infoTextRight: MutableLiveData<CharSequence?> = MutableLiveData()
@@ -74,16 +75,26 @@ class BookReaderViewModel(
 
 
     init {
-        loadPrefs()
+        println("init viewmodel")
+        viewModelScope.launch {
+            bookPath.asFlow().collect {
+                println("collect bookpath: $bookPath")
+            }
 
-        savedBookStatus.observeForever {
-            goToPositionByBookStatus(savedBookStatus.value)
+            savedBookStatus.collect {
+                println("collect savedBookStatus")
+                goToPositionByBookStatus(it)
+            }
         }
+
+        loadPrefs()
     }
 
     fun recalcCurrentPage() {
-        if (book.value != null)
+        if (book.value != null) {
+            println("recaltCurrentPage")
             updateView(getCur(recalc = true))
+        }
     }
 
     private fun loadBook() {
@@ -221,6 +232,7 @@ class BookReaderViewModel(
     }
 
     private fun loadPrefs() {
+        println("loadPrefs")
         val settings = KoReaderApplication.getContext().getSharedPreferences(
             PREFS_FILE,
             Context.MODE_PRIVATE
@@ -290,12 +302,12 @@ class BookReaderViewModel(
                     val bookStatus = bookStatusRepository.getBookStatusByPath(it)
 
                     if (bookStatus == null) {
-                        Log.d("savePosition", "bookstatus is null")
+                        Log.d("BookReaderViewModel", "savePosition: bookstatus is null")
                         bookStatusRepository.insert(BookStatus(book.value!!))
                     } else {
                         Log.d(
-                            "savePosition",
-                            bookStatus.position_section.toString() + " " + bookStatus.position_offset
+                            "BookReaderViewModel",
+                            "savePosition: section: ${bookStatus.position_section}, offset: ${bookStatus.position_offset}"
                         )
                         val bookPosition =
                             BookPosition(book.value!!.curPage.startBookPosition)

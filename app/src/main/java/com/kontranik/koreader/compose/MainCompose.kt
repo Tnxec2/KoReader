@@ -39,7 +39,6 @@ fun MainCompose(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-
     val backButtonPressedTime = remember {
         mutableLongStateOf(Date().time-3000)
     }
@@ -49,7 +48,7 @@ fun MainCompose(
             scope.launch { drawerState.close() }
         else
             scope.launch {
-                println(Date().time - backButtonPressedTime.longValue)
+                //println(Date().time - backButtonPressedTime.longValue)
                 if (Date().time - backButtonPressedTime.longValue < 2000) {
                     val activity = (context as? Activity)
                     activity?.finish()

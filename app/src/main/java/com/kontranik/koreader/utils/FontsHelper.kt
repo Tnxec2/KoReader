@@ -106,7 +106,7 @@ open class FontsHelper() {
     internal fun replaceTypefaces(spannable: Spannable): Spannable {
         val allSpans = spannable.getSpans(0, spannable.length, TypefaceSpan::class.java)
         for (typfaceSpan in allSpans) {
-            Log.d("FontsHelper", "family: ${typfaceSpan.family}, typeface: ${typfaceSpan.typeface?.style}")
+            //Log.d("FontsHelper", "family: ${typfaceSpan.family}, typeface: ${typfaceSpan.typeface?.style}")
             if ( typfaceSpan.family == "monospace" || typfaceSpan.typeface == Typeface.MONOSPACE) {
                 val start: Int = spannable.getSpanStart(typfaceSpan)
                 val end: Int = spannable.getSpanEnd(typfaceSpan)

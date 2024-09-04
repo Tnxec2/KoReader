@@ -46,16 +46,18 @@ class BookReaderTextview(
                 override fun onClick(point: Point) {
                     super.onClick(point)
 
-                    // Find the URL that was pressed
-                    val off = getClickedOffset(point)
-                    val spannable = text as SpannedString
-                    val link = spannable.getSpans(off, off, URLSpan::class.java)
-                    if (link.isNotEmpty()) {
-                        // link clicked
-                        listener?.onClickLinkOnBookReaderTextview(link[0].url)
-                    } else {
-                        // not a link, normal click
-                        checkTap(point, TapType.OneTap)
+                    if (text is SpannedString) {
+                        // Find the URL that was pressed
+                        val off = getClickedOffset(point)
+                        val spannable = text as SpannedString
+                        val link = spannable.getSpans(off, off, URLSpan::class.java)
+                        if (link.isNotEmpty()) {
+                            // link clicked
+                            listener?.onClickLinkOnBookReaderTextview(link[0].url)
+                        } else {
+                            // not a link, normal click
+                            checkTap(point, TapType.OneTap)
+                        }
                     }
                 }
 

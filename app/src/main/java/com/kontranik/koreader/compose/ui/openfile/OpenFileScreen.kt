@@ -106,7 +106,6 @@ fun OpenFileScreen(
     }
 
     LaunchedEffect(key1 = fileChooseFragmentViewModel.showConfirmSelectStorageDialog) {
-        println(fileChooseFragmentViewModel.showConfirmSelectStorageDialog.value)
         showConfirmOpenStorageDialog = fileChooseFragmentViewModel.showConfirmSelectStorageDialog.value
     }
 

@@ -66,7 +66,7 @@ fun BookInfoScreen(
     navigateToAuthor: (authorId: Long) -> Unit,
     modifier: Modifier = Modifier,
     bookInfoViewModell: BookInfoViewModell = viewModel(factory = AppViewModelProvider.Factory),
-    bookReaderViewModel: BookReaderViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    bookReaderViewModel: BookReaderViewModel,
     bookStatusViewModel: BookStatusViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
 
