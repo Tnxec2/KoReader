@@ -54,6 +54,8 @@ fun TextSettingsScreen(
         navigateBack = { coroutineScope.launch { navigateBack() }},
         textSize = settingsViewModel.pageViewSettings.value.textSize,
         onChangeTextSize = { coroutineScope.launch { settingsViewModel.changeFontSize(it) } },
+        textSizeInfoArea = settingsViewModel.pageViewSettings.value.textSizeInfoArea,
+        onChangeTextSizeInfoArea = { coroutineScope.launch { settingsViewModel.changeFontSizeInfoArea(it) } },
         lineSpacingMultiplier = settingsViewModel.pageViewSettings.value.lineSpacingMultiplier,
         onChangeLineSpacingMultiplier= { coroutineScope.launch { settingsViewModel.changeLineSpacingMultiplier(it) }},
         letterSpacing = settingsViewModel.pageViewSettings.value.letterSpacing,
@@ -76,6 +78,8 @@ fun TextSettingsScreen(
 fun TextSettingsContent(
     textSize: Float,
     onChangeTextSize: (Float) -> Unit,
+    textSizeInfoArea: Float,
+    onChangeTextSizeInfoArea: (Float) -> Unit,
     lineSpacingMultiplier: Float,
     onChangeLineSpacingMultiplier: (Float) -> Unit,
     letterSpacing: Float,
@@ -120,9 +124,18 @@ fun TextSettingsContent(
                     SettingsCard(title = stringResource(id = R.string.text)) {
                         Column {
                             FontSizeWidget(
+                                title = stringResource(id = R.string.textsize),
                                 textSize = textSize,
                                 onChangeTextSize = onChangeTextSize,
                                 selectedFont = fonts[TextType.Normal]!!.getTypeface(),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            FontSizeWidget(
+                                title = stringResource(id = R.string.textsize_infoarea),
+                                textSize = textSizeInfoArea,
+                                onChangeTextSize = onChangeTextSizeInfoArea,
+                                selectedFont = fonts[TextType.InfoArea]!!.getTypeface(),
                                 modifier = Modifier.fillMaxWidth()
                             )
 
@@ -210,6 +223,15 @@ fun TextSettingsContent(
                                 shoNotoFonts = showNotoFonts,
                                 onChange = { onChangeFont(TextType.Monospace, it) }
                             )
+
+                            SettingsFontPicker(
+                                title = stringResource(id = R.string.text_infoarea),
+                                style = Typeface.NORMAL,
+                                typefaceRecord = fonts[TextType.InfoArea]!!,
+                                showSystemFonts = showSystemFonts,
+                                shoNotoFonts = showNotoFonts,
+                                onChange = { onChangeFont(TextType.InfoArea, it) }
+                            )
                         }
                     }
                 }
@@ -221,14 +243,16 @@ fun TextSettingsContent(
 
 @PreviewPortraitLight
 @Composable
-private fun ColorThemeSettingsPreview() {
+private fun TextSettingsContentPreview() {
     AppTheme {
         Surface {
             TextSettingsContent(
                 drawerState = DrawerState(DrawerValue.Closed),
                 navigateBack = {},
                 textSize = 12f,
+                textSizeInfoArea = 12f,
                 onChangeTextSize = {},
+                onChangeTextSizeInfoArea = {},
                 lineSpacingMultiplier = 1.2f,
                 onChangeLineSpacingMultiplier= {},
                 letterSpacing = 1.2f,

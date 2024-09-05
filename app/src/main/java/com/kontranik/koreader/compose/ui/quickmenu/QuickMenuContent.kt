@@ -59,7 +59,7 @@ fun QuickMenuDialogContent(
 
         Column(
             modifier
-                .padding(horizontal =  paddingMedium)
+                .padding(horizontal = paddingMedium)
                 .padding(top = paddingSmall)
         ) {
             Row(Modifier.fillMaxWidth()) {
@@ -79,6 +79,7 @@ fun QuickMenuDialogContent(
                 }
             }
             FontSizeWidget(
+                title = stringResource(id = R.string.textsize),
                 textSize = textSize,
                 onChangeTextSize = onChangeTextSize,
                 selectedFont = selectedFont,

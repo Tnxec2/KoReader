@@ -1,5 +1,6 @@
 package com.kontranik.koreader.compose.ui.reader
 
+import android.app.ActionBar.LayoutParams
 import android.graphics.Bitmap
 import android.graphics.Shader
 import android.graphics.Typeface
@@ -76,6 +77,7 @@ fun BookReaderContent(
     onSetTextview: (BookReaderTextview) -> Unit,
     onChangeSize: (IntSize) -> Unit,
 
+    infoAreaFont: Typeface,
     infoLeft: String,
     infoMiddle: String,
     infoRight: String,
@@ -153,11 +155,15 @@ fun BookReaderContent(
                     factory={ ctx ->
                         BookReaderTextview(ctx, bookReaderViewModel).apply{
                             onSetTextview(this)
+                            layoutParams =
+                                LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
                         }
                     },
-                Modifier.fillMaxWidth()
+                Modifier
+                    .fillMaxWidth()
                     .weight(1f)
-                    .padding(top = Dp(colors.marginTop.toFloat()),
+                    .padding(
+                        top = Dp(colors.marginTop.toFloat()),
                         bottom = Dp(colors.marginBottom.toFloat()),
                         start = Dp(colors.marginLeft.toFloat()),
                         end = Dp(colors.marginRight.toFloat())
@@ -166,6 +172,8 @@ fun BookReaderContent(
                     )
 
             InfoArea(
+                textSize = pageViewSettings.textSizeInfoArea,
+                font = infoAreaFont,
                 left = infoLeft,
                 middle = infoMiddle,
                 right = infoRight,

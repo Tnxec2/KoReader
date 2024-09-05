@@ -13,6 +13,9 @@ import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Log
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.material3.MaterialTheme
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.kontranik.koreader.R
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +65,7 @@ object ImageUtils {
                 R.drawable.ic_folder_black_24dp,
                 null
             )
-            else -> ResourcesCompat.getDrawable(c.resources, R.drawable.ic_book_black_24dp, null)
+            else -> AppCompatResources.getDrawable(c, R.drawable.ic_book_black_24dp)
         }
 
         return drawableToBitmap(d!!)

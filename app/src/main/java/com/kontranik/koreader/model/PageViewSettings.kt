@@ -10,6 +10,7 @@ import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
 
 data class PageViewSettings(
     var textSize: Float = defaultTextSize,
+    var textSizeInfoArea: Float = defaultTextSize,
     var lineSpacingMultiplier: Float = defaultLineSpacingMultiplier,
     var letterSpacing: Float = defaultLetterSpacing,
     var typeFace: Typeface = Typeface.DEFAULT,

@@ -3,6 +3,7 @@ package com.kontranik.koreader.compose.ui.reader
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.graphics.Point
 import android.text.SpannedString
 import android.text.style.ImageSpan
@@ -32,7 +33,6 @@ class BookReaderTextview(
             text = it
         }
 
-
         bookReaderViewModel.themeColors.observe(context as LifecycleOwner) {
             setTextColor(it.colorsText.toArgb())
             setLinkTextColor(it.colorsLink.toArgb())
@@ -45,8 +45,7 @@ class BookReaderTextview(
             OnSwipeTouchListener(context) {
                 override fun onClick(point: Point) {
                     super.onClick(point)
-
-                    if (text is SpannedString) {
+                    try {
                         // Find the URL that was pressed
                         val off = getClickedOffset(point)
                         val spannable = text as SpannedString
@@ -58,6 +57,8 @@ class BookReaderTextview(
                             // not a link, normal click
                             checkTap(point, TapType.OneTap)
                         }
+                    } catch (e: Exception) {
+                        checkTap(point, TapType.OneTap)
                     }
                 }
 

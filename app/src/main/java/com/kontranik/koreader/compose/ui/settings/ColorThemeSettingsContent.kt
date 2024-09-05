@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
@@ -153,7 +155,11 @@ fun ColorThemeSettingsContent(
                         Column {
                             SettingsCheckbox(value = showBackgroundImage,
                                 label = stringResource(id = R.string.color_theme_show_background_image),
-                                onChange = onChangeShowBackgroundImage)
+                                onChange = onChangeShowBackgroundImage,
+                                modifier = if ( showBackgroundImage && backgroundImage == null ) Modifier
+                                    .border(width = 1.dp, color = Color.Red)
+                                    .padding(3.dp)
+                                else Modifier)
                             SettingsCheckbox(value = tileBackgroundImage,
                                 label = stringResource(id = R.string.repeat_tiled_image),
                                 onChange = onChangeTileBackgroundImage)
@@ -164,7 +170,11 @@ fun ColorThemeSettingsContent(
                                 title = stringResource(id = R.string.color_theme_selected_image),
                                 onChangeImageUri = { onChangeBackgroundImage(it) },
                                 imageUri = backgroundImage,
-                                showImageUriValue = true
+                                showImageUriValue = true,
+                                modifier = if ( showBackgroundImage && backgroundImage == null ) Modifier
+                                    .border(width = 1.dp, color = Color.Red)
+                                    .padding(3.dp)
+                                else Modifier
                             )
                         }
                     }

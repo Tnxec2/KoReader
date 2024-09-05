@@ -3,6 +3,8 @@ package com.kontranik.koreader.compose.ui.settings
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +18,7 @@ import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.defaultLetterSpacing
 import com.kontranik.koreader.compose.theme.defaultLineSpacingMultiplier
 import com.kontranik.koreader.compose.theme.defaultTextSize
+import com.kontranik.koreader.compose.theme.defaultTextSizeInfoArea
 import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.model.ScreenZone
 
@@ -37,6 +40,7 @@ const val PREF_KEY_USE_SYSTEM_FONTS = "showSystemFonts"
 const val PREF_KEY_SHOW_NOTO_FONTS = "showNotoFonts"
 
 const val PREF_KEY_BOOK_TEXT_SIZE = "TextSize"
+const val PREF_KEY_BOOK_TEXT_SIZE_INFO_AREA = "TextSizeInfoArea"
 const val PREF_KEY_BOOK_LINE_SPACING = "LineSpacing"
 const val PREF_KEY_BOOK_LETTER_SPACING = "LetterSpacing"
 
@@ -65,6 +69,8 @@ const val PREF_KEY_BOOK_FONT_NAME_BOLDITALIC = "FontNameItalicBold"
 const val PREF_KEY_BOOK_FONT_PATH_BOLDITALIC = "FontPathItalicBold"
 const val PREF_KEY_BOOK_FONT_NAME_MONOSPACE = "FontNameMonospace"
 const val PREF_KEY_BOOK_FONT_PATH_MONOSPACE = "FontPathMonospace"
+const val PREF_KEY_BOOK_FONT_NAME_INFO_AREA = "FontNameInfoArea"
+const val PREF_KEY_BOOK_FONT_PATH_INFO_AREA = "FontPathInfoArea"
 
 const val PREF_KEY_TAP_ONE_TOP_LEFT = "tapZoneOneClickTopLeft"
 const val PREF_KEY_TAP_ONE_TOP_CENTER = "tapZoneOneClickTopCenter"
@@ -135,7 +141,7 @@ val defaultColors = arrayOf(
         Color(0xFF000000),
         Color(0xFFFBF0D9),
         Color(0xFF2196F3),
-        Color(0xFF000000),
+        Color(0xFFFBF0D9),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
         stetchBackgroundImage = true,
@@ -179,6 +185,7 @@ val defaultsFonts = mapOf(
     TextType.Italic to TypefaceRecord(name = SERIF),
     TextType.BoldItalic to TypefaceRecord(name = SERIF),
     TextType.Monospace to TypefaceRecord(name = MONO),
+    TextType.InfoArea to TypefaceRecord(name = SANSSERIF),
 )
 
 enum class Actions {
@@ -361,6 +368,7 @@ class SettingsViewModel(
         readTabZones()
 
         val fontSize = prefs.getFloat(PREF_KEY_BOOK_TEXT_SIZE, defaultTextSize)
+        val fontSizeInfoArea = prefs.getFloat(PREF_KEY_BOOK_TEXT_SIZE_INFO_AREA, defaultTextSizeInfoArea)
 
         val lineSpacingMultiplierString = prefs.getString(PREF_KEY_BOOK_LINE_SPACING, null)
         val lineSpacingMultiplier =
@@ -370,12 +378,16 @@ class SettingsViewModel(
         val letterSpacing = letterSpacingString?.toFloat() ?: defaultLetterSpacing
 
         pageViewSettings.value = pageViewSettings.value.copy(
-            textSize = fontSize, lineSpacingMultiplier = lineSpacingMultiplier, letterSpacing = letterSpacing
+            textSize = fontSize,
+            textSizeInfoArea = fontSizeInfoArea,
+            lineSpacingMultiplier = lineSpacingMultiplier,
+            letterSpacing = letterSpacing
         )
     }
 
     private fun readTabZones() {
-        tapOneAction.value = hashMapOf(
+        try {
+            tapOneAction.value = hashMapOf(
                 ScreenZone.TopLeft to Actions.valueOf(prefs.getString(
                     PREF_KEY_TAP_ONE_TOP_LEFT,
                     defaultTapZoneOneTopLeft.name
@@ -488,6 +500,10 @@ class SettingsViewModel(
                     defaultTapZoneDoubleBottomRight.name
                 ) ?: defaultTapZoneDoubleBottomRight.name)
             )
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun readFonts() {
@@ -507,7 +523,10 @@ class SettingsViewModel(
         val nameBoldItalic = prefs.getString(PREF_KEY_BOOK_FONT_NAME_BOLDITALIC, defaultsFonts[TextType.Bold]?.name) ?: TypefaceRecord.DEFAULT.name
 
         val pathMono = prefs.getString(PREF_KEY_BOOK_FONT_PATH_MONOSPACE, null)
-        val nameMono = prefs.getString(PREF_KEY_BOOK_FONT_NAME_MONOSPACE, defaultsFonts[TextType.Monospace]?.name) ?: TypefaceRecord.MONO
+        val nameMono = prefs.getString(PREF_KEY_BOOK_FONT_NAME_MONOSPACE, defaultsFonts[TextType.Monospace]?.name) ?: MONO
+
+        val pathInfoArea = prefs.getString(PREF_KEY_BOOK_FONT_PATH_INFO_AREA, null)
+        val nameInfoArea = prefs.getString(PREF_KEY_BOOK_FONT_NAME_INFO_AREA, defaultsFonts[TextType.InfoArea]?.name) ?: MONO
 
         fonts.value = mapOf(
             TextType.Normal to TypefaceRecord(nameNormal, pathNormal),
@@ -515,6 +534,7 @@ class SettingsViewModel(
             TextType.Italic to TypefaceRecord(nameItalic, pathItalic),
             TextType.BoldItalic to TypefaceRecord(nameBoldItalic, pathBoldItalic),
             TextType.Monospace to TypefaceRecord(nameMono, pathMono),
+            TextType.InfoArea to TypefaceRecord(nameInfoArea, pathInfoArea),
         )
     }
 
@@ -653,10 +673,17 @@ class SettingsViewModel(
         prefEditor.putBoolean(PREF_KEY_BACKGROUND_IMAGE_STRETCH+themeIndex, value)
         prefEditor.apply()
     }
-    fun changeBackgroundImage(themeIndex: Int, value: String) {
-        changeColors(themeIndex, colors[themeIndex]!!.value.copy(backgroundImageUri = value))
+    fun changeBackgroundImage(themeIndex: Int, value: Uri?) {
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(
+            backgroundImageUri = value?.toString(),
+            showBackgroundImage = value != null
+            ))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
-        prefEditor.putString(PREF_KEY_BACKGROUND_IMAGE_URI+themeIndex, value)
+        if (value != null)
+            prefEditor.putString(PREF_KEY_BACKGROUND_IMAGE_URI+themeIndex, value.toString())
+        else
+            prefEditor.remove(PREF_KEY_BACKGROUND_IMAGE_URI+themeIndex)
+        prefEditor.putBoolean(PREF_KEY_SHOW_BACKGROUND_IMAGE+themeIndex, value != null)
         prefEditor.apply()
     }
     fun changeMarginTop(themeIndex: Int, value: String) {
@@ -740,6 +767,13 @@ class SettingsViewModel(
         pageViewSettings.value = pageViewSettings.value.copy(textSize = size)
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putFloat(PREF_KEY_BOOK_TEXT_SIZE, size)
+        prefEditor.apply()
+    }
+
+    fun changeFontSizeInfoArea(size: Float) {
+        pageViewSettings.value = pageViewSettings.value.copy(textSizeInfoArea = size)
+        val prefEditor: SharedPreferences.Editor = prefs.edit()
+        prefEditor.putFloat(PREF_KEY_BOOK_TEXT_SIZE_INFO_AREA, size)
         prefEditor.apply()
     }
 
@@ -851,6 +885,9 @@ private fun getFontPathPref(fonttype: TextType): String {
         TextType.BoldItalic -> {
             PREF_KEY_BOOK_FONT_PATH_BOLDITALIC
         }
+        TextType.InfoArea -> {
+            PREF_KEY_BOOK_FONT_PATH_INFO_AREA
+        }
         else -> {
             PREF_KEY_BOOK_FONT_PATH_NORMAL
         }
@@ -870,6 +907,9 @@ private fun getFontNamePref(fonttype: TextType): String {
         }
         TextType.BoldItalic -> {
             PREF_KEY_BOOK_FONT_NAME_BOLDITALIC
+        }
+        TextType.InfoArea -> {
+            PREF_KEY_BOOK_FONT_NAME_INFO_AREA
         }
         else -> {
             PREF_KEY_BOOK_FONT_NAME_NORMAL

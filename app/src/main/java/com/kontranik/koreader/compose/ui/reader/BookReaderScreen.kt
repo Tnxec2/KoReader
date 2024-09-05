@@ -196,7 +196,8 @@ fun BookReaderScreen(
             settingsViewModel.onFinishQuickMenuDialog(textSize, lineSpacingMultiplier, letterSpacing, colorThemeIndex)
             showQuickMenu.value = false
         },
-        
+
+        infoAreaFont = settingsViewModel.fonts.value[TextType.InfoArea]!!.getTypeface(),
         infoLeft = bookReaderViewModel.infoTextLeft.observeAsState("").value.toString(),
         infoMiddle = bookReaderViewModel.infoTextRight.observeAsState("").value.toString(),
         infoRight = bookReaderViewModel.infoTextSystemstatus.observeAsState("").value.toString(),
@@ -206,7 +207,6 @@ fun BookReaderScreen(
 
 
         onSetTextview = {
-            textview.value.removeListener()
             textview.value = it
         },
         bookReaderViewModel = bookReaderViewModel,

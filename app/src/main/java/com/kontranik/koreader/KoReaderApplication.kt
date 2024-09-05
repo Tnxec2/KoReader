@@ -15,13 +15,6 @@ class KoReaderApplication : Application() {
     // No need to cancel this scope as it'll be torn down with the process
     val applicationScope = CoroutineScope(SupervisorJob())
 
-    // TODO: remove old initialisation, this should be done by AppContainer
-    private val database by lazy { BooksRoomDatabase.getDatabase(this, applicationScope) }
-    val bookmarksRepository by lazy { BookmarksRepository(database.bookmarksDao()) }
-    val bookStatusRepository by lazy { BookStatusRepository(database.bookStatusDao()) }
-    val libraryItemRepository by lazy { LibraryItemRepository(database.libraryItemDao()) }
-    val authorsRepository by lazy { AuthorsRepository(database.authorDao()) }
-
     /**
      * AppContainer instance used by the rest of classes to obtain dependencies
      */

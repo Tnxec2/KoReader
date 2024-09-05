@@ -63,9 +63,7 @@ object AppViewModelProvider {
         }
 
         initializer {
-            OpenFileViewModel(
-                koReaderApplication().applicationContext
-            )
+            OpenFileViewModel()
         }
 
         initializer {
@@ -77,8 +75,8 @@ object AppViewModelProvider {
         initializer {
             LibraryViewModel(
                 this.createSavedStateHandle(),
-                koReaderApplication().libraryItemRepository,
-                koReaderApplication().authorsRepository,
+                koReaderApplication().container.libraryItemRepository,
+                koReaderApplication().container.authorsRepository,
                 koReaderApplication().applicationScope,
             )
         }

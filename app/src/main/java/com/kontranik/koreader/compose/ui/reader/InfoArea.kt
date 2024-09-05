@@ -1,5 +1,6 @@
 package com.kontranik.koreader.compose.ui.reader
 
+import android.graphics.Typeface
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -16,6 +18,8 @@ import com.kontranik.koreader.compose.theme.AppTheme
 
 @Composable
 fun InfoArea(
+    textSize: Float,
+    font: Typeface,
     left: String,
     middle: String,
     right: String,
@@ -33,7 +37,8 @@ fun InfoArea(
         Text(
             text = left,
             color = textColor,
-            fontSize = 10.sp,
+            fontSize = textSize.sp,
+            fontFamily = FontFamily(font),
             modifier = Modifier
                 .weight(1f)
                 .clickable {
@@ -43,7 +48,8 @@ fun InfoArea(
         Text(
             text = middle,
             color = textColor,
-            fontSize = 10.sp,
+            fontSize = textSize.sp,
+            fontFamily = FontFamily(font),
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .weight(1f)
@@ -54,7 +60,8 @@ fun InfoArea(
         Text(
             text = right,
             color = textColor,
-            fontSize = 10.sp,
+            fontSize = textSize.sp,
+            fontFamily = FontFamily(font),
             textAlign = TextAlign.End,
             modifier = Modifier
                 .weight(1f)
@@ -71,6 +78,8 @@ private fun InfoAreaPreview() {
     AppTheme {
         Surface {
             InfoArea(
+                textSize = 10f,
+                font = Typeface.SERIF,
                 left = "left",
                 middle = "middle",
                 right = "right",

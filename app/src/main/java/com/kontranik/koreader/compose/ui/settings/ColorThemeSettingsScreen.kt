@@ -65,6 +65,6 @@ fun ColorThemeSettingsScreen(
         marginRight = colors.marginRight,
         onChangeMarginRight = { coroutineScope.launch { settingsViewModel.changeMarginRight(themeIndex, it) }},
         backgroundImage = colors.backgroundImageUri,
-        onChangeBackgroundImage = { coroutineScope.launch { settingsViewModel.changeBackgroundImage(themeIndex, it.toString()) }},
+        onChangeBackgroundImage = { coroutineScope.launch { settingsViewModel.changeBackgroundImage(themeIndex, it) }},
     )
 }

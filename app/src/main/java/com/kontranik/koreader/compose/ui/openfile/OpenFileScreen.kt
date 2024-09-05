@@ -1,6 +1,8 @@
 package com.kontranik.koreader.compose.ui.openfile
 
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -79,12 +81,19 @@ fun OpenFileScreen(
     var showConfirmOpenStorageDialog by remember { mutableStateOf(false) }
     var deleteStoragePosition by remember { mutableStateOf<Int?>(null) }
 
+    val temp = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
+        coroutineScope.launch {
+            println("storagePicker: $it")
+            fileChooseFragmentViewModel.addStoragePath(it.toString())
+        }
+    }
+
     val storagePicker = rememberLauncherForActivityResult(
          contract = GetStorageToOpen(),
          onResult = { uri ->
              uri?.let {
                  coroutineScope.launch {
-                    println("storagePicker: $it")
+                     context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     fileChooseFragmentViewModel.addStoragePath(it.toString())
                  }
              }
@@ -243,13 +252,22 @@ fun FileMenuItem(
             )
             .fillMaxWidth()
     ) {
-        Image(
-            bitmap = bookInfoComposableState.value.cover,
-            contentDescription = bookInfoComposableState.value.title,
-            modifier = Modifier
-                .padding(horizontal = paddingMedium, vertical = paddingSmall)
-                .size(width = 50.dp, height = 100.dp)
-        )
+        if (fileItem.isDir || fileItem.isStorage || fileItem.isRoot)
+            Icon(
+                bitmap = bookInfoComposableState.value.cover,
+                contentDescription = bookInfoComposableState.value.title,
+                modifier = Modifier
+                    .padding(horizontal = paddingMedium, vertical = paddingSmall)
+                    .size(width = 50.dp, height = 100.dp)
+            )
+        else
+            Image(
+                bitmap = bookInfoComposableState.value.cover,
+                contentDescription = bookInfoComposableState.value.title,
+                modifier = Modifier
+                    .padding(horizontal = paddingMedium, vertical = paddingSmall)
+                    .size(width = 50.dp, height = 100.dp)
+            )
         Column(
             Modifier
                 .padding(end = paddingMedium)

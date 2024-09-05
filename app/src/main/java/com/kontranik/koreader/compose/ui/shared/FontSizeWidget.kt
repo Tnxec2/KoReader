@@ -22,6 +22,7 @@ import com.kontranik.koreader.R
 
 @Composable
 fun FontSizeWidget(
+    title: String,
     textSize: Float,
     onChangeTextSize: (Float) -> Unit,
     selectedFont: Typeface,
@@ -32,7 +33,7 @@ fun FontSizeWidget(
         modifier = modifier
     ) {
         Text(
-            text = stringResource(id = R.string.textsize),
+            text = title,
             modifier = Modifier.weight(0.5f)
         )
         Row(
@@ -70,7 +71,11 @@ fun FontSizeWidget(
 @Composable
 private fun FontSizeWidgetPreview() {
     Surface {
-        FontSizeWidget(textSize = 34f, onChangeTextSize = {}, selectedFont = Typeface.SANS_SERIF)
+        FontSizeWidget(
+            title = stringResource(id = R.string.textsize),
+            textSize = 34f,
+            onChangeTextSize = {},
+            selectedFont = Typeface.SANS_SERIF)
     }
     
 }

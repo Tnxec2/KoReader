@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-09-04T11:03:06.948644536Z">
+        <DropdownSelection timestamp="2024-09-04T12:40:29.224946921Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=/home/kontranik/.android/avd/Pixel_Nik_API_35.avd" />

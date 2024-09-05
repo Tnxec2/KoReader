@@ -6,7 +6,8 @@ enum class TextType {
     Italic,
     BoldItalic,
     Normal,
-    Monospace;
+    Monospace,
+    InfoArea;
 
     companion object {
         fun fromString(s: String): TextType {
@@ -22,6 +23,9 @@ enum class TextType {
                 }
                 "bolditalic" -> {
                     BoldItalic
+                }
+                "infoarea" -> {
+                    InfoArea
                 }
                 else -> {
                     Normal
