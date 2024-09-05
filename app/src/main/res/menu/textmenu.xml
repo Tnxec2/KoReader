@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/textmenu_addbookmark"
+        android:title="Add bookmark"
+        app:showAsAction="always" />
+    <item android:id="@+id/textmenu_cancel"
+        app:showAsAction="always"
+        android:title="Cancel Select Mode"/>
+</menu>

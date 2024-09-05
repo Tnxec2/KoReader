@@ -128,6 +128,10 @@ fun BookReaderScreen(
                         inBookClickedImageBitmap.value = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
                     }
                 }
+
+                override fun onAddBookmark(start: Int, end: Int, text: CharSequence) {
+                    bookReaderViewModel.addBookmark(start, text)
+                }
             }
         )
     }

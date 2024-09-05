@@ -417,5 +417,13 @@ class BookReaderViewModel(
         goToPage(Page(null, BookPosition(bookmark), BookPosition()))
     }
 
-
+    fun addBookmark(start: Int, text: CharSequence) {
+        bookmarkRepository.insert(
+        Bookmark(
+            path = book.value!!.fileLocation,
+            text = text.toString(),
+            position_section = curPage.value!!.startBookPosition.section,
+            position_offset = curPage.value!!.startBookPosition.offSet + start,
+        ))
+    }
 }
