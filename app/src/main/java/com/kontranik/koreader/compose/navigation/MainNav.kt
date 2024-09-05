@@ -39,7 +39,6 @@ import com.kontranik.koreader.compose.ui.settings.TapZonesOneClickSettingsScreen
 import com.kontranik.koreader.compose.ui.settings.TapZonesSettingsScreen
 import com.kontranik.koreader.compose.ui.settings.TextSettingsScreen
 import com.kontranik.koreader.database.BookStatusViewModel
-import com.kontranik.koreader.database.model.Author
 
 
 fun NavGraphBuilder.mainGraph(
@@ -178,8 +177,17 @@ fun NavGraphBuilder.mainGraph(
             BoomkmarksScreen(
                 drawerState = drawerState,
                 navigateBack = { navController.popBackStack() },
-                navigateToBookmark = { },
-                addBookmark = { })
+                navigateToReader = {
+                    navController.navigate(NavOptions.BookReader.name){
+                        popUpTo(NavOptions.BookReader.name) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = false
+                    }
+                },
+                bookReaderViewModel = bookReaderViewModel
+                )
         }
 
         composable(

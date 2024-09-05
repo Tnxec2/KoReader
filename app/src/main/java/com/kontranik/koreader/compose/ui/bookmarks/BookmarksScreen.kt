@@ -43,6 +43,7 @@ import com.kontranik.koreader.compose.ui.appbar.AppBarAction
 import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.database.model.Bookmark
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import kotlinx.coroutines.launch
 
 object BoomkmarksScreenDestination : NavigationDestination {
@@ -56,9 +57,9 @@ object BoomkmarksScreenDestination : NavigationDestination {
 fun BoomkmarksScreen(
     drawerState: DrawerState,
     navigateBack: () -> Unit,
-    navigateToBookmark: (bookmark: Bookmark) -> Unit,
-    addBookmark: () -> Unit,
+    navigateToReader: () -> Unit,
     modifier: Modifier = Modifier,
+    bookReaderViewModel: BookReaderViewModel,
     bookmarksViewModel: BookmarksViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -76,7 +77,7 @@ fun BoomkmarksScreen(
                     IconButton(onClick = { coroutineScope.launch { navigateBack() } }) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(
                             id = R.string.back
-                        )
+                            )
                         )
                     }
                 },
@@ -84,7 +85,11 @@ fun BoomkmarksScreen(
                     AppBarAction(appBarAction = AppBarAction(
                         icon = R.drawable.ic_iconmonstr_bookmark_add,
                         description = R.string.add_bookmark,
-                        onClick = { addBookmark() }
+                        onClick = {
+                            coroutineScope.launch {
+                                bookReaderViewModel.addBookmarkForCurrentPage()
+                            }
+                        }
                     ))
                 }
             )
@@ -115,7 +120,8 @@ fun BoomkmarksScreen(
                         bookmark = item,
                         onOpen = {
                             coroutineScope.launch {
-                                navigateToBookmark(item)
+                                bookReaderViewModel.goToBookmark(item)
+                                navigateToReader()
                             }
                         },
                         onDelete = {

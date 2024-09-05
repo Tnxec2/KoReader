@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.os.BatteryManager
 import android.text.style.ImageSpan
 import android.util.Log
+import android.widget.TextView
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -40,7 +41,7 @@ import kotlin.math.min
 class BookReaderViewModel(
     private val bookStatusRepository: BookStatusRepository,
     private val bookmarkRepository: BookmarksRepository
-) : ViewModel()  {
+) : ViewModel() {
 
     val bookPath = MutableLiveData<String?>(null)
     val book = MutableLiveData<Book?>(null)
@@ -101,7 +102,7 @@ class BookReaderViewModel(
 
     private fun loadBook(path: String?) {
         try {
-            if (path != null && book.value?.fileLocation != path ) {
+            if (path != null && book.value?.fileLocation != path) {
                 if (!FileHelper.contentFileExist(KoReaderApplication.getContext(), path)) {
 //                    Toast.makeText(
 //                        context,
@@ -119,7 +120,12 @@ class BookReaderViewModel(
                     if (bookStatus != null) {
                         bookStatusRepository.updateLastOpenTime(bookStatus.id, Date().time)
                     } else {
-                        bookStatusRepository.insert(BookStatus(newBook, Page(null, BookPosition(), BookPosition())))
+                        bookStatusRepository.insert(
+                            BookStatus(
+                                newBook,
+                                Page(null, BookPosition(), BookPosition())
+                            )
+                        )
                     }
                 }
 
@@ -138,7 +144,7 @@ class BookReaderViewModel(
     }
 
     private fun getCur(): Page? {
-        return getPage(curPage.value!!.startBookPosition.copy(),revers = false, recalc = true)
+        return getPage(curPage.value!!.startBookPosition.copy(), revers = false, recalc = true)
     }
 
     fun goToNextPage() {
@@ -168,15 +174,17 @@ class BookReaderViewModel(
     }
 
     private fun getNext(): Page? {
-        val bookPosition =  BookPosition(curPage.value!!.endBookPosition.section,
-            offSet = curPage.value!!.endBookPosition.offSet+1)
+        val bookPosition = BookPosition(
+            curPage.value!!.endBookPosition.section,
+            offSet = curPage.value!!.endBookPosition.offSet + 1
+        )
         bookPosition.offSet += 1
         return getPage(BookPosition(bookPosition), revers = false, recalc = false)
     }
 
     private fun getPrev(): Page? {
         println("getPrev")
-        val bookPosition =  BookPosition(curPage.value!!.startBookPosition)
+        val bookPosition = BookPosition(curPage.value!!.startBookPosition)
         bookPosition.offSet -= 1
         return getPage(BookPosition(bookPosition), revers = true, recalc = false)
     }
@@ -188,7 +196,8 @@ class BookReaderViewModel(
             themeColors.value!!,
             BookPosition(bookPosition),
             revers = revers,
-            recalc = recalc)
+            recalc = recalc
+        )
     }
 
     private fun updateView(page: Page?) {
@@ -196,7 +205,9 @@ class BookReaderViewModel(
         if (page != null) {
             pageViewContent.postValue(page.content)
         } else {
-            pageViewContent.postValue(KoReaderApplication.getContext().getString(R.string.no_page_content))
+            pageViewContent.postValue(
+                KoReaderApplication.getContext().getString(R.string.no_page_content)
+            )
         }
         updateInfo()
     }
@@ -230,11 +241,16 @@ class BookReaderViewModel(
 
     private fun updateSystemStatus() {
         val simpleDateFormatTime = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val bm = KoReaderApplication.getContext().getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        val bm = KoReaderApplication.getContext()
+            .getSystemService(Context.BATTERY_SERVICE) as BatteryManager
         val batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         val strTime: String = simpleDateFormatTime.format(Date().time)
         infoTextSystemstatus.value =
-            KoReaderApplication.getContext().resources.getString(R.string.page_info_text_time, strTime, batLevel)
+            KoReaderApplication.getContext().resources.getString(
+                R.string.page_info_text_time,
+                strTime,
+                batLevel
+            )
     }
 
     private fun loadPrefs() {
@@ -266,7 +282,8 @@ class BookReaderViewModel(
         )
         val prefEditor = settings.edit()
         prefEditor.putFloat(
-            PREF_SCREEN_BRIGHTNESS, screenBrightnessLevel)
+            PREF_SCREEN_BRIGHTNESS, screenBrightnessLevel
+        )
         prefEditor.apply()
     }
 
@@ -286,7 +303,10 @@ class BookReaderViewModel(
                 bookPath.value?.let { path ->
                     bookStatusRepository.getBookStatusByPath(path).let { bookStatus ->
                         if (bookStatus == null) {
-                            Log.d("BookReaderViewModel", "savePosition: bookstatus is null, insert new")
+                            Log.d(
+                                "BookReaderViewModel",
+                                "savePosition: bookstatus is null, insert new"
+                            )
                             bookStatusRepository.insert(BookStatus(book.value!!, curPage.value!!))
                         } else {
                             Log.d(
@@ -321,6 +341,14 @@ class BookReaderViewModel(
         )
     }
 
+    fun addBookmarkForCurrentPage() {
+        curPage.value?.content?.let {
+            bookmarkRepository.insert(
+                getBookmarkForCurrentPosition(it.toString())
+            )
+        }
+    }
+
     private fun getBookmarkForCurrentPosition(pageText: String): Bookmark {
         return Bookmark(
             path = book.value!!.fileLocation,
@@ -332,7 +360,7 @@ class BookReaderViewModel(
         )
     }
 
-    fun loadNote(url: String){
+    fun loadNote(url: String) {
         note.value = book.value?.getNote(url)
     }
 
@@ -348,7 +376,8 @@ class BookReaderViewModel(
                 null,
                 book.value!!.ebookHelper!!.pageScheme.getBookPositionForPage(page),
                 BookPosition()
-            ))
+            )
+        )
     }
 
     private fun goToPage(page: Page) {
@@ -367,7 +396,26 @@ class BookReaderViewModel(
             if (book.value!!.getPageScheme()?.scheme?.get(i) != null)
                 curTextPage += book.value!!.getPageScheme()!!.scheme[i]!!.countTextPages
         }
-        curTextPage += ( curPage.value!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE )
+        curTextPage += (curPage.value!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE)
         return curTextPage
     }
+
+    private fun isBookmarkOnCurrentPage(bookmark: Bookmark): Boolean {
+        return curPage.value?.let {
+            bookmark.position_section >= curPage.value!!.startBookPosition.section
+            &&
+            bookmark.position_section <= curPage.value!!.endBookPosition.section
+            &&
+            bookmark.position_offset >= curPage.value!!.startBookPosition.offSet
+            &&
+            bookmark.position_offset < curPage.value!!.endBookPosition.offSet
+        } ?: false
+    }
+
+    fun goToBookmark(bookmark: Bookmark) {
+        if (isBookmarkOnCurrentPage(bookmark)) return
+        goToPage(Page(null, BookPosition(bookmark), BookPosition()))
+    }
+
+
 }

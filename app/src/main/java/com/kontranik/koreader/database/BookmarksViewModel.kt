@@ -1,16 +1,16 @@
 package com.kontranik.koreader.database
 
 import android.net.Uri
-import androidx.lifecycle.*
-import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDestination
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.viewModelScope
 import com.kontranik.koreader.compose.ui.bookmarks.BoomkmarksScreenDestination
-import com.kontranik.koreader.database.repository.BookmarksRepository
 import com.kontranik.koreader.database.model.Bookmark
+import com.kontranik.koreader.database.repository.BookmarksRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 

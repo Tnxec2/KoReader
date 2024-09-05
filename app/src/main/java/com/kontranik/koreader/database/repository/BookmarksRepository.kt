@@ -1,6 +1,5 @@
 package com.kontranik.koreader.database.repository
 
-import androidx.lifecycle.LiveData
 import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.dao.BookmarksDao
 import com.kontranik.koreader.database.model.Bookmark
