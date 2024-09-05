@@ -19,6 +19,12 @@ class BookmarksRepository(private val mBookmarksDao: BookmarksDao) {
         return result
     }
 
+
+    fun getByPathAndPosition(path: String, page: Int, startOffset: Int, endOffset: Int): Flow<List<Bookmark>> {
+        val result = mBookmarksDao.getByPathAndPosition(path, page, startOffset, endOffset)
+        return result
+    }
+
     fun delete(id: Long) {
         BooksRoomDatabase.databaseWriteExecutor.execute { mBookmarksDao.delete(id) }
     }

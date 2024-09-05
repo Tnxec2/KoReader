@@ -7,14 +7,14 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.drawable.GradientDrawable
+import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannedString
-import android.text.style.CharacterStyle
+import android.text.style.BackgroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.URLSpan
 import android.util.Log
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.ui.graphics.toArgb
@@ -129,6 +129,22 @@ class BookReaderTextview(
         }
         bookReaderViewModel.pageViewSettings.observe(context as LifecycleOwner) {
             changeSettings(it)
+        }
+
+        bookReaderViewModel.mAllBookmarksWithOffsetOnPage.observe(context as LifecycleOwner) {
+
+            val spanText = Spannable.Factory.getInstance().newSpannable(text)
+            it?.forEach { bookmarkWithOffsetOnPage ->
+                bookmarkWithOffsetOnPage.bookmark.text?.let { bookmarktext ->
+                    spanText.setSpan(
+                        BackgroundColorSpan(-0x100), // todo: color should be configured in settings
+                        bookmarkWithOffsetOnPage.offset,
+                        bookmarkWithOffsetOnPage.offset + bookmarktext.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
+            }
+            text = spanText
         }
 
         setOnTouchListener(

@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.kontranik.koreader.database.BookmarksHelper
+import com.kontranik.koreader.model.Page
 import java.util.*
 
 @Entity(tableName = BookmarksHelper.TABLE)
@@ -26,4 +27,16 @@ class Bookmark(
     companion object {
         const val SORT_TRIM = ":"
     }
+}
+
+data class BookmarkWithOffsetOnPage(
+    val bookmark: Bookmark,
+    val offset: Int
+)
+
+fun Bookmark.toBookmarkWithOffsetOnPage(page: Page): BookmarkWithOffsetOnPage {
+    return BookmarkWithOffsetOnPage(
+        bookmark = this,
+        offset = position_offset - page.startBookPosition.offSet
+    )
 }

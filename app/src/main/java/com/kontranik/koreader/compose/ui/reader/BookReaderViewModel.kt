@@ -5,11 +5,11 @@ import android.graphics.Bitmap
 import android.os.BatteryManager
 import android.text.style.ImageSpan
 import android.util.Log
-import android.widget.TextView
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
@@ -20,6 +20,7 @@ import com.kontranik.koreader.compose.ui.settings.defaultColors
 import com.kontranik.koreader.database.BooksRoomDatabase
 import com.kontranik.koreader.database.model.BookStatus
 import com.kontranik.koreader.database.model.Bookmark
+import com.kontranik.koreader.database.model.toBookmarkWithOffsetOnPage
 import com.kontranik.koreader.database.repository.BookStatusRepository
 import com.kontranik.koreader.database.repository.BookmarksRepository
 import com.kontranik.koreader.model.Book
@@ -30,6 +31,8 @@ import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.PageLoader
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
@@ -46,6 +49,22 @@ class BookReaderViewModel(
     val bookPath = MutableLiveData<String?>(null)
     val book = MutableLiveData<Book?>(null)
     private var curPage = MutableLiveData(Page(startBookPosition = BookPosition()))
+
+    var mAllBookmarksWithOffsetOnPage = bookPath.asFlow().combine(curPage.asFlow()) {
+        path, page ->
+        path?.let {
+            bookmarkRepository
+                .getByPathAndPosition(
+                    it,
+                    page.startBookPosition.section,
+                    page.startBookPosition.offSet,
+                    page.endBookPosition.offSet
+                ).first().map { b ->
+                    b.toBookmarkWithOffsetOnPage(page)
+                }
+        }
+    }.asLiveData()
+
 
     private var pageLoader = PageLoader()
 
@@ -418,6 +437,7 @@ class BookReaderViewModel(
     }
 
     fun addBookmark(start: Int, text: CharSequence) {
+        println("addBookmark: start: $start, curpage.offset: ${curPage.value!!.startBookPosition.offSet}")
         bookmarkRepository.insert(
         Bookmark(
             path = book.value!!.fileLocation,
