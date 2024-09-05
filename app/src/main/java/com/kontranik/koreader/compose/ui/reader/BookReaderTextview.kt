@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Point
+import android.text.SpannableString
 import android.text.SpannedString
 import android.text.style.ImageSpan
 import android.text.style.URLSpan
@@ -28,6 +29,8 @@ class BookReaderTextview(
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initUi() {
+        isFocusable = true
+        setTextIsSelectable(true)
 
         bookReaderViewModel.pageViewContent.observe(context as LifecycleOwner) {
             text = it
@@ -48,7 +51,10 @@ class BookReaderTextview(
                     try {
                         // Find the URL that was pressed
                         val off = getClickedOffset(point)
-                        val spannable = text as SpannedString
+                        val spannable = if (text.javaClass == SpannedString::class.java)
+                            text as SpannedString
+                        else
+                            text as SpannableString
                         val link = spannable.getSpans(off, off, URLSpan::class.java)
                         if (link.isNotEmpty()) {
                             // link clicked
@@ -90,15 +96,23 @@ class BookReaderTextview(
                 override fun onLongClick(point: Point) {
                     super.onLongClick(point)
 
-                    // Find the Image that was pressed
-                    val off = getClickedOffset(point)
-                    val spannable = text as SpannedString
-                    val image = spannable.getSpans(off, off, ImageSpan::class.java)
-                    if (image.isNotEmpty()) {
-                        listener?.onClickImageOnBookReaderTextview(image[0])
-                    } else {
-                        checkTap(point, TapType.LongTap)
+                    try {
+                        // Find the Image that was pressed
+                        val off = getClickedOffset(point)
+                        val spannable = if (text.javaClass == SpannedString::class.java)
+                            text as SpannedString
+                        else
+                            text as SpannableString
+                        val image = spannable.getSpans(off, off, ImageSpan::class.java)
+                        if (image.isNotEmpty()) {
+                            listener?.onClickImageOnBookReaderTextview(image[0])
+                        } else {
+                            checkTap(point, TapType.LongTap)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
+
                 }
             }
         )
