@@ -19,6 +19,7 @@ import android.view.MenuItem
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.LifecycleOwner
+import com.kontranik.koreader.compose.ui.settings.defaultColors
 import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.model.ScreenZone
 import com.kontranik.koreader.utils.OnSwipeTouchListener
@@ -137,7 +138,9 @@ class BookReaderTextview(
             it?.forEach { bookmarkWithOffsetOnPage ->
                 bookmarkWithOffsetOnPage.bookmark.text?.let { bookmarktext ->
                     spanText.setSpan(
-                        BackgroundColorSpan(-0x100), // todo: color should be configured in settings
+                        BackgroundColorSpan(
+                            bookReaderViewModel.themeColors.value!!.colorBookmark.toArgb()
+                        ), // todo: color should be configured in settings
                         bookmarkWithOffsetOnPage.offset,
                         bookmarkWithOffsetOnPage.offset + bookmarktext.length,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE

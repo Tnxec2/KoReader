@@ -209,4 +209,5 @@
     <string name="stretch_background_image">Stretch background image</string>
     <string name="textsize_infoarea">Textgröße in Infobereich</string>
     <string name="text_infoarea">Infobereich</string>
+    <string name="color_bookmarks">Color bookmarks</string>
 </resources>

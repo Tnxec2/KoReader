@@ -47,6 +47,7 @@ const val PREF_KEY_BOOK_LETTER_SPACING = "LetterSpacing"
 const val PREF_KEY_COLOR_BACK = "colorBackTheme"
 const val PREF_KEY_COLOR_TEXT = "colorTextTheme"
 const val PREF_KEY_COLOR_INFOTEXT = "colorInfoTheme"
+const val PREF_KEY_COLOR_BOOKMARKS = "colorBookmarks"
 const val PREF_KEY_COLOR_LINKTEXT = "colorLinkTheme"
 const val PREF_KEY_MARGIN_TOP = "marginTopTheme"
 const val PREF_KEY_MARGIN_BOTTOM = "marginBottomTheme"
@@ -115,6 +116,7 @@ data class ThemeColors(
     val colorsText: Color,
     val colorsLink: Color,
     val colorsInfo: Color,
+    val colorBookmark: Color,
     val showBackgroundImage: Boolean,
     val backgroundImageTiledRepeat: Boolean,
     val stetchBackgroundImage: Boolean,
@@ -132,6 +134,7 @@ val defaultColors = arrayOf(
         Color(0xFF5F4B32),
         Color(0xFF2196F3),
         Color(0xFF5F4B32),
+        Color(0xFFFF9800),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
         stetchBackgroundImage = true,
@@ -142,6 +145,7 @@ val defaultColors = arrayOf(
         Color(0xFFFBF0D9),
         Color(0xFF2196F3),
         Color(0xFFFBF0D9),
+        Color(0xFF94713F),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
         stetchBackgroundImage = true,
@@ -152,6 +156,7 @@ val defaultColors = arrayOf(
         Color(0xFFe57614),
         Color(0xFF005CA6),
         Color(0xFFe57614),
+        Color(0xFF506B30),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
         stetchBackgroundImage = true,
@@ -162,6 +167,7 @@ val defaultColors = arrayOf(
         Color(0xFF008705),
         Color(0xFF00599F),
         Color(0xFF008705),
+        Color(0xFF195A58),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
         stetchBackgroundImage = true,
@@ -172,6 +178,7 @@ val defaultColors = arrayOf(
         Color(0xFF8C8A83),
         Color(0xFF3D7198),
         Color(0xFF8C8A83),
+        Color(0xFF3D7198),
         showBackgroundImage = false,
         backgroundImageTiledRepeat = false,
         stetchBackgroundImage = true,
@@ -559,6 +566,11 @@ class SettingsViewModel(
             if (co != 0) Color(co)
             else defaultColors[colorThemeIndex].colorsInfo
 
+        co = prefs.getInt(PREF_KEY_COLOR_BOOKMARKS + colorThemeIndex, 0)
+        val colorBookmark =
+            if (co != 0) Color(co)
+            else defaultColors[colorThemeIndex].colorBookmark
+
         val showBackgroundImage =
             prefs.getBoolean(PREF_KEY_SHOW_BACKGROUND_IMAGE + colorThemeIndex, false)
         val backgroundImageUri =
@@ -573,6 +585,7 @@ class SettingsViewModel(
             colorText,
             colorLinkText,
             colorInfoText,
+            colorBookmark,
             showBackgroundImage,
             backgroundImageTiledRepeat,
             stetchBackgroundImage,
@@ -653,6 +666,15 @@ class SettingsViewModel(
         changeColors(themeIndex, colors[themeIndex]!!.value.copy(colorsInfo = value))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putInt(PREF_KEY_COLOR_INFOTEXT+themeIndex, value.toArgb())
+        prefEditor.apply()
+    }
+    fun setDefaultColorBookmark(themeIndex: Int) {
+        changeColorBookmark(themeIndex, defaultColors[themeIndex].colorBookmark)
+    }
+    fun changeColorBookmark(themeIndex: Int, value: Color) {
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(colorBookmark = value))
+        val prefEditor: SharedPreferences.Editor = prefs.edit()
+        prefEditor.putInt(PREF_KEY_COLOR_BOOKMARKS+themeIndex, value.toArgb())
         prefEditor.apply()
     }
     fun changeShowBackgroundImage(themeIndex: Int, value: Boolean) {

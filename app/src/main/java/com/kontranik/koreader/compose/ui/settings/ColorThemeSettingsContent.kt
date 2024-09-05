@@ -1,12 +1,6 @@
 package com.kontranik.koreader.compose.ui.settings
 
-import android.content.Context
-import android.content.Intent
-import android.database.Cursor
 import android.net.Uri
-import android.provider.MediaStore
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,13 +15,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kontranik.koreader.R
@@ -35,7 +25,6 @@ import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
-import com.kontranik.koreader.compose.ui.settings.elements.SettingsButton
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsCard
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsCheckbox
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsColor
@@ -43,10 +32,6 @@ import com.kontranik.koreader.compose.ui.settings.elements.SettingsImagePickerBu
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsTextField
 import com.kontranik.koreader.compose.ui.settings.elements.SettingsTitle
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLight
-import kotlinx.coroutines.launch
-import java.lang.Exception
-
-
 
 
 @Composable
@@ -64,6 +49,9 @@ fun ColorThemeSettingsContent(
     colorInfoArea: Color,
     onChangeColorInfoArea: (Color) -> Unit,
     onSetDefaultColorInfoArea: () -> Unit,
+    colorBookmark: Color,
+    onChangeColorBookmark: (Color) -> Unit,
+    onSetDefaultColorBookmark: () -> Unit,
     showBackgroundImage: Boolean,
     onChangeShowBackgroundImage: (Boolean) -> Unit,
     backgroundImage: String?,
@@ -142,6 +130,13 @@ fun ColorThemeSettingsContent(
                                 color = colorInfoArea,
                                 onColorChanged = onChangeColorInfoArea,
                                 onSelectDefaultColor = onSetDefaultColorInfoArea,
+                                selectNoneButtonText = stringResource(id = R.string.default_color)
+                            )
+                            SettingsColor(
+                                text = stringResource(id = R.string.color_bookmarks),
+                                color = colorBookmark,
+                                onColorChanged = onChangeColorBookmark,
+                                onSelectDefaultColor = onSetDefaultColorBookmark,
                                 selectNoneButtonText = stringResource(id = R.string.default_color)
                             )
                         }
@@ -231,6 +226,9 @@ private fun ColorThemeSettingsPreview() {
                 colorInfoArea = Color(0xFFDAD1C0),
                 onChangeColorInfoArea = {},
                 onSetDefaultColorInfoArea = {},
+                colorBookmark = Color(0xFF26ADD6),
+                onChangeColorBookmark = {},
+                onSetDefaultColorBookmark = {},
                 tileBackgroundImage = true,
                 onChangeTileBackgroundImage = {},
                 showBackgroundImage = false,
