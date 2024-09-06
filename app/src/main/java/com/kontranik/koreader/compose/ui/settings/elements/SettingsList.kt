@@ -39,7 +39,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsList(
-    title: String,
     entries: List<String>,
     entryValues: List<String>,
     defaultValue: String,
@@ -49,7 +48,8 @@ fun SettingsList(
     showDefaultValue: Boolean,
     modifier: Modifier = Modifier,
     show: Boolean = false,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    title: String? = null,
 ) {
     var showDropdown by rememberSaveable { mutableStateOf(show) }
     val scrollState = rememberLazyListState()
@@ -66,7 +66,7 @@ fun SettingsList(
         }
 
         Column {
-            Text(
+            if (title != null) Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
