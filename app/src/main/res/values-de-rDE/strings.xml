@@ -210,4 +210,5 @@
     <string name="textsize_infoarea">Textgröße in Infobereich</string>
     <string name="text_infoarea">Infobereich</string>
     <string name="color_bookmarks">Color bookmarks</string>
+    <string name="cancel_selection_mode">Auswahlmodus beenden</string>
 </resources>

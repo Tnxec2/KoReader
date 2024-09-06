@@ -21,9 +21,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.MenuCompat
 import androidx.core.view.forEach
-import androidx.core.view.iterator
 import androidx.lifecycle.LifecycleOwner
-import com.kontranik.koreader.compose.ui.settings.defaultColors
 import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.model.ScreenZone
 import com.kontranik.koreader.utils.OnSwipeTouchListener
@@ -271,7 +269,8 @@ class BookReaderTextview(
 
                     it.clear()
                     it.add(0, com.kontranik.koreader.R.id.textmenu_addbookmark, 0, com.kontranik.koreader.R.string.add_bookmark)
-                    it.add(0, com.kontranik.koreader.R.id.textmenu_cancel, 0, "Cancel selection mode")
+                    it.add(0, com.kontranik.koreader.R.id.textmenu_cancel, 0,
+                        com.kontranik.koreader.R.string.cancel_selection_mode)
 
                     //it.add(1, R.id.copy, 0, copyItem.title)
                     //it.add(1, R.id.shareText, 0, shareText.title)

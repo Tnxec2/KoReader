@@ -254,6 +254,7 @@
     <string name="textsize_infoarea">Text size info area</string>
     <string name="text_infoarea">Info area</string>
     <string name="color_bookmarks">Color bookmarks</string>
+    <string name="cancel_selection_mode">Cancel selection mode</string>
 
 
 </resources>
