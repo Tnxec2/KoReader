@@ -93,7 +93,7 @@
     <string name="color_foreground">Text color</string>
     <string name="color_linktext">Link color</string>
     <string name="color_infotext">Text color in info area</string>
-    <string name="default_color">set default color</string>
+    <string name="default_color">Reset to default color</string>
 
     <string name="color_theme_indexed_header">Theme %1$s</string>
     <string name="color_theme1_header">Theme 1</string>

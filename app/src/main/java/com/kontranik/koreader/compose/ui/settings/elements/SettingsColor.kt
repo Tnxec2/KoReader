@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -26,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,6 +58,7 @@ dependencies {
 }
 
  */
+
 @Composable
 fun SettingsColor(
     text: String,
@@ -79,15 +84,15 @@ fun SettingsColor(
     ) {
         Text(
             text = text,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
         )
-
-        Box(
+        Spacer(modifier = Modifier.weight(1f))
+        Column(
             modifier = Modifier
                 .padding(paddingSmall)
                 .background(color)
                 .size(30.dp)
-        )
+        ) {}
 
 
     }
@@ -124,18 +129,19 @@ fun ColorPicker(
     controller: ColorPickerController = rememberColorPickerController(),
 ) {
 
-    val hexColor = remember {
+    val hexColor = remember() {
         mutableStateOf(color.toHexCodeWithAlpha())
     }
     LaunchedEffect(key1 = color) {
-        controller.selectByColor(color, true)
+        println("color: ${color.toHexCodeWithAlpha()}")
+        controller.selectByColor(color, false)
     }
 
     Dialog(
         onDismissRequest = { onCancel() }
     ) {
         Card(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(paddingSmall),
             shape = RoundedCornerShape(16.dp),
@@ -145,6 +151,7 @@ fun ColorPicker(
                 modifier = Modifier.padding(paddingSmall)
             ) {
             HsvColorPicker(
+                initialColor = color,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 10.dp)
@@ -165,14 +172,7 @@ fun ColorPicker(
                     .height(30.dp),
                 controller = controller,
             )
-//            AlphaTile(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(20.dp)
-//                    .padding(bottom = paddingSmall)
-//                    .clip(RoundedCornerShape(6.dp)),
-//                controller = controller
-//            )
+
                 OutlinedTextField(
                     label = {
                         Text(text = "HEX Color")
@@ -188,6 +188,14 @@ fun ColorPicker(
 
                         }
                     })
+                AlphaTile(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .padding(top = paddingSmall)
+                        .clip(RoundedCornerShape(6.dp)),
+                    controller = controller
+                )
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
@@ -250,7 +258,7 @@ private fun SettingsColorWithNoneButtonPreview() {
             onColorChanged = {},
             onSelectDefaultColor = {},
             selectNoneButtonText = "set default color",
-            showPickerPopup = true
+            showPickerPopup = false
         )
     }
 }
