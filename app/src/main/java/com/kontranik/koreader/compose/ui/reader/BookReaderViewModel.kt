@@ -445,5 +445,6 @@ class BookReaderViewModel(
             position_section = curPage.value!!.startBookPosition.section,
             position_offset = curPage.value!!.startBookPosition.offSet + start,
         ))
+        recalcCurrentPage()
     }
 }

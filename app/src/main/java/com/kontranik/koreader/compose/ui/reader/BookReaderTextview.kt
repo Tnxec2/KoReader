@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannedString
@@ -18,6 +19,9 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.MenuCompat
+import androidx.core.view.forEach
+import androidx.core.view.iterator
 import androidx.lifecycle.LifecycleOwner
 import com.kontranik.koreader.compose.ui.settings.defaultColors
 import com.kontranik.koreader.model.PageViewSettings
@@ -134,20 +138,22 @@ class BookReaderTextview(
 
         bookReaderViewModel.mAllBookmarksWithOffsetOnPage.observe(context as LifecycleOwner) {
 
-            val spanText = Spannable.Factory.getInstance().newSpannable(text)
-            it?.forEach { bookmarkWithOffsetOnPage ->
-                bookmarkWithOffsetOnPage.bookmark.text?.let { bookmarktext ->
-                    spanText.setSpan(
-                        BackgroundColorSpan(
-                            bookReaderViewModel.themeColors.value!!.colorBookmark.toArgb()
-                        ), // todo: color should be configured in settings
-                        bookmarkWithOffsetOnPage.offset,
-                        bookmarkWithOffsetOnPage.offset + bookmarktext.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
+            if (text.isNotEmpty()) {
+                val spanText = Spannable.Factory.getInstance().newSpannable(text)
+                it?.forEach { bookmarkWithOffsetOnPage ->
+                    bookmarkWithOffsetOnPage.bookmark.text?.let { bookmarktext ->
+                        spanText.setSpan(
+                            BackgroundColorSpan(
+                                bookReaderViewModel.themeColors.value!!.colorBookmark.toArgb()
+                            ),
+                            bookmarkWithOffsetOnPage.offset,
+                            bookmarkWithOffsetOnPage.offset + bookmarktext.length,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                    }
                 }
+                text = spanText
             }
-            text = spanText
         }
 
         setOnTouchListener(
@@ -164,6 +170,9 @@ class BookReaderTextview(
         setTextIsSelectable(true)
 
         customSelectionActionModeCallback = TextCallback(this)
+        setOnClickListener {
+            switchToNormalMode()
+        }
     }
 
     fun switchToNormalMode() {
@@ -250,15 +259,29 @@ class BookReaderTextview(
 
         override fun onPrepareActionMode(mode: android.view.ActionMode?, menu: Menu?): Boolean {
             menu?.let {
+
                 try {
-                    val copyItem = it.findItem(R.id.copy)
-                    val shareText = it.findItem(R.id.shareText)
+                    //val copyItem = it.findItem(R.id.copy)
+                    //val shareText = it.findItem(R.id.shareText)
+                    val originalMenu = mutableListOf<MenuItem>()
+                    it.forEach {item ->
+                        if (item.itemId != R.id.selectAll)
+                            originalMenu.add(item)
+                    }
 
                     it.clear()
                     it.add(0, com.kontranik.koreader.R.id.textmenu_addbookmark, 0, com.kontranik.koreader.R.string.add_bookmark)
                     it.add(0, com.kontranik.koreader.R.id.textmenu_cancel, 0, "Cancel selection mode")
-                    it.add(0, R.id.copy, 0, copyItem.title)
-                    it.add(0, R.id.shareText, 0, shareText.title)
+
+                    //it.add(1, R.id.copy, 0, copyItem.title)
+                    //it.add(1, R.id.shareText, 0, shareText.title)
+
+                    originalMenu.forEachIndexed { index, item -> it.add(1, item.itemId, index, item.title) }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        it.setGroupDividerEnabled(true)
+                    } else {
+                        MenuCompat.setGroupDividerEnabled(menu, true);
+                    }
                 } catch (e: java.lang.Exception) {
                     // ignored
                 }
