@@ -24,7 +24,7 @@ class Author(
     @ColumnInfo(name = AuthorHelper.COLUMN_LASTNAME)
     var lastname: String? = null,
 
-) : Serializable {
+) {
 
     override fun hashCode(): Int {
         var result = id.hashCode()

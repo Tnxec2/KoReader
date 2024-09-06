@@ -25,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -138,7 +139,10 @@ fun DropdownListContentThemed(
                 .background(color = MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            itemsIndexed(themesList) { index, item ->
+            itemsIndexed(
+                themesList,
+                key = { index, _ -> index}
+                ) { index, item ->
                 if (index != 0) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.primary, thickness = 0.5.dp)
                 }

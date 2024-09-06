@@ -1,9 +1,12 @@
 package com.kontranik.koreader.compose.ui.library.main
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DrawerState
@@ -51,29 +54,28 @@ fun LibraryMainMenuScreen(
         modifier = modifier.fillMaxSize(),
     ) { padding ->
 
-        Column(Modifier.padding(padding)) {
-            LazyColumn() {
-                item {
+        Column(
+            Modifier
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+        ) {
+
                     MainMenuItem(
                         painterId = R.drawable.ic_folder_black_24dp,
                         menuTextId = R.string.books_by_title,
                         onClick = { coroutineScope.launch { navigateToBooksByTitle() } })
-                }
-                item {
+
                     MainMenuItem(
                         painterId = R.drawable.ic_folder_black_24dp,
                         menuTextId = R.string.books_by_author,
                         onClick = { coroutineScope.launch { navigateToBooksByAuthor() } })
-                }
-                item {
+
                     MainMenuItem(
                         painterId = R.drawable.ic_baseline_settings_24,
                         menuTextId = R.string.library_settings,
                         onClick = { coroutineScope.launch { navigateToSettings() } })
-                }
-            }
-        }
 
+        }
     }
 }
 

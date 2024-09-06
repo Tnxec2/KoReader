@@ -3,11 +3,14 @@ package com.kontranik.koreader.compose.ui.opds
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -85,96 +88,96 @@ fun OpdsEntryDetailsContent(
         }
     }
 
-    LazyColumn(modifier.padding(paddingSmall)) {
-        item {
-            Card {
-                Column(Modifier.padding(paddingSmall)) {
+    Column(
+        modifier
+            .padding(paddingSmall)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Card {
+            Column(Modifier.padding(paddingSmall)) {
+                Text(
+                    text = entry.title,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                entry.author?.let {
                     Text(
-                        text = entry.title,
-                        style = MaterialTheme.typography.titleLarge
+                        text = it.toString(),
+                        style = MaterialTheme.typography.titleMedium
                     )
-                    entry.author?.let {
+                }
+                cover.value?.let {
+                    Image(
+                        bitmap = it,
+                        contentDescription = entry.title,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+        Card(Modifier.padding(top = paddingSmall)) {
+            Column(
+                Modifier.padding(paddingSmall)
+            ) {
+                entry.content?.let {
+                    Html(text = it.data)
+                }
+            }
+        }
+    }
+    if (rels.value.values.isNotEmpty()) {
+        Card(Modifier.padding(top = paddingSmall)) {
+            Column(
+                Modifier.padding(paddingSmall)
+            ) {
+                if (rels.value.values.isNotEmpty()) {
+                    Text(
+                        text = stringResource(id = R.string.links),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(bottom = paddingSmall)
+                    )
+
+                    rels.value.mapKeys { rel ->
                         Text(
-                            text = it.toString(),
-                            style = MaterialTheme.typography.titleMedium
+                            text = rel.key,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(bottom = paddingSmall)
                         )
-                    }
-                    cover.value?.let {
-                        Image(
-                            bitmap = it,
-                            contentDescription = entry.title,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        )
-                    }
-                }
-            }
-        }
-        item {
-            Card(Modifier.padding(top = paddingSmall)) {
-                Column(
-                    Modifier.padding(paddingSmall)
-                ) {
-                    entry.content?.let {
-                        Html(text = it.data)
-                    }
-                }
-            }
-        }
-        if (rels.value.values.isNotEmpty())
-            item {
-                Card(Modifier.padding(top = paddingSmall)) {
-                    Column(
-                        Modifier.padding(paddingSmall)
-                    ) {
-                        if (rels.value.values.isNotEmpty()) {
+
+
+                        rel.value.map { link ->
                             Text(
-                                text = stringResource(id = R.string.links),
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(bottom = paddingSmall)
+                                text = link.getTitle()?.toString() ?: "",
+                                fontSize = 18.sp,
+                                style = TextStyle(
+                                    textDecoration = TextDecoration.Underline
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .heightIn(min = 30.dp)
+                                    .fillMaxWidth()
+                                    .padding(bottom = paddingSmall)
+                                    .clickable {
+                                        Log.d(
+                                            "ENTRYLINK",
+                                            "clicked entry.otherLinks: $link"
+                                        )
+                                        if (link.isCatalogEntry()) {
+                                            navigateToOpdsEntryLink(link)
+                                        } else if (link.isDownloadable()) {
+                                            download(entry, link)
+                                        } else {
+                                            openInBrowser(link)
+                                        }
+                                    }
                             )
-
-                            rels.value.mapKeys { rel ->
-                                Text(
-                                    text = rel.key,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(bottom = paddingSmall)
-                                )
-
-
-                                rel.value.map { link ->
-                                    Text(
-                                        text = link.getTitle()?.toString() ?: "",
-                                        fontSize = 18.sp,
-                                        style = TextStyle(
-                                            textDecoration = TextDecoration.Underline
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier
-                                            .heightIn(min = 30.dp)
-                                            .fillMaxWidth()
-                                            .padding(bottom = paddingSmall)
-                                            .clickable {
-                                                Log.d(
-                                                    "ENTRYLINK",
-                                                    "clicked entry.otherLinks: $link"
-                                                )
-                                                if (link.isCatalogEntry()) {
-                                                    navigateToOpdsEntryLink(link)
-                                                } else if (link.isDownloadable()) {
-                                                    download(entry, link)
-                                                } else {
-                                                    openInBrowser(link)
-                                                }
-                                            }
-                                    )
-                                }
-                            }
                         }
                     }
                 }
             }
+        }
     }
 }
 

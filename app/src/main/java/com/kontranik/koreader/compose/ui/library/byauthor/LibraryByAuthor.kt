@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.navigation.NavigationDestination
@@ -129,7 +130,8 @@ fun LibraryByAuthorScreen(
 
             LazyColumn(state = listState) {
                 items(count = booksPagingState.itemCount,
-                    key = { index -> booksPagingState[index]?.id ?: 0 }) { index ->
+                    key = booksPagingState.itemKey { it.id.toString() }
+                ) { index ->
                     val item = booksPagingState[index]
                     item?.let {
                         AuthorItem(

@@ -19,6 +19,7 @@ data class LibraryItemWithAuthors(
     )
     val authors: List<Author>
 ) {
+    @Ignore
     constructor(bookInfo: BookInfo) : this(
         libraryItem = LibraryItem(bookInfo),
         authors = bookInfo.authors ?: listOf()

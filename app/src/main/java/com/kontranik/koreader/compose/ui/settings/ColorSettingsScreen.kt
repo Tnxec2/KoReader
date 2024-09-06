@@ -1,12 +1,14 @@
 package com.kontranik.koreader.compose.ui.settings
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DrawerState
@@ -15,11 +17,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kontranik.koreader.R
@@ -92,59 +92,55 @@ fun ColorSettingsContent(
                 .padding(padding)
                 .padding(paddingSmall)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
 
-            LazyColumn(
-                Modifier
+
+            SettingsTitle(
+                text = stringResource(id = R.string.color_theme),
+                modifier = Modifier.padding(bottom = paddingSmall)
+            )
+
+            SettingsCard(
+                title = stringResource(id = R.string.select_theme),
+                modifier = Modifier.padding(bottom = paddingMedium)
             ) {
-                item {
-                    SettingsTitle(
-                        text = stringResource(id = R.string.color_theme),
-                        modifier = Modifier.padding(bottom = paddingSmall)
+                Column {
+                    SettingsList(
+                        title = stringResource(id = R.string.interface_theme_title),
+                        entries = getStringArrayFromResourceArray(res = selected_theme_entries),
+                        entryValues = selected_theme_entries.mapIndexed { index, s -> index.toString() },
+                        defaultValue = getStringArrayFromResourceArray(res = selected_theme_entries)[selectedTheme],
+                        icon = R.drawable.ic_iconmonstr_paintbrush_10,
+                        onChange = { onChangeSelectedTheme(it) },
+                        showDefaultValue = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
+            }
 
-                item {
-                    SettingsCard(
-                        title = stringResource(id = R.string.select_theme),
-                        modifier = Modifier.padding(bottom = paddingMedium)
-                    ) {
-                        Column {
-                            SettingsList(
-                                title = stringResource(id = R.string.interface_theme_title),
-                                entries = getStringArrayFromResourceArray(res = selected_theme_entries),
-                                entryValues = selected_theme_entries.mapIndexed { index, s -> index.toString() },
-                                defaultValue = getStringArrayFromResourceArray(res = selected_theme_entries)[selectedTheme],
-                                icon = R.drawable.ic_iconmonstr_paintbrush_10,
-                                onChange = { onChangeSelectedTheme(it) },
-                                showDefaultValue = true,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
-                }
-
-                item {
-                    SettingsCard(title = stringResource(id = R.string.select_theme)) {
-                        Column {
-                            (0..4).toList().map { index ->
-                                SettingsButton(
-                                    title = stringResource(
-                                        id = R.string.color_theme_indexed_header,
-                                        index + 1
-                                    ),
-                                    defaultValue = null,
-                                    onClick = { navigateToTheme(index) },
-                                    showDefaultValue = false,
-                                    modifier = Modifier.fillMaxWidth().heightIn(min = 30.dp)
-                                )
-                            }
-                        }
+            SettingsCard(title = stringResource(id = R.string.select_theme)) {
+                Column {
+                    (0..4).toList().map { index ->
+                        SettingsButton(
+                            title = stringResource(
+                                id = R.string.color_theme_indexed_header,
+                                index + 1
+                            ),
+                            defaultValue = null,
+                            onClick = { navigateToTheme(index) },
+                            showDefaultValue = false,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 30.dp)
+                        )
                     }
                 }
             }
         }
     }
+
+
 }
 
 

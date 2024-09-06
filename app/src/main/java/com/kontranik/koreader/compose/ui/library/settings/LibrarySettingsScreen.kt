@@ -197,7 +197,7 @@ fun LibrarySettingsScreen(
                             icon = R.drawable.baseline_autorenew_24,
                             description = R.string.refresh_library,
                             onClick = { coroutineScope.launch {
-                                libraryViewModel.readRecursive(context, scanPointList.value)
+                                showConfirmDialogRefreshLibrary = true
                             } }
                         ))
                     AppBarAction(appBarAction = AppBarAction(
@@ -217,6 +217,7 @@ fun LibrarySettingsScreen(
                 .weight(1f)) {
                 itemsIndexed(
                     scanPointList.value.toList(),
+                    key = { index, _ -> index}
                 ) { index, item ->
                     LibrarySettingsScreenItem(
                         scanPoint = item,
@@ -264,7 +265,7 @@ fun LibrarySettingsScreenItem(
         mutableStateOf(Uri.parse(scanPoint)
             ?: throw IllegalArgumentException("Must pass URI of directory to open"))
     }
-    val scanPointText = remember {
+    val scanPointText = remember(scanPoint) {
         derivedStateOf {
             DocumentFile.fromTreeUri(
                 context, directoryUri.value)?.uri?.pathSegments?.last() ?: scanPoint

@@ -3,12 +3,15 @@ package com.kontranik.koreader.compose.ui.settings
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DrawerState
@@ -89,13 +92,14 @@ fun SettingsContent(
                     }
                 },) }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(paddingSmall)
+                .verticalScroll(rememberScrollState())
         ) {
-            items(settingsItems) { item ->
+            settingsItems.map { item ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -107,7 +111,9 @@ fun SettingsContent(
                         contentDescription = stringResource(id = item.title),
                         modifier = Modifier.padding(paddingSmall)) }
                     Text(text = stringResource(id = item.title),
-                        modifier = Modifier.padding(paddingSmall).weight(1f))
+                        modifier = Modifier
+                            .padding(paddingSmall)
+                            .weight(1f))
                 }
             }
         }

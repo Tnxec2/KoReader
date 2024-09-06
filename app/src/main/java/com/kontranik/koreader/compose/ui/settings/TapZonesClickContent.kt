@@ -1,5 +1,7 @@
 package com.kontranik.koreader.compose.ui.settings
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -10,7 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DrawerState
@@ -81,23 +84,69 @@ fun TapZonesClickSettingsContent(
     onChangeBottomRight: (String) -> Unit,
 ) {
     val itemsNew = listOf(
-    listOf(
-        TapItem(title = R.string.tapzone_top_left, defaultValue = topLeft, defaultValueTitle = topLeftTitle, onChange = onChangeTopLeft),
-        TapItem(title = R.string.tapzone_top_center, defaultValue = topCenter, defaultValueTitle = topCenterTitle, onChange = onChangeTopCenter),
-        TapItem(title = R.string.tapzone_top_right, defaultValue = topRight, defaultValueTitle = topRightTitle, onChange = onChangeTopRight),
-    ),
+        listOf(
+            TapItem(
+                title = R.string.tapzone_top_left,
+                defaultValue = topLeft,
+                defaultValueTitle = topLeftTitle,
+                onChange = onChangeTopLeft
+            ),
+            TapItem(
+                title = R.string.tapzone_top_center,
+                defaultValue = topCenter,
+                defaultValueTitle = topCenterTitle,
+                onChange = onChangeTopCenter
+            ),
+            TapItem(
+                title = R.string.tapzone_top_right,
+                defaultValue = topRight,
+                defaultValueTitle = topRightTitle,
+                onChange = onChangeTopRight
+            ),
+        ),
 
-    listOf(
-        TapItem(title = R.string.tapzone_middle_left, defaultValue = middleLeft, defaultValueTitle = middleLeftTitle, onChange = onChangeMiddleLeft),
-        TapItem(title = R.string.tapzone_middle_center, defaultValue = middleCenter, defaultValueTitle = middleCenterTitle, onChange = onChangeMiddleCenter, enabled = middleCenterEnabled),
-        TapItem(title = R.string.tapzone_middle_right, defaultValue = middleRight, defaultValueTitle = middleRightTitle, onChange = onChangeMiddleRight),
-    ),
+        listOf(
+            TapItem(
+                title = R.string.tapzone_middle_left,
+                defaultValue = middleLeft,
+                defaultValueTitle = middleLeftTitle,
+                onChange = onChangeMiddleLeft
+            ),
+            TapItem(
+                title = R.string.tapzone_middle_center,
+                defaultValue = middleCenter,
+                defaultValueTitle = middleCenterTitle,
+                onChange = onChangeMiddleCenter,
+                enabled = middleCenterEnabled
+            ),
+            TapItem(
+                title = R.string.tapzone_middle_right,
+                defaultValue = middleRight,
+                defaultValueTitle = middleRightTitle,
+                onChange = onChangeMiddleRight
+            ),
+        ),
 
-    listOf(
-        TapItem(title = R.string.tapzone_bottom_left, defaultValue = bottomLeft, defaultValueTitle = bottomLeftTitle, onChange = onChangeBottomLeft),
-        TapItem(title = R.string.tapzone_bottom_center, defaultValue = bottomCenter, defaultValueTitle = bottomCenterTitle, onChange = onChangeBottomCenter),
-        TapItem(title = R.string.tapzone_bottom_right, defaultValue = bottomRight, defaultValueTitle = bottomRightTitle, onChange = onChangeBottomRight),
-    )
+        listOf(
+            TapItem(
+                title = R.string.tapzone_bottom_left,
+                defaultValue = bottomLeft,
+                defaultValueTitle = bottomLeftTitle,
+                onChange = onChangeBottomLeft
+            ),
+            TapItem(
+                title = R.string.tapzone_bottom_center,
+                defaultValue = bottomCenter,
+                defaultValueTitle = bottomCenterTitle,
+                onChange = onChangeBottomCenter
+            ),
+            TapItem(
+                title = R.string.tapzone_bottom_right,
+                defaultValue = bottomRight,
+                defaultValueTitle = bottomRightTitle,
+                onChange = onChangeBottomRight
+            ),
+        )
     )
 
     Scaffold(
@@ -106,72 +155,75 @@ fun TapZonesClickSettingsContent(
                 title = R.string.settings,
                 drawerState = drawerState,
                 navigationIcon = {
-                    IconButton(onClick = {  navigateBack() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = { navigateBack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
-                },) }
+                },
+            )
+        }
     ) { padding ->
         Column(
             modifier
                 .padding(padding)
                 .padding(paddingSmall)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
 
-            LazyColumn(
-                Modifier
-            ) {
-                item {
-                    SettingsTitle(
-                        text = title,
-                        modifier = Modifier.padding(bottom = paddingSmall)
-                    )
-                }
 
-                item {
-                    SettingsCard(
-                        modifier = Modifier.padding(bottom = paddingMedium)
-                    ) {
-                        Column(
-                            Modifier.fillMaxWidth()
+            SettingsTitle(
+                text = title,
+                modifier = Modifier.padding(bottom = paddingSmall)
+            )
+
+            SettingsCard(
+                modifier = Modifier.padding(bottom = paddingMedium)
+            ) {
+                Column(
+                    Modifier.fillMaxWidth()
+                ) {
+                    itemsNew.mapIndexed { indexRow, row ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Min)
+                                .heightIn(min = 100.dp)
                         ) {
-                        itemsNew.mapIndexed { indexRow, row ->
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(IntrinsicSize.Min)
-                                    .heightIn(min = 100.dp)
-                            ) {
-                                row.mapIndexed { index, item ->
-                                        SettingsList(
-                                            //title = stringResource(id = item.title),
-                                            entries = getStringArrayFromResourceArray(res = tapzonen_entries),
-                                            entryValues = tapzonen_values.toList(),
-                                            defaultValue = item.defaultValue,
-                                            defaultValueTitle = item.defaultValueTitle,
-                                            onChange = item.onChange,
-                                            showDefaultValue = true,
-                                            modifier = Modifier
-                                                .weight(1f).align(Alignment.CenterVertically),
-                                            enabled = item.enabled,
-                                        )
-                                        if (index < row.size-1) VerticalDivider(
-                                            color = Color.Black,
-                                            modifier = Modifier.fillMaxHeight().width(1.dp)
-                                        )
-                                    }
-                                }
-                                if (indexRow < itemsNew.size-1) HorizontalDivider(
+                            row.mapIndexed { index, item ->
+                                SettingsList(
+                                    //title = stringResource(id = item.title),
+                                    entries = getStringArrayFromResourceArray(res = tapzonen_entries),
+                                    entryValues = tapzonen_values.toList(),
+                                    defaultValue = item.defaultValue,
+                                    defaultValueTitle = item.defaultValueTitle,
+                                    onChange = item.onChange,
+                                    showDefaultValue = true,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .align(Alignment.CenterVertically),
+                                    enabled = item.enabled,
+                                )
+                                if (index < row.size - 1) VerticalDivider(
                                     color = Color.Black,
-                                    modifier = Modifier.height(1.dp)
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .width(1.dp)
                                 )
                             }
                         }
+                        if (indexRow < itemsNew.size - 1) HorizontalDivider(
+                            color = Color.Black,
+                            modifier = Modifier.height(1.dp)
+                        )
                     }
                 }
             }
         }
     }
+
 }
 
 

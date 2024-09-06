@@ -128,7 +128,10 @@ fun SettingsListContent(
                 .background(color = MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            itemsIndexed(entries) { index, item ->
+            itemsIndexed(
+                entries,
+                key = { _, item -> item}
+            ) { index, item ->
                 if (index != 0) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.primary, thickness = 0.5.dp)
                 }

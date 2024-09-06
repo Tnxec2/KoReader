@@ -2,6 +2,7 @@ package com.kontranik.koreader.database.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.kontranik.koreader.database.BookStatusHelper
 import com.kontranik.koreader.model.Book
@@ -24,6 +25,7 @@ class BookStatus(
     var cover: ByteArray? = null
 ) {
 
+    @Ignore
     constructor(book: Book, curPage: Page) : this(
         id = null,
         path = book.fileLocation,

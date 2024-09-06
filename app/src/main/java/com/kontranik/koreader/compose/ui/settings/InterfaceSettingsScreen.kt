@@ -1,10 +1,13 @@
 package com.kontranik.koreader.compose.ui.settings
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DrawerState
@@ -16,7 +19,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
@@ -40,14 +42,14 @@ fun InterfaceSettingsScreen(
 
     InterfaceContent(
         drawerState = drawerState,
-        navigateBack = { coroutineScope.launch { navigateBack() }},
+        navigateBack = { coroutineScope.launch { navigateBack() } },
         modifier = modifier,
         interfaceTheme = settingsViewModel.interfaceTheme.value,
-        onChangeInterfaceTheme = {coroutineScope.launch { settingsViewModel.changeinterfaceTheme(it) }},
+        onChangeInterfaceTheme = { coroutineScope.launch { settingsViewModel.changeinterfaceTheme(it) } },
         brightness = settingsViewModel.brightness.value,
-        onChangeBrightness = {coroutineScope.launch { settingsViewModel.changebrightness(it) }},
+        onChangeBrightness = { coroutineScope.launch { settingsViewModel.changebrightness(it) } },
         orientation = settingsViewModel.orientation.value,
-        onChangeOrientation = {coroutineScope.launch { settingsViewModel.changeorientation(it) }},
+        onChangeOrientation = { coroutineScope.launch { settingsViewModel.changeorientation(it) } },
     )
 }
 
@@ -71,67 +73,63 @@ fun InterfaceContent(
                 title = R.string.settings,
                 drawerState = drawerState,
                 navigationIcon = {
-                    IconButton(onClick = {  navigateBack() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = { navigateBack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
-                },) }
+                },
+            )
+        }
     ) { padding ->
         Column(
             modifier
                 .padding(padding)
                 .padding(paddingSmall)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            LazyColumn(
-                Modifier
-            ) {
-                item {
-                    SettingsTitle(
-                        text = stringResource(id = R.string.interface_header),
-                        modifier = Modifier.padding(bottom = paddingSmall)
+
+            SettingsTitle(
+                text = stringResource(id = R.string.interface_header),
+                modifier = Modifier.padding(bottom = paddingSmall)
+            )
+
+            SettingsCard {
+                Column {
+                    SettingsList(
+                        title = stringResource(id = R.string.interface_theme_title),
+                        entries = getStringArrayFromResourceArray(res = interface_entries),
+                        entryValues = interface_values.toList(),
+                        defaultValue = interfaceTheme,
+                        icon = R.drawable.ic_baseline_preview_24,
+                        onChange = { onChangeInterfaceTheme(it) },
+                        showDefaultValue = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                }
 
-                item {
-                    SettingsCard(
+                    SettingsList(
+                        title = stringResource(id = R.string.brightness_title),
+                        entries = getStringArrayFromResourceArray(res = brightness_entries),
+                        entryValues = brightness_values.toList(),
+                        defaultValue = brightness,
+                        icon = R.drawable.ic_baseline_brightness_medium_24,
+                        onChange = { onChangeBrightness(it) },
+                        showDefaultValue = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                    ) {
-                        Column {
-
-                            SettingsList(
-                                title = stringResource(id = R.string.interface_theme_title),
-                                entries = getStringArrayFromResourceArray(res = interface_entries),
-                                entryValues = interface_values.toList(),
-                                defaultValue = interfaceTheme,
-                                icon = R.drawable.ic_baseline_preview_24,
-                                onChange = { onChangeInterfaceTheme(it) },
-                                showDefaultValue = true,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            SettingsList(
-                                title = stringResource(id = R.string.brightness_title),
-                                entries = getStringArrayFromResourceArray(res = brightness_entries),
-                                entryValues = brightness_values.toList(),
-                                defaultValue = brightness,
-                                icon = R.drawable.ic_baseline_brightness_medium_24,
-                                onChange = { onChangeBrightness(it) },
-                                showDefaultValue = true,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            SettingsList(
-                                title = stringResource(id = R.string.orientation_title),
-                                entries = getStringArrayFromResourceArray(res = orientation_enties),
-                                entryValues = orientation_values.toList(),
-                                defaultValue = orientation,
-                                icon = R.drawable.ic_baseline_screen_rotation_24,
-                                onChange = { onChangeOrientation(it) },
-                                showDefaultValue = true,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
+                    SettingsList(
+                        title = stringResource(id = R.string.orientation_title),
+                        entries = getStringArrayFromResourceArray(res = orientation_enties),
+                        entryValues = orientation_values.toList(),
+                        defaultValue = orientation,
+                        icon = R.drawable.ic_baseline_screen_rotation_24,
+                        onChange = { onChangeOrientation(it) },
+                        showDefaultValue = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }

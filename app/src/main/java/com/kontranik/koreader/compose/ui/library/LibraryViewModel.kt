@@ -174,39 +174,44 @@ class LibraryViewModel(
     private fun readRecursiveScanpoint(context: Context, scanPoint: String) {
         val resolver: ContentResolver = context.contentResolver
 
-        val directoryUri = Uri.parse(scanPoint)
-            ?: throw IllegalArgumentException("Must pass URI of directory to open")
-        val documentsTree = DocumentFile.fromTreeUri(context, directoryUri)
-        if (documentsTree == null || !documentsTree.isDirectory || !documentsTree.canRead()) {
-            //
-        } else {
-            applicationScope.launch {
-                var builder =
-                    NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
+        try {
+            val directoryUri = Uri.parse(scanPoint)
+                ?: throw IllegalArgumentException("Must pass URI of directory to open")
+            val documentsTree = DocumentFile.fromTreeUri(context, directoryUri)
+            if (documentsTree == null || !documentsTree.isDirectory || !documentsTree.canRead()) {
+                //
+            } else {
+                applicationScope.launch {
+                    var builder =
+                        NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
+                            .setStyle(
+                                NotificationCompat.MessagingStyle("Me")
+                                    .setConversationTitle("Library refresh")
+                            )
+                            .setSmallIcon(R.drawable.baseline_notifications_24)
+                            .setContentText("Refreshing of library started")
+                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+                    notify(context, builder)
+                    refreshInProgress.postValue(true)
+                    traverseDirectoryEntries(resolver, directoryUri)
+                    refreshInProgress.postValue(false)
+
+                    builder = NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
                         .setStyle(
                             NotificationCompat.MessagingStyle("Me")
                                 .setConversationTitle("Library refresh")
                         )
                         .setSmallIcon(R.drawable.baseline_notifications_24)
-                        .setContentText("Refreshing of library started")
+                        .setContentText("Refreshing of library ended")
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
-                notify(context, builder)
-                refreshInProgress.postValue(true)
-                traverseDirectoryEntries(resolver, directoryUri)
-                refreshInProgress.postValue(false)
-
-                builder = NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
-                    .setStyle(
-                        NotificationCompat.MessagingStyle("Me")
-                            .setConversationTitle("Library refresh")
-                    )
-                    .setSmallIcon(R.drawable.baseline_notifications_24)
-                    .setContentText("Refreshing of library ended")
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-                notify(context, builder)
+                    notify(context, builder)
+                }
             }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

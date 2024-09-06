@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DrawerState
@@ -35,10 +38,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kontranik.koreader.R
+import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
-import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.ui.settings.PREFS_FILE
 import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
 import kotlinx.coroutines.launch
@@ -64,21 +67,24 @@ fun MainMenuScreen(
     LaunchedEffect(key1 = Unit) {
         val prefs = context.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
 
-        if ( prefs.contains(PREF_BOOK_PATH) ) {
+        if (prefs.contains(PREF_BOOK_PATH)) {
             bookPath.value = prefs.getString(PREF_BOOK_PATH, null)
         }
     }
 
     Scaffold(
         topBar = {
-            AppBar (
+            AppBar(
                 title = R.string.main_menu,
                 drawerState = drawerState,
                 navigationIcon = {
                     IconButton(onClick = { coroutineScope.launch { navigateBack() } }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(
-                            id = R.string.back
-                        ))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(
+                                id = R.string.back
+                            )
+                        )
                     }
                 }
             )
@@ -86,47 +92,65 @@ fun MainMenuScreen(
         },
         modifier = modifier.fillMaxSize(),
     ) { padding ->
-
-        Column(Modifier.padding(padding)) {
-        LazyColumn() {
-            item { MainMenuItem(painterId = R.drawable.ic_folder_black_24dp, menuTextId = R.string.openfile, onClick = { coroutineScope.launch{ navigateToOpenFile() } }) }
-            item { MainMenuItem(painterId = R.drawable.ic_iconmonstr_book_time, menuTextId = R.string.last_opened, onClick = { coroutineScope.launch{ navigateToLastOpened() } }) }
-            item { MainMenuItem(painterId = R.drawable.baseline_local_library_24, menuTextId = R.string.library, onClick = { coroutineScope.launch{ navigateToLibrary() } }) }
-            item { MainMenuItem(painterId = R.drawable.networking_1, menuTextId = R.string.opds, onClick = { coroutineScope.launch{ navigateToOpdsNetworkLibrary() } }) }
-            item { MainMenuItem(painterId = R.drawable.ic_baseline_settings_24, menuTextId = R.string.settings, onClick = { coroutineScope.launch{ navigateToSettings() } }) }
-        }
-
-        bookPath.value?.let {
-            Spacer(modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth())
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+        Column(
+            Modifier
+                .padding(padding)
+        ) {
+            Column(
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_iconmonstr_book_info),
-                    contentDescription = stringResource(id = R.string.bookinfo),
-                    modifier = Modifier
-                        .padding(paddingSmall)
-                        .size(32.dp)
-                        .clickable(
-                            onClick = {coroutineScope.launch { navigateToBookInfo(it)}},
-                            role = Role.Button,
-                        ),
-                )
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_iconmonstr_bookmark),
-                    contentDescription = stringResource(id = R.string.bookmarklist),
-                    modifier = Modifier
-                        .padding(paddingSmall)
-                        .size(32.dp)
-                        .clickable(
-                            onClick = {coroutineScope.launch { navigateToBookmarks(it)}},
-                            role = Role.Button,
-                        ),
-                )
+                MainMenuItem(
+                    painterId = R.drawable.ic_folder_black_24dp,
+                    menuTextId = R.string.openfile,
+                    onClick = { coroutineScope.launch { navigateToOpenFile() } })
+                MainMenuItem(
+                    painterId = R.drawable.ic_iconmonstr_book_time,
+                    menuTextId = R.string.last_opened,
+                    onClick = { coroutineScope.launch { navigateToLastOpened() } })
+                MainMenuItem(
+                    painterId = R.drawable.baseline_local_library_24,
+                    menuTextId = R.string.library,
+                    onClick = { coroutineScope.launch { navigateToLibrary() } })
+                MainMenuItem(
+                    painterId = R.drawable.networking_1,
+                    menuTextId = R.string.opds,
+                    onClick = { coroutineScope.launch { navigateToOpdsNetworkLibrary() } })
+                MainMenuItem(
+                    painterId = R.drawable.ic_baseline_settings_24,
+                    menuTextId = R.string.settings,
+                    onClick = { coroutineScope.launch { navigateToSettings() } })
+
             }
-        }
+            bookPath.value?.let {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_iconmonstr_book_info),
+                        contentDescription = stringResource(id = R.string.bookinfo),
+                        modifier = Modifier
+                            .padding(paddingSmall)
+                            .size(32.dp)
+                            .clickable(
+                                onClick = { coroutineScope.launch { navigateToBookInfo(it) } },
+                                role = Role.Button,
+                            ),
+                    )
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_iconmonstr_bookmark),
+                        contentDescription = stringResource(id = R.string.bookmarklist),
+                        modifier = Modifier
+                            .padding(paddingSmall)
+                            .size(32.dp)
+                            .clickable(
+                                onClick = { coroutineScope.launch { navigateToBookmarks(it) } },
+                                role = Role.Button,
+                            ),
+                    )
+                }
+            }
 
         }
 
@@ -138,7 +162,8 @@ fun MainMenuItem(
     @DrawableRes painterId: Int,
     @StringRes menuTextId: Int,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -159,6 +184,7 @@ fun MainMenuItem(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = paddingSmall)
+                .padding(vertical = paddingMedium)
         )
     }
 }
@@ -169,14 +195,14 @@ private fun MainMenuScreenPreview() {
     AppTheme {
         MainMenuScreen(
             drawerState = DrawerState(DrawerValue.Closed),
-            navigateBack = {  },
+            navigateBack = { },
             navigateToOpenFile = { },
             navigateToLastOpened = { },
-            navigateToLibrary = {  },
+            navigateToLibrary = { },
             navigateToOpdsNetworkLibrary = { },
             navigateToSettings = { },
-            navigateToBookInfo = {  },
-            navigateToBookmarks = {  },
+            navigateToBookInfo = { },
+            navigateToBookmarks = { },
         )
     }
 

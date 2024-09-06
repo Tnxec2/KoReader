@@ -43,6 +43,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.navigation.NavigationDestination
@@ -51,7 +52,6 @@ import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.compose.ui.shared.rememberBookInfoForLibraryItem
-import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.LibraryItem
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.database.model.mocupAuthors
@@ -159,10 +159,11 @@ fun LibraryByTitleScreen(
             }
 
             LazyColumn(state = listState) {
-                items(count = booksPagingState.itemCount,
-                    key = { index -> booksPagingState[index]?.libraryItem?.id ?: 0 }) { index ->
-                    val item = booksPagingState[index]
-                    item?.let {
+                items(
+                    count = booksPagingState.itemCount,
+                    key = booksPagingState.itemKey { item -> item.libraryItem.id.toString() }
+                ) { index ->
+                    booksPagingState[index]?.let {
                         BooksItem(
                             item = it,
                             onClick = {
