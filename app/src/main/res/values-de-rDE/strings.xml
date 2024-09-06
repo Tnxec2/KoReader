@@ -10,7 +10,6 @@
     <string name="swipe_down">Nach unten wischen</string>
     <string name="click_in_zone">Klick %1$d in %2$s</string>
     <string name="doubleclick_in_zone">Doppelklick in %1$s</string>
-    <string name="longclick_in_zone">Langes Klick in %1$s</string>
     <string name="page_info_text_left">%1$d / %2$d (%3$d%%)</string>
     <string name="page_info_text_right">%1$d / %2$d (%3$d)</string>
     <string name="page_info_text_time">%1$s / %2$d %%</string>
@@ -98,7 +97,6 @@
     <string name="tapzones_header">Tap-Bereiche</string>
     <string name="tapzones_one_click_header">Einzelklick</string>
     <string name="tapzones_double_click_header">Doppelklick</string>
-    <string name="tapzones_long_click_header">langes Klick</string>
     <string name="tapzone_top_left">oben links</string>
     <string name="tapzone_top_center">oben mitte</string>
     <string name="tapzone_top_right">oben rechts</string>

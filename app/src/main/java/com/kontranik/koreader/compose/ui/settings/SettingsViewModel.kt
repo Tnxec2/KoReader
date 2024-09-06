@@ -93,16 +93,6 @@ const val PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT = "tapZoneDoubleClickBottomLeft"
 const val PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER = "tapZoneDoubleClickBottomCenter"
 const val PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT = "tapZoneOneClickBottomRight"
 
-const val PREF_KEY_TAP_LONG_TOP_LEFT = "tapZoneLongClickTopLeft"
-const val PREF_KEY_TAP_LONG_TOP_CENTER = "tapZoneLongClickTopCenter"
-const val PREF_KEY_TAP_LONG_TOP_RIGHT = "tapZoneLongClickTopRight"
-const val PREF_KEY_TAP_LONG_MIDDLE_LEFT = "tapZoneLongClickMiddleLeft"
-const val PREF_KEY_TAP_LONG_MIDDLE_CENTER = "tapZoneLongClickMiddleCenter"
-const val PREF_KEY_TAP_LONG_MIDDLE_RIGHT = "tapZoneLongClickMiddleRight"
-const val PREF_KEY_TAP_LONG_BOTTOM_LEFT = "tapZoneLongClickBottomLeft"
-const val PREF_KEY_TAP_LONG_BOTTOM_CENTER = "tapZoneLongClickBottomCenter"
-const val PREF_KEY_TAP_LONG_BOTTOM_RIGHT = "tapZoneOneClickBottomRight"
-
 const val PREF_COLOR_SELECTED_THEME_DEFAULT = 0
 const val PREF_DEFAULT_MARGIN = 10
 const val interfaceThemeDefault = "Auto"
@@ -213,7 +203,6 @@ enum class Actions {
             MainMenu -> R.string.tapzones_activity_main_menu
             GoTo -> R.string.tapzones_activity_goto
             Bookmarks -> R.string.tapzones_activity_bookmarks
-
         }
     }
 }
@@ -239,17 +228,6 @@ val defaultTapZoneDoubleMiddleRight = Actions.PageNext
 val defaultTapZoneDoubleBottomLeft = Actions.PagePrev
 val defaultTapZoneDoubleBottomCenter = Actions.GoTo
 val defaultTapZoneDoubleBottomRight = Actions.PageNext
-
-val defaultTapZoneLongTopLeft = Actions.None
-val defaultTapZoneLongTopCenter = Actions.None
-val defaultTapZoneLongTopRight = Actions.None
-val defaultTapZoneLongMiddleLeft = Actions.None
-val defaultTapZoneLongMiddleCenter = Actions.QuickMenu
-val defaultTapZoneLongMiddleRight = Actions.None
-val defaultTapZoneLongBottomLeft = Actions.None
-val defaultTapZoneLongBottomCenter = Actions.None
-val defaultTapZoneLongBottomRight = Actions.None
-
 
 val interface_entries = arrayOf(
     R.string.InterfaceLight,
@@ -351,8 +329,6 @@ class SettingsViewModel(
 
     val tapOneAction = mutableStateOf(mapOf<ScreenZone, Actions>())
     val tapDoubleAction = mutableStateOf(mapOf<ScreenZone, Actions>())
-    val tapLongAction = mutableStateOf(mapOf<ScreenZone, Actions>())
-
 
     init {
         interfaceTheme.value = prefs.getString(PREFS_interface_theme, interfaceThemeDefault) ?: interfaceThemeDefault
@@ -430,44 +406,6 @@ class SettingsViewModel(
                 ) ?: defaultTapZoneOneBottomRight.name),
             )
 
-        tapLongAction.value = hashMapOf(
-                ScreenZone.TopLeft to Actions.valueOf(prefs.getString(
-                    PREF_KEY_TAP_LONG_TOP_LEFT,
-                    defaultTapZoneLongTopLeft.name
-                ) ?: defaultTapZoneLongTopLeft.name),
-                ScreenZone.TopCenter to Actions.valueOf(prefs.getString(
-                    PREF_KEY_TAP_LONG_TOP_CENTER,
-                    defaultTapZoneLongTopCenter.name
-                ) ?: defaultTapZoneLongTopCenter.name),
-                ScreenZone.TopRight to Actions.valueOf(prefs.getString(
-                    PREF_KEY_TAP_LONG_TOP_RIGHT,
-                    defaultTapZoneLongTopRight.name
-                ) ?: defaultTapZoneLongTopRight.name),
-                ScreenZone.MiddleLeft to Actions.valueOf(prefs.getString(
-                    PREF_KEY_TAP_LONG_MIDDLE_LEFT,
-                    defaultTapZoneLongMiddleLeft.name
-                ) ?: defaultTapZoneLongMiddleLeft.name),
-                ScreenZone.MiddleCenter to Actions.valueOf(prefs.getString(
-                    PREF_KEY_TAP_LONG_MIDDLE_CENTER,
-                    defaultTapZoneLongMiddleCenter.name
-                ) ?: defaultTapZoneLongMiddleCenter.name),
-                ScreenZone.MiddleRight to Actions.valueOf(prefs.getString(
-                    PREF_KEY_TAP_LONG_MIDDLE_RIGHT,
-                    defaultTapZoneLongMiddleRight.name
-                ) ?: defaultTapZoneLongMiddleRight.name),
-                ScreenZone.BottomLeft to Actions.valueOf(prefs.getString(
-                    PREF_KEY_TAP_LONG_BOTTOM_LEFT,
-                    defaultTapZoneLongBottomLeft.name
-                ) ?: defaultTapZoneLongBottomLeft.name),
-                ScreenZone.BottomCenter to Actions.valueOf(prefs.getString(
-                    PREF_KEY_TAP_LONG_BOTTOM_CENTER,
-                    defaultTapZoneLongBottomCenter.name
-                ) ?: defaultTapZoneLongBottomCenter.name),
-                ScreenZone.BottomRight to Actions.valueOf(prefs.getString(
-                    PREF_KEY_TAP_LONG_BOTTOM_RIGHT,
-                    defaultTapZoneLongBottomRight.name
-                ) ?: defaultTapZoneLongBottomRight.name),
-            )
         tapDoubleAction.value =
             hashMapOf(
                 ScreenZone.TopLeft to Actions.valueOf(prefs.getString(
@@ -762,15 +700,6 @@ class SettingsViewModel(
         prefEditor.putString(getTapDoubleKey(zone), action)
         prefEditor.apply()
     }
-    fun changeLongClick(zone: ScreenZone, action: String) {
-        tapLongAction.value = tapLongAction.value.map {
-                entry -> entry.key to if (zone == entry.key) Actions.valueOf(action) else entry.value
-        }.toMap()
-
-        val prefEditor: SharedPreferences.Editor = prefs.edit()
-        prefEditor.putString(getTapLongKey(zone), action)
-        prefEditor.apply()
-    }
 
     fun changeShowSystemFonts(value: Boolean) {
         showSystemFonts.value = value
@@ -876,20 +805,6 @@ private fun getTapDoubleKey(zone: ScreenZone): String {
         ScreenZone.BottomLeft -> PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT
         ScreenZone.BottomCenter -> PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER
         ScreenZone.BottomRight -> PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT
-    }
-}
-
-private fun getTapLongKey(zone: ScreenZone): String {
-    return when (zone) {
-        ScreenZone.TopLeft -> PREF_KEY_TAP_LONG_TOP_LEFT
-        ScreenZone.TopCenter -> PREF_KEY_TAP_LONG_TOP_CENTER
-        ScreenZone.TopRight -> PREF_KEY_TAP_LONG_TOP_RIGHT
-        ScreenZone.MiddleLeft -> PREF_KEY_TAP_LONG_MIDDLE_LEFT
-        ScreenZone.MiddleCenter -> PREF_KEY_TAP_LONG_MIDDLE_CENTER
-        ScreenZone.MiddleRight -> PREF_KEY_TAP_LONG_MIDDLE_RIGHT
-        ScreenZone.BottomLeft -> PREF_KEY_TAP_LONG_BOTTOM_LEFT
-        ScreenZone.BottomCenter -> PREF_KEY_TAP_LONG_BOTTOM_CENTER
-        ScreenZone.BottomRight -> PREF_KEY_TAP_LONG_BOTTOM_RIGHT
     }
 }
 

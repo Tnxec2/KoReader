@@ -34,7 +34,6 @@ import com.kontranik.koreader.compose.ui.settings.InterfaceSettingsScreen
 import com.kontranik.koreader.compose.ui.settings.RootSettingsScreen
 import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
 import com.kontranik.koreader.compose.ui.settings.TapZonesDoubleClickSettingsScreen
-import com.kontranik.koreader.compose.ui.settings.TapZonesLongClickSettingsScreen
 import com.kontranik.koreader.compose.ui.settings.TapZonesOneClickSettingsScreen
 import com.kontranik.koreader.compose.ui.settings.TapZonesSettingsScreen
 import com.kontranik.koreader.compose.ui.settings.TextSettingsScreen
@@ -276,7 +275,6 @@ fun NavGraphBuilder.mainGraph(
                 navigateBack = { navController.popBackStack() },
                 navigateToSettingsTapZonesOneClick = { navController.navigate(NavOptions.SettingsTapZonesOneClick.name) },
                 navigateToSettingsTapZonesDoubleClick = { navController.navigate(NavOptions.SettingsTapZonesDoubleClick.name) },
-                navigateToSettingsTapZonesLongClick = { navController.navigate(NavOptions.SettingsTapZonesLongClick.name) },
             )
         }
 
@@ -290,15 +288,6 @@ fun NavGraphBuilder.mainGraph(
 
         composable(NavOptions.SettingsTapZonesDoubleClick.name) {
             TapZonesDoubleClickSettingsScreen(
-                drawerState = drawerState,
-                navigateBack = { navController.popBackStack() },
-                settingsViewModel = settingsViewModel
-            )
-        }
-
-
-        composable(NavOptions.SettingsTapZonesLongClick.name) {
-            TapZonesLongClickSettingsScreen(
                 drawerState = drawerState,
                 navigateBack = { navController.popBackStack() },
                 settingsViewModel = settingsViewModel

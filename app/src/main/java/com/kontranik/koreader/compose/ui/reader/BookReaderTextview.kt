@@ -85,7 +85,7 @@ class BookReaderTextview(
         }
 
         override fun onDoubleClick(point: Point) {
-            //super.onDoubleClick(point)
+            super.onDoubleClick(point)
             checkTap(point, TapType.DoubleTap)
         }
 
@@ -107,7 +107,7 @@ class BookReaderTextview(
                     switchToSelectionMode()
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                switchToSelectionMode()
             }
 
         }
@@ -201,7 +201,7 @@ class BookReaderTextview(
         val zone = getZone(point)
 
         when (tapType) {
-            OnSwipeTouchListener.TapType.OneTap -> { // double tap
+            OnSwipeTouchListener.TapType.OneTap -> { // single tap
                 listener?.onTapOnBookReaderTextview(zone)
             }
             OnSwipeTouchListener.TapType.DoubleTap -> { // double tap

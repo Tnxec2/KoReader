@@ -109,7 +109,7 @@ fun BookReaderScreen(
                     tap(settingsViewModel.tapDoubleAction.value[zone])
                 }
                 override fun onLongTapOnBookReaderTextview(zone: ScreenZone) {
-                    tap(settingsViewModel.tapLongAction.value[zone])
+                    //
                 }
                 override fun onSwipeLeftOnBookReaderTextview() {
                     bookReaderViewModel.doPagePrev()
