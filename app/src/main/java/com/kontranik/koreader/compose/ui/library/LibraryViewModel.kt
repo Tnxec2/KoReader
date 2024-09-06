@@ -166,8 +166,14 @@ class LibraryViewModel(
     }
 
     fun readRecursive(context: Context, scanPoints: Set<String>) {
-        scanPoints.forEach { scanPoint ->
-            readRecursiveScanpoint(context, scanPoint)
+        applicationScope.launch {
+            refreshInProgress.postValue(true)
+            notify(context, "Library refresh", "Refreshing of library started")
+            scanPoints.forEach { scanPoint ->
+                readRecursiveScanpoint(context, scanPoint)
+            }
+            refreshInProgress.postValue(false)
+            notify(context, "Library refresh", "Refreshing of library ended")
         }
     }
 
@@ -181,49 +187,29 @@ class LibraryViewModel(
             if (documentsTree == null || !documentsTree.isDirectory || !documentsTree.canRead()) {
                 //
             } else {
-                applicationScope.launch {
-                    var builder =
-                        NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
-                            .setStyle(
-                                NotificationCompat.MessagingStyle("Me")
-                                    .setConversationTitle("Library refresh")
-                            )
-                            .setSmallIcon(R.drawable.baseline_notifications_24)
-                            .setContentText("Refreshing of library started")
-                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-                    notify(context, builder)
-                    refreshInProgress.postValue(true)
-                    traverseDirectoryEntries(resolver, directoryUri)
-                    refreshInProgress.postValue(false)
-
-                    builder = NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
-                        .setStyle(
-                            NotificationCompat.MessagingStyle("Me")
-                                .setConversationTitle("Library refresh")
-                        )
-                        .setSmallIcon(R.drawable.baseline_notifications_24)
-                        .setContentText("Refreshing of library ended")
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-                    notify(context, builder)
-                }
+                traverseDirectoryEntries(resolver, directoryUri)
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun notify(context: Context, builder: NotificationCompat.Builder) {
+    private fun notify(context: Context, title: String, message: String) {
+        val builder =
+            NotificationCompat.Builder(KoReaderApplication.getContext(), CHANNEL_ID)
+                .setSmallIcon(R.drawable.baseline_local_library_24)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        try {
+
         NotificationManagerCompat.from(KoReaderApplication.getContext()).apply {
             if (ActivityCompat.checkSelfPermission(
                     context,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
+                // TODO: Consider calling ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
                 //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
                 //                                          int[] grantResults)
@@ -233,6 +219,10 @@ class LibraryViewModel(
             } else {
                 notify(notificationId, builder.build())
             }
+        }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
