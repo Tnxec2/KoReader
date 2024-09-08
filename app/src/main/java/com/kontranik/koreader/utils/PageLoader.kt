@@ -36,8 +36,10 @@ class PageLoader : PageSplitterHtml(){
             loadPages(bookPosition.section, recalc)
         }
 
-        restultPage = findPage(bookPosition.offSet) ?: section(bookPosition, revers, recalc)
-
+        restultPage = findPage(bookPosition.offSet)?.apply {
+            pageStartPosition.offSet = bookPosition.offSet
+        } ?: section(bookPosition, revers, recalc)
+        Log.d(TAG, "resultPage. start = ${restultPage?.pageStartPosition}, end = ${restultPage?.pageEndPosition}")
         return restultPage
     }
 
@@ -78,9 +80,9 @@ class PageLoader : PageSplitterHtml(){
         if ( offset > pages.last().pageEndPosition.offSet) return null
 
         val result = pages.firstOrNull { page: Page ->
-            offset in page.pageStartPosition.offSet until page.pageEndPosition.offSet
+            offset in page.pageStartPosition.offSet .. page.pageEndPosition.offSet
         }
-        Log.d(TAG, "findPage. start = ${result?.pageStartPosition}, end = ${result?.pageEndPosition}")
+        Log.d(TAG, "findPage. offset = $offset, start = ${result?.pageStartPosition}, end = ${result?.pageEndPosition}")
         return result
     }
 
