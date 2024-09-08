@@ -48,7 +48,7 @@ class BookReaderViewModel(
 
     val bookPath = MutableLiveData<String?>(null)
     val book = MutableLiveData<Book?>(null)
-    private var curPage = MutableLiveData(Page(startBookPosition = BookPosition()))
+    private var curPage = MutableLiveData(Page(pageStartPosition = BookPosition()))
 
     var mAllBookmarksWithOffsetOnPage = bookPath.asFlow().combine(curPage.asFlow()) {
         path, page ->
@@ -56,9 +56,9 @@ class BookReaderViewModel(
             bookmarkRepository
                 .getByPathAndPosition(
                     it,
-                    page.startBookPosition.section,
-                    page.startBookPosition.offSet,
-                    page.endBookPosition.offSet
+                    page.pageStartPosition.section,
+                    page.pageStartPosition.offSet,
+                    page.pageEndPosition.offSet
                 ).first().map { b ->
                     b.toBookmarkWithOffsetOnPage(page)
                 }
@@ -163,7 +163,7 @@ class BookReaderViewModel(
     }
 
     private fun getCur(): Page? {
-        return getPage(curPage.value!!.startBookPosition.copy(), revers = false, recalc = true)
+        return getPage(curPage.value!!.pageStartPosition.copy(), revers = false, recalc = true)
     }
 
     fun goToNextPage() {
@@ -194,8 +194,8 @@ class BookReaderViewModel(
 
     private fun getNext(): Page? {
         val bookPosition = BookPosition(
-            curPage.value!!.endBookPosition.section,
-            offSet = curPage.value!!.endBookPosition.offSet + 1
+            curPage.value!!.pageEndPosition.section,
+            offSet = curPage.value!!.pageEndPosition.offSet + 1
         )
         bookPosition.offSet += 1
         return getPage(BookPosition(bookPosition), revers = false, recalc = false)
@@ -203,7 +203,7 @@ class BookReaderViewModel(
 
     private fun getPrev(): Page? {
         println("getPrev")
-        val bookPosition = BookPosition(curPage.value!!.startBookPosition)
+        val bookPosition = BookPosition(curPage.value!!.pageStartPosition)
         bookPosition.offSet -= 1
         return getPage(BookPosition(bookPosition), revers = true, recalc = false)
     }
@@ -333,7 +333,7 @@ class BookReaderViewModel(
                                 "savePosition: section: ${bookStatus.position_section}, offset: ${bookStatus.position_offset}"
                             )
                             val bookPosition =
-                                BookPosition(curPage.value!!.startBookPosition)
+                                BookPosition(curPage.value!!.pageStartPosition)
                             bookStatus.updatePosition(bookPosition)
                             bookStatusRepository.update(bookStatus)
                         }
@@ -374,8 +374,8 @@ class BookReaderViewModel(
             text = if (pageText.length <= 100)
                 pageText else
                 pageText.substring(0, 100),
-            position_section = curPage.value!!.startBookPosition.section,
-            position_offset = curPage.value!!.startBookPosition.offSet,
+            position_section = curPage.value!!.pageStartPosition.section,
+            position_offset = curPage.value!!.pageStartPosition.offSet,
         )
     }
 
@@ -406,28 +406,28 @@ class BookReaderViewModel(
     }
 
     fun getCurSection(): Int {
-        return curPage.value!!.endBookPosition.section
+        return curPage.value!!.pageEndPosition.section
     }
 
     fun getCurTextPage(): Int {
         var curTextPage = 0
-        for (i in 0 until curPage.value!!.endBookPosition.section) {
+        for (i in 0 until curPage.value!!.pageEndPosition.section) {
             if (book.value!!.getPageScheme()?.scheme?.get(i) != null)
                 curTextPage += book.value!!.getPageScheme()!!.scheme[i]!!.countTextPages
         }
-        curTextPage += (curPage.value!!.endBookPosition.offSet / BookPageScheme.CHAR_PER_PAGE)
+        curTextPage += (curPage.value!!.pageEndPosition.offSet / BookPageScheme.CHAR_PER_PAGE)
         return curTextPage
     }
 
     private fun isBookmarkOnCurrentPage(bookmark: Bookmark): Boolean {
         return curPage.value?.let {
-            bookmark.position_section >= curPage.value!!.startBookPosition.section
+            bookmark.position_section >= curPage.value!!.pageStartPosition.section
             &&
-            bookmark.position_section <= curPage.value!!.endBookPosition.section
+            bookmark.position_section <= curPage.value!!.pageEndPosition.section
             &&
-            bookmark.position_offset >= curPage.value!!.startBookPosition.offSet
+            bookmark.position_offset >= curPage.value!!.pageStartPosition.offSet
             &&
-            bookmark.position_offset < curPage.value!!.endBookPosition.offSet
+            bookmark.position_offset < curPage.value!!.pageEndPosition.offSet
         } ?: false
     }
 
@@ -437,13 +437,13 @@ class BookReaderViewModel(
     }
 
     fun addBookmark(start: Int, text: CharSequence) {
-        println("addBookmark: start: $start, curpage.offset: ${curPage.value!!.startBookPosition.offSet}")
+        println("addBookmark: start: $start, curpage.offset: ${curPage.value!!.pageStartPosition.offSet}")
         bookmarkRepository.insert(
         Bookmark(
             path = book.value!!.fileLocation,
             text = text.toString(),
-            position_section = curPage.value!!.startBookPosition.section,
-            position_offset = curPage.value!!.startBookPosition.offSet + start,
+            position_section = curPage.value!!.pageStartPosition.section,
+            position_offset = curPage.value!!.pageStartPosition.offSet + start,
         ))
         recalcCurrentPage()
     }

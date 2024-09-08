@@ -37,6 +37,6 @@ data class BookmarkWithOffsetOnPage(
 fun Bookmark.toBookmarkWithOffsetOnPage(page: Page): BookmarkWithOffsetOnPage {
     return BookmarkWithOffsetOnPage(
         bookmark = this,
-        offset = position_offset - page.startBookPosition.offSet
+        offset = position_offset - page.pageStartPosition.offSet
     )
 }

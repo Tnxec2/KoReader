@@ -31,8 +31,8 @@ class BookStatus(
         path = book.fileLocation,
         title = book.ebookHelper?.bookInfo?.title,
         authors = book.ebookHelper?.bookInfo?.authorsAsString(),
-        position_section = curPage.startBookPosition.section,
-        position_offset = curPage.startBookPosition.offSet,
+        position_section = curPage.pageStartPosition.section,
+        position_offset = curPage.pageStartPosition.offSet,
         cover = ImageUtils.getBytes(book.ebookHelper?.bookInfo?.cover)
     )
 

@@ -42,8 +42,8 @@ class PageLoader : PageSplitterHtml(){
     }
 
     private fun isCurrentSectionLoaded(bookPosition: BookPosition) =
-            (bookPosition.section >= pages.first().startBookPosition.section
-                    && bookPosition.section <= pages.last().endBookPosition.section)
+            (bookPosition.section >= pages.first().pageStartPosition.section
+                    && bookPosition.section <= pages.last().pageEndPosition.section)
 
     private fun section(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page {
         var resultPage: Page? = null
@@ -75,12 +75,12 @@ class PageLoader : PageSplitterHtml(){
     private fun findPage(offset: Int): Page? {
         if ( offset < 0) return null
         if ( pages.isEmpty() ) return null
-        if ( offset > pages.last().endBookPosition.offSet) return null
+        if ( offset > pages.last().pageEndPosition.offSet) return null
 
         val result = pages.firstOrNull { page: Page ->
-            offset in page.startBookPosition.offSet until page.endBookPosition.offSet
+            offset in page.pageStartPosition.offSet until page.pageEndPosition.offSet
         }
-        Log.d(TAG, "findPage. start = ${result?.startBookPosition}, end = ${result?.endBookPosition}")
+        Log.d(TAG, "findPage. start = ${result?.pageStartPosition}, end = ${result?.pageEndPosition}")
         return result
     }
 

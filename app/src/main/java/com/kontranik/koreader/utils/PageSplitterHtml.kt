@@ -88,8 +88,8 @@ open class PageSplitterHtml() : FontsHelper() {
             pages.add(Page(
                     content = SpannableStringBuilder()
                         .append(content.subSequence(startOffset, endOffset)),
-                    startBookPosition = BookPosition(section = section, offSet = startOffset),
-                    endBookPosition = BookPosition(section = section, offSet = endOffset)
+                    pageStartPosition = BookPosition(section = section, offSet = startOffset),
+                    pageEndPosition = BookPosition(section = section, offSet = endOffset)
             ))
 
             if ( endLine >= staticLayout!!.lineCount-1 ) break
