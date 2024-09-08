@@ -23,7 +23,9 @@ import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.navigation.mainGraph
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.compose.ui.opds.OpdsViewModell
+import com.kontranik.koreader.compose.ui.openfile.OpenFileViewModel
 import com.kontranik.koreader.compose.ui.reader.BookReaderScreen
 import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
@@ -67,6 +69,8 @@ fun MainCompose(
     val bookReaderViewModel: BookReaderViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val bookStatusViewModel: BookStatusViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val opdsViewModell: OpdsViewModell = viewModel(factory = AppViewModelProvider.Factory)
+    val openFileViewModel: OpenFileViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val libraryViewModel: LibraryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
     LaunchedEffect(key1 = Unit) {
         bookStatusViewModel.cleanup(context)
@@ -81,7 +85,8 @@ fun MainCompose(
                 navController,
                 startDestination = NavRoutes.MainRoute.name
             ) {
-                mainGraph(drawerState, navController, settingsViewModel, bookReaderViewModel, bookStatusViewModel, opdsViewModell)
+                mainGraph(drawerState, navController, settingsViewModel, bookReaderViewModel,
+                    openFileViewModel, bookStatusViewModel, opdsViewModell, libraryViewModel)
             }
         }
     }

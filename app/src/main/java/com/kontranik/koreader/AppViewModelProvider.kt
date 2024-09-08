@@ -37,7 +37,9 @@ object AppViewModelProvider {
 
         initializer {
             BookStatusViewModel(
-                koReaderApplication().container.bookStatusRepository
+                koReaderApplication().container.bookStatusRepository,
+                koReaderApplication().container.libraryItemRepository,
+                koReaderApplication().container.authorsRepository,
             )
         }
 

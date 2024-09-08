@@ -77,7 +77,7 @@ fun AuthorsItemPopupMenu(
                     .clickable { onDelete() }
             ) {
                 Text(
-                    text = stringResource(id = R.string.deletebook),
+                    text = stringResource(id = R.string.delete_author),
                     modifier = Modifier
                         .padding(horizontal = paddingMedium, vertical = paddingMedium)
                 )

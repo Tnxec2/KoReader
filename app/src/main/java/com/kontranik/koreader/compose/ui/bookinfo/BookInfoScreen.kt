@@ -46,6 +46,7 @@ import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLandscapeLightDar
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
+import com.kontranik.koreader.compose.ui.openfile.OpenFileViewModel
 import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import com.kontranik.koreader.database.BookStatusViewModel
 import kotlinx.coroutines.launch
@@ -67,6 +68,7 @@ fun BookInfoScreen(
     modifier: Modifier = Modifier,
     bookInfoViewModell: BookInfoViewModell = viewModel(factory = AppViewModelProvider.Factory),
     bookReaderViewModel: BookReaderViewModel,
+    openFileViewModel: OpenFileViewModel,
     bookStatusViewModel: BookStatusViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
 
@@ -138,8 +140,12 @@ fun BookInfoScreen(
                 onConfirmation = {
                     coroutineScope.launch {
                         bookStatusViewModel.deleteByPath(bookInfoViewModell.bookPath)
+                        bookReaderViewModel.bookPath.postValue(null)
+                        openFileViewModel.loadPath()
+                        navigateBack()
                     }
-                })
+                }
+            )
         }
     }
 }

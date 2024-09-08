@@ -90,7 +90,7 @@ class OpenFileViewModel : ViewModel()  {
     }
 
 
-    private fun loadPath() {
+    fun loadPath() {
         if ( selectedDocumentFileUriString == null ) {
             storageList()
             return

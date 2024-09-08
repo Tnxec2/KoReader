@@ -15,6 +15,7 @@ import com.kontranik.koreader.compose.ui.bookinfo.BookInfoScreen
 import com.kontranik.koreader.compose.ui.bookmarks.BoomkmarksScreen
 import com.kontranik.koreader.compose.ui.bookmarks.BoomkmarksScreenDestination
 import com.kontranik.koreader.compose.ui.lastopened.LastOpenedScreen
+import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.compose.ui.library.byauthor.LibraryByAuthorDestination
 import com.kontranik.koreader.compose.ui.library.byauthor.LibraryByAuthorScreen
 import com.kontranik.koreader.compose.ui.library.bytitle.LibraryByTitleDestination
@@ -25,6 +26,7 @@ import com.kontranik.koreader.compose.ui.mainmenu.MainMenuScreen
 import com.kontranik.koreader.compose.ui.opds.OpdsListScreen
 import com.kontranik.koreader.compose.ui.opds.OpdsViewModell
 import com.kontranik.koreader.compose.ui.openfile.OpenFileScreen
+import com.kontranik.koreader.compose.ui.openfile.OpenFileViewModel
 import com.kontranik.koreader.compose.ui.reader.BookReaderScreen
 import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import com.kontranik.koreader.compose.ui.settings.ColorSettingsScreen
@@ -45,8 +47,10 @@ fun NavGraphBuilder.mainGraph(
     navController: NavHostController,
     settingsViewModel: SettingsViewModel,
     bookReaderViewModel: BookReaderViewModel,
+    openFileViewModel: OpenFileViewModel,
     bookStatusViewModel: BookStatusViewModel,
-    opdsViewModell: OpdsViewModell
+    opdsViewModell: OpdsViewModell,
+    libraryViewModel: LibraryViewModel
 ) {
 
     navigation(
@@ -95,7 +99,9 @@ fun NavGraphBuilder.mainGraph(
                 navigateBack = { navController.popBackStack() },
                 navigateToBookInfo = { path ->
                     val encoded = Uri.encode(path.replace('%','|'))
-                    navController.navigate("${BookInfoDestination.route}?path=${encoded}") }
+                    navController.navigate("${BookInfoDestination.route}?path=${encoded}") },
+                openFileViewModel = openFileViewModel,
+                libraryViewModel = libraryViewModel,
             )
         }
 
@@ -215,6 +221,7 @@ fun NavGraphBuilder.mainGraph(
                     navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}")
                 },
                 bookReaderViewModel = bookReaderViewModel,
+                openFileViewModel = openFileViewModel,
                 bookStatusViewModel = bookStatusViewModel,
             )
         }

@@ -41,7 +41,9 @@ class LibraryItemRepository(private val mLibraryItemDao: LibraryItemDao) {
     }
 
     fun delete(id: Long) {
-        BooksRoomDatabase.databaseWriteExecutor.execute { mLibraryItemDao.delete(id) }
+        BooksRoomDatabase.databaseWriteExecutor.execute {
+            mLibraryItemDao.delete(id)
+        }
     }
 
     fun deleteCrossRefLibraryItem(libraryItem: LibraryItem) {
@@ -55,6 +57,7 @@ class LibraryItemRepository(private val mLibraryItemDao: LibraryItemDao) {
             mLibraryItemDao.deleteAll()
         }
     }
+
     fun deleteAllCrossRef() {
         BooksRoomDatabase.databaseWriteExecutor.execute {
             mLibraryItemDao.deleteAllCrossRef()
@@ -69,4 +72,5 @@ class LibraryItemRepository(private val mLibraryItemDao: LibraryItemDao) {
 
     @WorkerThread
     fun getCountByAuthorId(authorId: Long): Long = mLibraryItemDao.getCountByAuthorId(authorId)
+
 }

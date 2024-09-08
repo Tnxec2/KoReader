@@ -140,7 +140,7 @@ fun LibraryByAuthorScreen(
                                 navigateToAuthor(it)
                             },
                             onDelete = {
-                                // TODO: libraryViewModel.delete(it)
+                                libraryViewModel.deleteAuthor(it)
                             },
                         )
                         if (index < booksPagingState.itemCount-1)

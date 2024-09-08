@@ -423,4 +423,8 @@ class LibraryViewModel(
         val item = libraryItemRepository.getByPathWithAuthors(path)
         return item.firstOrNull()
     }
+
+    fun deleteAuthor(author: Author) {
+        author.id?.let { id -> authorsRepository.delete(id) }
+    }
 }

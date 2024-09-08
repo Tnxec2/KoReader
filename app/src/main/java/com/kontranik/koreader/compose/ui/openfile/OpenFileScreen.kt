@@ -66,8 +66,8 @@ fun OpenFileScreen(
     navigateBack: () -> Unit,
     navigateToBookInfo: (bookPath: String) -> Unit,
     modifier: Modifier = Modifier,
-    fileChooseFragmentViewModel: OpenFileViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    libraryViewModel: LibraryViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    openFileViewModel: OpenFileViewModel,
+    libraryViewModel: LibraryViewModel,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -76,7 +76,7 @@ fun OpenFileScreen(
 
     val listState = rememberLazyListState()
 
-    val fileItemListState = fileChooseFragmentViewModel.fileItemList
+    val fileItemListState = openFileViewModel.fileItemList
 
     var showConfirmOpenStorageDialog by remember { mutableStateOf(false) }
     var deleteStoragePosition by remember { mutableStateOf<Int?>(null) }
@@ -84,7 +84,7 @@ fun OpenFileScreen(
     val temp = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
         coroutineScope.launch {
             println("storagePicker: $it")
-            fileChooseFragmentViewModel.addStoragePath(it.toString())
+            openFileViewModel.addStoragePath(it.toString())
         }
     }
 
@@ -94,15 +94,15 @@ fun OpenFileScreen(
              uri?.let {
                  coroutineScope.launch {
                      context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    fileChooseFragmentViewModel.addStoragePath(it.toString())
+                    openFileViewModel.addStoragePath(it.toString())
                  }
              }
          })
 
-    LaunchedEffect(key1 = fileChooseFragmentViewModel.scrollToDocumentFileUriString) {
-        fileChooseFragmentViewModel.scrollToDocumentFileUriString.value?.let {
+    LaunchedEffect(key1 = openFileViewModel.scrollToDocumentFileUriString) {
+        openFileViewModel.scrollToDocumentFileUriString.value?.let {
             listState.scrollToItem(
-                fileChooseFragmentViewModel.getPositionInFileItemList()
+                openFileViewModel.getPositionInFileItemList()
             )
             val layoutInfo = listState.layoutInfo
             val viewportHeight =
@@ -114,8 +114,8 @@ fun OpenFileScreen(
         }
     }
 
-    LaunchedEffect(key1 = fileChooseFragmentViewModel.showConfirmSelectStorageDialog) {
-        showConfirmOpenStorageDialog = fileChooseFragmentViewModel.showConfirmSelectStorageDialog.value
+    LaunchedEffect(key1 = openFileViewModel.showConfirmSelectStorageDialog) {
+        showConfirmOpenStorageDialog = openFileViewModel.showConfirmSelectStorageDialog.value
     }
 
     fun addToStorage() {
@@ -145,7 +145,7 @@ fun OpenFileScreen(
             text = stringResource(R.string.sure_delete_storage),
             onDismissRequest = { deleteStoragePosition = null },
             onConfirmation = {
-                fileChooseFragmentViewModel.deleteStorage(it)
+                openFileViewModel.deleteStorage(it)
                 deleteStoragePosition = null
             })
     }
@@ -166,23 +166,23 @@ fun OpenFileScreen(
                     }
                 },
                 appBarActions = listOf{
-                    if (fileChooseFragmentViewModel.isVisibleImageButtonFilechooseAddStorage.value)
+                    if (openFileViewModel.isVisibleImageButtonFilechooseAddStorage.value)
                         AppBarAction(appBarAction = AppBarAction(
                             icon = R.drawable.ic_iconmonstr_folder_add,
                             description = R.string.add_to_storage,
                             onClick = { showConfirmOpenStorageDialog = true }
                         ))
-                    if (!fileChooseFragmentViewModel.isVisibleImageButtonFilechooseAddStorage.value)
+                    if (!openFileViewModel.isVisibleImageButtonFilechooseAddStorage.value)
                         AppBarAction(appBarAction = AppBarAction(
                             icon = R.drawable.ic_baseline_storage_24,
                             description = R.string.go_to_storage,
-                            onClick = { fileChooseFragmentViewModel.storageList() }
+                            onClick = { openFileViewModel.storageList() }
                         ))
-                    if (!fileChooseFragmentViewModel.isVisibleImageButtonFilechooseAddStorage.value)
+                    if (!openFileViewModel.isVisibleImageButtonFilechooseAddStorage.value)
                         AppBarAction(appBarAction = AppBarAction(
                             icon = R.drawable.ic_baseline_arrow_back_24,
                             description = R.string.back,
-                            onClick = { fileChooseFragmentViewModel.goBack() }
+                            onClick = { openFileViewModel.goBack() }
                         ))
                 }
             )
@@ -203,7 +203,7 @@ fun OpenFileScreen(
                         fileItem = item,
                         onClick = {
                             if (item.isDir)
-                                fileChooseFragmentViewModel.onFilelistItemClick(index)
+                                openFileViewModel.onFilelistItemClick(index)
                             else
                                 item.uriString?.let {coroutineScope.launch { navigateToBookInfo(it) } }
                         },

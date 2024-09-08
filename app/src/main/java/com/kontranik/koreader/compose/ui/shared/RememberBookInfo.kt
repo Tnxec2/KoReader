@@ -38,16 +38,20 @@ fun rememberBookInfoForFileItem(fileItem: FileItem): MutableState<BookInfoCompos
 
     LaunchedEffect(key1 = fileItem) {
         coroutineScope.launch {
-            if (!fileItem.isDir) {
-                val contentUriPath = fileItem.uriString
-                if (contentUriPath != null) {
-                    EbookHelper.getBookInfo(contentUriPath, fileItem)?.toBookInfoComposable()?.let {
-                        val cover = ImageUtils.scaleBitmap(
-                            it.cover.asAndroidBitmap(), 50, 100)
-                            .asImageBitmap()
-                        bookInfoState.value = it.copy(cover = cover)
+            try {
+                if (!fileItem.isDir) {
+                    val contentUriPath = fileItem.uriString
+                    if (contentUriPath != null) {
+                        EbookHelper.getBookInfo(contentUriPath, fileItem)?.toBookInfoComposable()?.let {
+                            val cover = ImageUtils.scaleBitmap(
+                                it.cover.asAndroidBitmap(), 50, 100)
+                                .asImageBitmap()
+                            bookInfoState.value = it.copy(cover = cover)
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
