@@ -18,6 +18,10 @@ open class PageSplitterHtml() : FontsHelper() {
     private var content: SpannableStringBuilder = SpannableStringBuilder()
     private var staticLayout: StaticLayout? = null
 
+    private var marginTop: Int = 0
+    private var marginLeft: Int = 0
+    private var marginRight: Int = 0
+
     fun splitPages(
         pageViewSettings: PageViewSettings,
         themeColors: ThemeColors,
@@ -29,6 +33,10 @@ open class PageSplitterHtml() : FontsHelper() {
 
         if (pageViewSettings.pageSize.width <= 0) return
         if ( reloadFonts ) loadFonts()
+
+        marginTop = (pageViewSettings.marginTop * KoReaderApplication.getContext().resources.displayMetrics.density).toInt()
+        marginRight = (pageViewSettings.marginRight * KoReaderApplication.getContext().resources.displayMetrics.density).toInt()
+        marginLeft = (pageViewSettings.marginLeft * KoReaderApplication.getContext().resources.displayMetrics.density).toInt()
 
         val painter = TextPaint().apply {
             isAntiAlias = true
@@ -46,8 +54,8 @@ open class PageSplitterHtml() : FontsHelper() {
                     html, Html.FROM_HTML_MODE_COMPACT,
                     CustomImageGetter(
                         book,
-                        pageViewSettings.pageSize.width - themeColors.marginRight - themeColors.marginLeft,
-                        pageViewSettings.pageSize.height - themeColors.marginTop,
+                        pageViewSettings.pageSize.width - marginRight - marginLeft,
+                        pageViewSettings.pageSize.height - marginTop,
                         painter.color,
                         section > 0),
                     null
@@ -62,7 +70,7 @@ open class PageSplitterHtml() : FontsHelper() {
                 0,
                 content.length,
                 painter,
-                pageViewSettings.pageSize.width - themeColors.marginRight - themeColors.marginLeft
+                pageViewSettings.pageSize.width - (marginRight + marginLeft)
             )
             .setLineSpacing(1f, pageViewSettings.lineSpacingMultiplier)
             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
@@ -78,9 +86,9 @@ open class PageSplitterHtml() : FontsHelper() {
         var endOffset: Int
         while (true) {
             startLineTop = staticLayout!!.getLineTop(startLine)
-            endLine = staticLayout!!.getLineForVertical(startLineTop + pageViewSettings.pageSize.height - themeColors.marginRight - themeColors.marginLeft)
+            endLine = staticLayout!!.getLineForVertical(startLineTop + pageViewSettings.pageSize.height - (marginRight + marginLeft))
             endLineBottom = staticLayout!!.getLineBottom(endLine)
-            var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageViewSettings.pageSize.height - themeColors.marginTop)
+            var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageViewSettings.pageSize.height - marginTop)
                 endLine - 1 else endLine
             if ( lastFullyVisibleLine < startLine) lastFullyVisibleLine = startLine
             startOffset = staticLayout!!.getLineStart(startLine)

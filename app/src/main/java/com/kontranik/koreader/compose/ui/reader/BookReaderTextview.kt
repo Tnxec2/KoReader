@@ -14,12 +14,14 @@ import android.text.style.BackgroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.URLSpan
 import android.util.Log
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.MenuCompat
 import androidx.core.view.forEach
+import androidx.core.view.marginRight
 import androidx.lifecycle.LifecycleOwner
 import com.kontranik.koreader.model.PageViewSettings
 import com.kontranik.koreader.model.ScreenZone
@@ -126,13 +128,13 @@ class BookReaderTextview(
         }
 
         bookReaderViewModel.themeColors.observe(context as LifecycleOwner) {
-            val top = it.marginTop
-            val left = it.marginLeft
-            val right = it.marginRight
+            val top = it.marginTop * resources.displayMetrics.density
+            val left = it.marginLeft * resources.displayMetrics.density
+            val right = it.marginRight * resources.displayMetrics.density
 
             setTextColor(it.colorsText.toArgb())
             setLinkTextColor(it.colorsLink.toArgb())
-            setPadding(left, top, right, 0)
+            setPadding(left.toInt(), top.toInt(), right.toInt(), 0)
         }
 
         bookReaderViewModel.pageViewSettings.observe(context as LifecycleOwner) {
