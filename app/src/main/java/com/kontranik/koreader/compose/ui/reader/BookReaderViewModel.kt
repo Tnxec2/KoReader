@@ -3,6 +3,7 @@ package com.kontranik.koreader.compose.ui.reader
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.BatteryManager
+import android.text.SpannableStringBuilder
 import android.text.style.ImageSpan
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -121,6 +122,7 @@ class BookReaderViewModel(
 
     private fun loadBook(path: String?) {
         try {
+            curPage.postValue(Page(SpannableStringBuilder("load book..."), BookPosition()))
             if (path != null && book.value?.fileLocation != path) {
                 if (!FileHelper.contentFileExist(KoReaderApplication.getContext(), path)) {
 //                    Toast.makeText(
@@ -437,7 +439,7 @@ class BookReaderViewModel(
     }
 
     fun addBookmark(start: Int, text: CharSequence) {
-        println("addBookmark: start: $start, curpage.offset: ${curPage.value!!.pageStartPosition.offSet}")
+        Log.d("BOOKREADER", "addBookmark: start: $start, curpage.offset: ${curPage.value!!.pageStartPosition.offSet}")
         bookmarkRepository.insert(
         Bookmark(
             path = book.value!!.fileLocation,
