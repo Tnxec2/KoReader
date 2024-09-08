@@ -19,6 +19,7 @@ import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
 import com.kontranik.koreader.compose.ui.settings.TextType
 import com.kontranik.koreader.model.ScreenZone
 import com.kontranik.koreader.compose.ui.reader.BookReaderTextview.BookReaderTextviewListener
+import com.kontranik.koreader.compose.ui.shared.VolumeButtonsHandler
 import kotlinx.coroutines.launch
 
 @Composable
@@ -135,6 +136,17 @@ fun BookReaderScreen(
             }
         )
     }
+
+    VolumeButtonsHandler(
+        onVolumeUp = {
+            println("volume up")
+            bookReaderViewModel.doPagePrev()
+         },
+        onVolumeDown = {
+            println("volume down")
+            bookReaderViewModel.goToNextPage()
+        }
+    )
 
     BookReaderContent(
         backgroundColor = currentBackgroundColor,
