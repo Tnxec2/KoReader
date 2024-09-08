@@ -54,7 +54,6 @@ fun OpdsItem(
                 onClick = { onClick() },
             )
             .fillMaxWidth()
-            .heightIn(min = 30.dp)
     ) {
         uiDetails.value.cover?.let {
             Image(
@@ -70,6 +69,7 @@ fun OpdsItem(
             Modifier
                 .padding(start = paddingMedium, bottom = paddingSmall)
                 .fillMaxWidth()
+                .heightIn(min = 50.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
