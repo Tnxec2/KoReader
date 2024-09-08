@@ -36,9 +36,7 @@ class PageLoader : PageSplitterHtml(){
             loadPages(bookPosition.section, recalc)
         }
 
-         restultPage = findPage(bookPosition.offSet)
-
-         if ( restultPage == null) restultPage = section(bookPosition, restultPage, revers, recalc)
+        restultPage = findPage(bookPosition.offSet) ?: section(bookPosition, revers, recalc)
 
         return restultPage
     }
@@ -47,8 +45,8 @@ class PageLoader : PageSplitterHtml(){
             (bookPosition.section >= pages.first().startBookPosition.section
                     && bookPosition.section <= pages.last().endBookPosition.section)
 
-    private fun section(bookPosition: BookPosition, page: Page?, revers: Boolean, recalc: Boolean): Page {
-        var resultPage = page
+    private fun section(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page {
+        var resultPage: Page? = null
         var section = bookPosition.section
         while (resultPage == null) {
             if (!revers) section++
@@ -79,22 +77,15 @@ class PageLoader : PageSplitterHtml(){
         if ( pages.isEmpty() ) return null
         if ( offset > pages.last().endBookPosition.offSet) return null
 
-        var startOffset: Int
-        var endOffset: Int
-
-        for (  i in 0 until pages.size) {
-            startOffset = pages[i].startBookPosition.offSet
-            endOffset = pages[i].endBookPosition.offSet
-
-            if ( offset in startOffset until  endOffset) {
-                return pages[i]
-            }
+        val result = pages.firstOrNull { page: Page ->
+            offset in page.startBookPosition.offSet until page.endBookPosition.offSet
         }
-        return null
+        Log.d(TAG, "findPage. start = ${result?.startBookPosition}, end = ${result?.endBookPosition}")
+        return result
     }
 
     private fun loadPages(section: Int, recalc: Boolean) {
-        println("loadPages: ${book.getPageScheme()!!.sectionCount}")
+        Log.d(TAG,"loadPages: ${book.getPageScheme()!!.sectionCount}")
         if (section >= 0 && section <= book.getPageScheme()!!.sectionCount) {
             val html = book.getPageBody(section)
             if ( html != null) {
