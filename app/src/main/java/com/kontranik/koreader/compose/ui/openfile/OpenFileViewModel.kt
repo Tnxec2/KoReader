@@ -8,12 +8,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModel
 import com.kontranik.koreader.KoReaderApplication
+import com.kontranik.koreader.compose.ui.settings.OPENFILE_EXTERNAL_PATHS
+import com.kontranik.koreader.compose.ui.settings.PREFS_FILE
+import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
 import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.FileItem
-
-const val OPENFILE_PREFS_FILE = "OpenFileActivitySettings"
-const val OPENFILE_LAST_PATH = "LastPath"
-const val OPENFILE_EXTERNAL_PATHS = "ExternalPaths"
 
 class OpenFileViewModel : ViewModel()  {
     private var externalPaths = mutableListOf<String>()
@@ -29,30 +28,26 @@ class OpenFileViewModel : ViewModel()  {
 
 
     init {
+        start()
+    }
+
+    fun start() {
         loadPrefs()
         loadPath()
     }
 
     private fun loadPrefs() {
         val settings = KoReaderApplication.getContext()
-            .getSharedPreferences(
-                OPENFILE_PREFS_FILE,
-                Context.MODE_PRIVATE)
+            .getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
 
-        if ( settings!!.contains(OPENFILE_LAST_PATH) ) {
-            this.lastPath = settings.getString(OPENFILE_LAST_PATH, null)
+        if ( settings!!.contains(PREF_BOOK_PATH) ) {
+            this.lastPath = settings.getString(PREF_BOOK_PATH, null)
             extractDirectory()
         }
 
         if ( settings.contains(OPENFILE_EXTERNAL_PATHS)) {
-            // settings!!.edit().remove(PREF_EXTERNAL_PATHS).apply()
-
             val eP = settings.getStringSet(OPENFILE_EXTERNAL_PATHS, null)
-            if ( eP != null) {
-                externalPaths = eP.toMutableList()
-            } else {
-                externalPaths = mutableListOf()
-            }
+            externalPaths = eP?.toMutableList() ?: mutableListOf()
         }
     }
 
@@ -68,23 +63,10 @@ class OpenFileViewModel : ViewModel()  {
         }
     }
 
-    fun savePrefsOpenedBook(uriString: String) {
-        val settings = KoReaderApplication.getContext()
-            .getSharedPreferences(
-                OPENFILE_PREFS_FILE,
-                Context.MODE_PRIVATE)
-        val prefEditor = settings.edit()
-        prefEditor!!.putString(OPENFILE_LAST_PATH, uriString)
-        prefEditor.apply()
-    }
-
     private fun savePrefsExternalPaths() {
         val settings = KoReaderApplication.getContext()
-            .getSharedPreferences(
-                OPENFILE_PREFS_FILE,
-                Context.MODE_PRIVATE)
+            .getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
         val prefEditor = settings.edit()
-
         prefEditor.putStringSet(OPENFILE_EXTERNAL_PATHS, externalPaths.toMutableSet())
         prefEditor.apply()
     }
@@ -139,7 +121,7 @@ class OpenFileViewModel : ViewModel()  {
                 println("directoryUri: $directoryUri")
                 contentResolver.takePersistableUriPermission(directoryUri, takeFlags)
                 val documentsTree = DocumentFile.fromTreeUri(KoReaderApplication.getContext(), directoryUri)
-                println("documentsTree ${documentsTree} isdir: ${documentsTree?.isDirectory}, can read ${documentsTree?.canRead()}")
+                println("documentsTree $documentsTree isdir: ${documentsTree?.isDirectory}, can read ${documentsTree?.canRead()}")
                 if ( documentsTree == null || !documentsTree.isDirectory || !documentsTree.canRead() ) {
                     iterator.remove()
                 } else {

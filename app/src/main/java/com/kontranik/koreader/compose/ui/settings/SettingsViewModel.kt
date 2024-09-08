@@ -31,6 +31,7 @@ import java.util.Locale
 const val PREFS_FILE = "KOREADER"
 
 const val PREF_BOOK_PATH = "BookPath"
+const val OPENFILE_EXTERNAL_PATHS = "ExternalPaths"
 
 const val PREFS_interface_theme = "interface_theme"
 const val PREFS_interface_brightness = "brightness"

@@ -81,13 +81,6 @@ fun OpenFileScreen(
     var showConfirmOpenStorageDialog by remember { mutableStateOf(false) }
     var deleteStoragePosition by remember { mutableStateOf<Int?>(null) }
 
-    val temp = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
-        coroutineScope.launch {
-            println("storagePicker: $it")
-            openFileViewModel.addStoragePath(it.toString())
-        }
-    }
-
     val storagePicker = rememberLauncherForActivityResult(
          contract = GetStorageToOpen(),
          onResult = { uri ->
@@ -97,20 +90,27 @@ fun OpenFileScreen(
                     openFileViewModel.addStoragePath(it.toString())
                  }
              }
-         })
+         }
+    )
 
-    LaunchedEffect(key1 = openFileViewModel.scrollToDocumentFileUriString) {
+    LaunchedEffect(key1 = Unit) {
+        openFileViewModel.start()
+    }
+
+    LaunchedEffect(key1 = openFileViewModel.scrollToDocumentFileUriString.value) {
         openFileViewModel.scrollToDocumentFileUriString.value?.let {
+            println("scrollToDocumentFileUriString = $it")
+            println(openFileViewModel.getPositionInFileItemList())
             listState.scrollToItem(
                 openFileViewModel.getPositionInFileItemList()
             )
-            val layoutInfo = listState.layoutInfo
-            val viewportHeight =
-                layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset
-            val lastItem = listState.layoutInfo.visibleItemsInfo.last()
-            if (lastItem.offset + lastItem.size > viewportHeight) {
-                listState.scrollBy(lastItem.offset + lastItem.size - viewportHeight.toFloat())
-            }
+//            val layoutInfo = listState.layoutInfo
+//            val viewportHeight =
+//                layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset
+//            val lastItem = listState.layoutInfo.visibleItemsInfo.last()
+//            if (lastItem.offset + lastItem.size > viewportHeight) {
+//                listState.scrollBy(lastItem.offset + lastItem.size - viewportHeight.toFloat())
+//            }
         }
     }
 
