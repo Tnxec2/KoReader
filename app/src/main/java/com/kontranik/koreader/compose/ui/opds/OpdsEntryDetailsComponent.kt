@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.shared.Html
 import com.kontranik.koreader.database.model.mocupAuthors
@@ -117,6 +120,7 @@ fun OpdsEntryDetailsContent(
             }
         }
 
+
         Card(Modifier.padding(top = paddingSmall)) {
             Column(
                 Modifier.padding(paddingSmall)
@@ -126,40 +130,33 @@ fun OpdsEntryDetailsContent(
                 }
             }
         }
-    }
-    if (rels.value.values.isNotEmpty()) {
-        Card(Modifier.padding(top = paddingSmall)) {
-            Column(
-                Modifier.padding(paddingSmall)
-            ) {
-                if (rels.value.values.isNotEmpty()) {
-                    Text(
-                        text = stringResource(id = R.string.links),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(bottom = paddingSmall)
-                    )
 
-                    rels.value.mapKeys { rel ->
+
+        if (rels.value.values.isNotEmpty()) {
+            Card(Modifier.padding(top = paddingSmall)) {
+                Column(
+                    Modifier.padding(paddingSmall)
+                ) {
+                    if (rels.value.values.isNotEmpty()) {
                         Text(
-                            text = rel.key,
-                            style = MaterialTheme.typography.titleMedium,
+                            text = stringResource(id = R.string.links),
+                            style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(bottom = paddingSmall)
                         )
 
-
-                        rel.value.map { link ->
+                        rels.value.mapKeys { rel ->
                             Text(
-                                text = link.getTitle()?.toString() ?: "",
-                                fontSize = 18.sp,
-                                style = TextStyle(
-                                    textDecoration = TextDecoration.Underline
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .heightIn(min = 30.dp)
+                                text = rel.key,
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = paddingSmall)
+                            )
+
+                            rel.value.map { link ->
+                                Row(verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(bottom = paddingSmall)
-                                    .clickable {
+                                    . clickable {
                                         Log.d(
                                             "ENTRYLINK",
                                             "clicked entry.otherLinks: $link"
@@ -172,7 +169,20 @@ fun OpdsEntryDetailsContent(
                                             openInBrowser(link)
                                         }
                                     }
-                            )
+                                ) {
+                                    Text(
+                                        text = link.getTitle()?.toString() ?: "",
+                                        fontSize = 18.sp,
+                                        style = TextStyle(
+                                            textDecoration = TextDecoration.Underline
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(vertical = paddingSmall)
+                                    )
+                                }
+
+
+                            }
                         }
                     }
                 }
