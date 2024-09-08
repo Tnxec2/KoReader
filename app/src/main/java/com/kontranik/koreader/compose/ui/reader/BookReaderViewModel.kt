@@ -197,15 +197,15 @@ class BookReaderViewModel(
             curPage.value!!.pageEndPosition.section,
             offSet = curPage.value!!.pageEndPosition.offSet + 1
         )
-        bookPosition.offSet += 1
-        return getPage(BookPosition(bookPosition), revers = false, recalc = false)
+        return getPage(bookPosition, revers = false, recalc = false)
     }
 
     private fun getPrev(): Page? {
-        println("getPrev")
-        val bookPosition = BookPosition(curPage.value!!.pageStartPosition)
-        bookPosition.offSet -= 1
-        return getPage(BookPosition(bookPosition), revers = true, recalc = false)
+        val bookPosition = BookPosition(
+            curPage.value!!.pageStartPosition.section,
+            curPage.value!!.pageStartPosition.offSet - 1
+        )
+        return getPage(bookPosition, revers = true, recalc = false)
     }
 
     private fun getPage(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page? {
