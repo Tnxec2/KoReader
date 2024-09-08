@@ -148,7 +148,6 @@ fun BookReaderContent(
             painterModifier
                 .padding(padding)
                 .fillMaxSize()
-
         ) {
 
             AndroidView(
@@ -162,12 +161,6 @@ fun BookReaderContent(
                 Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(
-                        top = Dp(colors.marginTop.toFloat()),
-                        bottom = Dp(colors.marginBottom.toFloat()),
-                        start = Dp(colors.marginLeft.toFloat()),
-                        end = Dp(colors.marginRight.toFloat())
-                    )
                     .onGloballyPositioned { layoutCoordinates -> onChangeSize(layoutCoordinates.size) }
                     )
 
@@ -181,7 +174,12 @@ fun BookReaderContent(
                 onClickMiddle = { onClickInfoMiddle() },
                 onClickRight = { onClickInfoRight() },
                 textColor = colors.colorsInfo,
-                modifier = Modifier.padding(horizontal = paddingSmall)
+                modifier = Modifier
+                    .padding(
+                        start = Dp(colors.marginLeft.toFloat()),
+                        end = Dp(colors.marginLeft.toFloat()),
+                        bottom = Dp(colors.marginBottom.toFloat())
+                    )
             )
         }
 

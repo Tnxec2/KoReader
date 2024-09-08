@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kontranik.koreader.compose.theme.AppTheme
 
@@ -30,7 +32,7 @@ fun InfoArea(
     modifier: Modifier = Modifier) {
 
     Row(
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Bottom,
         modifier = modifier
             .fillMaxWidth()
     ) {
@@ -39,6 +41,8 @@ fun InfoArea(
             color = textColor,
             fontSize = textSize.sp,
             fontFamily = FontFamily(font),
+            maxLines = 1,
+            lineHeight = 1.sp,
             modifier = Modifier
                 .weight(1f)
                 .clickable {
@@ -51,6 +55,8 @@ fun InfoArea(
             fontSize = textSize.sp,
             fontFamily = FontFamily(font),
             textAlign = TextAlign.Center,
+            maxLines = 1,
+            lineHeight = 1.sp,
             modifier = Modifier
                 .weight(1f)
                 .clickable {
@@ -63,6 +69,8 @@ fun InfoArea(
             fontSize = textSize.sp,
             fontFamily = FontFamily(font),
             textAlign = TextAlign.End,
+            maxLines = 1,
+            lineHeight = 1.sp,
             modifier = Modifier
                 .weight(1f)
                 .clickable {

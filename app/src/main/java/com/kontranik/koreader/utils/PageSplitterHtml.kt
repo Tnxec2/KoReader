@@ -46,8 +46,8 @@ open class PageSplitterHtml() : FontsHelper() {
                     html, Html.FROM_HTML_MODE_COMPACT,
                     CustomImageGetter(
                         book,
-                        pageViewSettings.pageSize.width,
-                        pageViewSettings.pageSize.height,
+                        pageViewSettings.pageSize.width - themeColors.marginRight - themeColors.marginLeft,
+                        pageViewSettings.pageSize.height - themeColors.marginTop,
                         painter.color,
                         section > 0),
                     null
@@ -62,7 +62,7 @@ open class PageSplitterHtml() : FontsHelper() {
                 0,
                 content.length,
                 painter,
-                pageViewSettings.pageSize.width
+                pageViewSettings.pageSize.width - themeColors.marginRight - themeColors.marginLeft
             )
             .setLineSpacing(1f, pageViewSettings.lineSpacingMultiplier)
             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
@@ -78,9 +78,9 @@ open class PageSplitterHtml() : FontsHelper() {
         var endOffset: Int
         while (true) {
             startLineTop = staticLayout!!.getLineTop(startLine)
-            endLine = staticLayout!!.getLineForVertical(startLineTop + pageViewSettings.pageSize.height)
+            endLine = staticLayout!!.getLineForVertical(startLineTop + pageViewSettings.pageSize.height - themeColors.marginRight - themeColors.marginLeft)
             endLineBottom = staticLayout!!.getLineBottom(endLine)
-            var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageViewSettings.pageSize.height )
+            var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageViewSettings.pageSize.height - themeColors.marginTop)
                 endLine - 1 else endLine
             if ( lastFullyVisibleLine < startLine) lastFullyVisibleLine = startLine
             startOffset = staticLayout!!.getLineStart(startLine)
@@ -88,8 +88,8 @@ open class PageSplitterHtml() : FontsHelper() {
             pages.add(Page(
                     content = SpannableStringBuilder()
                         .append(content.subSequence(startOffset, endOffset)),
-                    startBookPosition = BookPosition(section = section, offSet = startOffset),
-                    endBookPosition = BookPosition(section = section, offSet = endOffset)
+                    startPagePosition = BookPosition(section = section, offSet = startOffset),
+                    endPagePosition = BookPosition(section = section, offSet = endOffset)
             ))
 
             if ( endLine >= staticLayout!!.lineCount-1 ) break

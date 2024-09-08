@@ -1,7 +1,6 @@
 package com.kontranik.koreader.compose.ui.reader
 
 
-import android.R
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
@@ -29,7 +28,7 @@ import com.kontranik.koreader.utils.OnSwipeTouchListener
 
 class BookReaderTextview(
     context: Context,
-    val bookReaderViewModel: BookReaderViewModel):
+    private val bookReaderViewModel: BookReaderViewModel):
     AppCompatTextView(context) {
 
     private var listener: BookReaderTextviewListener? = null
@@ -127,9 +126,15 @@ class BookReaderTextview(
         }
 
         bookReaderViewModel.themeColors.observe(context as LifecycleOwner) {
+            val top = it.marginTop
+            val left = it.marginLeft
+            val right = it.marginRight
+
             setTextColor(it.colorsText.toArgb())
             setLinkTextColor(it.colorsLink.toArgb())
+            setPadding(left, top, right, 0)
         }
+
         bookReaderViewModel.pageViewSettings.observe(context as LifecycleOwner) {
             changeSettings(it)
         }
@@ -263,7 +268,7 @@ class BookReaderTextview(
                     //val shareText = it.findItem(R.id.shareText)
                     val originalMenu = mutableListOf<MenuItem>()
                     it.forEach {item ->
-                        if (item.itemId != R.id.selectAll)
+                        if (item.itemId != android.R.id.selectAll)
                             originalMenu.add(item)
                     }
 

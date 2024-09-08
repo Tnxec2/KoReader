@@ -95,6 +95,7 @@ const val PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT = "tapZoneOneClickBottomRight"
 
 const val PREF_COLOR_SELECTED_THEME_DEFAULT = 0
 const val PREF_DEFAULT_MARGIN = 10
+const val PREF_DEFAULT_MARGIN_BOTTOM = 2
 const val interfaceThemeDefault = "Auto"
 const val brightnessDefault = "System"
 const val orientationDefault = "Sensor"
@@ -111,10 +112,10 @@ data class ThemeColors(
     val backgroundImageTiledRepeat: Boolean,
     val stetchBackgroundImage: Boolean,
     val backgroundImageUri: String?,
-    val marginTop: String = PREF_DEFAULT_MARGIN.toString(),
-    val marginBottom: String = PREF_DEFAULT_MARGIN.toString(),
-    val marginLeft: String = PREF_DEFAULT_MARGIN.toString(),
-    val marginRight: String = PREF_DEFAULT_MARGIN.toString(),
+    val marginTop: Int = PREF_DEFAULT_MARGIN,
+    val marginBottom: Int = PREF_DEFAULT_MARGIN_BOTTOM,
+    val marginLeft: Int = PREF_DEFAULT_MARGIN,
+    val marginRight: Int = PREF_DEFAULT_MARGIN,
 )
 
 
@@ -528,10 +529,10 @@ class SettingsViewModel(
             backgroundImageTiledRepeat,
             stetchBackgroundImage,
             backgroundImageUri,
-            marginTop =  prefs.getInt(PREF_KEY_MARGIN_TOP, PREF_DEFAULT_MARGIN).toString(),
-            marginBottom =  prefs.getInt(PREF_KEY_MARGIN_BOTTOM, PREF_DEFAULT_MARGIN).toString(),
-            marginLeft =  prefs.getInt(PREF_KEY_MARGIN_LEFT, PREF_DEFAULT_MARGIN).toString(),
-            marginRight =  prefs.getInt(PREF_KEY_MARGIN_RIGHT, PREF_DEFAULT_MARGIN).toString(),
+            marginTop =  prefs.getInt(PREF_KEY_MARGIN_TOP, PREF_DEFAULT_MARGIN),
+            marginBottom =  prefs.getInt(PREF_KEY_MARGIN_BOTTOM, PREF_DEFAULT_MARGIN_BOTTOM),
+            marginLeft =  prefs.getInt(PREF_KEY_MARGIN_LEFT, PREF_DEFAULT_MARGIN),
+            marginRight =  prefs.getInt(PREF_KEY_MARGIN_RIGHT, PREF_DEFAULT_MARGIN),
         )
     }
 
@@ -647,27 +648,31 @@ class SettingsViewModel(
         prefEditor.apply()
     }
     fun changeMarginTop(themeIndex: Int, value: String) {
-        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginTop = value))
+        val margin = value.toIntOrNull() ?: 0
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginTop = margin))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
-        prefEditor.putInt(PREF_KEY_MARGIN_TOP+themeIndex, value.toInt())
+        prefEditor.putInt(PREF_KEY_MARGIN_TOP+themeIndex, margin)
         prefEditor.apply()
     }
     fun changeMarginBottom(themeIndex: Int, value: String) {
-        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginBottom = value))
+        val margin = value.toIntOrNull() ?: 0
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginBottom = margin))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
-        prefEditor.putInt(PREF_KEY_MARGIN_BOTTOM+themeIndex, value.toInt())
+        prefEditor.putInt(PREF_KEY_MARGIN_BOTTOM+themeIndex, margin)
         prefEditor.apply()
     }
     fun changeMarginLeft(themeIndex: Int, value: String) {
-        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginLeft = value))
+        val margin = value.toIntOrNull() ?: 0
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginLeft = margin))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
-        prefEditor.putInt(PREF_KEY_MARGIN_LEFT+themeIndex, value.toInt())
+        prefEditor.putInt(PREF_KEY_MARGIN_LEFT+themeIndex, margin)
         prefEditor.apply()
     }
     fun changeMarginRight(themeIndex: Int, value: String) {
-        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginRight = value))
+        val margin = value.toIntOrNull() ?: 0
+        changeColors(themeIndex, colors[themeIndex]!!.value.copy(marginRight = margin))
         val prefEditor: SharedPreferences.Editor = prefs.edit()
-        prefEditor.putInt(PREF_KEY_MARGIN_RIGHT+themeIndex, value.toInt())
+        prefEditor.putInt(PREF_KEY_MARGIN_RIGHT+themeIndex, margin)
         prefEditor.apply()
     }
 
