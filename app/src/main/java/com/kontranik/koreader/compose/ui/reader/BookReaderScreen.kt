@@ -113,10 +113,10 @@ fun BookReaderScreen(
                     //
                 }
                 override fun onSwipeLeftOnBookReaderTextview() {
-                    bookReaderViewModel.doPagePrev()
+                    bookReaderViewModel.goToNextPage()
                 }
                 override fun onSwipeRightOnBookReaderTextview() {
-                    bookReaderViewModel.goToNextPage()
+                    bookReaderViewModel.doPagePrev()
                 }
                 override fun onSlideUpOnBookReaderTextView(point: Point) {
                     //
