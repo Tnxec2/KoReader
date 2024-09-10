@@ -33,7 +33,7 @@ class PageLoader : PageSplitterHtml(){
         Log.d(TAG, "PageLoader.getPage: Index = $pageIndex, size pages = ${pages.size}, $bookPosition , revers = $revers, recalc = $recalc")
 
         if (pageIndex != null && pages.isNotEmpty()) {
-            return if (pageIndex >= 0 && pageIndex < pages.size-1)
+            return if (pageIndex >= 0 && pageIndex < pages.size)
                 pages[pageIndex]
             else {
                 if (bookPosition.section == 0 && pageIndex < 0)
