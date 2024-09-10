@@ -42,7 +42,6 @@ fun InfoArea(
             fontSize = textSize.sp,
             fontFamily = FontFamily(font),
             maxLines = 1,
-            lineHeight = 1.sp,
             modifier = Modifier
                 .weight(1f)
                 .clickable {
@@ -56,9 +55,7 @@ fun InfoArea(
             fontFamily = FontFamily(font),
             textAlign = TextAlign.Center,
             maxLines = 1,
-            lineHeight = 1.sp,
             modifier = Modifier
-                .weight(1f)
                 .clickable {
                     onClickMiddle()
                 }
@@ -70,7 +67,6 @@ fun InfoArea(
             fontFamily = FontFamily(font),
             textAlign = TextAlign.End,
             maxLines = 1,
-            lineHeight = 1.sp,
             modifier = Modifier
                 .weight(1f)
                 .clickable {
