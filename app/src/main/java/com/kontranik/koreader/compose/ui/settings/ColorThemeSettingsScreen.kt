@@ -63,6 +63,8 @@ fun ColorThemeSettingsScreen(
         onChangeMarginTop = { coroutineScope.launch { settingsViewModel.changeMarginTop(themeIndex, it) }},
         marginBottom = colors.marginBottom.toString(),
         onChangeMarginBottom = { coroutineScope.launch { settingsViewModel.changeMarginBottom(themeIndex, it) }},
+        marginBottomInfoArea = colors.marginBottomInfoArea.toString(),
+        onChangeMarginBottomInfoArea = { coroutineScope.launch { settingsViewModel.changeMarginBottomInfoArea(themeIndex, it) }},
         marginLeft = colors.marginLeft.toString(),
         onChangeMarginLeft = { coroutineScope.launch { settingsViewModel.changeMarginLeft(themeIndex, it) }},
         marginRight = colors.marginRight.toString(),

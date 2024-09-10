@@ -64,6 +64,8 @@ fun ColorThemeSettingsContent(
     onChangeMarginTop: (String) -> Unit,
     marginBottom: String,
     onChangeMarginBottom: (String) -> Unit,
+    marginBottomInfoArea: String,
+    onChangeMarginBottomInfoArea: (String) -> Unit,
     marginLeft: String,
     onChangeMarginLeft: (String) -> Unit,
     marginRight: String,
@@ -196,6 +198,10 @@ fun ColorThemeSettingsContent(
                                 value = marginRight, label = stringResource(id = R.string.marginRight),
                                 onChange = onChangeMarginRight
                             )
+                            SettingsTextField(
+                                value = marginBottomInfoArea, label = stringResource(id = R.string.marginBottomInfoArea),
+                                onChange = onChangeMarginBottomInfoArea
+                            )
                         }
                     }
                 }
@@ -237,6 +243,8 @@ private fun ColorThemeSettingsPreview() {
                 onChangeMarginTop = {},
                 marginBottom = "5",
                 onChangeMarginBottom = {},
+                marginBottomInfoArea = "5",
+                onChangeMarginBottomInfoArea = {},
                 marginLeft = "4",
                 onChangeMarginLeft = {},
                 marginRight = "5",

@@ -19,6 +19,7 @@ open class PageSplitterHtml() : FontsHelper() {
     private var staticLayout: StaticLayout? = null
 
     private var marginTop: Int = 0
+    private var marginBottom: Int = 0
     private var marginLeft: Int = 0
     private var marginRight: Int = 0
 
@@ -34,9 +35,11 @@ open class PageSplitterHtml() : FontsHelper() {
         if (pageViewSettings.pageSize.width <= 0) return
         if ( reloadFonts ) loadFonts()
 
-        marginTop = (pageViewSettings.marginTop * KoReaderApplication.getContext().resources.displayMetrics.density).toInt()
-        marginRight = (pageViewSettings.marginRight * KoReaderApplication.getContext().resources.displayMetrics.density).toInt()
-        marginLeft = (pageViewSettings.marginLeft * KoReaderApplication.getContext().resources.displayMetrics.density).toInt()
+        val density = KoReaderApplication.getContext().resources.displayMetrics.density
+        marginTop = (pageViewSettings.marginTop * density).toInt()
+        marginBottom = (pageViewSettings.marginBottom * density).toInt()
+        marginRight = (pageViewSettings.marginRight * density).toInt()
+        marginLeft = (pageViewSettings.marginLeft * density).toInt()
 
         val painter = TextPaint().apply {
             isAntiAlias = true
@@ -55,7 +58,7 @@ open class PageSplitterHtml() : FontsHelper() {
                     CustomImageGetter(
                         book,
                         pageViewSettings.pageSize.width - marginRight - marginLeft,
-                        pageViewSettings.pageSize.height - marginTop,
+                        pageViewSettings.pageSize.height - marginTop - marginBottom,
                         painter.color,
                         section > 0),
                     null
@@ -89,7 +92,7 @@ open class PageSplitterHtml() : FontsHelper() {
             startLineTop = staticLayout!!.getLineTop(startLine)
             endLine = staticLayout!!.getLineForVertical(startLineTop + pageViewSettings.pageSize.height - (marginRight + marginLeft))
             endLineBottom = staticLayout!!.getLineBottom(endLine)
-            var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageViewSettings.pageSize.height - marginTop)
+            var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageViewSettings.pageSize.height - marginTop - marginBottom)
                 endLine - 1 else endLine
             if ( lastFullyVisibleLine < startLine) lastFullyVisibleLine = startLine
             startOffset = staticLayout!!.getLineStart(startLine)

@@ -167,7 +167,7 @@
     <string name="repeat_tiled_image">repeat tiled image</string>
 
     <string name="marginTop">Margin Top</string>
-    <string name="marginBottom">Margin Bottom</string>
+    <string name="marginBottom">Margin between text and info area</string>
     <string name="marginRight">Margin Right</string>
     <string name="marginLeft">Margin Left</string>
     <string name="default_margin_value" translatable="false">16</string>
@@ -254,6 +254,7 @@
     <string name="color_bookmarks">Color bookmarks</string>
     <string name="cancel_selection_mode">Cancel selection mode</string>
     <string name="delete_author">Delete author</string>
+    <string name="marginBottomInfoArea">Margin under info area</string>
 
 
 </resources>

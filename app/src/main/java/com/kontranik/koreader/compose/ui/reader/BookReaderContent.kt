@@ -178,7 +178,7 @@ fun BookReaderContent(
                     .padding(
                         start = Dp(colors.marginLeft.toFloat()),
                         end = Dp(colors.marginLeft.toFloat()),
-                        bottom = Dp(colors.marginBottom.toFloat())
+                        bottom = Dp(colors.marginBottomInfoArea.toFloat())
                     )
             )
         }

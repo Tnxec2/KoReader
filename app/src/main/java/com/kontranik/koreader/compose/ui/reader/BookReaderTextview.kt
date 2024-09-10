@@ -120,7 +120,6 @@ class BookReaderTextview(
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initUi() {
-
         isFocusable = true
 
         bookReaderViewModel.pageViewContent.observe(context as LifecycleOwner) {
@@ -129,12 +128,13 @@ class BookReaderTextview(
 
         bookReaderViewModel.themeColors.observe(context as LifecycleOwner) {
             val top = it.marginTop * resources.displayMetrics.density
+            val bottom = it.marginBottom * resources.displayMetrics.density
             val left = it.marginLeft * resources.displayMetrics.density
             val right = it.marginRight * resources.displayMetrics.density
 
             setTextColor(it.colorsText.toArgb())
             setLinkTextColor(it.colorsLink.toArgb())
-            setPadding(left.toInt(), top.toInt(), right.toInt(), 0)
+            setPadding(left.toInt(), top.toInt(), right.toInt(), bottom.toInt())
         }
 
         bookReaderViewModel.pageViewSettings.observe(context as LifecycleOwner) {

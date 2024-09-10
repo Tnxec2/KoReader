@@ -127,7 +127,7 @@
     <string name="color_theme_selected_image">Bild</string>
     <string name="repeat_tiled_image">Bild gekachelt darstellen</string>
     <string name="marginTop">Rand oben</string>
-    <string name="marginBottom">Rand unten</string>
+    <string name="marginBottom">Rand unter dem Text</string>
     <string name="marginRight">Rand rechts</string>
     <string name="marginLeft">Rand links</string>
     <string name="tapzones_activity_bookmarks">Lesezeichen</string>
@@ -210,4 +210,5 @@
     <string name="color_bookmarks">Color bookmarks</string>
     <string name="cancel_selection_mode">Auswahlmodus beenden</string>
     <string name="delete_author">Author löschen</string>
+    <string name="marginBottomInfoArea">Abstand unter Infobereich</string>
 </resources>
