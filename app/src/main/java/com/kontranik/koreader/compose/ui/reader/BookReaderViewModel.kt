@@ -49,7 +49,7 @@ class BookReaderViewModel(
 
     val bookPath = MutableLiveData<String?>(null)
     val book = MutableLiveData<Book?>(null)
-    private var curPage = MutableLiveData(Page(pageStartPosition = BookPosition()))
+    private var curPage = MutableLiveData(Page())
 
     var mAllBookmarksWithOffsetOnPage = bookPath.asFlow().combine(curPage.asFlow()) {
         path, page ->
@@ -122,7 +122,7 @@ class BookReaderViewModel(
 
     private fun loadBook(path: String?) {
         try {
-            curPage.postValue(Page(SpannableStringBuilder("load book..."), BookPosition()))
+            curPage.postValue(Page(content = SpannableStringBuilder("load book...")))
             if (path != null && book.value?.fileLocation != path) {
                 if (!FileHelper.contentFileExist(KoReaderApplication.getContext(), path)) {
 //                    Toast.makeText(
@@ -144,7 +144,11 @@ class BookReaderViewModel(
                         bookStatusRepository.insert(
                             BookStatus(
                                 newBook,
-                                Page(null, BookPosition(), BookPosition())
+                                Page(
+                                    content = null,
+                                    pageStartPosition = BookPosition(),
+                                    pageEndPosition = BookPosition()
+                                )
                             )
                         )
                     }
@@ -156,7 +160,8 @@ class BookReaderViewModel(
                     BookPosition(status.position_section, status.position_offset)
                 }
 
-                curPage.postValue(Page(null, startPosition, BookPosition()))
+                curPage.postValue(
+                    Page(pageStartPosition = startPosition, pageEndPosition = BookPosition()))
                 book.postValue(newBook)
             }
         } catch (e: Exception) {
@@ -165,7 +170,7 @@ class BookReaderViewModel(
     }
 
     private fun getCur(): Page? {
-        return getPage(curPage.value!!.pageStartPosition.copy(), revers = false, recalc = true)
+        return getPage(null, curPage.value!!.pageStartPosition, revers = false, recalc = true)
     }
 
     fun goToNextPage() {
@@ -195,27 +200,38 @@ class BookReaderViewModel(
     }
 
     private fun getNext(): Page? {
-        val bookPosition = BookPosition(
-            curPage.value!!.pageEndPosition.section,
-            offSet = curPage.value!!.pageEndPosition.offSet + 1
-        )
-        return getPage(bookPosition, revers = false, recalc = false)
+        curPage.value?.let { curPage ->
+            val bookPosition = BookPosition(
+                curPage.pageEndPosition.section,
+                offSet = curPage.pageEndPosition.offSet + 1
+            )
+            return getPage(curPage.pageIndex+1, bookPosition, revers = false, recalc = false)
+        }
+        return null
     }
 
     private fun getPrev(): Page? {
-        val bookPosition = BookPosition(
-            curPage.value!!.pageStartPosition.section,
-            curPage.value!!.pageStartPosition.offSet - 1
-        )
-        return getPage(bookPosition, revers = true, recalc = false)
+        curPage.value?.let { curPage ->
+            val bookPosition = BookPosition(
+                curPage.pageStartPosition.section,
+                curPage.pageStartPosition.offSet - 1
+            )
+            return getPage(curPage.pageIndex-1, bookPosition, revers = true, recalc = false)
+        }
+        return null
     }
 
-    private fun getPage(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page? {
+    private fun getPage(
+        pageIndex: Int?,
+        bookPosition: BookPosition,
+        revers: Boolean,
+        recalc: Boolean): Page? {
         return pageLoader.getPage(
             book.value,
             pageViewSettings.value!!,
             themeColors.value!!,
-            BookPosition(bookPosition),
+            pageIndex,
+            bookPosition,
             revers = revers,
             recalc = recalc
         )
@@ -387,17 +403,13 @@ class BookReaderViewModel(
 
     fun goToSection(section: Int) {
         goToPage(
-            Page(null, BookPosition(section = section), BookPosition())
+            Page(pageStartPosition = BookPosition(section = section))
         )
     }
 
     fun goToPage(page: Int) {
         goToPage(
-            Page(
-                null,
-                book.value!!.ebookHelper!!.pageScheme.getBookPositionForPage(page),
-                BookPosition()
-            )
+            Page(pageStartPosition =  book.value!!.ebookHelper!!.pageScheme.getBookPositionForPage(page))
         )
     }
 
@@ -435,7 +447,7 @@ class BookReaderViewModel(
 
     fun goToBookmark(bookmark: Bookmark) {
         if (isBookmarkOnCurrentPage(bookmark)) return
-        goToPage(Page(null, BookPosition(bookmark), BookPosition()))
+        goToPage(Page(pageStartPosition = BookPosition(bookmark)))
     }
 
     fun addBookmark(start: Int, text: CharSequence) {

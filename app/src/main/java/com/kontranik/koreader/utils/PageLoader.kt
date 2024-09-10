@@ -19,6 +19,7 @@ class PageLoader : PageSplitterHtml(){
         book2: Book?,
         pageViewSettings: PageViewSettings,
         colors: ThemeColors,
+        pageIndex: Int?,
         bookPosition: BookPosition,
         revers: Boolean,
         recalc: Boolean): Page? {
@@ -29,17 +30,27 @@ class PageLoader : PageSplitterHtml(){
         book = book2
         mColors = colors.copy()
 
-        Log.d(TAG, "PageLoader.getPage:  $bookPosition , revers = $revers, recalc = $recalc")
+        Log.d(TAG, "PageLoader.getPage: Index = $pageIndex, size pages = ${pages.size}, $bookPosition , revers = $revers, recalc = $recalc")
 
-        var restultPage: Page?
+        if (pageIndex != null && pages.isNotEmpty()) {
+            return if (pageIndex >= 0 && pageIndex < pages.size-1)
+                pages[pageIndex]
+            else {
+                if (bookPosition.section == 0 && pageIndex < 0)
+                   pages[0]
+                else
+                   section(bookPosition.section, revers = pageIndex < 0, recalc)
+            }
+        }
+
         if ( pages.isEmpty() || recalc || !isCurrentSectionLoaded(bookPosition)) {
             loadPages(bookPosition.section, recalc)
         }
 
-        restultPage = findPage(bookPosition.offSet)?.apply {
+        val restultPage: Page = findPage(bookPosition.offSet)?.apply {
             pageStartPosition.offSet = bookPosition.offSet
-        } ?: section(bookPosition, revers, recalc)
-        Log.d(TAG, "resultPage. start = ${restultPage?.pageStartPosition}, end = ${restultPage?.pageEndPosition}")
+        } ?: section(bookPosition.section, revers, recalc)
+        Log.d(TAG, "resultPage. start = ${restultPage.pageStartPosition}, end = ${restultPage.pageEndPosition}")
         return restultPage
     }
 
@@ -47,12 +58,11 @@ class PageLoader : PageSplitterHtml(){
             (bookPosition.section >= pages.first().pageStartPosition.section
                     && bookPosition.section <= pages.last().pageEndPosition.section)
 
-    private fun section(bookPosition: BookPosition, revers: Boolean, recalc: Boolean): Page {
+    private fun section(initSection: Int, revers: Boolean, recalc: Boolean): Page {
         var resultPage: Page? = null
-        var section = bookPosition.section
+        var section = initSection
         while (resultPage == null) {
-            if (!revers) section++
-            else section--
+            section += if (revers) -1 else 1
 
             section = max(0, section)
 //            section = min(book.getPageScheme()!!.sectionCount, section)
@@ -71,6 +81,7 @@ class PageLoader : PageSplitterHtml(){
                 }
             }
         }
+        println("section-resultPage: index: ${resultPage.pageIndex} start: ${resultPage.pageStartPosition}, end: ${resultPage.pageEndPosition}")
         return resultPage
     }
 
@@ -87,7 +98,7 @@ class PageLoader : PageSplitterHtml(){
     }
 
     private fun loadPages(section: Int, recalc: Boolean) {
-        Log.d(TAG,"loadPages: ${book.getPageScheme()!!.sectionCount}")
+        Log.d(TAG,"loadPages: $section of ${book.getPageScheme()!!.sectionCount}")
         if (section >= 0 && section <= book.getPageScheme()!!.sectionCount) {
             val html = book.getPageBody(section)
             if ( html != null) {

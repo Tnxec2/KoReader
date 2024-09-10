@@ -5,5 +5,6 @@ import android.text.SpannableStringBuilder
 data class Page (
         var content: SpannableStringBuilder? = null,
         var pageStartPosition: BookPosition = BookPosition(),
-        var pageEndPosition: BookPosition = BookPosition()
+        var pageEndPosition: BookPosition = BookPosition(),
+        var pageIndex: Int = 0
 )

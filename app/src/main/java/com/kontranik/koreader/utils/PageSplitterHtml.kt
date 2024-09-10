@@ -84,6 +84,7 @@ open class PageSplitterHtml() : FontsHelper() {
         var endLineBottom: Int
         var startOffset: Int
         var endOffset: Int
+        var pageIndex = 0
         while (true) {
             startLineTop = staticLayout!!.getLineTop(startLine)
             endLine = staticLayout!!.getLineForVertical(startLineTop + pageViewSettings.pageSize.height - (marginRight + marginLeft))
@@ -93,12 +94,15 @@ open class PageSplitterHtml() : FontsHelper() {
             if ( lastFullyVisibleLine < startLine) lastFullyVisibleLine = startLine
             startOffset = staticLayout!!.getLineStart(startLine)
             endOffset = staticLayout!!.getLineEnd(lastFullyVisibleLine)
-            pages.add(Page(
-                    content = SpannableStringBuilder()
+
+            pages.add(
+                Page(content = SpannableStringBuilder()
                         .append(content.subSequence(startOffset, endOffset)),
                     pageStartPosition = BookPosition(section = section, offSet = startOffset),
-                    pageEndPosition = BookPosition(section = section, offSet = endOffset)
+                    pageEndPosition = BookPosition(section = section, offSet = endOffset),
+                    pageIndex = pageIndex
             ))
+            pageIndex+=1
 
             if ( endLine >= staticLayout!!.lineCount-1 ) break
             startLine = lastFullyVisibleLine + 1
