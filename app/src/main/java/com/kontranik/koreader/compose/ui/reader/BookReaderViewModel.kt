@@ -271,7 +271,7 @@ class BookReaderViewModel(
                     book.value!!.getPageScheme()!!.sectionCount
                 )
         } else {
-            infoTextRight.value = KoReaderApplication.getContext().getString(R.string.no_book)
+            infoTextLeft.value = KoReaderApplication.getContext().getString(R.string.no_book)
         }
         updateSystemStatus()
     }
