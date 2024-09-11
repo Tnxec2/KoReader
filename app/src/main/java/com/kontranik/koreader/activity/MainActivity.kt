@@ -23,7 +23,8 @@ class MainActivity : ComponentActivity() {
 //        windowInsetsController.systemBarsBehavior =
 //            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 //        windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
-
+// We handle all the insets manually
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
         setContent {
             MainCompose()

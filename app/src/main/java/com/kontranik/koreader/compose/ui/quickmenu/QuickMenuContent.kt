@@ -43,6 +43,9 @@ fun QuickMenuDialogContent(
     textSize: Float,
     onChangeTextSize: (Float) -> Unit,
     selectedFont: Typeface,
+    textSizeInfoArea: Float,
+    onChangeTextSizeInfoArea: (Float) -> Unit,
+    selectedFontInfoArea: Typeface,
     lineSpacingMultiplier: Float,
     itemsLineSpacing: List<String>,
     itemsLetterSpacing: List<String>,
@@ -65,9 +68,9 @@ fun QuickMenuDialogContent(
             Row(Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(id = R.string.color_theme),
-                    modifier = Modifier.weight(0.5f)
+                    modifier = Modifier.weight(0.3f)
                 )
-                Row(Modifier.weight(0.5f)) {
+                Row(Modifier.weight(0.7f)) {
                     DropdownListThemed(
                         themesList = themes,
                         selectedTheme = themes[colorThemePosition],
@@ -83,6 +86,13 @@ fun QuickMenuDialogContent(
                 textSize = textSize,
                 onChangeTextSize = onChangeTextSize,
                 selectedFont = selectedFont,
+                modifier = Modifier.fillMaxWidth()
+            )
+            FontSizeWidget(
+                title = stringResource(id = R.string.textsize_infoarea),
+                textSize = textSizeInfoArea,
+                onChangeTextSize = onChangeTextSizeInfoArea,
+                selectedFont = selectedFontInfoArea,
                 modifier = Modifier.fillMaxWidth()
             )
             Row(Modifier.fillMaxWidth()) {
@@ -168,9 +178,6 @@ fun QuickMenuDialogContent(
 
 }
 
-
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun QuickMenuContentPreview() {
@@ -188,6 +195,7 @@ private fun QuickMenuContentPreview() {
     var colorTheme by remember { mutableStateOf(themes[0]) }
 
     var textSize by remember { mutableFloatStateOf(34f) }
+    var textSizeInfoArea by remember { mutableFloatStateOf(14f) }
 
     val itemsLineSpacing by remember { mutableStateOf(getLineSpacings().map { it.toString() }) }
     var lineSpacingMultiplier by remember { mutableFloatStateOf(itemsLineSpacing[0].toFloat()) }
@@ -206,6 +214,9 @@ private fun QuickMenuContentPreview() {
                 textSize = textSize,
                 onChangeTextSize = { textSize = it },
                 selectedFont = selectedFont,
+                textSizeInfoArea = textSizeInfoArea,
+                onChangeTextSizeInfoArea = { },
+                selectedFontInfoArea = selectedFont,
                 itemsLineSpacing = itemsLineSpacing,
                 itemsLetterSpacing = itemsLetterSpacing,
                 lineSpacingMultiplier = lineSpacingMultiplier,

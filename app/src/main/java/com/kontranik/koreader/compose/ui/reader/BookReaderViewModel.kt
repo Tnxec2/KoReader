@@ -7,6 +7,7 @@ import android.text.SpannableStringBuilder
 import android.text.style.ImageSpan
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
@@ -460,5 +461,16 @@ class BookReaderViewModel(
             position_offset = curPage.value!!.pageStartPosition.offSet + start,
         ))
         recalcCurrentPage()
+    }
+
+    fun changeReaderSize(size: IntSize) {
+        if (pageViewSettings.value!!.pageSize.width != size.width ||
+            pageViewSettings.value!!.pageSize.height != size.height
+        ) {
+            pageViewSettings.value =
+                pageViewSettings.value!!.copy(
+                    pageSize = size)
+            recalcCurrentPage()
+        }
     }
 }

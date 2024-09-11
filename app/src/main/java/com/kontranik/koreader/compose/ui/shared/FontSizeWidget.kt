@@ -1,6 +1,5 @@
 package com.kontranik.koreader.compose.ui.shared
 
-import android.R.attr.maxLines
 import android.graphics.Typeface
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Icon
@@ -34,11 +33,11 @@ fun FontSizeWidget(
     ) {
         Text(
             text = title,
-            modifier = Modifier.weight(0.5f)
+            modifier = Modifier.weight(0.3f)
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(0.5f)) {
+            modifier = Modifier.weight(0.7f)) {
             IconButton(onClick = { onChangeTextSize(textSize-1) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_a_small),

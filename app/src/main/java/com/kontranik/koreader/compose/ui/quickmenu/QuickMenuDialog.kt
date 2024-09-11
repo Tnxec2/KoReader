@@ -2,6 +2,11 @@ package com.kontranik.koreader.compose.ui.quickmenu
 
 import android.content.Context
 import android.graphics.Typeface
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
@@ -12,7 +17,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
+import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.ui.settings.PREFS_FILE
 import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
 import com.kontranik.koreader.compose.ui.shared.getLetterSpacing
@@ -30,13 +38,21 @@ fun QuickMenuDialog(
     onChangeColorThemeQuickMenuDialog: (colorTheme: String, colorThemeIndex: Int) -> Unit,
     textSize: Float,
     onChangeTextSizeQuickMenuDialog: (textSize: Float) -> Unit,
+    selectedFont: Typeface,
+    textSizeInfoArea: Float,
+    onChangeTextSizeInfoAreaQuickMenuDialog: (Float) -> Unit,
+    selectedFontInfoArea: Typeface,
     lineSpacingMultiplier: Float,
     onChangeLineSpacingQuickMenuDialog: (lineSpacingMultiplier: Float) -> Unit,
     letterSpacing: Float,
     onChangeLetterSpacingQuickMenuDialog: (letterSpacing: Float) -> Unit,
-    onFinishQuickMenuDialog: (textSize: Float, lineSpacingMultiplier: Float, letterSpacing: Float, colorThemeIndex: Int) -> Unit,
+    onFinishQuickMenuDialog: (
+        textSize: Float,
+        textSizeInfoArea: Float,
+        lineSpacingMultiplier: Float,
+        letterSpacing: Float,
+        colorThemeIndex: Int) -> Unit,
     onOpenBookInfo: () -> Unit,
-    selectedFont: Typeface
 ) {
     val context = LocalContext.current
 
@@ -49,6 +65,10 @@ fun QuickMenuDialog(
 
     var textSizeState by remember { mutableFloatStateOf(
         textSize
+    ) }
+
+    var textSizeInfoAreaState by remember { mutableFloatStateOf(
+        textSizeInfoArea
     ) }
 
     val itemsLineSpacing by remember {mutableStateOf(getLineSpacings().map{it.toString()})}
@@ -67,13 +87,15 @@ fun QuickMenuDialog(
     }
 
     fun saveQuickSettings() {
-        onFinishQuickMenuDialog(textSizeState, lineSpacingMultiplierState, letterSpacingState, colorThemeIndex)
+        onFinishQuickMenuDialog(textSizeState, textSizeInfoAreaState, lineSpacingMultiplierState, letterSpacingState, colorThemeIndex)
         onClose()
     }
 
-    ModalBottomSheet(
+    Dialog(
         onDismissRequest = { onClose() }
     ) {
+        Card() {
+
         QuickMenuDialogContent(
             themes = themes,
             colorThemePosition = colorThemeIndex,
@@ -87,6 +109,12 @@ fun QuickMenuDialog(
                 onChangeTextSizeQuickMenuDialog(it)
            },
             selectedFont = selectedFont,
+            textSizeInfoArea = textSizeInfoAreaState,
+            onChangeTextSizeInfoArea = {
+                textSizeInfoAreaState = it
+                onChangeTextSizeInfoAreaQuickMenuDialog(it)
+            },
+            selectedFontInfoArea = selectedFontInfoArea,
             itemsLineSpacing = itemsLineSpacing,
             itemsLetterSpacing = itemsLetterSpacing,
             lineSpacingMultiplier = lineSpacingMultiplierState,
@@ -104,6 +132,8 @@ fun QuickMenuDialog(
             onClose = {onClose()},
             onOpenBookInfo = { onOpenBookInfo() },
             saveQuickSettings = {saveQuickSettings()},
+            modifier = Modifier.padding(paddingMedium)
         )
+        }
     }
 }

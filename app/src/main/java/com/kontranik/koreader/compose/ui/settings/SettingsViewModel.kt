@@ -761,12 +761,14 @@ class SettingsViewModel(
 
     fun onFinishQuickMenuDialog(
         textSize: Float,
+        textSizeInfoArea: Float,
         lineSpacingMultiplier: Float,
         letterSpacing: Float,
         colorThemeIndex: Int) {
 
         pageViewSettings.value = pageViewSettings.value.copy(
             textSize = textSize,
+            textSizeInfoArea = textSizeInfoArea,
             lineSpacingMultiplier = lineSpacingMultiplier,
             letterSpacing = letterSpacing
         )
@@ -775,6 +777,7 @@ class SettingsViewModel(
 
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putFloat(PREF_KEY_BOOK_TEXT_SIZE, textSize)
+        prefEditor.putFloat(PREF_KEY_BOOK_TEXT_SIZE_INFO_AREA, textSizeInfoArea)
         prefEditor.putString(PREF_KEY_BOOK_LINE_SPACING, lineSpacingMultiplier.toString())
         prefEditor.putString(PREF_KEY_BOOK_LETTER_SPACING, letterSpacing.toString())
         prefEditor.putInt(PREF_KEY_COLOR_SELECTED_THEME_INDEX, colorThemeIndex)

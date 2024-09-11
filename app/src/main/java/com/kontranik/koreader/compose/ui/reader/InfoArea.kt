@@ -5,16 +5,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,12 +24,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kontranik.koreader.compose.theme.AppTheme
-import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 
 @Composable
 fun InfoArea(
-    textSize: Float,
+    textSize: MutableState<Float>,
     font: Typeface,
     left: String,
     middle: String,
@@ -49,7 +48,7 @@ fun InfoArea(
         Text(
             text = left,
             color = textColor,
-            fontSize = textSize.sp,
+            fontSize = textSize.value.sp,
             fontFamily = FontFamily(font),
             maxLines = 1,
             modifier = Modifier
@@ -68,7 +67,7 @@ fun InfoArea(
         Text(
             text = middle,
             color = textColor,
-            fontSize = textSize.sp,
+            fontSize = textSize.value.sp,
             fontFamily = FontFamily(font),
             textAlign = TextAlign.Center,
             maxLines = 1,
@@ -85,7 +84,7 @@ fun InfoArea(
         Text(
             text = right,
             color = textColor,
-            fontSize = textSize.sp,
+            fontSize = textSize.value.sp,
             fontFamily = FontFamily(font),
             textAlign = TextAlign.End,
             maxLines = 1,
@@ -104,7 +103,9 @@ private fun InfoAreaPreview() {
     AppTheme {
         Surface {
             InfoArea(
-                textSize = 10f,
+                textSize = remember {
+                    mutableFloatStateOf(10f)
+                },
                 font = Typeface.SERIF,
                 left = "long long long long very long left",
                 middle = "long long middle",
@@ -125,7 +126,9 @@ private fun InfoAreaPreview2() {
     AppTheme {
         Surface {
             InfoArea(
-                textSize = 10f,
+                textSize = remember {
+                    mutableFloatStateOf(10f)
+                },
                 font = Typeface.SERIF,
                 left = "no book",
                 middle = "",

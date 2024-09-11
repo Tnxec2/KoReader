@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -38,7 +37,7 @@ import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.utils.ImageUtils
 
 @Composable
-fun ImageViewer(
+fun ImageViewerDialog(
     imageBitmap: Bitmap,
     isDarkMode: Boolean,
     onClose: () -> Unit,
@@ -113,7 +112,7 @@ private fun ImageViewerPreview() {
     val bitmap = context.getDrawable(R.drawable.book_mockup)!!.let { ImageUtils.drawableToBitmap(it)}
     AppTheme {
         Surface {
-            ImageViewer(
+            ImageViewerDialog(
                 imageBitmap = bitmap,
                 isDarkMode = false,
                 onClose = { }
