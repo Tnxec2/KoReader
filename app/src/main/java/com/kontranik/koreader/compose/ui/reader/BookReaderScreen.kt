@@ -142,11 +142,11 @@ fun BookReaderScreen(
                 }
 
                 override fun onSlideUpOnBookReaderTextView(point: Point) {
-                    //
+                    settingsViewModel.increaseScreenBrghtness(point)
                 }
 
                 override fun onSlideDownOnBookReaderTextView(point: Point) {
-                    //
+                    settingsViewModel.decreaseScreenBrghtness(point)
                 }
 
                 override fun onClickImageOnBookReaderTextview(imageSpan: ImageSpan) {

@@ -1,17 +1,17 @@
 package com.kontranik.koreader.compose
 
 import android.app.Activity
+import android.content.pm.ActivityInfo
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
@@ -21,13 +21,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
+import com.kontranik.koreader.activity.MainActivity
 import com.kontranik.koreader.compose.navigation.mainGraph
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.ui.library.LibraryViewModel
 import com.kontranik.koreader.compose.ui.opds.OpdsViewModell
 import com.kontranik.koreader.compose.ui.openfile.OpenFileViewModel
-import com.kontranik.koreader.compose.ui.reader.BookReaderScreen
 import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
+import com.kontranik.koreader.compose.ui.settings.PREF_BRIGHTNESS_MANUAL
 import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
 import com.kontranik.koreader.database.BookStatusViewModel
 import kotlinx.coroutines.launch
@@ -35,6 +36,7 @@ import java.util.Date
 
 @Composable
 fun MainCompose(
+    activity: MainActivity,
     navController: NavHostController = rememberNavController(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
 ) {
@@ -74,6 +76,29 @@ fun MainCompose(
 
     LaunchedEffect(key1 = Unit) {
         bookStatusViewModel.cleanup(context)
+    }
+
+    LaunchedEffect(key1 = settingsViewModel.screenOrientation.value) {
+        activity.requestedOrientation = when (settingsViewModel.screenOrientation.value) {
+            "Sensor" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            "Portrait" -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            "PortraitSensor" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+            "Landscape" -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            "LandscapeSensor" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
+    }
+
+    LaunchedEffect(key1 = settingsViewModel.screenBrightnessLevel.floatValue,
+        settingsViewModel.screenBrightness.value) {
+
+        val layoutParams: WindowManager.LayoutParams = activity.window.attributes
+        settingsViewModel.systemScreenBrightnessLevel.floatValue = layoutParams.screenBrightness
+
+        if ( settingsViewModel.screenBrightness.value == PREF_BRIGHTNESS_MANUAL ) {
+            layoutParams.screenBrightness = settingsViewModel.screenBrightnessLevel.floatValue
+            activity.window.attributes = layoutParams
+        }
     }
 
     AppTheme(

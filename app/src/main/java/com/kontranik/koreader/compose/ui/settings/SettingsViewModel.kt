@@ -1,11 +1,13 @@
 package com.kontranik.koreader.compose.ui.settings
 
+import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.graphics.Point
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
@@ -27,6 +29,8 @@ import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.MON
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.SANSSERIF
 import com.kontranik.koreader.utils.typefacefactory.TypefaceRecord.Companion.SERIF
 import java.util.Locale
+import kotlin.math.max
+import kotlin.math.min
 
 const val PREFS_FILE = "KOREADER"
 
@@ -95,13 +99,21 @@ const val PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT = "tapZoneDoubleClickBottomLeft"
 const val PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER = "tapZoneDoubleClickBottomCenter"
 const val PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT = "tapZoneOneClickBottomRight"
 
+const val PREF_BRIGHTNESS_MANUAL = "Manual"
+const val PREF_BRIGHTNESS_SYSTEM = "System"
+
 const val PREF_COLOR_SELECTED_THEME_DEFAULT = 0
 const val PREF_DEFAULT_MARGIN = 10
 const val PREF_DEFAULT_MARGIN_BOTTOM = 2
 const val PREF_DEFAULT_MARGIN_BOTTOM_INFOAREA = 2
 const val interfaceThemeDefault = "Auto"
-const val brightnessDefault = "System"
+const val brightnessDefault = PREF_BRIGHTNESS_SYSTEM
+const val brightnessSliderWidthDefault = 32
 const val orientationDefault = "Sensor"
+
+const val screenBrightnessLevelMin: Float = 0.01F
+const val screenBrightnessLevelMax: Float = 1F
+const val screenBrightnessLevelStep: Float = 0.002F
 
 
 
@@ -315,10 +327,13 @@ class SettingsViewModel(
     val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     var interfaceTheme = mutableStateOf(interfaceThemeDefault)
-    var brightness = mutableStateOf(brightnessDefault)
-    var orientation = mutableStateOf(orientationDefault)
+    var screenBrightness = mutableStateOf(brightnessDefault)
+    var screenOrientation = mutableStateOf(orientationDefault)
     var showSystemFonts = mutableStateOf(true)
     var showNotoFonts = mutableStateOf(true)
+
+    var screenBrightnessLevel = mutableFloatStateOf(0f)
+    var systemScreenBrightnessLevel = mutableFloatStateOf(0.5f)
 
     var selectedColorTheme = mutableIntStateOf(PREF_COLOR_SELECTED_THEME_DEFAULT)
 
@@ -337,8 +352,8 @@ class SettingsViewModel(
 
     init {
         interfaceTheme.value = prefs.getString(PREFS_interface_theme, interfaceThemeDefault) ?: interfaceThemeDefault
-        brightness.value = prefs.getString(PREFS_interface_brightness, brightnessDefault) ?: brightnessDefault
-        orientation.value = prefs.getString(PREFS_orientation, orientationDefault) ?: orientationDefault
+        screenBrightness.value = prefs.getString(PREFS_interface_brightness, brightnessDefault) ?: brightnessDefault
+        screenOrientation.value = prefs.getString(PREFS_orientation, orientationDefault) ?: orientationDefault
 
         selectedColorTheme.intValue = prefs.getInt(
             PREF_KEY_COLOR_SELECTED_THEME_INDEX,
@@ -549,14 +564,14 @@ class SettingsViewModel(
     }
 
     fun changebrightness(value: String) {
-        brightness.value = value
+        screenBrightness.value = value
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putString(PREFS_interface_brightness, value)
         prefEditor.apply()
     }
 
     fun changeorientation(value: String) {
-        orientation.value = value
+        screenOrientation.value = value
         val prefEditor: SharedPreferences.Editor = prefs.edit()
         prefEditor.putString(PREFS_orientation, value)
         prefEditor.apply()
@@ -795,6 +810,22 @@ class SettingsViewModel(
                 Configuration.UI_MODE_NIGHT_YES -> true
                 Configuration.UI_MODE_NIGHT_NO -> false
                 else -> false
+            }
+        }
+    }
+
+    fun increaseScreenBrghtness(point: Point) {
+        if ( screenBrightness.value == PREF_BRIGHTNESS_MANUAL ) {
+            if ( point.x < brightnessSliderWidthDefault || point.x > pageViewSettings.value.pageSize.width -brightnessSliderWidthDefault) {
+                screenBrightnessLevel.floatValue = min(screenBrightnessLevel.floatValue + screenBrightnessLevelStep, screenBrightnessLevelMax)
+            }
+        }
+    }
+
+    fun decreaseScreenBrghtness(point: Point) {
+        if ( screenBrightness.value == PREF_BRIGHTNESS_MANUAL ) {
+            if ( point.x < brightnessSliderWidthDefault || point.x > pageViewSettings.value.pageSize.width-brightnessSliderWidthDefault) {
+                screenBrightnessLevel.floatValue = max(screenBrightnessLevel.floatValue - screenBrightnessLevelStep, screenBrightnessLevelMin)
             }
         }
     }

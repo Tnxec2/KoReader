@@ -2,6 +2,7 @@ package com.kontranik.koreader.activity
 
 import android.os.Bundle
 import android.view.View
+import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.kontranik.koreader.compose.MainCompose
@@ -17,6 +18,8 @@ class MainActivity : ComponentActivity() {
 
         actionBar?.hide()
 
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+
 //        val windowInsetsController =
 //            WindowCompat.getInsetsController(window, window.decorView)
 //        // Configure the behavior of the hidden system bars.
@@ -24,10 +27,12 @@ class MainActivity : ComponentActivity() {
 //            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 //        windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
 // We handle all the insets manually
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        enableEdgeToEdge()
+
+        // enableEdgeToEdge()
         setContent {
-            MainCompose()
+            MainCompose(
+                activity = this
+            )
         }
     }
 

@@ -1,7 +1,5 @@
 package com.kontranik.koreader.compose.ui.settings
 
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,9 +44,9 @@ fun InterfaceSettingsScreen(
         modifier = modifier,
         interfaceTheme = settingsViewModel.interfaceTheme.value,
         onChangeInterfaceTheme = { coroutineScope.launch { settingsViewModel.changeinterfaceTheme(it) } },
-        brightness = settingsViewModel.brightness.value,
+        brightness = settingsViewModel.screenBrightness.value,
         onChangeBrightness = { coroutineScope.launch { settingsViewModel.changebrightness(it) } },
-        orientation = settingsViewModel.orientation.value,
+        orientation = settingsViewModel.screenOrientation.value,
         onChangeOrientation = { coroutineScope.launch { settingsViewModel.changeorientation(it) } },
     )
 }
