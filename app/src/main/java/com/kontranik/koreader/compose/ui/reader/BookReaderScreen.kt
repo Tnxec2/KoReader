@@ -36,6 +36,11 @@ import kotlinx.coroutines.launch
 fun BookReaderScreen(
     drawerState: DrawerState,
     navigateToMainMenu: () -> Unit,
+    navigateToOpenFile: () -> Unit,
+    navigateToLastOpened: () -> Unit,
+    navigateToLibrary: (title: String?) -> Unit,
+    navigateToOpdsNetworkLibrary: () -> Unit,
+    navigateToSettings: () -> Unit,
     navigateToBookmarks: (path: String) -> Unit,
     navigateToBookInfo: (String) -> Unit,
     settingsViewModel: SettingsViewModel,
@@ -100,6 +105,32 @@ fun BookReaderScreen(
             Actions.Bookmarks -> {
                 corutineScope.launch {
                     bookReaderViewModel.bookPath.value?.let { navigateToBookmarks(it) }
+                }
+            }
+
+            Actions.OpenFile -> {
+                corutineScope.launch {
+                    navigateToOpenFile()
+                }
+            }
+            Actions.LastOpened -> {
+                corutineScope.launch {
+                    navigateToLastOpened()
+                }
+            }
+            Actions.Library -> {
+                corutineScope.launch {
+                    navigateToLibrary(bookReaderViewModel.book.value?.getTitle())
+                }
+            }
+            Actions.Opds -> {
+                corutineScope.launch {
+                    navigateToOpdsNetworkLibrary()
+                }
+            }
+            Actions.Settings -> {
+                corutineScope.launch {
+                    navigateToSettings()
                 }
             }
 

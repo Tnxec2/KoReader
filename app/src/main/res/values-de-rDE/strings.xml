@@ -112,6 +112,12 @@
     <string name="tapzones_activity_quick_menu">Schnelleinstellungen</string>
     <string name="tapzones_activity_main_menu">Hauptmenü</string>
     <string name="tapzones_activity_goto">Navigationmenü</string>
+    <string name="tapzones_activity_bookmarks">Lesezeichen</string>
+    <string name="tapzones_activity_open_file">Datei öffnen</string>
+    <string name="tapzones_activity_last_opened">Letzte geöffnete</string>
+    <string name="tapzones_activity_library">Bibliothek</string>
+    <string name="tapzones_activity_opds">Opds</string>
+    <string name="tapzones_activity_settings">Einstellungen</string>
     <string name="line_spacing">Zeilenabstand</string>
     <string name="letter_spacing">Buchstabenabstand</string>
     <string name="textsize_sample">ABCabc</string>
@@ -130,7 +136,6 @@
     <string name="marginBottom">Rand unter dem Text</string>
     <string name="marginRight">Rand rechts</string>
     <string name="marginLeft">Rand links</string>
-    <string name="tapzones_activity_bookmarks">Lesezeichen</string>
     <string name="deletebook">Buchdatei löschen</string>
     <string name="title_delete_book">Buchdatei löschen</string>
     <string name="sure_delete_book">Wollen Sie wirklich dieses Buch löschen</string>

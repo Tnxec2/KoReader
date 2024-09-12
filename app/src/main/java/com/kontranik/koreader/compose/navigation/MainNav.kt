@@ -61,10 +61,17 @@ fun NavGraphBuilder.mainGraph(
             BookReaderScreen(
                 drawerState = drawerState,
                 navigateToMainMenu = { navController.navigate(NavOptions.MainMenu.name)},
+                navigateToOpenFile = { navController.navigate(NavOptions.OpenFile.name) },
+                navigateToLastOpened = { navController.navigate(NavOptions.LastOpened.name) },
                 navigateToBookmarks = { path ->
                     val encoded = Uri.encode(path.replace('%','|'))
                     navController.navigate("${BoomkmarksScreenDestination.route}?path=${encoded}")
                 },
+                navigateToLibrary = {  title ->
+                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${null}&title=${title}")
+                },
+                navigateToOpdsNetworkLibrary = { navController.navigate(NavOptions.OPDS.name)},
+                navigateToSettings = { navController.navigate(NavOptions.Settings.name)},
                 navigateToBookInfo = { path: String ->
                     val encoded = Uri.encode(path.replace('%','|'))
                     navController.navigate("${BookInfoDestination.route}?path=${encoded}")
@@ -121,7 +128,7 @@ fun NavGraphBuilder.mainGraph(
                 drawerState = drawerState,
                 navigateBack = { navController.popBackStack() },
                 navigateToBooksByTitle = {
-                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${null}")
+                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${null}&title=${null}")
                 },
                 navigateToBooksByAuthor = {
                     navController.navigate(LibraryByAuthorDestination.route)
@@ -138,7 +145,11 @@ fun NavGraphBuilder.mainGraph(
         composable(
             route = LibraryByTitleDestination.routeWithArgs,
             arguments = listOf(
-                navArgument(LibraryByTitleDestination.AUTHOR_ID) {
+                navArgument(LibraryByTitleDestination.KEY_AUTHOR_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(LibraryByTitleDestination.KEY_TITLE) {
                     type = NavType.StringType
                     nullable = true
                 }
@@ -159,7 +170,7 @@ fun NavGraphBuilder.mainGraph(
                 drawerState = drawerState,
                 navigateBack = { navController.popBackStack() },
                 navigateToAuthor = { author ->
-                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${author.id}")
+                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${author.id}&title=${null}")
                 }
             )
         }
@@ -218,7 +229,7 @@ fun NavGraphBuilder.mainGraph(
                     }
                 },
                 navigateToAuthor = { authorId: Long ->
-                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}")
+                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}&title=${null}")
                 },
                 bookReaderViewModel = bookReaderViewModel,
                 openFileViewModel = openFileViewModel,

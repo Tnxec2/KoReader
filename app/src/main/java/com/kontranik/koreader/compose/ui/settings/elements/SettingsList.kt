@@ -4,12 +4,16 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -17,6 +21,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.kontranik.koreader.R
+import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingSmall
 import kotlinx.coroutines.launch
 
@@ -136,17 +142,19 @@ fun SettingsListContent(
                 if (index != 0) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.primary, thickness = 0.5.dp)
                 }
-                Box(
+                Row(
+                    horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .background(color = if (index == defaultPos) MaterialTheme.colorScheme.secondary else Color.Transparent)
                         .clickable {
                             onItemClick(index, item)
                             onClose()
                         },
-                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = item,
+                        color = if (index == defaultPos) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(paddingSmall)
                     )
                 }
@@ -159,8 +167,10 @@ fun SettingsListContent(
 @Preview
 @Composable
 private fun SettingsTextFieldPreview() {
+    AppTheme {
+        Surface(Modifier.width(300.dp).height(500.dp)) {
 
-    Column {
+    Column(Modifier.padding(10.dp).fillMaxSize()) {
         SettingsList(
             title = "Title",
             entries = listOf(
@@ -190,12 +200,15 @@ private fun SettingsTextFieldPreview() {
             "entry2",
             "entry3",
         ),
-        defaultValue = "entry1",
+        defaultValue = "entry2",
         defaultValueTitle = "entry_title",
         icon = R.drawable.ic_iconmonstr_paintbrush_10,
         showDefaultValue = true,
         onChange = {},
-        show = false,
+        show = true,
     )
+    }
+
+        }
     }
 }

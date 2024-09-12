@@ -113,5 +113,9 @@ class Book(var fileLocation: String) {
         return ebookHelper?.pageScheme
     }
 
+    fun getTitle(): String? {
+        return ebookHelper?.getBookInfoTemporary(fileLocation)?.title
+    }
+
 
 }

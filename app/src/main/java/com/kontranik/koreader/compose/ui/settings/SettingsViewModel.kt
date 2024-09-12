@@ -209,7 +209,12 @@ enum class Actions {
     MainMenu,
     GoTo,
     Bookmarks,
-    QuickMenu;
+    QuickMenu,
+    OpenFile,
+    LastOpened,
+    Library,
+    Opds,
+    Settings;
 
     fun toTitle(): Int {
         return when (this) {
@@ -220,6 +225,11 @@ enum class Actions {
             MainMenu -> R.string.tapzones_activity_main_menu
             GoTo -> R.string.tapzones_activity_goto
             Bookmarks -> R.string.tapzones_activity_bookmarks
+            OpenFile -> R.string.tapzones_activity_open_file
+            LastOpened -> R.string.tapzones_activity_last_opened
+            Library -> R.string.tapzones_activity_library
+            Opds -> R.string.tapzones_activity_opds
+            Settings -> R.string.tapzones_activity_settings
         }
     }
 }
@@ -295,15 +305,25 @@ val tapzonen_entries = arrayOf(
     R.string.tapzones_activity_main_menu,
     R.string.tapzones_activity_goto,
     R.string.tapzones_activity_bookmarks,
+    R.string.tapzones_activity_open_file,
+    R.string.tapzones_activity_last_opened,
+    R.string.tapzones_activity_library,
+    R.string.tapzones_activity_opds,
+    R.string.tapzones_activity_settings,
 )
 val tapzonen_values = arrayOf(
-    "None",
-    "PagePrev",
-    "PageNext",
-    "QuickMenu",
-    "MainMenu",
-    "GoTo",
-    "Bookmarks"
+    Actions.None.name,
+    Actions.PagePrev.name,
+    Actions.PageNext.name,
+    Actions.QuickMenu.name,
+    Actions.MainMenu.name,
+    Actions.GoTo.name,
+    Actions.Bookmarks.name,
+    Actions.OpenFile.name,
+    Actions.LastOpened.name,
+    Actions.Library.name,
+    Actions.Opds.name,
+    Actions.Settings.name,
 )
 
 val line_spacing_values = arrayOf(1f, 1.15f, 1.5f, 2.0f, 2.5f, 3.0f)

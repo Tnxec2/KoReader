@@ -149,6 +149,11 @@
     <string name="tapzones_activity_main_menu">main menu</string>
     <string name="tapzones_activity_goto">go to…</string>
     <string name="tapzones_activity_bookmarks">bookmarks</string>
+    <string name="tapzones_activity_open_file">open file</string>
+    <string name="tapzones_activity_last_opened">last opened</string>
+    <string name="tapzones_activity_library">library</string>
+    <string name="tapzones_activity_opds">opds</string>
+    <string name="tapzones_activity_settings">settings</string>
 
     <string name="line_spacing">Line Spacing</string>
     <string name="letter_spacing">Letter Spacing</string>

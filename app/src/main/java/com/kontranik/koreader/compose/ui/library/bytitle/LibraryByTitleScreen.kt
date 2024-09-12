@@ -63,8 +63,9 @@ import kotlinx.coroutines.launch
 object LibraryByTitleDestination : NavigationDestination {
     override val route = "LibraryByTitle"
     override val titleRes = R.string.books_by_title
-    const val AUTHOR_ID = "authorid"
-    val routeWithArgs = "$route?authorid={$AUTHOR_ID}"
+    const val KEY_AUTHOR_ID = "authorid"
+    const val KEY_TITLE = "title"
+    val routeWithArgs = "$route?authorid={$KEY_AUTHOR_ID}&title={$KEY_TITLE}"
 }
 
 @Composable
@@ -85,7 +86,7 @@ fun LibraryByTitleScreen(
     val booksPagingState = libraryViewModel.libraryTitlePageByFilter.collectAsLazyPagingItems()
 
     var filter by remember {
-        mutableStateOf("")
+        mutableStateOf(libraryViewModel.libraryTitleSearchFilter.value ?: "")
     }
 
     val author by libraryViewModel.authorState

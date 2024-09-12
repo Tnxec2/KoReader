@@ -10,6 +10,7 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.Document
 import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -51,9 +52,15 @@ class LibraryViewModel(
     private val applicationScope: CoroutineScope,
     ) : ViewModel() {
 
-    private val authorId: String? = savedStateHandle[LibraryByTitleDestination.AUTHOR_ID]
+    private val authorId: String? = savedStateHandle[LibraryByTitleDestination.KEY_AUTHOR_ID]
+    private val title: String? = savedStateHandle[LibraryByTitleDestination.KEY_TITLE]
 
     val authorState = mutableStateOf<Author?>(null)
+    var libraryTitleSearchFilter = MutableLiveData<String?>(title)
+
+    val libraryTitlePageByFilter = libraryTitleSearchFilter.switchMap {
+        getTitlePageByFilter(it).liveData.cachedIn(viewModelScope)
+    }.asFlow()
 
     init {
         authorId?.let {
@@ -64,12 +71,6 @@ class LibraryViewModel(
             }
         }
     }
-
-    private var libraryTitleSearchFilter = MutableLiveData<String?>(null)
-
-    val libraryTitlePageByFilter = libraryTitleSearchFilter.switchMap {
-        getTitlePageByFilter(it).liveData.cachedIn(viewModelScope)
-    }.asFlow()
 
     private fun getTitlePageByFilter(searchFilter: String?) = Pager(config = PagingConfig(15)) {
         libraryItemRepository.pageLibraryItem(authorState.value, searchFilter)
