@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.compose.ui.settings.OPENFILE_EXTERNAL_PATHS
@@ -16,7 +17,7 @@ import com.kontranik.koreader.utils.FileItem
 
 class OpenFileViewModel : ViewModel()  {
     private var externalPaths = mutableListOf<String>()
-    private var selectedDocumentFileUriString: String? = null
+    private var selectedDocumentFileUriString = MutableLiveData<String?>()
     private var lastPath: String? = null
 
     val fileItemList = mutableStateOf(listOf<FileItem>())
@@ -29,25 +30,28 @@ class OpenFileViewModel : ViewModel()  {
 
     init {
         start()
+
+        selectedDocumentFileUriString.observeForever {
+            loadPath(it)
+        }
     }
 
     fun start() {
         loadPrefs()
-        loadPath()
     }
 
     private fun loadPrefs() {
         val settings = KoReaderApplication.getContext()
             .getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
 
-        if ( settings!!.contains(PREF_BOOK_PATH) ) {
-            this.lastPath = settings.getString(PREF_BOOK_PATH, null)
-            extractDirectory()
-        }
-
         if ( settings.contains(OPENFILE_EXTERNAL_PATHS)) {
             val eP = settings.getStringSet(OPENFILE_EXTERNAL_PATHS, null)
             externalPaths = eP?.toMutableList() ?: mutableListOf()
+        }
+
+        if ( settings!!.contains(PREF_BOOK_PATH) ) {
+            this.lastPath = settings.getString(PREF_BOOK_PATH, null)
+            extractDirectory()
         }
     }
 
@@ -59,7 +63,7 @@ class OpenFileViewModel : ViewModel()  {
             } else it
             val directoryUri = Uri.parse(parent).toString()
             // val sf = DocumentFile.fromSingleUri(applicationContext, directoryUri)
-            selectedDocumentFileUriString = directoryUri
+            selectedDocumentFileUriString.postValue(directoryUri)
         }
     }
 
@@ -72,7 +76,7 @@ class OpenFileViewModel : ViewModel()  {
     }
 
 
-    fun loadPath() {
+    fun loadPath(selectedDocumentFileUriString: String?) {
         if ( selectedDocumentFileUriString == null ) {
             storageList()
             return
@@ -139,8 +143,8 @@ class OpenFileViewModel : ViewModel()  {
     private fun getFileList(fileItem: FileItem) {
         isVisibleImageButtonFilechooseAddStorage.value = false
         getFileList(fileItem.uriString)
-        scrollToDocumentFileUriString.value = selectedDocumentFileUriString
-        selectedDocumentFileUriString = fileItem.uriString
+        scrollToDocumentFileUriString.value = selectedDocumentFileUriString.value
+        selectedDocumentFileUriString.postValue(fileItem.uriString)
     }
 
     private fun getFileList(documentFilePath: String?) {

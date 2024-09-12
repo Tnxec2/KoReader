@@ -141,7 +141,7 @@ fun BookInfoScreen(
                     coroutineScope.launch {
                         bookStatusViewModel.deleteByPath(bookInfoViewModell.bookPath)
                         bookReaderViewModel.bookPath.postValue(null)
-                        openFileViewModel.loadPath()
+                        openFileViewModel.loadPath(null)
                         navigateBack()
                     }
                 }

@@ -78,7 +78,7 @@ fun OpenFileScreen(
 
     val fileItemListState = openFileViewModel.fileItemList
 
-    var showConfirmOpenStorageDialog by remember { mutableStateOf(false) }
+    var showConfirmOpenStorageDialog by openFileViewModel.showConfirmSelectStorageDialog
     var deleteStoragePosition by remember { mutableStateOf<Int?>(null) }
 
     val storagePicker = rememberLauncherForActivityResult(
@@ -94,28 +94,15 @@ fun OpenFileScreen(
     )
 
     LaunchedEffect(key1 = Unit) {
-        openFileViewModel.start()
+        //openFileViewModel.start()
     }
 
     LaunchedEffect(key1 = openFileViewModel.scrollToDocumentFileUriString.value) {
         openFileViewModel.scrollToDocumentFileUriString.value?.let {
-            println("scrollToDocumentFileUriString = $it")
-            println(openFileViewModel.getPositionInFileItemList())
             listState.scrollToItem(
                 openFileViewModel.getPositionInFileItemList()
             )
-//            val layoutInfo = listState.layoutInfo
-//            val viewportHeight =
-//                layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset
-//            val lastItem = listState.layoutInfo.visibleItemsInfo.last()
-//            if (lastItem.offset + lastItem.size > viewportHeight) {
-//                listState.scrollBy(lastItem.offset + lastItem.size - viewportHeight.toFloat())
-//            }
         }
-    }
-
-    LaunchedEffect(key1 = openFileViewModel.showConfirmSelectStorageDialog) {
-        showConfirmOpenStorageDialog = openFileViewModel.showConfirmSelectStorageDialog.value
     }
 
     fun addToStorage() {
@@ -205,7 +192,10 @@ fun OpenFileScreen(
                             if (item.isDir)
                                 openFileViewModel.onFilelistItemClick(index)
                             else
-                                item.uriString?.let {coroutineScope.launch { navigateToBookInfo(it) } }
+                                item.uriString?.let {
+                                    openFileViewModel.scrollToDocumentFileUriString.value = it
+                                    coroutineScope.launch { navigateToBookInfo(it) }
+                                }
                         },
                         onDeleteStorage = {
                             deleteStoragePosition = index

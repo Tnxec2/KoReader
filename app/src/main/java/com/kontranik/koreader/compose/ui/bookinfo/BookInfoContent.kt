@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.core.text.HtmlCompat
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
@@ -72,32 +73,36 @@ fun BookInfoContent(
             }
 
         }
-        Card(modifier = Modifier.padding(vertical = paddingMedium)) {
-            Html(
-                bookInfoDetails.annotation,
-                modifier = Modifier.padding(paddingMedium)
-            )
-        }
-        Card(modifier = Modifier.padding(bottom = paddingMedium)) {
-            Column(modifier = Modifier.padding(paddingMedium)) {
-                bookInfoDetails.authors.filter { it.id != null }.map { author ->
-                    Text(
-                        text = author.asString(),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = paddingSmall)
-                            .clickable {
-                                coroutineScope.launch {
-                                    author.id?.let { navigateToAuthor(it) }
+        println(HtmlCompat.fromHtml(bookInfoDetails.annotation, HtmlCompat.FROM_HTML_MODE_LEGACY).toString())
+        if (HtmlCompat.fromHtml(bookInfoDetails.annotation, HtmlCompat.FROM_HTML_MODE_LEGACY).toString().isNotEmpty())
+            Card(modifier = Modifier.padding(top = paddingMedium)) {
+                Html(
+                    bookInfoDetails.annotation,
+                    textSize = MaterialTheme.typography.bodyLarge.fontSize.value,
+                    modifier = Modifier.padding(paddingMedium)
+                )
+            }
+        if (bookInfoDetails.authors.any { it.id != null })
+            Card(modifier = Modifier.padding(top = paddingMedium)) {
+                Column(modifier = Modifier.padding(paddingMedium)) {
+                    bookInfoDetails.authors.filter { it.id != null }.map { author ->
+                        Text(
+                            text = author.asString(),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = paddingSmall)
+                                .clickable {
+                                    coroutineScope.launch {
+                                        author.id?.let { navigateToAuthor(it) }
+                                    }
                                 }
-                            }
-                    )
+                        )
+                    }
                 }
             }
-        }
     }
 }
 
