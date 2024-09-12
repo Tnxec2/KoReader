@@ -234,9 +234,15 @@ fun BookReaderScreen(
                 left = bookReaderViewModel.infoTextLeft.observeAsState("").value.toString(),
                 middle = bookReaderViewModel.infoTextRight.observeAsState("").value.toString(),
                 right = bookReaderViewModel.infoTextSystemstatus.observeAsState("").value.toString(),
-                onClickLeft = { showGotoDialog.value = true },
-                onClickMiddle = { showGotoDialog.value = true },
-                onClickRight = { showQuickMenu.value = true },
+                onClickLeft = {
+                    tap(settingsViewModel.tapInfoAreaAction.value[ScreenZone.TopLeft])
+                },
+                onClickMiddle = {
+                    tap(settingsViewModel.tapInfoAreaAction.value[ScreenZone.TopCenter])
+                },
+                onClickRight = {
+                    tap(settingsViewModel.tapInfoAreaAction.value[ScreenZone.TopRight])
+               },
                 textColor = savedColors.colorsInfo,
                 modifier = Modifier
                     .padding(

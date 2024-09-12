@@ -99,6 +99,10 @@ const val PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT = "tapZoneDoubleClickBottomLeft"
 const val PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER = "tapZoneDoubleClickBottomCenter"
 const val PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT = "tapZoneOneClickBottomRight"
 
+const val PREF_KEY_TAP_INFO_LEFT = "tapZoneInfoClickLeft"
+const val PREF_KEY_TAP_INFO_CENTER = "tapZoneInfoClickCenter"
+const val PREF_KEY_TAP_INFO_RIGHT = "tapZoneInfoClickRight"
+
 const val PREF_BRIGHTNESS_MANUAL = "Manual"
 const val PREF_BRIGHTNESS_SYSTEM = "System"
 
@@ -256,6 +260,10 @@ val defaultTapZoneDoubleBottomLeft = Actions.PagePrev
 val defaultTapZoneDoubleBottomCenter = Actions.GoTo
 val defaultTapZoneDoubleBottomRight = Actions.PageNext
 
+val defaultTapZoneInfoLeft = Actions.GoTo
+val defaultTapZoneInfoCenter = Actions.GoTo
+val defaultTapZoneInfoRight = Actions.QuickMenu
+
 val interface_entries = arrayOf(
     R.string.InterfaceLight,
     R.string.InterfaceDark,
@@ -369,6 +377,7 @@ class SettingsViewModel(
 
     val tapOneAction = mutableStateOf(mapOf<ScreenZone, Actions>())
     val tapDoubleAction = mutableStateOf(mapOf<ScreenZone, Actions>())
+    val tapInfoAreaAction = mutableStateOf(mapOf<ScreenZone, Actions>())
 
     init {
         interfaceTheme.value = prefs.getString(PREFS_interface_theme, interfaceThemeDefault) ?: interfaceThemeDefault
@@ -485,6 +494,22 @@ class SettingsViewModel(
                     defaultTapZoneDoubleBottomRight.name
                 ) ?: defaultTapZoneDoubleBottomRight.name)
             )
+
+            tapInfoAreaAction.value =
+                hashMapOf(
+                    ScreenZone.TopLeft to Actions.valueOf(prefs.getString(
+                        PREF_KEY_TAP_INFO_LEFT,
+                        defaultTapZoneInfoLeft.name
+                    ) ?: defaultTapZoneInfoLeft.name),
+                    ScreenZone.TopCenter to Actions.valueOf(prefs.getString(
+                        PREF_KEY_TAP_INFO_CENTER,
+                        defaultTapZoneInfoCenter.name
+                    ) ?: defaultTapZoneInfoCenter.name),
+                    ScreenZone.TopRight to Actions.valueOf(prefs.getString(
+                        PREF_KEY_TAP_INFO_RIGHT,
+                        defaultTapZoneInfoRight.name
+                    ) ?: defaultTapZoneInfoRight.name),
+                )
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -753,6 +778,16 @@ class SettingsViewModel(
         prefEditor.apply()
     }
 
+    fun changeInfoAreaClick(zone: ScreenZone, action: String) {
+        tapInfoAreaAction.value = tapInfoAreaAction.value.map {
+                entry -> entry.key to if (zone == entry.key) Actions.valueOf(action) else entry.value
+        }.toMap()
+
+        val prefEditor: SharedPreferences.Editor = prefs.edit()
+        prefEditor.putString(getTapInfoAreaKey(zone), action)
+        prefEditor.apply()
+    }
+
     fun changeShowSystemFonts(value: Boolean) {
         showSystemFonts.value = value
         val prefEditor: SharedPreferences.Editor = prefs.edit()
@@ -876,6 +911,20 @@ private fun getTapDoubleKey(zone: ScreenZone): String {
         ScreenZone.BottomLeft -> PREF_KEY_TAP_DOUBLE_BOTTOM_LEFT
         ScreenZone.BottomCenter -> PREF_KEY_TAP_DOUBLE_BOTTOM_CENTER
         ScreenZone.BottomRight -> PREF_KEY_TAP_DOUBLE_BOTTOM_RIGHT
+    }
+}
+
+private fun getTapInfoAreaKey(zone: ScreenZone): String {
+    return when (zone) {
+        ScreenZone.TopLeft -> PREF_KEY_TAP_INFO_LEFT
+        ScreenZone.TopCenter -> PREF_KEY_TAP_INFO_CENTER
+        ScreenZone.TopRight -> PREF_KEY_TAP_INFO_RIGHT
+        ScreenZone.MiddleLeft -> PREF_KEY_TAP_INFO_LEFT
+        ScreenZone.MiddleCenter -> PREF_KEY_TAP_INFO_CENTER
+        ScreenZone.MiddleRight -> PREF_KEY_TAP_INFO_RIGHT
+        ScreenZone.BottomLeft -> PREF_KEY_TAP_INFO_LEFT
+        ScreenZone.BottomCenter -> PREF_KEY_TAP_INFO_CENTER
+        ScreenZone.BottomRight -> PREF_KEY_TAP_INFO_RIGHT
     }
 }
 

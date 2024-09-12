@@ -131,6 +131,7 @@
     <string name="tapzones_header">Tap Zones</string>
     <string name="tapzones_one_click_header">One Click</string>
     <string name="tapzones_double_click_header">Double Click</string>
+    <string name="tapzones_info_area_click_header">Info Area</string>
 
     <string name="tapzone_top_left">top left</string>
     <string name="tapzone_top_center">top center</string>
@@ -141,6 +142,10 @@
     <string name="tapzone_bottom_left">bottom left</string>
     <string name="tapzone_bottom_center">bottom center</string>
     <string name="tapzone_bottom_right">bottom right</string>
+
+    <string name="tapzone_left">left</string>
+    <string name="tapzone_center">center</string>
+    <string name="tapzone_right">right</string>
 
     <string name="tapzones_activity_none">none</string>
     <string name="tapzones_activity_page_prev">previous page</string>

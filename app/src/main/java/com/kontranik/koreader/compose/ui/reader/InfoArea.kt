@@ -57,12 +57,21 @@ fun InfoArea(
                 }
         )
         if (middle.isNotEmpty()) {
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(1f)
+            .clickable {
+                onClickLeft()
+            })
         VerticalDivider(
             color = textColor,
             modifier = Modifier.padding(vertical = 2.dp)
+                .clickable {
+                    onClickMiddle()
+                }
         )
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(1f)
+            .clickable {
+                onClickMiddle()
+            })
 
         Text(
             text = middle,
@@ -76,10 +85,16 @@ fun InfoArea(
                     onClickMiddle()
                 }
         )}
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(1f)
+            .clickable {
+                onClickMiddle()
+            })
         VerticalDivider(
                 color = textColor,
             modifier = Modifier.padding(vertical = 2.dp)
+                .clickable {
+                    onClickMiddle()
+                }
         )
         Text(
             text = right,

@@ -97,6 +97,7 @@
     <string name="tapzones_header">Tap-Bereiche</string>
     <string name="tapzones_one_click_header">Einzelklick</string>
     <string name="tapzones_double_click_header">Doppelklick</string>
+    <string name="tapzones_info_area_click_header">Infobereich</string>
     <string name="tapzone_top_left">oben links</string>
     <string name="tapzone_top_center">oben mitte</string>
     <string name="tapzone_top_right">oben rechts</string>
@@ -106,6 +107,9 @@
     <string name="tapzone_bottom_left">unten links</string>
     <string name="tapzone_bottom_center">unten mitte</string>
     <string name="tapzone_bottom_right">unten rechts</string>
+    <string name="tapzone_left">links</string>
+    <string name="tapzone_center">mitte</string>
+    <string name="tapzone_right">rechts</string>
     <string name="tapzones_activity_none">nichts</string>
     <string name="tapzones_activity_page_prev">vorherige Seite</string>
     <string name="tapzones_activity_page_next">nächste Seite</string>

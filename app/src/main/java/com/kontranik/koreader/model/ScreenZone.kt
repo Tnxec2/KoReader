@@ -3,7 +3,6 @@ package com.kontranik.koreader.model
 import android.graphics.Point
 
 enum class ScreenZone {
-
     TopLeft,
     TopCenter,
     TopRight,

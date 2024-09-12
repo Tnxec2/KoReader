@@ -43,6 +43,7 @@ fun TapZonesSettingsScreen(
     navigateBack: () -> Unit,
     navigateToSettingsTapZonesOneClick: () -> Unit,
     navigateToSettingsTapZonesDoubleClick: () -> Unit,
+    navigateToSettingsTapZonesInfoAreaClick: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -52,6 +53,7 @@ fun TapZonesSettingsScreen(
         modifier = modifier,
         navigateToSettingsTapZonesOneClick = navigateToSettingsTapZonesOneClick,
         navigateToSettingsTapZonesDoubleClick = navigateToSettingsTapZonesDoubleClick,
+        navigateToSettingsTapZonesInfoAreaClick = navigateToSettingsTapZonesInfoAreaClick,
     )
 }
 
@@ -62,6 +64,7 @@ fun TapZonesSettingsContent(
     navigateBack: () -> Unit,
     navigateToSettingsTapZonesOneClick: () -> Unit,
     navigateToSettingsTapZonesDoubleClick: () -> Unit,
+    navigateToSettingsTapZonesInfoAreaClick: () -> Unit,
 ) {
     val settingsItems = listOf(
         SettingsItem(R.string.tapzones_one_click_header, null, navigateToSettingsTapZonesOneClick),
@@ -69,6 +72,11 @@ fun TapZonesSettingsContent(
             R.string.tapzones_double_click_header,
             null,
             navigateToSettingsTapZonesDoubleClick
+        ),
+        SettingsItem(
+            R.string.tapzones_info_area_click_header,
+            null,
+            navigateToSettingsTapZonesInfoAreaClick
         ),
     )
 
@@ -145,6 +153,7 @@ private fun TapZonesSettingsContentPreview() {
                 navigateBack = {},
                 navigateToSettingsTapZonesOneClick = {},
                 navigateToSettingsTapZonesDoubleClick = {},
+                navigateToSettingsTapZonesInfoAreaClick = {},
             )
         }
     }
