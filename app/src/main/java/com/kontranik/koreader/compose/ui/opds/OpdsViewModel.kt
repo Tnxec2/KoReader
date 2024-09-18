@@ -257,14 +257,9 @@ class OpdsViewModell(
         else opdsEntryList.value = listOf()
     }
 
-    fun canGoBack(): Boolean {
-        return navigationHistory.isNotEmpty()
-    }
-
     fun goBack() {
         if (navigationHistory.isNotEmpty()) {
             val url = navigationHistory.removeLast()
-            println("goback: $url")
             load(url, true)
         }
     }

@@ -42,16 +42,6 @@ fun OpdsListScreen(
         }
     }
 
-    BackHandler(enabled = true, onBack = {
-            coroutineScope.launch {
-                if (opdsViewModell.canGoBack())
-                    opdsViewModell.goBack()
-                else
-                    navigateBack()
-            }
-        }
-    )
-
     OpdsListContent(
         drawerState = drawerState,
         entrysState = opdsViewModell.opdsEntryList,

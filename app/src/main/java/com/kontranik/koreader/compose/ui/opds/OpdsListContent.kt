@@ -1,5 +1,6 @@
 package com.kontranik.koreader.compose.ui.opds
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,7 @@ import com.kontranik.koreader.compose.ui.appbar.AppBar
 import com.kontranik.koreader.compose.ui.appbar.AppBarAction
 import com.kontranik.koreader.compose.ui.shared.ConfirmDialog
 import com.kontranik.koreader.compose.ui.shared.CustomInputDialog
+import com.kontranik.koreader.opds.model.BACK
 import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.EntryEditDetails
 import com.kontranik.koreader.opds.model.Link
@@ -92,6 +94,21 @@ fun OpdsListContent(
     val entryEditDetails = remember { mutableStateOf(EntryEditDetails()) }
 
     val showSearchInputDialog = remember { mutableStateOf(false) }
+
+    BackHandler(enabled = true, onBack = {
+        if (entryDetails.value == null) {
+            coroutineScope.launch {
+                if (startUrl.value == OVERVIEW) {
+                    navigateBack()
+                } else {
+                    loadLink(BACK.clickLink!!)
+                }
+            }
+        } else {
+            entryDetails.value = null
+        }
+    }
+    )
 
     Scaffold(
         snackbarHost = {
@@ -148,7 +165,7 @@ fun OpdsListContent(
         },
         modifier = modifier.fillMaxSize(),
     ) { padding ->
-        
+
         if (entryDetails.value == null) {
             OpdsList(
                 listState = listState,
