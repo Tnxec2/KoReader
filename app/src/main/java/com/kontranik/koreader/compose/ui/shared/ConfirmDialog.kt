@@ -2,15 +2,21 @@ package com.kontranik.koreader.compose.ui.shared
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,6 +33,7 @@ import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ConfirmDialog(
     title: String?,
@@ -39,14 +46,14 @@ fun ConfirmDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
                 .padding(paddingMedium),
             shape = RoundedCornerShape(16.dp),
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingSmall),
+                    .fillMaxWidth()
+                    .padding(paddingSmall)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -63,58 +70,82 @@ fun ConfirmDialog(
                     text = text,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
                         .wrapContentSize(Alignment.Center),
                     textAlign = TextAlign.Center,
                 )
-                //Spacer(modifier = Modifier.padding(paddingSmall))
-                Row(
+
+                FlowRow(
+                    verticalArrangement = Arrangement.spacedBy(
+                        paddingSmall,
+                        Alignment.Top
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(paddingSmall, Alignment.End),
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
+                        .align(Alignment.End)
+                        .padding(top = paddingMedium)
+                        .fillMaxWidth()
                 ) {
                     if (isCancelable)
-                        TextButton(
+                        OutlinedButton(
                             onClick = { onDismissRequest() },
-                            modifier = Modifier.padding(paddingSmall),
+                            modifier = Modifier,
                         ) {
                             Text(stringResource(android.R.string.cancel))
                         }
-                    TextButton(
-                        onClick = { onConfirmation() },
-                        modifier = Modifier.padding(paddingSmall),
-                    ) {
-                        Text(stringResource(android.R.string.ok))
-                    }
+                        OutlinedButton(
+                            onClick = { onConfirmation() },
+                            modifier = Modifier,
+                        ) {
+                            Text(stringResource(android.R.string.ok))
+                        }
                 }
             }
         }
     }
 }
 
-@Preview
+@Preview(widthDp = 400, heightDp = 300)
 @Composable
 private fun ConfirmDialogPreview() {
     AppTheme {
-        ConfirmDialog(
-            title = "Title",
-            text = stringResource(id = R.string.sure_delete_book),
-            onDismissRequest = {  },
-            onConfirmation = { },
+        Surface() {
+            ConfirmDialog(
+                title = "Title",
+                text = stringResource(id = R.string.sure_delete_book),
+                onDismissRequest = { },
+                onConfirmation = { },
             )
+        }
     }
 }
 
-@Preview
+@Preview(widthDp = 200, heightDp = 400)
+@Composable
+private fun ConfirmDialogPreview1() {
+    AppTheme {
+        Surface() {
+            ConfirmDialog(
+                title = "Title",
+                text = stringResource(id = R.string.sure_delete_book),
+                onDismissRequest = { },
+                onConfirmation = { },
+            )
+        }
+    }
+}
+
+@Preview(widthDp = 200, heightDp = 300)
 @Composable
 private fun ConfirmDialogPreview2() {
     AppTheme {
-        ConfirmDialog(
-            title = "Title",
-            text = stringResource(id = R.string.sure_delete_book),
-            onDismissRequest = {  },
-            onConfirmation = { },
-            isCancelable = false
-        )
+        Surface() {
+            ConfirmDialog(
+                title = "Title",
+                text = stringResource(id = R.string.sure_delete_book),
+                onDismissRequest = { },
+                onConfirmation = { },
+                isCancelable = false
+            )
+        }
     }
 }
