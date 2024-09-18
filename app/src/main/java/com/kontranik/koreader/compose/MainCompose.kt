@@ -52,10 +52,8 @@ fun MainCompose(
             scope.launch { drawerState.close() }
         else
             scope.launch {
-                //println(Date().time - backButtonPressedTime.longValue)
                 if (Date().time - backButtonPressedTime.longValue < 2000) {
-                    val activity = (context as? Activity)
-                    activity?.finish()
+                    activity.finish()
                 } else {
                     backButtonPressedTime.longValue = Date().time
                     Toast.makeText(

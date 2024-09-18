@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -55,11 +56,12 @@ const val OPDS_PREFS_FILE = "OpdsActivitySettings"
 const val OPDS_PREF_OPDS_OVERVIEW = "OPDS_OVERVIEW"
 
 class OpdsViewModell(
-    savedStateHandle: SavedStateHandle,
-    val context: Context,
 ) : ViewModel() {
 
     val opdsEntryList = mutableStateOf(listOf<Entry>())
+
+    val showToastState = mutableStateOf(false)
+    val toastMessageResourceIdState = mutableIntStateOf(0)
 
     private val navigationHistory = mutableListOf<String>()
     private var openedLink: String? = null
@@ -82,6 +84,8 @@ class OpdsViewModell(
 
     fun start() {
         loadPrefs()
+        navigationHistory.clear()
+        openedLink = null
         load(OVERVIEW)
     }
 
@@ -158,7 +162,10 @@ class OpdsViewModell(
             canReload.value = true
         }
         if (!back) {
-            openedLink?.let { navigationHistory.add(it) }
+            openedLink?.let {
+                if (navigationHistory.isEmpty() || navigationHistory.last() != it)
+                    navigationHistory.add(it)
+            }
             openedLink = url
         }
 
@@ -223,28 +230,22 @@ class OpdsViewModell(
             } catch (e: IOException) {
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        KoReaderApplication.getContext(),
-                        context.getString(R.string.connection_error), Toast.LENGTH_LONG
-                    ).show()
+                    toastMessageResourceIdState.intValue = R.string.connection_error
+                    showToastState.value = true
                     loadErrorList(url)
                 }
             } catch (e: XmlPullParserException) {
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        KoReaderApplication.getContext(),
-                        context.getString(R.string.xml_error), Toast.LENGTH_LONG
-                    ).show()
+                    toastMessageResourceIdState.intValue = R.string.xml_error
+                    showToastState.value = true
                     loadErrorList(url)
                 }
             } catch (e: MalformedURLException) {
                 Log.e("OPDS List fragment", e.localizedMessage, e)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        KoReaderApplication.getContext(),
-                        context.getString(R.string.connection_error_malformedURLException), Toast.LENGTH_LONG
-                    ).show()
+                    toastMessageResourceIdState.intValue = R.string.connection_error_malformedURLException
+                    showToastState.value = true
                     loadErrorList(url)
                 }
             }
@@ -256,9 +257,14 @@ class OpdsViewModell(
         else opdsEntryList.value = listOf()
     }
 
-    private fun goBack() {
+    fun canGoBack(): Boolean {
+        return navigationHistory.isNotEmpty()
+    }
+
+    fun goBack() {
         if (navigationHistory.isNotEmpty()) {
             val url = navigationHistory.removeLast()
+            println("goback: $url")
             load(url, true)
         }
     }
@@ -285,5 +291,9 @@ class OpdsViewModell(
             else
                 load(it)
         }
+    }
+
+    fun hideToast() {
+        showToastState.value = false
     }
 }

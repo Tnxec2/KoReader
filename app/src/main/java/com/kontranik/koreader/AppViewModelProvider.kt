@@ -59,8 +59,6 @@ object AppViewModelProvider {
 
         initializer {
             OpdsViewModell(
-                this.createSavedStateHandle(),
-                koReaderApplication().applicationContext
             )
         }
 

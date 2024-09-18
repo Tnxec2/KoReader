@@ -2,6 +2,8 @@ package com.kontranik.koreader.compose.ui.opds
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kontranik.koreader.AppViewModelProvider
+import com.kontranik.koreader.KoReaderApplication
+import com.kontranik.koreader.R
 import com.kontranik.koreader.utils.UrlHelper
 import kotlinx.coroutines.launch
 
@@ -27,6 +31,26 @@ fun OpdsListScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    LaunchedEffect(key1 = opdsViewModell.showToastState.value) {
+        if (opdsViewModell.showToastState.value) {
+            Toast.makeText(
+                KoReaderApplication.getContext(),
+                context.getString(opdsViewModell.toastMessageResourceIdState.intValue), Toast.LENGTH_LONG
+            ).show()
+            opdsViewModell.hideToast()
+        }
+    }
+
+    BackHandler(enabled = true, onBack = {
+            coroutineScope.launch {
+                if (opdsViewModell.canGoBack())
+                    opdsViewModell.goBack()
+                else
+                    navigateBack()
+            }
+        }
+    )
 
     OpdsListContent(
         drawerState = drawerState,
