@@ -1,6 +1,7 @@
 package com.kontranik.koreader.compose.ui.library.bytitle
 
 import android.net.Uri
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -27,7 +28,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +57,11 @@ import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDialog
+import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import com.kontranik.koreader.compose.ui.shared.ConfirmDialog
+import com.kontranik.koreader.database.BookStatusViewModel
+import com.kontranik.koreader.model.BookInfoComposable
 import kotlinx.coroutines.launch
 
 object LibraryByTitleDestination : NavigationDestination {
@@ -72,7 +76,10 @@ object LibraryByTitleDestination : NavigationDestination {
 fun LibraryByTitleScreen(
     drawerState: DrawerState,
     navigateBack: () -> Unit,
-    navigateToBook: (LibraryItemWithAuthors) -> Unit,
+    navigateToReader: (bookPath: String) -> Unit,
+    navigateToAuthor: (authorId: Long) -> Unit,
+    bookReaderViewModel: BookReaderViewModel,
+    bookStatusViewModel: BookStatusViewModel,
     modifier: Modifier = Modifier,
     libraryViewModel: LibraryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
@@ -94,6 +101,9 @@ fun LibraryByTitleScreen(
     var confirmDeleteBook by remember {
         mutableStateOf<Pair<Boolean, LibraryItemWithAuthors>?>(null)
     }
+
+    var bookInfo by remember { mutableStateOf<BookInfoComposable?>(null) }
+
 
     Scaffold(
         snackbarHost = {
@@ -167,7 +177,7 @@ fun LibraryByTitleScreen(
                     booksPagingState[index]?.let {
                         BooksItem(
                             item = it,
-                            onClick = {
+                            onClick = { bookInfoComposable ->
                                 coroutineScope.launch {
                                     val bookPathUri = it.libraryItem.path
                                     try {
@@ -176,7 +186,7 @@ fun LibraryByTitleScreen(
                                                 Uri.parse(bookPathUri)
                                             )
                                         inputStream?.close()
-                                        navigateToBook(it)
+                                        bookInfo = bookInfoComposable
                                     } catch (e: Exception) {
                                         confirmDeleteBook = Pair(true, it)
                                     }
@@ -206,6 +216,33 @@ fun LibraryByTitleScreen(
                     }
                 )
             }
+
+            bookInfo?.let {
+                BookInfoDialog(
+                    bookInfoComposable = it,
+                    navigateBack = { bookInfo = null },
+                    deleteBook = { path ->
+                        coroutineScope.launch {
+                            bookInfo = null
+                            bookStatusViewModel.deleteByPath(path)
+                            bookReaderViewModel.bookPath.postValue(null)
+                        }
+                    },
+                    navigateToReader = { path ->
+                        coroutineScope.launch {
+                            bookInfo = null
+                            bookReaderViewModel.changePath(path)
+                            navigateToReader(path)
+                        }
+                    },
+                    navigateToAuthor = { authorId ->
+                        coroutineScope.launch {
+                            bookInfo = null
+                            navigateToAuthor(authorId)
+                        }
+                    }
+                )
+            }
         }
     }
 }
@@ -214,7 +251,7 @@ fun LibraryByTitleScreen(
 @Composable
 fun BooksItem(
     item: LibraryItemWithAuthors,
-    onClick: () -> Unit,
+    onClick: (bookInfoComposable: BookInfoComposable) -> Unit,
     onDelete: () -> Unit,
     onUpdate: () -> Unit,
     modifier: Modifier = Modifier,) {
@@ -227,13 +264,13 @@ fun BooksItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .combinedClickable(
-                onClick = { onClick() },
+                onClick = { onClick(bookInfoComposableState.value) },
                 onLongClick = { showPopup = true }
             )
             .fillMaxWidth()
     ) {
         Image(
-            bitmap = bookInfoComposableState.value.cover,
+            bitmap = bookInfoComposableState.value.cover!!,
             contentDescription = bookInfoComposableState.value.title,
             modifier = Modifier
                 .padding(horizontal = paddingMedium, vertical = paddingSmall)
@@ -259,7 +296,7 @@ fun BooksItem(
                 modifier = Modifier
             )
             Text(
-                text = bookInfoComposableState.value.path,
+                text = bookInfoComposableState.value.filename,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
             )
@@ -278,7 +315,7 @@ fun BooksItem(
 @Composable
 private fun BooksItemPreview() {
     val context = LocalContext.current
-    val bitmap = context.getDrawable(R.drawable.book_mockup)?.let { ImageUtils.getBytes(ImageUtils.drawableToBitmap(it)) }
+    val bitmap = AppCompatResources.getDrawable(context, R.drawable.book_mockup)?.let { ImageUtils.getBytes(ImageUtils.drawableToBitmap(it)) }
     AppTheme {
         Surface {
             BooksItem(

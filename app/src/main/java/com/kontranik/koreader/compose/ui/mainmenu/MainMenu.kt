@@ -26,9 +26,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,13 +40,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.appbar.AppBar
+import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDialog
+import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import com.kontranik.koreader.compose.ui.settings.PREFS_FILE
 import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
+import com.kontranik.koreader.database.BookStatusViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -56,13 +64,17 @@ fun MainMenuScreen(
     navigateToLibrary: () -> Unit,
     navigateToOpdsNetworkLibrary: () -> Unit,
     navigateToSettings: () -> Unit,
-    navigateToBookInfo: (bookPath: String) -> Unit,
+    navigateToAuthor: (authorId: Long) -> Unit,
+    bookStatusViewModel: BookStatusViewModel,
+    bookReaderViewModel: BookReaderViewModel,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val bookPath = rememberSaveable { mutableStateOf<String?>(null) }
+
+    var bookInfoPath by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(key1 = Unit) {
         val prefs = context.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
@@ -134,7 +146,9 @@ fun MainMenuScreen(
                             .padding(paddingSmall)
                             .size(32.dp)
                             .clickable(
-                                onClick = { coroutineScope.launch { navigateToBookInfo(it) } },
+                                onClick = {
+                                    bookInfoPath = it
+                                },
                                 role = Role.Button,
                             ),
                     )
@@ -150,6 +164,32 @@ fun MainMenuScreen(
                             ),
                     )
                 }
+            }
+
+            bookInfoPath?.let {
+                BookInfoDialog(
+                    bookPath = it,
+                    navigateBack = { bookInfoPath = null },
+                    deleteBook = { path ->
+                        coroutineScope.launch {
+                            bookInfoPath = null
+                            bookStatusViewModel.deleteByPath(path)
+                            bookReaderViewModel.bookPath.postValue(null)
+                        }
+                    },
+                    navigateToReader = { path ->
+                        coroutineScope.launch {
+                            bookInfoPath = null
+                            navigateBack()
+                        }
+                    },
+                    navigateToAuthor = { authorId ->
+                        coroutineScope.launch {
+                            bookInfoPath = null
+                            navigateToAuthor(authorId)
+                        }
+                    }
+                )
             }
 
         }
@@ -187,23 +227,4 @@ fun MainMenuItem(
                 .padding(vertical = paddingMedium)
         )
     }
-}
-
-@Preview
-@Composable
-private fun MainMenuScreenPreview() {
-    AppTheme {
-        MainMenuScreen(
-            drawerState = DrawerState(DrawerValue.Closed),
-            navigateBack = { },
-            navigateToOpenFile = { },
-            navigateToLastOpened = { },
-            navigateToLibrary = { },
-            navigateToOpdsNetworkLibrary = { },
-            navigateToSettings = { },
-            navigateToBookInfo = { },
-            navigateToBookmarks = { },
-        )
-    }
-
 }

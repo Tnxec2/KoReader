@@ -5,7 +5,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.kontranik.koreader.compose.ui.bookinfo.BookInfoViewModell
 import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.BookmarksViewModel
 import com.kontranik.koreader.compose.ui.library.LibraryViewModel
@@ -40,14 +39,6 @@ object AppViewModelProvider {
                 koReaderApplication().container.bookStatusRepository,
                 koReaderApplication().container.libraryItemRepository,
                 koReaderApplication().container.authorsRepository,
-            )
-        }
-
-        initializer {
-            BookInfoViewModell(
-                this.createSavedStateHandle(),
-                koReaderApplication().container.libraryItemRepository,
-                koReaderApplication().applicationContext
             )
         }
 

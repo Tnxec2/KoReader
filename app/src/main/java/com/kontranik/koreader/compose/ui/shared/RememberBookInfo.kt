@@ -1,5 +1,6 @@
 package com.kontranik.koreader.compose.ui.shared
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,12 +12,16 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.documentfile.provider.DocumentFile
+import com.kontranik.koreader.KoReaderApplication
+
 import com.kontranik.koreader.database.BookStatusViewModel
+import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.BookStatus
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
 import com.kontranik.koreader.model.BookInfo
 import com.kontranik.koreader.model.BookInfoComposable
 import com.kontranik.koreader.model.toBookInfoComposable
+import com.kontranik.koreader.model.toBookInfoComposableForImageBitmap
 import com.kontranik.koreader.parser.EbookHelper
 import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.FileItem
@@ -24,6 +29,72 @@ import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.ImageUtils.getBitmap
 import kotlinx.coroutines.launch
+
+@Composable
+fun rememberBookInfoUiStateForPath(
+    bookPath: String,
+    bookInfoComposable: BookInfoComposable
+    ): MutableState<BookInfoUiState> {
+
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val bookInfoState = remember {
+        mutableStateOf(
+            BookInfoUiState(
+                bookInfoComposable,
+                canDelete = false,
+                exit = false
+            )
+        )
+    }
+
+    LaunchedEffect(key1 = bookPath) {
+        coroutineScope.launch {
+            val uri = Uri.parse(bookPath)
+            val doc = DocumentFile.fromSingleUri(context, uri)
+
+            val ebookHelper = EbookHelper.getHelper(bookPath)
+
+            if (ebookHelper != null) {
+                val bookInfo = ebookHelper.getBookInfoTemporary(bookPath)
+
+                if (bookInfo != null) {
+                    bookInfoState.value = BookInfoUiState(
+                        bookInfo.toBookInfoComposable(),
+                        canDelete = doc?.canRead() == true,
+                        exit = false
+                    )
+                    KoReaderApplication.getApplicationScope().launch {
+                        val libraryItemWithAuthors = KoReaderApplication.getContainer().
+                            libraryItemRepository.getByPathWithAuthors(bookPath).firstOrNull()
+
+                        libraryItemWithAuthors?.let { item ->
+                            bookInfoState.value =
+                                BookInfoUiState(
+                                    item.toBookInfoComposableForImageBitmap(
+                                        bookInfoState.value.bookInfoComposable.cover,
+                                        bookInfoState.value.bookInfoComposable.annotation
+                                    )
+                                )
+                        }
+                    }
+                } else {
+                    bookInfoState.value = bookInfoState.value.copy(
+                        exit = true
+                    )
+                }
+            } else {
+                bookInfoState.value = bookInfoState.value.copy(
+                    exit = true
+                )
+            }
+        }
+    }
+
+    return bookInfoState
+}
+
 
 @Composable
 fun rememberBookInfoForFileItem(fileItem: FileItem): MutableState<BookInfoComposable> {
@@ -44,7 +115,7 @@ fun rememberBookInfoForFileItem(fileItem: FileItem): MutableState<BookInfoCompos
                     if (contentUriPath != null) {
                         EbookHelper.getBookInfo(contentUriPath, fileItem)?.toBookInfoComposable()?.let {
                             val cover = ImageUtils.scaleBitmap(
-                                it.cover.asAndroidBitmap(), 50, 100)
+                                it.cover!!.asAndroidBitmap(), 50, 100)
                                 .asImageBitmap()
                             bookInfoState.value = it.copy(cover = cover)
                         }
@@ -112,16 +183,47 @@ fun rememberBookInfoForLibraryItem(item: LibraryItemWithAuthors): MutableState<B
 
     val bookInfoState = remember {
         mutableStateOf(
-            item.toBookInfoComposable(cover = if (item.libraryItem.cover != null) {
-                ImageUtils.getImage(item.libraryItem.cover!!) ?: getBitmap(
-                    context,
-                    ImageEnum.Ebook
-                )
-            } else {
-                getBitmap(context, ImageEnum.Ebook)
-            })
+            item.toBookInfoComposable(
+                cover = if (item.libraryItem.cover != null) {
+                    ImageUtils.getImage(item.libraryItem.cover!!) ?: getBitmap(
+                        context,
+                        ImageEnum.Ebook
+                    )
+                } else {
+                    getBitmap(context, ImageEnum.Ebook)
+                }
+            )
         )
     }
 
     return bookInfoState
+}
+
+data class BookInfoUiState(
+    val bookInfoComposable: BookInfoComposable = BookInfoComposable(),
+    val canDelete: Boolean = false,
+    val exit: Boolean = false
+)
+
+
+data class BookInfoDetails(
+    var title: String = "",
+    var cover: Bitmap? = null,
+    var authors: List<Author> = listOf(),
+    val allAuthors: String = "",
+    val filename: String = "",
+    val path: String = "",
+    var annotation: String = ""
+)
+
+fun BookInfo.toBookInfoDetails(): BookInfoDetails {
+    return BookInfoDetails(
+        title = title ?: "",
+        cover = cover,
+        authors = authors?.toList() ?: listOf(),
+        allAuthors = authorsAsString(),
+        filename = filename,
+        path = path,
+        annotation = annotation
+    )
 }

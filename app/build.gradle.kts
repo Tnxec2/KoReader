@@ -14,7 +14,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 12
-        versionName = "1.5.1"
+        versionName = "1.5.2"
         setProperty("archivesBaseName", "$applicationId-v$versionCode($versionName)")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

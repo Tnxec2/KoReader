@@ -38,5 +38,9 @@ class KoReaderApplication : Application() {
         fun getApplicationScope(): CoroutineScope {
             return mInstance.applicationScope
         }
+
+        fun getContainer(): AppContainer {
+            return mInstance.container
+        }
     }
 }

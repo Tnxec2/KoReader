@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDetails
+import com.kontranik.koreader.compose.ui.shared.BookInfoDetails
 import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.BookStatus
 import com.kontranik.koreader.database.model.LibraryItemWithAuthors
@@ -17,13 +17,15 @@ import java.net.URLDecoder
 
 
 data class BookInfoComposable(
-        var title: String,
-        var cover: ImageBitmap,
+        var title: String = "",
+        var cover: ImageBitmap? = null,
         var authors: MutableList<Author> = mutableListOf(),
         var authorsAsString: String = authors.joinToString("; ", transform = { it.asString() }),
         val filename: String = "",
-        val path: String,
-        var annotation: String = ""
+        val path: String = "",
+        var annotation: String = "",
+    val canDelete: Boolean = false,
+    val exit: Boolean = false
 ) : Serializable {
 
     override fun toString(): String {
@@ -38,7 +40,7 @@ fun BookStatus.toBookInfoComposable(altCover: ImageBitmap): BookInfoComposable {
         authors = mutableListOf(),
         authorsAsString = authors ?: "",
         filename = URLDecoder.decode(path),
-        path = URLDecoder.decode(path),
+        path = path!!,
         annotation = ""
     )
 }
@@ -55,13 +57,26 @@ fun FileItem.toBookInfoComposable(cover: ImageBitmap): BookInfoComposable {
     )
 }
 
-fun LibraryItemWithAuthors.toBookInfoComposable(cover: Bitmap): BookInfoComposable {
+fun LibraryItemWithAuthors.toBookInfoComposable(cover: Bitmap?, annotation: String = ""): BookInfoComposable {
     return BookInfoComposable(
         title = libraryItem.title ?: "",
-        cover = cover.asImageBitmap(),
+        cover = cover?.asImageBitmap(),
+        filename = URLDecoder.decode(libraryItem.path),
+        path = libraryItem.path,
+        authors = authors.toMutableList(),
+        authorsAsString = authors.joinToString("; ", transform = { it.asString() }),
+        annotation = annotation
+    )
+}
+
+fun LibraryItemWithAuthors.toBookInfoComposableForImageBitmap(cover: ImageBitmap?, annotation: String): BookInfoComposable {
+    return BookInfoComposable(
+        title = libraryItem.title ?: "",
+        cover = cover,
         path = URLDecoder.decode(libraryItem.path),
         authors = authors.toMutableList(),
         authorsAsString = authors.joinToString("; ", transform = { it.asString() }),
+        annotation = annotation
     )
 }
 

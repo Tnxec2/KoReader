@@ -1,5 +1,6 @@
 package com.kontranik.koreader.compose.ui.lastopened
 
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -23,7 +24,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -44,15 +49,21 @@ import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.ImageUtils.getBytes
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDialog
+import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
+import com.kontranik.koreader.model.BookInfoComposable
 import kotlinx.coroutines.launch
+import java.net.URLDecoder
 
 
 @Composable
 fun LastOpenedScreen(
     drawerState: DrawerState,
     navigateBack: () -> Unit,
-    navigateToBookInfo: (bookPath: String) -> Unit,
+    navigateToReader: (bookPath: String) -> Unit,
+    navigateToAuthor: (authorId: Long) -> Unit,
     modifier: Modifier = Modifier,
+    bookReaderViewModel: BookReaderViewModel,
     bookStatusViewModel: BookStatusViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -60,6 +71,9 @@ fun LastOpenedScreen(
     val listState = rememberLazyListState()
 
     val lastOpenedBooksState = bookStatusViewModel.lastOpenedBooks.collectAsState(initial = listOf())
+
+    var bookInfo by remember { mutableStateOf<BookInfoComposable?>(null) }
+
 
     Scaffold(
         topBar = {
@@ -90,8 +104,10 @@ fun LastOpenedScreen(
                 ) { index, item ->
                     LastOpenedItem(
                         bookStatus = item,
-                        onClick = {
-                            item.path?.let {coroutineScope.launch { navigateToBookInfo(it) } }
+                        onClick = { bookInfoComposable ->
+                            item.path?.let {
+                                bookInfo = bookInfoComposable
+                            }
                         },
                         bookStatusViewModel = bookStatusViewModel
                     )
@@ -100,13 +116,40 @@ fun LastOpenedScreen(
                 }
             }
         }
+
+        bookInfo?.let {
+            BookInfoDialog(
+                bookInfoComposable = it,
+                navigateBack = { bookInfo = null },
+                deleteBook = { path ->
+                    coroutineScope.launch {
+                        bookInfo = null
+                        bookStatusViewModel.deleteByPath(path)
+                        bookReaderViewModel.bookPath.postValue(null)
+                    }
+                },
+                navigateToReader = { path ->
+                    coroutineScope.launch {
+                        bookInfo = null
+                        bookReaderViewModel.changePath(path)
+                        navigateToReader(path)
+                    }
+                },
+                navigateToAuthor = { authorId ->
+                    coroutineScope.launch {
+                        bookInfo = null
+                        navigateToAuthor(authorId)
+                    }
+                }
+            )
+        }
     }
 }
 
 @Composable
 fun LastOpenedItem(
     bookStatus: BookStatus,
-    onClick: () -> Unit,
+    onClick: (bookInfoComposable: BookInfoComposable) -> Unit,
     modifier: Modifier = Modifier,
     bookStatusViewModel: BookStatusViewModel? = null,
 ) {
@@ -116,12 +159,12 @@ fun LastOpenedItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .clickable(
-                onClick = { onClick() },
+                onClick = { onClick(bookInfoComposableState.value) },
             )
             .fillMaxWidth()
     ) {
         Image(
-            bitmap = bookInfoComposableState.value.cover,
+            bitmap = bookInfoComposableState.value.cover!!,
             contentDescription = bookInfoComposableState.value.title,
             contentScale = ContentScale.Fit,
             modifier = Modifier
@@ -143,7 +186,7 @@ fun LastOpenedItem(
                 modifier = Modifier
             )
             Text(
-                text = bookInfoComposableState.value.path ?: "",
+                text = URLDecoder.decode(bookInfoComposableState.value.path),
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
             )
@@ -155,7 +198,7 @@ fun LastOpenedItem(
 @Composable
 private fun LastOpenedItemPreview() {
     val context = LocalContext.current
-    val bitmap = context.getDrawable(R.drawable.book_mockup)?.let { ImageUtils.drawableToBitmap(it)}
+    val bitmap = AppCompatResources.getDrawable(context, R.drawable.book_mockup)?.let { ImageUtils.drawableToBitmap(it)}
     AppTheme {
         Surface {
             LastOpenedItem(

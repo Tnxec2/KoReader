@@ -1,5 +1,6 @@
 package com.kontranik.koreader.compose.ui.bookinfo
 
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -24,17 +25,21 @@ import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
+import com.kontranik.koreader.compose.ui.shared.BookInfoDetails
 import com.kontranik.koreader.compose.ui.shared.Html
 import com.kontranik.koreader.compose.ui.shared.PreviewPortraitLandscapeLightDark
+import com.kontranik.koreader.compose.ui.shared.toBookInfoDetails
 import com.kontranik.koreader.database.model.mocupAuthors
 import com.kontranik.koreader.model.BookInfo
+import com.kontranik.koreader.model.BookInfoComposable
+import com.kontranik.koreader.model.toBookInfoComposable
 import com.kontranik.koreader.utils.ImageUtils
 import kotlinx.coroutines.launch
 
 
 @Composable
 fun BookInfoContent(
-    bookInfoDetails: BookInfoDetails,
+    bookInfoDetails: BookInfoComposable,
     navigateToAuthor: (authorId: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -56,7 +61,7 @@ fun BookInfoContent(
                         .padding(paddingSmall)
                 )
                 Text(
-                    text = bookInfoDetails.allAuthors,
+                    text = bookInfoDetails.authorsAsString,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -64,7 +69,7 @@ fun BookInfoContent(
                 )
                 bookInfoDetails.cover?.let {
                     Image(
-                        bitmap = it.asImageBitmap(),
+                        bitmap = it,
                         contentDescription = bookInfoDetails.title,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.fillMaxWidth()
@@ -114,7 +119,7 @@ private fun BookInfoContentPreview() {
     val mocupBookInfo = BookInfo(
         title = "Book title",
         authors = mocupAuthors,
-        cover = context.getDrawable(R.drawable.book_mockup)
+        cover = AppCompatResources.getDrawable(context, R.drawable.book_mockup)
             ?.let { ImageUtils.drawableToBitmap(it) },
         filename = "filename",
         path = "path",
@@ -131,7 +136,7 @@ private fun BookInfoContentPreview() {
     AppTheme {
         Surface {
             BookInfoContent(
-                bookInfoDetails = mocupBookInfo.toBookInfoDetails(),
+                bookInfoDetails = mocupBookInfo.toBookInfoComposable(),
 
                 navigateToAuthor = {},
             )

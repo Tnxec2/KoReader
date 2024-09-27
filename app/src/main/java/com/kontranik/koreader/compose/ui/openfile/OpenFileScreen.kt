@@ -2,11 +2,10 @@ package com.kontranik.koreader.compose.ui.openfile
 
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,8 +41,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
@@ -58,14 +55,22 @@ import com.kontranik.koreader.utils.FileItem
 import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.compose.theme.AppTheme
+import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDialog
+import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
+import com.kontranik.koreader.database.BookStatusViewModel
+import com.kontranik.koreader.database.model.Author
+import com.kontranik.koreader.model.BookInfoComposable
 import kotlinx.coroutines.launch
 
 @Composable
 fun OpenFileScreen(
     drawerState: DrawerState,
     navigateBack: () -> Unit,
-    navigateToBookInfo: (bookPath: String) -> Unit,
+    navigateToReader: (bookPath: String) -> Unit,
+    navigateToAuthor: (authorId: Long) -> Unit,
     modifier: Modifier = Modifier,
+    bookReaderViewModel: BookReaderViewModel,
+    bookStatusViewModel: BookStatusViewModel,
     openFileViewModel: OpenFileViewModel,
     libraryViewModel: LibraryViewModel,
 ) {
@@ -80,6 +85,8 @@ fun OpenFileScreen(
 
     var showConfirmOpenStorageDialog by openFileViewModel.showConfirmSelectStorageDialog
     var deleteStoragePosition by remember { mutableStateOf<Int?>(null) }
+
+
 
     val storagePicker = rememberLauncherForActivityResult(
          contract = GetStorageToOpen(),
@@ -137,6 +144,35 @@ fun OpenFileScreen(
             })
     }
 
+    var bookInfo by remember { mutableStateOf<BookInfoComposable?>(null) }
+    bookInfo?.let {
+        BookInfoDialog(
+            bookInfoComposable = it,
+            navigateBack = { bookInfo = null },
+            deleteBook = { path ->
+                coroutineScope.launch {
+                    bookInfo = null
+                    bookStatusViewModel.deleteByPath(path)
+                    bookReaderViewModel.bookPath.postValue(null)
+                    openFileViewModel.loadPath(null)
+                }
+            },
+            navigateToReader = { path ->
+                coroutineScope.launch {
+                    bookInfo = null
+                    bookReaderViewModel.changePath(path)
+                    navigateToReader(path)
+                }
+            },
+            navigateToAuthor = { authorId ->
+                coroutineScope.launch {
+                    bookInfo = null
+                    navigateToAuthor(authorId)
+                }
+            }
+        )
+    }
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -188,13 +224,13 @@ fun OpenFileScreen(
                 ) { index, item ->
                     FileMenuItem(
                         fileItem = item,
-                        onClick = {
+                        onClick = { bookInfoItem: BookInfoComposable ->
                             if (item.isDir)
                                 openFileViewModel.onFilelistItemClick(index)
                             else
                                 item.uriString?.let {
                                     openFileViewModel.scrollToDocumentFileUriString.value = it
-                                    coroutineScope.launch { navigateToBookInfo(it) }
+                                    coroutineScope.launch { bookInfo = bookInfoItem }
                                 }
                         },
                         onDeleteStorage = {
@@ -222,7 +258,7 @@ fun OpenFileScreen(
 @Composable
 fun FileMenuItem(
     fileItem: FileItem,
-    onClick: () -> Unit,
+    onClick: (bookInfo: BookInfoComposable) -> Unit,
     onDeleteStorage: () -> Unit,
     onUpdateLibrary: () -> Unit,
     modifier: Modifier = Modifier) {
@@ -235,7 +271,7 @@ fun FileMenuItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .combinedClickable(
-                onClick = { onClick() },
+                onClick = { onClick(bookInfoComposableState.value) },
                 onLongClick = {
                     if (fileItem.isDir || fileItem.isStorage) showPopup = true
                 }
@@ -244,7 +280,7 @@ fun FileMenuItem(
     ) {
         if (fileItem.isDir || fileItem.isStorage || fileItem.isRoot)
             Icon(
-                bitmap = bookInfoComposableState.value.cover,
+                bitmap = bookInfoComposableState.value.cover!!,
                 contentDescription = bookInfoComposableState.value.title,
                 modifier = Modifier
                     .padding(horizontal = paddingMedium, vertical = paddingSmall)
@@ -252,7 +288,7 @@ fun FileMenuItem(
             )
         else
             Image(
-                bitmap = bookInfoComposableState.value.cover,
+                bitmap = bookInfoComposableState.value.cover!!,
                 contentDescription = bookInfoComposableState.value.title,
                 modifier = Modifier
                     .padding(horizontal = paddingMedium, vertical = paddingSmall)
@@ -292,7 +328,7 @@ fun FileMenuItem(
 @Composable
 private fun FileMenuItemPreview() {
     val context = LocalContext.current
-    val bitmap = context.getDrawable(R.drawable.book_mockup)?.let { ImageUtils.drawableToBitmap(it)}
+    val bitmap = AppCompatResources.getDrawable(context, R.drawable.book_mockup)?.let { ImageUtils.drawableToBitmap(it)}
     AppTheme {
         Surface {
         FileMenuItem(

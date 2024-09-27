@@ -23,6 +23,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDialog
 import com.kontranik.koreader.compose.ui.quickmenu.QuickMenuDialog
 import com.kontranik.koreader.compose.ui.settings.Actions
 import com.kontranik.koreader.compose.ui.settings.SettingsViewModel
@@ -30,6 +31,7 @@ import com.kontranik.koreader.compose.ui.settings.TextType
 import com.kontranik.koreader.model.ScreenZone
 import com.kontranik.koreader.compose.ui.reader.BookReaderTextview.BookReaderTextviewListener
 import com.kontranik.koreader.compose.ui.shared.VolumeButtonsHandler
+import com.kontranik.koreader.database.BookStatusViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -42,16 +44,19 @@ fun BookReaderScreen(
     navigateToOpdsNetworkLibrary: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToBookmarks: (path: String) -> Unit,
-    navigateToBookInfo: (String) -> Unit,
+    navigateToAuthor: (authorId: Long) -> Unit,
     settingsViewModel: SettingsViewModel,
     bookReaderViewModel: BookReaderViewModel,
+    bookStatusViewModel: BookStatusViewModel,
 ) {
-    val corutineScope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     LaunchedEffect(key1 = settingsViewModel.pageViewSettings.value) {
         bookReaderViewModel.pageViewSettings.value = settingsViewModel.pageViewSettings.value.copy()
     }
+
+    var bookInfoPath by remember { mutableStateOf<String?>(null) }
 
     val savedColors by settingsViewModel.selectedColors
 
@@ -95,7 +100,7 @@ fun BookReaderScreen(
             }
 
             Actions.MainMenu -> {
-                corutineScope.launch { navigateToMainMenu() }
+                coroutineScope.launch { navigateToMainMenu() }
             }
 
             Actions.GoTo -> {
@@ -103,33 +108,33 @@ fun BookReaderScreen(
             }
 
             Actions.Bookmarks -> {
-                corutineScope.launch {
+                coroutineScope.launch {
                     bookReaderViewModel.bookPath.value?.let { navigateToBookmarks(it) }
                 }
             }
 
             Actions.OpenFile -> {
-                corutineScope.launch {
+                coroutineScope.launch {
                     navigateToOpenFile()
                 }
             }
             Actions.LastOpened -> {
-                corutineScope.launch {
+                coroutineScope.launch {
                     navigateToLastOpened()
                 }
             }
             Actions.Library -> {
-                corutineScope.launch {
+                coroutineScope.launch {
                     navigateToLibrary(bookReaderViewModel.book.value?.getTitle())
                 }
             }
             Actions.Opds -> {
-                corutineScope.launch {
+                coroutineScope.launch {
                     navigateToOpdsNetworkLibrary()
                 }
             }
             Actions.Settings -> {
-                corutineScope.launch {
+                coroutineScope.launch {
                     navigateToSettings()
                 }
             }
@@ -277,13 +282,13 @@ fun BookReaderScreen(
                         maxPage = scheme.countTextPages,
                         aSections = scheme.sections,
                         gotoSection = {
-                            corutineScope.launch {
+                            coroutineScope.launch {
                                 showGotoDialog.value = false
                                 bookReaderViewModel.goToSection(it)
                             }
                         },
                         gotoPage = {
-                            corutineScope.launch {
+                            coroutineScope.launch {
                                 showGotoDialog.value = false
                                 bookReaderViewModel.goToPage(it)
                             }
@@ -320,7 +325,7 @@ fun BookReaderScreen(
                     },
                     onOpenBookmarks = {
                         showQuickMenu.value = false
-                        corutineScope.launch {
+                        coroutineScope.launch {
                             bookReaderViewModel.bookPath.value?.let {
                                 navigateToBookmarks(it)
                             }
@@ -328,7 +333,9 @@ fun BookReaderScreen(
                     },
                     onOpenBookInfo = {
                         showQuickMenu.value = false
-                        bookReaderViewModel.bookPath.value?.let { navigateToBookInfo(it) }
+                        bookReaderViewModel.bookPath.value?.let {
+                            bookInfoPath = it
+                        }
                     },
                     onChangeColorThemeQuickMenuDialog = { _: String, colorThemeIndex: Int ->
                         bookReaderViewModel.themeColors.value =
@@ -360,6 +367,30 @@ fun BookReaderScreen(
                     letterSpacing = settingsViewModel.pageViewSettings.value.letterSpacing,
                     selectedFont = settingsViewModel.fonts.value[TextType.Normal]!!.getTypeface(),
                     selectedFontInfoArea = settingsViewModel.fonts.value[TextType.InfoArea]!!.getTypeface(),
+                )
+            }
+
+
+            bookInfoPath?.let {
+                BookInfoDialog(
+                    bookPath = it,
+                    navigateBack = { bookInfoPath = null },
+                    deleteBook = { path ->
+                        coroutineScope.launch {
+                            bookInfoPath = null
+                            bookStatusViewModel.deleteByPath(path)
+                            bookReaderViewModel.bookPath.postValue(null)
+                        }
+                    },
+                    navigateToReader = {
+                        bookInfoPath = null
+                    },
+                    navigateToAuthor = { authorId ->
+                        coroutineScope.launch {
+                            bookInfoPath = null
+                            navigateToAuthor(authorId)
+                        }
+                    }
                 )
             }
         }

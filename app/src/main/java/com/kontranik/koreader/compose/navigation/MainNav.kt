@@ -10,8 +10,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.kontranik.koreader.compose.NavRoutes
-import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDestination
-import com.kontranik.koreader.compose.ui.bookinfo.BookInfoScreen
 import com.kontranik.koreader.compose.ui.bookmarks.BoomkmarksScreen
 import com.kontranik.koreader.compose.ui.bookmarks.BoomkmarksScreenDestination
 import com.kontranik.koreader.compose.ui.lastopened.LastOpenedScreen
@@ -73,12 +71,12 @@ fun NavGraphBuilder.mainGraph(
                 },
                 navigateToOpdsNetworkLibrary = { navController.navigate(NavOptions.OPDS.name)},
                 navigateToSettings = { navController.navigate(NavOptions.Settings.name)},
-                navigateToBookInfo = { path: String ->
-                    val encoded = Uri.encode(path.replace('%','|'))
-                    navController.navigate("${BookInfoDestination.route}?path=${encoded}")
+                navigateToAuthor = { authorId: Long ->
+                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}&title=${null}")
                 },
                 settingsViewModel = settingsViewModel,
-                bookReaderViewModel = bookReaderViewModel
+                bookReaderViewModel = bookReaderViewModel,
+                bookStatusViewModel = bookStatusViewModel,
             )
         }
 
@@ -95,9 +93,11 @@ fun NavGraphBuilder.mainGraph(
                 navigateToLibrary = { navController.navigate(NavOptions.Library.name) },
                 navigateToOpdsNetworkLibrary = { navController.navigate(NavOptions.OPDS.name)},
                 navigateToSettings = { navController.navigate(NavOptions.Settings.name)},
-                navigateToBookInfo = { path ->
-                    val encoded = Uri.encode(path.replace('%','|'))
-                    navController.navigate("${BookInfoDestination.route}?path=${encoded}") }
+                navigateToAuthor = { authorId: Long ->
+                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}&title=${null}")
+                },
+                bookReaderViewModel = bookReaderViewModel,
+                bookStatusViewModel = bookStatusViewModel,
             )
         }
 
@@ -105,11 +105,22 @@ fun NavGraphBuilder.mainGraph(
             OpenFileScreen(
                 drawerState = drawerState,
                 navigateBack = { navController.popBackStack() },
-                navigateToBookInfo = { path ->
-                    val encoded = Uri.encode(path.replace('%','|'))
-                    navController.navigate("${BookInfoDestination.route}?path=${encoded}") },
                 openFileViewModel = openFileViewModel,
                 libraryViewModel = libraryViewModel,
+                bookReaderViewModel = bookReaderViewModel,
+                bookStatusViewModel = bookStatusViewModel,
+                navigateToReader = {
+                    navController.navigate(NavOptions.BookReader.name){
+                        popUpTo(NavOptions.BookReader.name) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = false
+                    }
+                },
+                navigateToAuthor = { authorId: Long ->
+                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}&title=${null}")
+                },
             )
         }
 
@@ -117,10 +128,19 @@ fun NavGraphBuilder.mainGraph(
         composable(NavOptions.LastOpened.name) {
             LastOpenedScreen(drawerState = drawerState,
                 navigateBack = { navController.popBackStack() },
-                navigateToBookInfo = { path ->
-                    val encoded = Uri.encode(path.replace('%','|'))
-                    navController.navigate("${BookInfoDestination.route}?path=${encoded}")
-                }
+                navigateToReader = {
+                    navController.navigate(NavOptions.BookReader.name){
+                        popUpTo(NavOptions.BookReader.name) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = false
+                    }
+                },
+                navigateToAuthor = { authorId: Long ->
+                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}&title=${null}")
+                },
+                bookReaderViewModel = bookReaderViewModel,
             )
         }
 
@@ -159,10 +179,20 @@ fun NavGraphBuilder.mainGraph(
             LibraryByTitleScreen(
                 drawerState = drawerState,
                 navigateBack = { navController.popBackStack() },
-                navigateToBook = { item ->
-                    val encoded = Uri.encode(item.libraryItem.path.replace('%','|'))
-                    navController.navigate("${BookInfoDestination.route}?path=${encoded}")
-                }
+                bookReaderViewModel = bookReaderViewModel,
+                bookStatusViewModel = bookStatusViewModel,
+                navigateToReader = {
+                    navController.navigate(NavOptions.BookReader.name){
+                        popUpTo(NavOptions.BookReader.name) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = false
+                    }
+                },
+                navigateToAuthor = { authorId: Long ->
+                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}&title=${null}")
+                },
             )
         }
 
@@ -205,37 +235,6 @@ fun NavGraphBuilder.mainGraph(
                 },
                 bookReaderViewModel = bookReaderViewModel
                 )
-        }
-
-        composable(
-            route = BookInfoDestination.routeWithArgs,
-            arguments = listOf(
-                navArgument(BookInfoDestination.BOOK_PATH) {
-                    type = NavType.StringType
-                }
-            ),
-        ){
-            BookInfoScreen(
-                drawerState = drawerState,
-                navigateBack = {
-                    navController.popBackStack()
-                },
-                navigateToReader = {
-                    navController.navigate(NavOptions.BookReader.name){
-                        popUpTo(NavOptions.BookReader.name) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = false
-                    }
-                },
-                navigateToAuthor = { authorId: Long ->
-                    navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}&title=${null}")
-                },
-                bookReaderViewModel = bookReaderViewModel,
-                openFileViewModel = openFileViewModel,
-                bookStatusViewModel = bookStatusViewModel,
-            )
         }
 
         composable(NavOptions.Settings.name) {
