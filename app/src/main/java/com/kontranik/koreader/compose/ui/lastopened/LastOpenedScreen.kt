@@ -105,9 +105,7 @@ fun LastOpenedScreen(
                     LastOpenedItem(
                         bookStatus = item,
                         onClick = { bookInfoComposable ->
-                            item.path?.let {
-                                bookInfo = bookInfoComposable
-                            }
+                            bookInfo = bookInfoComposable
                         },
                         bookStatusViewModel = bookStatusViewModel
                     )

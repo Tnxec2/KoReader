@@ -86,8 +86,6 @@ fun OpenFileScreen(
     var showConfirmOpenStorageDialog by openFileViewModel.showConfirmSelectStorageDialog
     var deleteStoragePosition by remember { mutableStateOf<Int?>(null) }
 
-
-
     val storagePicker = rememberLauncherForActivityResult(
          contract = GetStorageToOpen(),
          onResult = { uri ->
@@ -101,7 +99,7 @@ fun OpenFileScreen(
     )
 
     LaunchedEffect(key1 = Unit) {
-        //openFileViewModel.start()
+        openFileViewModel.start()
     }
 
     LaunchedEffect(key1 = openFileViewModel.scrollToDocumentFileUriString.value) {

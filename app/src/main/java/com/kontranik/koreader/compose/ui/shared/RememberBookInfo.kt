@@ -113,11 +113,8 @@ fun rememberBookInfoForFileItem(fileItem: FileItem): MutableState<BookInfoCompos
                 if (!fileItem.isDir) {
                     val contentUriPath = fileItem.uriString
                     if (contentUriPath != null) {
-                        EbookHelper.getBookInfo(contentUriPath, fileItem)?.toBookInfoComposable()?.let {
-                            val cover = ImageUtils.scaleBitmap(
-                                it.cover!!.asAndroidBitmap(), 50, 100)
-                                .asImageBitmap()
-                            bookInfoState.value = it.copy(cover = cover)
+                        EbookHelper.getBookInfo(contentUriPath, fileItem)?.let {
+                            bookInfoState.value = it.toBookInfoComposable()
                         }
                     }
                 }
@@ -156,13 +153,7 @@ fun rememberBookInfoForBookStatus(bookStatus: BookStatus, bookStatusViewModel: B
                                 EbookHelper.getBookInfoTemporary(contentUriPath)
                             bookInfoTemp?.let { bookInfo ->
                                 bookInfoState.value = bookInfoState.value.copy(
-                                    cover = bookInfo.cover?.let { it1 ->
-                                        ImageUtils.scaleBitmap(
-                                            it1,
-                                            50,
-                                            100
-                                        ).asImageBitmap()
-                                    } ?: bookInfoState.value.cover,
+                                    cover = bookInfo.cover?.asImageBitmap() ?: bookInfoState.value.cover,
                                     authors = bookInfo.authors ?: mutableListOf(),
                                     authorsAsString = bookInfo.authorsAsString()
                                 )
