@@ -93,8 +93,6 @@ fun SettingsColor(
                 .background(color)
                 .size(30.dp)
         ) {}
-
-
     }
     if (showPicker.value)
         Popup(onDismissRequest = {

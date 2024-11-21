@@ -2,13 +2,8 @@ package com.kontranik.koreader.compose.ui.quickmenu
 
 import android.content.Context
 import android.graphics.Typeface
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,7 +15,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.kontranik.koreader.compose.theme.paddingMedium
+import com.kontranik.koreader.compose.theme.paddingSmall
 import com.kontranik.koreader.compose.ui.settings.PREFS_FILE
 import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
 import com.kontranik.koreader.compose.ui.shared.getLetterSpacing
@@ -28,7 +25,6 @@ import com.kontranik.koreader.compose.ui.shared.getLineSpacings
 import com.kontranik.koreader.compose.ui.shared.getThemes
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickMenuDialog(
     onClose: () -> Unit,
@@ -92,9 +88,10 @@ fun QuickMenuDialog(
     }
 
     Dialog(
+        properties = DialogProperties(usePlatformDefaultWidth = false),
         onDismissRequest = { onClose() }
     ) {
-        Card() {
+        Card(Modifier.padding(paddingSmall)) {
 
         QuickMenuDialogContent(
             themes = themes,

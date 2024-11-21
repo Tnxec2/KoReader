@@ -47,7 +47,6 @@ fun BookInfoContent(
 
     Column(
         modifier = modifier
-            .padding(paddingSmall)
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
     ) {
