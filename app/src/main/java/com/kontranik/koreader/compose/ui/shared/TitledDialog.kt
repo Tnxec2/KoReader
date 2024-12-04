@@ -33,17 +33,18 @@ import com.kontranik.koreader.compose.theme.paddingSmall
 fun TitledDialog(
     title: String,
     onClose: () -> Unit,
+    fillMaxSize: Boolean = true,
     modifier: Modifier = Modifier,
     actionIcons: @Composable () -> Unit  = {},
     content: @Composable ColumnScope.() -> Unit
 ) {
     Dialog(
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+        properties = DialogProperties(usePlatformDefaultWidth = fillMaxSize.not()),
         onDismissRequest = { onClose() }
     ) {
         Card(
-            modifier = modifier
-                .fillMaxSize()
+            modifier = (if (fillMaxSize) modifier
+                .fillMaxSize() else modifier)
                 .padding(paddingSmall)
         ) {
             Column(
@@ -87,6 +88,32 @@ private fun TitledDialogPreview() {
         Surface {
             TitledDialog(
                 title = "Title",
+                actionIcons = {
+                    IconButton(onClick = {  }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_compare_24),
+                            contentDescription = "invert"
+                        )
+                    }
+                },
+                onClose = { /*TODO*/ },
+            ) {
+                Text(text = "Text1")
+                Text(text = "Text2")
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun TitledDialogPreviewShrinkSize() {
+    AppTheme {
+
+        Surface {
+            TitledDialog(
+                title = "Title",
+                fillMaxSize = false,
                 actionIcons = {
                     IconButton(onClick = {  }) {
                         Icon(
