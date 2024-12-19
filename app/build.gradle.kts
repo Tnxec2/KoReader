@@ -13,8 +13,8 @@ android {
         applicationId = "com.kontranik.koreader"
         minSdk = 26
         targetSdk = 34
-        versionCode = 12
-        versionName = "1.5.2"
+        versionCode = 13
+        versionName = "1.5.6"
         setProperty("archivesBaseName", "$applicationId-v$versionCode($versionName)")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
