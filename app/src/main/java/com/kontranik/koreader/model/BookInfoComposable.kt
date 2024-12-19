@@ -33,6 +33,17 @@ data class BookInfoComposable(
     }
 }
 
+fun BookInfoComposable.toBookInfo(): BookInfo {
+    return BookInfo(
+        title = title,
+        cover = cover?.asAndroidBitmap(),
+        authors = authors,
+        filename = filename,
+        path = path,
+        annotation = annotation
+    )
+}
+
 fun BookStatus.toBookInfoComposable(altCover: ImageBitmap): BookInfoComposable {
     return BookInfoComposable(
         title = title ?: "",
@@ -47,13 +58,13 @@ fun BookStatus.toBookInfoComposable(altCover: ImageBitmap): BookInfoComposable {
 
 fun FileItem.toBookInfoComposable(cover: ImageBitmap): BookInfoComposable {
     return BookInfoComposable(
-        title = name,
-        cover = cover,
-        authors = mutableListOf(),
+        title = bookInfo?.title ?: name,
+        cover = bookInfo?.cover?.asImageBitmap() ?: cover,
+        authors = bookInfo?.authors ?: mutableListOf(),
         filename = name,
         path = path,
-        annotation = "",
-        authorsAsString = ""
+        annotation = bookInfo?.annotation ?: "",
+        authorsAsString = bookInfo?.authorsAsString() ?: ""
     )
 }
 

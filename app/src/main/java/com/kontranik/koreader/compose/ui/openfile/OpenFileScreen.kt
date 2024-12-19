@@ -58,8 +58,8 @@ import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.ui.bookinfo.BookInfoDialog
 import com.kontranik.koreader.compose.ui.reader.BookReaderViewModel
 import com.kontranik.koreader.database.BookStatusViewModel
-import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.model.BookInfoComposable
+import com.kontranik.koreader.model.toBookInfo
 import kotlinx.coroutines.launch
 
 @Composable
@@ -242,6 +242,9 @@ fun OpenFileScreen(
                                         setOf(it))
                                 }
                             }
+                        },
+                        onUpdateBookInfo = { bookInfoComposable ->
+                            item.bookInfo = bookInfoComposable.toBookInfo()
                         }
                     )
                     if (index < fileItemListState.value.size-1)
@@ -259,9 +262,10 @@ fun FileMenuItem(
     onClick: (bookInfo: BookInfoComposable) -> Unit,
     onDeleteStorage: () -> Unit,
     onUpdateLibrary: () -> Unit,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier,
+    onUpdateBookInfo: (bookInfoComposable: BookInfoComposable) -> Unit) {
 
-    val bookInfoComposableState = rememberBookInfoForFileItem(fileItem)
+    val bookInfoComposableState = rememberBookInfoForFileItem(fileItem, onUpdateBookInfo)
 
     var showPopup by rememberSaveable { mutableStateOf(false) }
 
@@ -350,6 +354,7 @@ private fun FileMenuItemPreview() {
             onClick = {  },
             onUpdateLibrary = {},
             onDeleteStorage = {},
+            onUpdateBookInfo = {},
         )
         }
     }
