@@ -3,17 +3,13 @@ package com.kontranik.koreader.compose.ui.shared
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.documentfile.provider.DocumentFile
 import com.kontranik.koreader.KoReaderApplication
-
 import com.kontranik.koreader.database.BookStatusViewModel
 import com.kontranik.koreader.database.model.Author
 import com.kontranik.koreader.database.model.BookStatus
@@ -34,23 +30,19 @@ import kotlinx.coroutines.launch
 fun rememberBookInfoUiStateForPath(
     bookPath: String,
     bookInfoComposable: BookInfoComposable
-    ): MutableState<BookInfoUiState> {
+    ): State<BookInfoUiState> {
 
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-
-    val bookInfoState = remember {
-        mutableStateOf(
-            BookInfoUiState(
-                bookInfoComposable,
-                canDelete = false,
-                exit = false
-            )
-        )
-    }
-
-    LaunchedEffect(key1 = bookPath) {
-        coroutineScope.launch {
+    val init = BookInfoUiState(
+        bookInfoComposable,
+        canDelete = false,
+        exit = false
+    )
+    return rememberAsyncState(
+        key = bookPath,
+        initialValue = init,
+        fetcher = {
+            var bookInfoState = init
             val uri = Uri.parse(bookPath)
             val doc = DocumentFile.fromSingleUri(context, uri)
 
@@ -60,86 +52,82 @@ fun rememberBookInfoUiStateForPath(
                 val bookInfo = ebookHelper.getBookInfoTemporary(bookPath)
 
                 if (bookInfo != null) {
-                    bookInfoState.value = BookInfoUiState(
+                    bookInfoState = BookInfoUiState(
                         bookInfo.toBookInfoComposable(),
                         canDelete = doc?.canRead() == true,
                         exit = false
                     )
                     KoReaderApplication.getApplicationScope().launch {
                         val libraryItemWithAuthors = KoReaderApplication.getContainer().
-                            libraryItemRepository.getByPathWithAuthors(bookPath).firstOrNull()
+                        libraryItemRepository.getByPathWithAuthors(bookPath).firstOrNull()
 
                         libraryItemWithAuthors?.let { item ->
-                            bookInfoState.value =
+                            bookInfoState =
                                 BookInfoUiState(
                                     item.toBookInfoComposableForImageBitmap(
-                                        bookInfoState.value.bookInfoComposable.cover,
-                                        bookInfoState.value.bookInfoComposable.annotation
+                                        bookInfoState.bookInfoComposable.cover,
+                                        bookInfoState.bookInfoComposable.annotation
                                     )
                                 )
                         }
                     }
                 } else {
-                    bookInfoState.value = bookInfoState.value.copy(
+                    bookInfoState = bookInfoState.copy(
                         exit = true
                     )
                 }
             } else {
-                bookInfoState.value = bookInfoState.value.copy(
+                bookInfoState = bookInfoState.copy(
                     exit = true
                 )
             }
+            bookInfoState
         }
-    }
-
-    return bookInfoState
+    )
 }
 
 
 @Composable
-fun rememberBookInfoForFileItem(fileItem: FileItem): MutableState<BookInfoComposable> {
-    val coroutineScope = rememberCoroutineScope()
+fun rememberBookInfoForFileItem(fileItem: FileItem, onUpdateItem: (bookInfoComposable: BookInfoComposable) -> Unit): State<BookInfoComposable> {
     val context = LocalContext.current
-
-    val bookInfoState = remember {
-        mutableStateOf(
-            fileItem.toBookInfoComposable(getBitmap(context, fileItem.image).asImageBitmap())
-        )
-    }
-
-    LaunchedEffect(key1 = fileItem) {
-        coroutineScope.launch {
-            try {
-                if (!fileItem.isDir) {
-                    val contentUriPath = fileItem.uriString
-                    if (contentUriPath != null) {
-                        EbookHelper.getBookInfo(contentUriPath, fileItem)?.let {
-                            bookInfoState.value = it.toBookInfoComposable()
+    val init = fileItem.toBookInfoComposable(getBitmap(context, fileItem.image).asImageBitmap())
+    return rememberAsyncState(
+        key = fileItem,
+        initialValue = init,
+        fetcher = {
+            var state = init
+            if (fileItem.bookInfo == null) {
+                try {
+                    if (!fileItem.isDir) {
+                        val contentUriPath = fileItem.uriString
+                        if (contentUriPath != null) {
+                            EbookHelper.getBookInfo(contentUriPath, fileItem)?.let {
+                                state = it.toBookInfoComposable()
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+                onUpdateItem(state)
             }
+            state
         }
-    }
+    )
 
-    return bookInfoState
+
 }
 
 @Composable
-fun rememberBookInfoForBookStatus(bookStatus: BookStatus, bookStatusViewModel: BookStatusViewModel?): MutableState<BookInfoComposable> {
-    val coroutineScope = rememberCoroutineScope()
+fun rememberBookInfoForBookStatus(bookStatus: BookStatus, bookStatusViewModel: BookStatusViewModel?): State<BookInfoComposable> {
     val context = LocalContext.current
+    val init = bookStatus.toBookInfoComposable(getBitmap(context, ImageEnum.Ebook).asImageBitmap())
 
-    val bookInfoState = remember {
-        mutableStateOf(
-            bookStatus.toBookInfoComposable(getBitmap(context, ImageEnum.Ebook).asImageBitmap())
-        )
-    }
-
-    LaunchedEffect(key1 = bookStatus) {
-        coroutineScope.launch {
+    return rememberAsyncState(
+        key = bookStatus,
+        initialValue = init,
+        fetcher = {
+            var state = init
             if (bookStatus.cover == null) {
                 val contentUriPath = bookStatus.path
                 if (contentUriPath != null) {
@@ -152,8 +140,8 @@ fun rememberBookInfoForBookStatus(bookStatus: BookStatus, bookStatusViewModel: B
                             val bookInfoTemp: BookInfo? =
                                 EbookHelper.getBookInfoTemporary(contentUriPath)
                             bookInfoTemp?.let { bookInfo ->
-                                bookInfoState.value = bookInfoState.value.copy(
-                                    cover = bookInfo.cover?.asImageBitmap() ?: bookInfoState.value.cover,
+                                state = state.copy(
+                                    cover = bookInfo.cover?.asImageBitmap() ?: state.cover,
                                     authors = bookInfo.authors ?: mutableListOf(),
                                     authorsAsString = bookInfo.authorsAsString()
                                 )
@@ -162,14 +150,14 @@ fun rememberBookInfoForBookStatus(bookStatus: BookStatus, bookStatusViewModel: B
                     }
                 }
             }
+            state
         }
-    }
+    )
 
-    return bookInfoState
 }
 
 @Composable
-fun rememberBookInfoForLibraryItem(item: LibraryItemWithAuthors): MutableState<BookInfoComposable> {
+fun rememberBookInfoForLibraryItem(item: LibraryItemWithAuthors): State<BookInfoComposable> {
     val context = LocalContext.current
 
     val bookInfoState = remember {
