@@ -72,9 +72,9 @@ fun MainCompose(
     val openFileViewModel: OpenFileViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val libraryViewModel: LibraryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
-    LaunchedEffect(key1 = Unit) {
-        bookStatusViewModel.cleanup(context)
-    }
+    //LaunchedEffect(key1 = Unit) {
+        //bookStatusViewModel.cleanup(context)
+    //}
 
     LaunchedEffect(key1 = settingsViewModel.screenOrientation.value) {
         activity.requestedOrientation = when (settingsViewModel.screenOrientation.value) {
