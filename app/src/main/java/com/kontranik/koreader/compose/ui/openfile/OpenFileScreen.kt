@@ -91,7 +91,9 @@ fun OpenFileScreen(
          onResult = { uri ->
              uri?.let {
                  coroutineScope.launch {
-                     context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                     context.contentResolver.takePersistableUriPermission(it,
+                         Intent.FLAG_GRANT_READ_URI_PERMISSION
+                             or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     openFileViewModel.addStoragePath(it.toString())
                  }
              }

@@ -1,6 +1,7 @@
 package com.kontranik.koreader.compose.ui.library.settings
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -98,12 +99,14 @@ fun LibrarySettingsScreen(
         prefEditor.apply()
     }
 
-
     val storagePicker = rememberLauncherForActivityResult(
          contract = GetStorageToOpen(),
          onResult = { uri ->
              uri?.let {
                  coroutineScope.launch {
+                     context.contentResolver.takePersistableUriPermission(it,
+                         Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                 or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                      println("storagePicker: $it")
                      scanPointList.value = scanPointList.value.plus(it.toString())
                      savePrefs()
