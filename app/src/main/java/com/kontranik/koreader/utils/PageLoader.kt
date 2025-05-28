@@ -33,14 +33,7 @@ class PageLoader : PageSplitterHtml(){
         Log.d(TAG, "PageLoader.getPage: Index = $pageIndex, size pages = ${pages.size}, $bookPosition , revers = $revers, recalc = $recalc")
 
         if (pageIndex != null && pages.isNotEmpty()) {
-            return if (pageIndex >= 0 && pageIndex < pages.size)
-                pages[pageIndex]
-            else {
-                if (bookPosition.section == 0 && pageIndex < 0)
-                   pages[0]
-                else
-                   section(bookPosition.section, revers = pageIndex < 0, recalc)
-            }
+            return getPageByIndex(pageIndex, bookPosition, recalc)
         }
 
         if ( pages.isEmpty() || recalc || !isCurrentSectionLoaded(bookPosition)) {
@@ -52,6 +45,21 @@ class PageLoader : PageSplitterHtml(){
         } ?: section(bookPosition.section, revers, recalc)
         Log.d(TAG, "resultPage. start = ${restultPage.pageStartPosition}, end = ${restultPage.pageEndPosition}")
         return restultPage
+    }
+
+    private fun getPageByIndex(
+        pageIndex: Int,
+        bookPosition: BookPosition,
+        recalc: Boolean
+    ): Page? {
+        return if (pageIndex >= 0 && pageIndex < pages.size)
+            pages[pageIndex]
+        else {
+            if (bookPosition.section == 0 && pageIndex < 0)
+                pages[0]
+            else
+                section(bookPosition.section, revers = pageIndex < 0, recalc)
+        }
     }
 
     private fun isCurrentSectionLoaded(bookPosition: BookPosition) =
@@ -90,11 +98,14 @@ class PageLoader : PageSplitterHtml(){
         if ( pages.isEmpty() ) return null
         if ( offset > pages.last().pageEndPosition.offSet) return null
 
-        val result = pages.firstOrNull { page: Page ->
+        return pages.firstOrNull { page: Page ->
             offset in page.pageStartPosition.offSet .. page.pageEndPosition.offSet
+        }.also {
+            Log.d(
+                TAG,
+                "findPage. offset = $offset, start = ${it?.pageStartPosition}, end = ${it?.pageEndPosition}"
+            )
         }
-        Log.d(TAG, "findPage. offset = $offset, start = ${result?.pageStartPosition}, end = ${result?.pageEndPosition}")
-        return result
     }
 
     private fun loadPages(section: Int, recalc: Boolean) {
