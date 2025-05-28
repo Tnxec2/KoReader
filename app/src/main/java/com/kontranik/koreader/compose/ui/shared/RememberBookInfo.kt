@@ -25,6 +25,7 @@ import com.kontranik.koreader.utils.ImageEnum
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.ImageUtils.getBitmap
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @Composable
 fun rememberBookInfoUiStateForPath(
@@ -43,7 +44,7 @@ fun rememberBookInfoUiStateForPath(
         initialValue = init,
         fetcher = {
             var bookInfoState = init
-            val uri = Uri.parse(bookPath)
+            val uri = bookPath.toUri()
             val doc = DocumentFile.fromSingleUri(context, uri)
 
             val ebookHelper = EbookHelper.getHelper(bookPath)
@@ -96,14 +97,11 @@ fun rememberBookInfoForFileItem(fileItem: FileItem, onUpdateItem: (bookInfoCompo
         initialValue = init,
         fetcher = {
             var state = init
-            if (fileItem.bookInfo == null) {
+            if (fileItem.bookInfo == null && !fileItem.isDir) {
                 try {
-                    if (!fileItem.isDir) {
-                        val contentUriPath = fileItem.uriString
-                        if (contentUriPath != null) {
-                            EbookHelper.getBookInfo(contentUriPath, fileItem)?.let {
-                                state = it.toBookInfoComposable()
-                            }
+                    fileItem.uriString?.let { contentUriPath ->
+                        EbookHelper.getBookInfo(contentUriPath, fileItem)?.let { bookInfo ->
+                            state = bookInfo.toBookInfoComposable()
                         }
                     }
                 } catch (e: Exception) {
@@ -114,8 +112,6 @@ fun rememberBookInfoForFileItem(fileItem: FileItem, onUpdateItem: (bookInfoCompo
             state
         }
     )
-
-
 }
 
 @Composable
@@ -134,7 +130,7 @@ fun rememberBookInfoForBookStatus(bookStatus: BookStatus, bookStatusViewModel: B
                     if (!FileHelper.contentFileExist(context, bookStatus.path)) {
                         bookStatusViewModel?.delete(bookStatus.id!!)
                     } else {
-                        val uri = Uri.parse(contentUriPath)
+                        val uri = contentUriPath.toUri()
                         val doc = DocumentFile.fromSingleUri(context, uri)
                         if (doc != null) {
                             val bookInfoTemp: BookInfo? =
