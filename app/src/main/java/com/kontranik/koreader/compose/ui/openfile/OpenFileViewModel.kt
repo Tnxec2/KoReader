@@ -84,9 +84,11 @@ class OpenFileViewModel : ViewModel()  {
             return
         }
 
-        if (!lastPathInExternalPaths()) {
-            storageList()
-            return
+        lastPath?.let { lastPath ->
+            if (externalPaths.any { it == lastPath }) {
+                storageList()
+                return
+            }
         }
 
         getFileList(selectedDocumentFileUriString)
@@ -102,10 +104,6 @@ class OpenFileViewModel : ViewModel()  {
         }
     }
 
-    private fun lastPathInExternalPaths(): Boolean {
-        if ( lastPath == null ) return false
-        return externalPaths.any { it == lastPath }
-    }
 
     fun storageList() {
         isVisibleImageButtonFilechooseAddStorage.value = true
