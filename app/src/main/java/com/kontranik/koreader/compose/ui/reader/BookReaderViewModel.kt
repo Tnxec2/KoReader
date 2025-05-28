@@ -52,23 +52,24 @@ class BookReaderViewModel(
 
     val bookPath = MutableLiveData<String?>(null)
     val book = MutableLiveData<Book?>(null)
-    private var curPage = MutableLiveData(Page())
+    private var currentPage = MutableLiveData(Page())
 
-    var mAllBookmarksWithOffsetOnPage = bookPath.asFlow().combine(curPage.asFlow()) {
-        path, page ->
-        path?.let {
+    var mAllBookmarksWithOffsetOnPage = bookPath
+        .asFlow()
+        .filterNotNull()
+        .combine(currentPage.asFlow()) { path, page ->
             bookmarkRepository
                 .getByPathAndPosition(
-                    it,
+                    path,
                     page.pageStartPosition.section,
                     page.pageStartPosition.offSet,
                     page.pageEndPosition.offSet
-                ).first().map { b ->
+                )
+                .first()
+                .map { b ->
                     b.toBookmarkWithOffsetOnPage(page)
                 }
-        }
-    }.asLiveData()
-
+        }.asLiveData()
 
     private var pageLoader = PageLoader()
 
@@ -93,6 +94,11 @@ class BookReaderViewModel(
 
 
     init {
+        initializeObservers()
+        loadPrefs()
+    }
+
+    private fun initializeObservers() {
         KoReaderApplication.getApplicationScope().launch {
             bookPath
                 .asFlow()
@@ -104,118 +110,116 @@ class BookReaderViewModel(
         }
 
         viewModelScope.launch {
-            book.asFlow().collect {
-                getCur()?.let { curPage.postValue(it) }
-            }
+            book
+                .asFlow()
+                .collect {
+                    getCur()?.let { currentPage.postValue(it) }
+                }
         }
 
         viewModelScope.launch {
-            curPage.asFlow().collect {
-                updateView(it)
-            }
+            currentPage
+                .asFlow()
+                .collect {
+                    updateView(it)
+                }
         }
-
-        loadPrefs()
     }
 
     fun recalcCurrentPage() {
         if (book.value != null) {
-            getCur()?.let { curPage.postValue(it) }
+            getCur()?.let { currentPage.postValue(it) }
         }
     }
 
     private fun loadBook(path: String?) {
         try {
-            curPage.postValue(Page(content = SpannableStringBuilder("load book...")))
-            if (path != null && book.value?.fileLocation != path) {
-                if (!FileHelper.contentFileExist(KoReaderApplication.getContext(), path)) {
-//                    Toast.makeText(
-//                        context,
-//                        KoReaderApplication.getContext().resources.getString(R.string.can_not_load_book, bookPath.value),
-//                        Toast.LENGTH_LONG
-//                    ).show()
+            currentPage.postValue(Page(content = SpannableStringBuilder("load book...")))
+            path?.takeIf { it != book.value?.fileLocation }?.let { mPath ->
+                if (!FileHelper.contentFileExist(KoReaderApplication.getContext(), mPath)) {
                     return
                 }
 
-                val newBook = Book(path)
-
-                val status = bookStatusRepository.getBookStatusByPath(newBook.fileLocation)
-                if (status != null) {
-                    val bookStatus = bookStatusRepository.getBookStatusByPath(newBook.fileLocation)
-                    if (bookStatus != null) {
-                        bookStatusRepository.updateLastOpenTime(bookStatus.id, Date().time)
-                    } else {
-                        bookStatusRepository.insert(
-                            BookStatus(
-                                newBook,
-                                Page(
-                                    content = null,
-                                    pageStartPosition = BookPosition(),
-                                    pageEndPosition = BookPosition()
-                                )
-                            )
-                        )
-                    }
-                }
+                val newBook = Book(mPath)
+                val status = updateBookStatus(newBook)
 
                 val startPosition: BookPosition = if (status == null) {
                     BookPosition()
                 } else {
-                    BookPosition(status.position_section, status.position_offset+1)
+                    BookPosition(status.position_section, status.position_offset + 1)
                 }
 
-                curPage.postValue(
-                    Page(pageStartPosition = startPosition, pageEndPosition = BookPosition()))
+                currentPage.postValue(
+                    Page(pageStartPosition = startPosition, pageEndPosition = BookPosition())
+                )
                 book.postValue(newBook)
             }
         } catch (e: Exception) {
-            Log.e("tag", e.stackTraceToString())
+            Log.e("BookReaderViewModel", e.stackTraceToString())
         }
     }
 
+    private fun updateBookStatus(newBook: Book): BookStatus? {
+        val status = bookStatusRepository.getBookStatusByPath(newBook.fileLocation)
+        if (status != null) {
+            val bookStatus = bookStatusRepository.getBookStatusByPath(newBook.fileLocation)
+            if (bookStatus != null) {
+                bookStatusRepository.updateLastOpenTime(bookStatus.id, Date().time)
+            } else {
+                bookStatusRepository.insert(
+                    BookStatus(
+                        newBook,
+                        Page(
+                            content = null,
+                            pageStartPosition = BookPosition(),
+                            pageEndPosition = BookPosition()
+                        )
+                    )
+                )
+            }
+        }
+        return status
+    }
+
     private fun getCur(): Page? {
-        return getPage(null, curPage.value!!.pageStartPosition, revers = false, recalc = true)
+        return getPage(null, currentPage.value!!.pageStartPosition, revers = false, recalc = true)
     }
 
-    fun goToNextPage() {
-        if (changingPage) return
-        changingPage = true
-        if (pageNext()) savePositionForBook()
-        changingPage = false
-    }
+    fun goToNextPage() = changePage { pageNext() }
 
-    fun doPagePrev() {
+    fun doPagePrev() = changePage { pagePrev() }
+
+    private fun changePage(action: () -> Boolean) {
         if (changingPage) return
         changingPage = true
-        if (pagePrev()) savePositionForBook()
+        if (action()) savePositionForBook()
         changingPage = false
     }
 
     private fun pageNext(): Boolean {
         if (book.value == null) return false
-        getNext()?.let { curPage.postValue(it) }
+        getNext()?.let { currentPage.postValue(it) }
         return true
     }
 
     private fun pagePrev(): Boolean {
         if (book.value == null) return false
-        getPrev()?.let { curPage.postValue(it) }
+        getPrev()?.let { currentPage.postValue(it) }
         return true
     }
 
     private fun getNext(): Page? {
-        curPage.value?.let { curPage ->
+        return currentPage.value?.let { curPage ->
             val bookPosition = BookPosition(
                 curPage.pageEndPosition.section,
                 offSet = curPage.pageEndPosition.offSet + 1
             )
-            return getPage(curPage.pageIndex+1, bookPosition, revers = false, recalc = false)
+            getPage(curPage.pageIndex+1, bookPosition, revers = false, recalc = false)
         }
-        return null
     }
 
     private fun getPrev(): Page? {
-        curPage.value?.let { curPage ->
+        currentPage.value?.let { curPage ->
             val bookPosition = BookPosition(
                 curPage.pageStartPosition.section,
                 curPage.pageStartPosition.offSet - 1
@@ -243,18 +247,15 @@ class BookReaderViewModel(
 
     private fun updateView(page: Page?) {
         println("updateView")
-        if (page != null) {
-            pageViewContent.postValue(page.content)
-        } else {
-            pageViewContent.postValue(
-                KoReaderApplication.getContext().getString(R.string.no_page_content)
-            )
-        }
+        pageViewContent.postValue(
+            page?.content ?:
+            KoReaderApplication.getContext().getString(R.string.no_page_content)
+        )
         updateInfo()
     }
 
     private fun updateInfo() {
-        if (book.value != null) {
+        book.value?.let {
             val curSection = getCurSection()
             val curTextPage = getCurTextPage()
 
@@ -274,7 +275,7 @@ class BookReaderViewModel(
                     book.value!!.getPageScheme()!!.sectionCountWithOutNotes,
                     book.value!!.getPageScheme()!!.sectionCount
                 )
-        } else {
+        } ?: run {
             infoTextLeft.value = KoReaderApplication.getContext().getString(R.string.no_book)
         }
         updateSystemStatus()
@@ -339,27 +340,28 @@ class BookReaderViewModel(
     }
 
     private fun savePositionForBook() {
-        if (bookPath.value != null && curPage.value != null) {
-            BooksRoomDatabase.databaseWriteExecutor.execute {
-                bookPath.value?.let { path ->
+        bookPath.value?.let { path ->
+            currentPage.value?.let { page ->
+                BooksRoomDatabase.databaseWriteExecutor.execute {
                     bookStatusRepository.getBookStatusByPath(path).let { bookStatus ->
                         if (bookStatus == null) {
                             Log.d(
                                 "BookReaderViewModel",
                                 "savePosition: bookstatus is null, insert new"
                             )
-                            bookStatusRepository.insert(BookStatus(book.value!!, curPage.value!!))
+                            bookStatusRepository.insert(BookStatus(book.value!!, page))
                         } else {
                             Log.d(
                                 "BookReaderViewModel",
                                 "savePosition: section: ${bookStatus.position_section}, offset: ${bookStatus.position_offset}"
                             )
                             val bookPosition =
-                                BookPosition(curPage.value!!.pageStartPosition)
+                                BookPosition(page.pageStartPosition)
                             bookStatus.updatePosition(bookPosition)
                             bookStatusRepository.update(bookStatus)
                         }
                     }
+
                 }
             }
         }
@@ -383,7 +385,7 @@ class BookReaderViewModel(
     }
 
     fun addBookmarkForCurrentPage() {
-        curPage.value?.content?.let {
+        currentPage.value?.content?.let {
             bookmarkRepository.insert(
                 getBookmarkForCurrentPosition(it.toString())
             )
@@ -396,8 +398,8 @@ class BookReaderViewModel(
             text = if (pageText.length <= 100)
                 pageText else
                 pageText.substring(0, 100),
-            position_section = curPage.value!!.pageStartPosition.section,
-            position_offset = curPage.value!!.pageStartPosition.offSet,
+            position_section = currentPage.value!!.pageStartPosition.section,
+            position_offset = currentPage.value!!.pageStartPosition.offSet,
         )
     }
 
@@ -418,34 +420,34 @@ class BookReaderViewModel(
     }
 
     private fun goToPage(page: Page) {
-        curPage.value = page
+        currentPage.value = page
         recalcCurrentPage()
         savePositionForBook()
     }
 
     fun getCurSection(): Int {
-        return curPage.value!!.pageEndPosition.section
+        return currentPage.value!!.pageEndPosition.section
     }
 
     fun getCurTextPage(): Int {
         var curTextPage = 0
-        for (i in 0 until curPage.value!!.pageEndPosition.section) {
+        for (i in 0 until currentPage.value!!.pageEndPosition.section) {
             if (book.value!!.getPageScheme()?.scheme?.get(i) != null)
                 curTextPage += book.value!!.getPageScheme()!!.scheme[i]!!.countTextPages
         }
-        curTextPage += (curPage.value!!.pageEndPosition.offSet / BookPageScheme.CHAR_PER_PAGE)
+        curTextPage += (currentPage.value!!.pageEndPosition.offSet / BookPageScheme.CHAR_PER_PAGE)
         return curTextPage
     }
 
     private fun isBookmarkOnCurrentPage(bookmark: Bookmark): Boolean {
-        return curPage.value?.let {
-            bookmark.position_section >= curPage.value!!.pageStartPosition.section
+        return currentPage.value?.let {
+            bookmark.position_section >= currentPage.value!!.pageStartPosition.section
             &&
-            bookmark.position_section <= curPage.value!!.pageEndPosition.section
+            bookmark.position_section <= currentPage.value!!.pageEndPosition.section
             &&
-            bookmark.position_offset >= curPage.value!!.pageStartPosition.offSet
+            bookmark.position_offset >= currentPage.value!!.pageStartPosition.offSet
             &&
-            bookmark.position_offset < curPage.value!!.pageEndPosition.offSet
+            bookmark.position_offset < currentPage.value!!.pageEndPosition.offSet
         } ?: false
     }
 
@@ -455,13 +457,13 @@ class BookReaderViewModel(
     }
 
     fun addBookmark(start: Int, text: CharSequence) {
-        Log.d("BOOKREADER", "addBookmark: start: $start, curpage.offset: ${curPage.value!!.pageStartPosition.offSet}")
+        Log.d("BOOKREADER", "addBookmark: start: $start, curpage.offset: ${currentPage.value!!.pageStartPosition.offSet}")
         bookmarkRepository.insert(
         Bookmark(
             path = book.value!!.fileLocation,
             text = text.toString(),
-            position_section = curPage.value!!.pageStartPosition.section,
-            position_offset = curPage.value!!.pageStartPosition.offSet + start,
+            position_section = currentPage.value!!.pageStartPosition.section,
+            position_offset = currentPage.value!!.pageStartPosition.offSet + start,
         ))
         recalcCurrentPage()
     }
