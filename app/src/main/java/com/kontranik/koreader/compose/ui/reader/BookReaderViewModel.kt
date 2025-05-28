@@ -161,7 +161,7 @@ class BookReaderViewModel(
                 val startPosition: BookPosition = if (status == null) {
                     BookPosition()
                 } else {
-                    BookPosition(status.position_section, status.position_offset)
+                    BookPosition(status.position_section, status.position_offset+1)
                 }
 
                 curPage.postValue(
