@@ -79,36 +79,38 @@ open class PageSplitterHtml() : FontsHelper() {
             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
             .build()
 
-        pages = mutableListOf()
+        pages.clear()
 
-        var startLine = 0
-        var endLine: Int
-        var startLineTop: Int
-        var endLineBottom: Int
-        var startOffset: Int
-        var endOffset: Int
-        var pageIndex = 0
-        while (true) {
-            startLineTop = staticLayout!!.getLineTop(startLine)
-            endLine = staticLayout!!.getLineForVertical(startLineTop + pageViewSettings.pageSize.height - (marginRight + marginLeft))
-            endLineBottom = staticLayout!!.getLineBottom(endLine)
-            var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageViewSettings.pageSize.height - marginTop - marginBottom)
-                endLine - 1 else endLine
-            if ( lastFullyVisibleLine < startLine) lastFullyVisibleLine = startLine
-            startOffset = staticLayout!!.getLineStart(startLine)
-            endOffset = staticLayout!!.getLineEnd(lastFullyVisibleLine)
+        staticLayout?.let { layout ->
+            var startLine = 0
+            var endLine: Int
+            var startLineTop: Int
+            var endLineBottom: Int
+            var startOffset: Int
+            var endOffset: Int
+            var pageIndex = 0
+            while (true) {
+                startLineTop = layout.getLineTop(startLine)
+                endLine = layout.getLineForVertical(startLineTop + pageViewSettings.pageSize.height - (marginRight + marginLeft))
+                endLineBottom = layout.getLineBottom(endLine)
+                var lastFullyVisibleLine = if (endLineBottom >  startLineTop + pageViewSettings.pageSize.height - marginTop - marginBottom)
+                    endLine - 1 else endLine
+                if ( lastFullyVisibleLine < startLine) lastFullyVisibleLine = startLine
+                startOffset = layout.getLineStart(startLine)
+                endOffset = layout.getLineEnd(lastFullyVisibleLine)
 
-            pages.add(
-                Page(content = SpannableStringBuilder()
-                        .append(content.subSequence(startOffset, endOffset)),
-                    pageStartPosition = BookPosition(section = section, offSet = startOffset),
-                    pageEndPosition = BookPosition(section = section, offSet = endOffset),
-                    pageIndex = pageIndex
-            ))
-            pageIndex+=1
+                pages.add(
+                    Page(content = SpannableStringBuilder()
+                            .append(content.subSequence(startOffset, endOffset)),
+                        pageStartPosition = BookPosition(section = section, offSet = startOffset),
+                        pageEndPosition = BookPosition(section = section, offSet = endOffset),
+                        pageIndex = pageIndex
+                ))
+                pageIndex+=1
 
-            if ( endLine >= staticLayout!!.lineCount-1 ) break
-            startLine = lastFullyVisibleLine + 1
+                if ( endLine >= layout.lineCount-1 ) break
+                startLine = lastFullyVisibleLine + 1
+            }
         }
     }
 
