@@ -49,7 +49,7 @@ class FB2Parser(appDir: String, private var uri: String, private var fileInputSt
                 ze = zis.nextEntry
                 if ( ze == null) break
                 if (!ze.isDirectory) {
-                    if (ze.name.toLowerCase(Locale.getDefault()).endsWith(".fb2")) {
+                    if (ze.name.lowercase(Locale.getDefault()).endsWith(".fb2")) {
                         saxParser.parse(zis, this)
                         break
                     }
@@ -57,7 +57,7 @@ class FB2Parser(appDir: String, private var uri: String, private var fileInputSt
             }
 
             zis.close()
-        } else if (uri.toLowerCase(Locale.getDefault()).endsWith(".fb2")) {
+        } else if (uri.lowercase(Locale.getDefault()).endsWith(".fb2")) {
             try {
                 saxParser.parse(fileInputStream, this)
             } catch (e: java.lang.Exception) {
@@ -86,7 +86,7 @@ class FB2Parser(appDir: String, private var uri: String, private var fileInputSt
     override fun startElement(namespaceURI: String, localName: String,
                               qName: String, attrs: Attributes) {
         val eName = if ("" == localName) qName else localName
-        val fel = FB2Elements.fromString(eName.toLowerCase(Locale.getDefault()))
+        val fel = FB2Elements.fromString(eName.lowercase(Locale.getDefault()))
         if (fel == null) {
             Log.d("PARSER","StartElement: $eName")
             return
@@ -102,7 +102,7 @@ class FB2Parser(appDir: String, private var uri: String, private var fileInputSt
     @Throws(SAXException::class)
     override fun endElement(namespaceURI: String, localName: String, qName: String) {
         val eName = if ("" == localName) qName else localName
-        val fel = FB2Elements.fromString(eName.toLowerCase(Locale.getDefault()))
+        val fel = FB2Elements.fromString(eName.lowercase(Locale.getDefault()))
         if (fel == null) {
             Log.d("PARSER", "EndElement: $eName")
             return

@@ -14,6 +14,8 @@ import com.kontranik.koreader.compose.ui.settings.PREFS_FILE
 import com.kontranik.koreader.compose.ui.settings.PREF_BOOK_PATH
 import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.FileItem
+import androidx.core.net.toUri
+import androidx.core.content.edit
 
 class OpenFileViewModel : ViewModel()  {
     private var externalPaths = mutableListOf<String>()
@@ -61,7 +63,7 @@ class OpenFileViewModel : ViewModel()  {
             val parent = if ( index > 0)  {
                 it.substring(0, index)
             } else it
-            val directoryUri = Uri.parse(parent).toString()
+            val directoryUri = parent.toUri().toString()
             // val sf = DocumentFile.fromSingleUri(applicationContext, directoryUri)
             selectedDocumentFileUriString.postValue(directoryUri)
         }
@@ -70,9 +72,9 @@ class OpenFileViewModel : ViewModel()  {
     private fun savePrefsExternalPaths() {
         val settings = KoReaderApplication.getContext()
             .getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
-        val prefEditor = settings.edit()
-        prefEditor.putStringSet(OPENFILE_EXTERNAL_PATHS, externalPaths.toMutableSet())
-        prefEditor.apply()
+        settings.edit {
+            putStringSet(OPENFILE_EXTERNAL_PATHS, externalPaths.toMutableSet())
+        }
     }
 
 
@@ -82,13 +84,7 @@ class OpenFileViewModel : ViewModel()  {
             return
         }
 
-        var lastPathIsInStorageList = false
-        lastPath?.let {
-            externalPaths.forEach {
-                if (it.contains(it)) lastPathIsInStorageList = true
-            }
-        }
-        if (!lastPathIsInStorageList) {
+        if (!lastPathInExternalPaths()) {
             storageList()
             return
         }
@@ -100,9 +96,15 @@ class OpenFileViewModel : ViewModel()  {
                 val uriString = fileItemList.value[pos].uriString
                 if (uriString == it) {
                     scrollToDocumentFileUriString.value = uriString
+                    return
                 }
             }
         }
+    }
+
+    private fun lastPathInExternalPaths(): Boolean {
+        if ( lastPath == null ) return false
+        return externalPaths.any { it == lastPath }
     }
 
     fun storageList() {
@@ -121,7 +123,7 @@ class OpenFileViewModel : ViewModel()  {
             val iterator = externalPaths.iterator()
             while(iterator.hasNext()) {
                 val path = iterator.next()
-                val directoryUri = Uri.parse(path)
+                val directoryUri = path.toUri()
                 println("directoryUri: $directoryUri")
                 contentResolver.takePersistableUriPermission(directoryUri, takeFlags)
                 val documentsTree = DocumentFile.fromTreeUri(KoReaderApplication.getContext(), directoryUri)

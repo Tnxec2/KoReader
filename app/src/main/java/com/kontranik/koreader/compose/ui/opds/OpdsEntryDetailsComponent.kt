@@ -43,6 +43,7 @@ import com.kontranik.koreader.opds.model.Entry
 import com.kontranik.koreader.opds.model.Link
 import com.kontranik.koreader.opds.model.OpdsTypes
 import com.kontranik.koreader.utils.ImageUtils
+import com.kontranik.koreader.utils.book_cover_base64
 import kotlinx.coroutines.launch
 
 
@@ -196,7 +197,7 @@ fun OpdsEntryDetailsContent(
 @Composable
 private fun OpdsEntryDetailsContentPreview() {
 
-    val href = stringResource(id = R.string.book_cover_base64)
+    val href = book_cover_base64
 
     val entrysState = remember {
         mutableStateOf(

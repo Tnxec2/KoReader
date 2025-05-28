@@ -34,6 +34,7 @@ import com.kontranik.koreader.opds.model.Link
 import com.kontranik.koreader.opds.model.OpdsTypes
 import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.opds.model.Author
+import com.kontranik.koreader.utils.icon_back_base64
 
 @Composable
 fun OpdsItem(
@@ -124,7 +125,7 @@ private fun OpdsItemPreview() {
                     thumbnail = Link(
                         type = OpdsTypes.TYPE_LINK_IMAGE_PNG,
                         title = null,
-                        href = stringResource(R.string.icon_back_base64),
+                        href = icon_back_base64,
                         rel = OpdsTypes.REL_IMAGE
                     ),
                     content = null,

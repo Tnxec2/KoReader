@@ -6,7 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
-import android.util.Log
+import androidx.core.net.toUri
 import com.kontranik.koreader.parser.EbookHelper
 
 object FileHelper {
@@ -16,93 +16,59 @@ object FileHelper {
     const val BACKDIR = ".."
 
     fun getFileListDC(context: Context, documentFilePath: String): List<FileItem> {
-        val mUri = Uri.parse(documentFilePath)
+        val mUri = documentFilePath.toUri()
         val resolver: ContentResolver = context.contentResolver
         val uriId = DocumentsContract.getDocumentId(mUri)
         val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(mUri, uriId)
         val resultF: ArrayList<Triple<Uri, String, String>> = ArrayList()
 
-        var c: Cursor? = null
-        try {
-            val requestedColumns = arrayOf(
-                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-                    DocumentsContract.Document.COLUMN_MIME_TYPE
-            )
-            c = resolver.query(childrenUri, requestedColumns, null, null, null)
-            while (c!!.moveToNext()) {
-                val documentId: String = c.getString(0)
-                val documentUri = DocumentsContract.buildDocumentUriUsingTree(mUri,
-                        documentId)
-                resultF.add( Triple(documentUri, c.getString(1), c.getString(2)))
-                Log.d(TAG, c.getString(1) + " " + c.getString(2))
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed query: $e")
-        } finally {
-            c?.close()
-        }
-
         val resultFiles = mutableListOf<FileItem>()
 
-        //val documentFile = DocumentFile.fromSingleUri(context, mUri)
+        val dirs: MutableList<FileItem> = mutableListOf()
+        val files: MutableList<FileItem> = mutableListOf()
 
-        val index = documentFilePath.lastIndexOf("%2F")
-        val index2 = documentFilePath.lastIndexOf("%3A")
-        var isRoot = false
-        var parent = ""
-        if ( index > 0)  {
-            parent = documentFilePath.substring(0, index)
-        } else if ( index2 > 0 ) {
-            parent = documentFilePath.substring(0, index2)
-            isRoot = true
-        }
-        val pUri = Uri.parse(parent)
-
-        // val p = if ( documentFile?.parentFile != null ) documentFile.parentFile!!.uri.pathSegments.last() else ""
-        //val u: String? = if ( documentFile?.parentFile != null ) documentFile.parentFile!!.uri.toString() else null
-
+        val parentUri = documentFilePath.substringBeforeLast("%2F", documentFilePath.substringBeforeLast("%3A"))
+        val isRoot = documentFilePath.contains("%3A")
 
         resultFiles.add(
             FileItem(
                 image = ImageEnum.Parent,
                 name = BACKDIR,
                 path = Uri.decode(documentFilePath.split("/").last()).toString(),
-                uriString = pUri.toString(),
+                uriString = parentUri.toString(),
                 isDir = true,
                 isRoot = isRoot,
                 bookInfo = null,
                 isStorage = false)
         )
-        val dirs: MutableList<FileItem> = mutableListOf()
-        val files: MutableList<FileItem> = mutableListOf()
 
-        for (i in resultF.indices) {
-            val uriToLoad = resultF[i].first
-
-            val uriString = uriToLoad.toString()
-            val path = getPath(uriToLoad)
-            //val name = getNameFromPath(path)
-            val name = resultF[i].second
-
-            if ( resultF[i].third == DocumentsContract.Document.MIME_TYPE_DIR) {
-                dirs.add(FileItem(ImageEnum.Dir, name, path, uriString = uriString, isDir = true, isRoot = false, null))
-            } else {
-                if (EbookHelper.isEpub(name)) {
-                    files.add(FileItem(ImageEnum.Epub, name, path, uriString = uriString, isDir = false, false, null))
-                } else if (EbookHelper.isFb2(name)) {
-                    files.add(FileItem(ImageEnum.Fb2, name, path, uriString = uriString, isDir = false, false, null))
+        resolver.query(
+            childrenUri, arrayOf(
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_MIME_TYPE
+            ), null, null, null
+        )?.use { cursor ->
+            while (cursor.moveToNext()) {
+                val documentId = cursor.getString(0)
+                val documentUri = DocumentsContract.buildDocumentUriUsingTree(mUri, documentId)
+                val name = cursor.getString(1)
+                val mimeType = cursor.getString(2)
+                val path = getPath(documentUri)
+                if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
+                    dirs.add(FileItem(ImageEnum.Dir, name, path, documentUri.toString(), true, false, null))
+                } else {
+                    when {
+                        EbookHelper.isEpub(name) -> files.add(FileItem(ImageEnum.Epub, name, path, documentUri.toString(), false, false, null))
+                        EbookHelper.isFb2(name) -> files.add(FileItem(ImageEnum.Fb2, name, path, documentUri.toString(), false, false, null))
+                    }
                 }
             }
         }
-        if ( dirs.isNotEmpty()) {
-            dirs.sortBy { it.name }
-            resultFiles.addAll(dirs)
-        }
-        if (files.isNotEmpty()) {
-            files.sortBy { it.name }
-            resultFiles.addAll(files)
-        }
+
+        resultFiles.addAll(dirs.sortedBy { it.name })
+        resultFiles.addAll(files.sortedBy { it.name })
+
         return resultFiles
     }
 
@@ -118,7 +84,7 @@ object FileHelper {
     fun contentFileExist(context: Context, uriPath: String?): Boolean {
         if ( uriPath == null) return false
         return try {
-            val fileInputStream = context.contentResolver.openInputStream(Uri.parse(uriPath))
+            val fileInputStream = context.contentResolver.openInputStream(uriPath.toUri())
             if ( fileInputStream != null) {
                 fileInputStream.close()
                 true

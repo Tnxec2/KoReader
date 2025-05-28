@@ -2,6 +2,8 @@ package com.kontranik.koreader.opds.model
 
 import com.kontranik.koreader.KoReaderApplication
 import com.kontranik.koreader.R
+import com.kontranik.koreader.utils.icon_back_base64
+import com.kontranik.koreader.utils.icon_loading_base64
 
 val BACK = Entry(
     id = "back",
@@ -15,7 +17,7 @@ val BACK = Entry(
     thumbnail = Link(
         type = OpdsTypes.TYPE_LINK_IMAGE_PNG,
         title = null,
-        href = KoReaderApplication.getContext().resources.getString(R.string.icon_back_base64),
+        href = icon_back_base64,
         rel = OpdsTypes.REL_IMAGE
     )
 )
@@ -26,7 +28,7 @@ val LOAD = Entry(
     thumbnail = Link(
         type = OpdsTypes.TYPE_LINK_IMAGE_PNG,
         title = null,
-        href = KoReaderApplication.getContext().resources.getString(R.string.icon_loading_base64),
+        href = icon_loading_base64,
         rel = OpdsTypes.REL_IMAGE
     )
 )
