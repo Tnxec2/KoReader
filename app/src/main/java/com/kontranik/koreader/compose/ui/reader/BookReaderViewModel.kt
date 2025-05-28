@@ -34,6 +34,7 @@ import com.kontranik.koreader.utils.FileHelper
 import com.kontranik.koreader.utils.ImageUtils
 import com.kontranik.koreader.utils.PageLoader
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
@@ -41,6 +42,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.min
+import androidx.core.content.edit
 
 
 class BookReaderViewModel(
@@ -92,12 +94,13 @@ class BookReaderViewModel(
 
     init {
         KoReaderApplication.getApplicationScope().launch {
-            bookPath.asFlow().collect {
-                println("collect bookpath $it")
-                it?.let { path ->
+            bookPath
+                .asFlow()
+                .filterNotNull()
+                .collect { path ->
                     loadBook(path)
                 }
-            }
+
         }
 
         viewModelScope.launch {
@@ -307,9 +310,9 @@ class BookReaderViewModel(
             PREFS_FILE,
             Context.MODE_PRIVATE
         )
-        val prefEditor = settings.edit()
-        prefEditor.putString(PREF_BOOK_PATH, path)
-        prefEditor.apply()
+        settings.edit {
+            putString(PREF_BOOK_PATH, path)
+        }
         bookPath.postValue(path)
     }
 
@@ -318,11 +321,11 @@ class BookReaderViewModel(
             PREFS_FILE,
             Context.MODE_PRIVATE
         )
-        val prefEditor = settings.edit()
-        prefEditor.putFloat(
-            PREF_SCREEN_BRIGHTNESS, screenBrightnessLevel
-        )
-        prefEditor.apply()
+        settings.edit {
+            putFloat(
+                PREF_SCREEN_BRIGHTNESS, screenBrightnessLevel
+            )
+        }
     }
 
     private fun removePathFromPrefs() {
@@ -330,9 +333,9 @@ class BookReaderViewModel(
             PREFS_FILE,
             Context.MODE_PRIVATE
         )
-        val prefEditor = settings.edit()
-        prefEditor.remove(PREF_BOOK_PATH)
-        prefEditor.apply()
+        settings.edit {
+            remove(PREF_BOOK_PATH)
+        }
     }
 
     private fun savePositionForBook() {

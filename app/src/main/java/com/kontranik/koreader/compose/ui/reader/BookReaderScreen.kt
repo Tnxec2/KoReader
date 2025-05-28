@@ -53,7 +53,17 @@ fun BookReaderScreen(
     val context = LocalContext.current
 
     LaunchedEffect(key1 = settingsViewModel.pageViewSettings.value) {
-        bookReaderViewModel.pageViewSettings.value = settingsViewModel.pageViewSettings.value.copy()
+        bookReaderViewModel.pageViewSettings.value =
+            bookReaderViewModel.pageViewSettings.value?.copy(
+                textSize = settingsViewModel.pageViewSettings.value.textSize,
+                textSizeInfoArea = settingsViewModel.pageViewSettings.value.textSizeInfoArea,
+                lineSpacingMultiplier = settingsViewModel.pageViewSettings.value.lineSpacingMultiplier,
+                letterSpacing = settingsViewModel.pageViewSettings.value.letterSpacing,
+                marginTop = settingsViewModel.pageViewSettings.value.marginTop,
+                marginBottom = settingsViewModel.pageViewSettings.value.marginBottom,
+                marginLeft = settingsViewModel.pageViewSettings.value.marginLeft,
+                marginRight = settingsViewModel.pageViewSettings.value.marginRight
+            ) ?: settingsViewModel.pageViewSettings.value.copy()
     }
 
     var bookInfoPath by remember { mutableStateOf<String?>(null) }
