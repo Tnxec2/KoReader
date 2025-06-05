@@ -1,24 +1,20 @@
 package com.kontranik.koreader.compose.ui.settings.elements
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,10 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
-import com.kontranik.koreader.R
-import com.kontranik.koreader.compose.theme.AppTheme
 import com.kontranik.koreader.compose.theme.paddingSmall
 import kotlinx.coroutines.launch
 
@@ -49,17 +41,17 @@ fun SettingsList(
     entries: List<String>,
     entryValues: List<String>,
     defaultValue: String,
+    modifier: Modifier = Modifier,
     defaultValueTitle: String? = null,
     @DrawableRes icon: Int? = null,
     onChange: (String) -> Unit,
     showDefaultValue: Boolean,
-    modifier: Modifier = Modifier,
     show: Boolean = false,
     enabled: Boolean = true,
     title: String? = null,
 ) {
     var showDropdown by rememberSaveable { mutableStateOf(show) }
-    val scrollState = rememberLazyListState()
+    val scrollState = rememberScrollState()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -71,32 +63,30 @@ fun SettingsList(
             Icon(painter = painterResource(id = it), contentDescription = title,
                 modifier = Modifier.padding(end = paddingSmall))
         }
-
-        Column {
-            if (title != null) Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-            )
-            if (showDefaultValue) Text(
-                text = defaultValueTitle ?: defaultValue,
-                modifier = Modifier
-            )
-        }
-
-        Box {
-            if (showDropdown) {
-                SettingsListContent(
-                    entries = entries,
-                    defaultPos = entryValues.indexOf(defaultValue),
-                    onItemClick = { pos, _ ->
-                        if (enabled) onChange(entryValues[pos])
-                        showDropdown = false
-                    },
-                    onClose = { showDropdown = false; },
-                    scrollState = scrollState,
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                if (title != null) Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (showDefaultValue) Text(
+                    text = defaultValueTitle ?: defaultValue,
+                    modifier = Modifier
                 )
             }
+
+            SettingsListContent(
+                expanded = showDropdown,
+                entries = entries,
+                defaultPos = entryValues.indexOf(defaultValue),
+                onItemClick = { pos, _ ->
+                    if (enabled) onChange(entryValues[pos])
+                    showDropdown = false
+                },
+                onClose = { showDropdown = false; },
+                scrollState = scrollState,
+            )
         }
     }
 }
@@ -104,62 +94,45 @@ fun SettingsList(
 
 @Composable
 fun SettingsListContent(
+    expanded: Boolean = true,
     entries: List<String>,
     defaultPos: Int,
     onItemClick: (pos: Int, value: String) -> Unit,
     onClose: () -> Unit,
-    modifier: Modifier = Modifier,
-    scrollState: LazyListState = rememberLazyListState(),
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = Unit) {
         coroutineScope.launch {
-            if (defaultPos >= 0) scrollState.scrollToItem(defaultPos)
+            if (defaultPos >= 0) scrollState.scrollTo(defaultPos)
         }
     }
 
-    Popup(
-        alignment = Alignment.TopCenter,
-        properties = PopupProperties(
-            excludeFromSystemGesture = true,
-        ),
-        onDismissRequest = { onClose() }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onClose,
+        scrollState = scrollState,
     ) {
-        LazyColumn(
-            state = scrollState,
-            modifier = modifier
-                .heightIn(max = 300.dp)
-                .padding(paddingSmall)
-                .border(width = 1.dp, color = Color.Gray)
-                .background(color = MaterialTheme.colorScheme.background),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            itemsIndexed(
-                entries,
-                key = { _, item -> item}
-            ) { index, item ->
-                if (index != 0) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.primary, thickness = 0.5.dp)
-                }
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(color = if (index == defaultPos) MaterialTheme.colorScheme.secondary else Color.Transparent)
-                        .clickable {
-                            onItemClick(index, item)
-                            onClose()
-                        },
-                ) {
+        entries.forEachIndexed { index, item ->
+            DropdownMenuItem(
+                text = {
                     Text(
                         text = item,
                         color = if (index == defaultPos) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(paddingSmall)
-                    )
-                }
-            }
+                        modifier = Modifier
+                            .fillMaxWidth()
 
+                    )
+                },
+                onClick = {
+                    onItemClick(index, item)
+                    onClose()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = if (index == defaultPos) MaterialTheme.colorScheme.secondary else Color.Transparent)
+            )
         }
     }
 }
@@ -167,48 +140,45 @@ fun SettingsListContent(
 @Preview
 @Composable
 private fun SettingsTextFieldPreview() {
-    AppTheme {
-        Surface(Modifier.width(300.dp).height(500.dp)) {
 
-    Column(Modifier.padding(10.dp).fillMaxSize()) {
-        SettingsList(
-            title = "Title",
-            entries = listOf(
-                "entry 1",
-                "entry 2",
-                "entry 3",
-            ),
-            entryValues = listOf(
-                "entry1",
-                "entry2",
-                "entry3",
-            ),
-            defaultValue = "entry1",
-            showDefaultValue = true,
-            onChange = {},
-            show = false,
-        )
-    SettingsList(
-        title = "Title",
-        entries = listOf(
-            "entry 1",
-            "entry 2",
-            "entry 3",
-        ),
-        entryValues = listOf(
-            "entry1",
-            "entry2",
-            "entry3",
-        ),
-        defaultValue = "entry2",
-        defaultValueTitle = "entry_title",
-        icon = R.drawable.ic_iconmonstr_paintbrush_10,
-        showDefaultValue = true,
-        onChange = {},
-        show = true,
-    )
-    }
+    Surface(Modifier.width(300.dp).height(500.dp)) {
 
+        Column(Modifier.padding(10.dp).fillMaxSize()) {
+            SettingsList(
+                title = "Title",
+                entries = listOf(
+                    "entry 1",
+                    "entry 2",
+                    "entry 3",
+                ),
+                entryValues = listOf(
+                    "entry1",
+                    "entry2",
+                    "entry3",
+                ),
+                defaultValue = "entry1",
+                showDefaultValue = true,
+                onChange = {},
+                show = false,
+            )
+            SettingsList(
+                title = "Title",
+                entries = listOf(
+                    "entry 1",
+                    "entry 2",
+                    "entry 3",
+                ),
+                entryValues = listOf(
+                    "entry1",
+                    "entry2",
+                    "entry3",
+                ),
+                defaultValue = "entry2",
+                defaultValueTitle = "entry2",
+                showDefaultValue = true,
+                onChange = {},
+                show = true,
+            )
         }
     }
 }

@@ -53,7 +53,7 @@ fun ColorSettingsScreen(
         onChangeSelectedTheme = {
             coroutineScope.launch {
                 settingsViewModel.changeselectedColorTheme(
-                    it.toInt()
+                    it
                 )
             }
         },
@@ -68,7 +68,7 @@ fun ColorSettingsContent(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
     navigateToTheme: (Int) -> Unit,
-    onChangeSelectedTheme: (String) -> Unit,
+    onChangeSelectedTheme: (Int) -> Unit,
 ) {
 
     Scaffold(
@@ -105,14 +105,17 @@ fun ColorSettingsContent(
                 title = stringResource(id = R.string.select_theme),
                 modifier = Modifier.padding(bottom = paddingMedium)
             ) {
+                val entries = getStringArrayFromResourceArray(res = selected_theme_entries)
                 Column {
                     SettingsList(
                         title = stringResource(id = R.string.interface_theme_title),
-                        entries = getStringArrayFromResourceArray(res = selected_theme_entries),
-                        entryValues = selected_theme_entries.mapIndexed { index, s -> index.toString() },
-                        defaultValue = getStringArrayFromResourceArray(res = selected_theme_entries)[selectedTheme],
+                        entries = entries,
+                        entryValues = entries.mapIndexed { index, s -> s },
+                        defaultValue = entries[selectedTheme],
                         icon = R.drawable.ic_iconmonstr_paintbrush_10,
-                        onChange = { onChangeSelectedTheme(it) },
+                        onChange = {
+                            onChangeSelectedTheme(entries.indexOf(it))
+                        },
                         showDefaultValue = true,
                         modifier = Modifier.fillMaxWidth()
                     )
