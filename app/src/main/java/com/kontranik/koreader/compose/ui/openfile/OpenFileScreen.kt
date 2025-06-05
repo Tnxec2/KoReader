@@ -41,6 +41,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kontranik.koreader.AppViewModelProvider
 import com.kontranik.koreader.R
 import com.kontranik.koreader.compose.theme.paddingMedium
 import com.kontranik.koreader.compose.theme.paddingSmall
@@ -71,7 +73,7 @@ fun OpenFileScreen(
     modifier: Modifier = Modifier,
     bookReaderViewModel: BookReaderViewModel,
     bookStatusViewModel: BookStatusViewModel,
-    openFileViewModel: OpenFileViewModel,
+    openFileViewModel: OpenFileViewModel = viewModel(factory = AppViewModelProvider.Factory),
     libraryViewModel: LibraryViewModel,
 ) {
     val context = LocalContext.current
@@ -99,10 +101,6 @@ fun OpenFileScreen(
              }
          }
     )
-
-    LaunchedEffect(key1 = Unit) {
-        openFileViewModel.start()
-    }
 
     LaunchedEffect(key1 = openFileViewModel.scrollToDocumentFileUriString.value) {
         openFileViewModel.scrollToDocumentFileUriString.value?.let {

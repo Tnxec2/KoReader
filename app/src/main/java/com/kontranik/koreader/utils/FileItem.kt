@@ -3,7 +3,7 @@ package com.kontranik.koreader.utils
 import androidx.documentfile.provider.DocumentFile
 import com.kontranik.koreader.model.BookInfo
 
-class FileItem(
+data class FileItem(
         var image: ImageEnum,
         var name: String,
         var path: String,

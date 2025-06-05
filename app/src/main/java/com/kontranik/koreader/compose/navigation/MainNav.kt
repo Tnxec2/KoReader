@@ -46,7 +46,6 @@ fun NavGraphBuilder.mainGraph(
     navController: NavHostController,
     settingsViewModel: SettingsViewModel,
     bookReaderViewModel: BookReaderViewModel,
-    openFileViewModel: OpenFileViewModel,
     bookStatusViewModel: BookStatusViewModel,
     opdsViewModell: OpdsViewModell,
     libraryViewModel: LibraryViewModel
@@ -105,7 +104,6 @@ fun NavGraphBuilder.mainGraph(
             OpenFileScreen(
                 drawerState = drawerState,
                 navigateBack = { navController.popBackStack() },
-                openFileViewModel = openFileViewModel,
                 libraryViewModel = libraryViewModel,
                 bookReaderViewModel = bookReaderViewModel,
                 bookStatusViewModel = bookStatusViewModel,

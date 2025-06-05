@@ -69,7 +69,7 @@ fun MainCompose(
     val bookReaderViewModel: BookReaderViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val bookStatusViewModel: BookStatusViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val opdsViewModell: OpdsViewModell = viewModel(factory = AppViewModelProvider.Factory)
-    val openFileViewModel: OpenFileViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
     val libraryViewModel: LibraryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
     //LaunchedEffect(key1 = Unit) {
@@ -109,7 +109,7 @@ fun MainCompose(
                 startDestination = NavRoutes.MainRoute.name
             ) {
                 mainGraph(drawerState, navController, settingsViewModel, bookReaderViewModel,
-                    openFileViewModel, bookStatusViewModel, opdsViewModell, libraryViewModel)
+                    bookStatusViewModel, opdsViewModell, libraryViewModel)
             }
         }
     }

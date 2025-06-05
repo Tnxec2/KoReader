@@ -31,15 +31,11 @@ class OpenFileViewModel : ViewModel()  {
 
 
     init {
-        start()
+        loadPrefs()
 
         selectedDocumentFileUriString.observeForever {
             loadPath(it)
         }
-    }
-
-    fun start() {
-        loadPrefs()
     }
 
     private fun loadPrefs() {
@@ -51,7 +47,7 @@ class OpenFileViewModel : ViewModel()  {
             externalPaths = eP?.toMutableList() ?: mutableListOf()
         }
 
-        if ( settings!!.contains(PREF_BOOK_PATH) ) {
+        if ( settings.contains(PREF_BOOK_PATH) ) {
             this.lastPath = settings.getString(PREF_BOOK_PATH, null)
             extractDirectory()
         }
@@ -122,12 +118,13 @@ class OpenFileViewModel : ViewModel()  {
             while(iterator.hasNext()) {
                 val path = iterator.next()
                 val directoryUri = path.toUri()
-                println("directoryUri: $directoryUri")
+                Log.d("storageList", "directoryUri: $directoryUri")
                 contentResolver.takePersistableUriPermission(directoryUri, takeFlags)
                 val documentsTree = DocumentFile.fromTreeUri(KoReaderApplication.getContext(), directoryUri)
-                println("documentsTree $documentsTree isdir: ${documentsTree?.isDirectory}, can read ${documentsTree?.canRead()}")
+
                 if ( documentsTree == null || !documentsTree.isDirectory || !documentsTree.canRead() ) {
-                    iterator.remove()
+                    // iterator.remove()
+                    Log.e("storageList", "can not read storage. documentsTree $documentsTree isdir: ${documentsTree?.isDirectory}, can read ${documentsTree?.canRead()}")
                 } else {
                     fileList.add(FileItem(documentsTree))
                 }
@@ -148,11 +145,20 @@ class OpenFileViewModel : ViewModel()  {
     }
 
     private fun getFileList(documentFilePath: String?) {
+
         if ( documentFilePath == null) {
             storageList()
             return
         } else {
-            val fl = FileHelper.getFileListDC(KoReaderApplication.getContext(), documentFilePath)
+            val last = documentFilePath.split("/").last()
+            var isRoot = externalPaths.any {
+                it.split("/").last() == last
+            }
+            val fl = FileHelper.getFileListDC(
+                KoReaderApplication.getContext(),
+                documentFilePath,
+                isRoot
+            )
             fileItemList.value = fl.toMutableList()
         }
     }
@@ -194,7 +200,7 @@ class OpenFileViewModel : ViewModel()  {
 
         if (selectedFileItem.isDir) {
             if ( selectedFileItem.isRoot ) {
-                if ( externalPaths.contains(selectedFileItem.uriString) )
+                if (isInExternalPaths(selectedFileItem.uriString))
                     getFileList(selectedFileItem)
                 else
                     storageList()
@@ -203,4 +209,7 @@ class OpenFileViewModel : ViewModel()  {
             }
         }
     }
+
+    private fun isInExternalPaths(filePath: String?): Boolean =
+        externalPaths.contains(filePath)
 }
