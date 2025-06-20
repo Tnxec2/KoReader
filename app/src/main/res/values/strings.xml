@@ -262,6 +262,7 @@
     <string name="cancel_selection_mode">Cancel selection mode</string>
     <string name="delete_author">Delete author</string>
     <string name="marginBottomInfoArea">Margin under info area</string>
+    <string name="exit">exit</string>
 
 
 </resources>

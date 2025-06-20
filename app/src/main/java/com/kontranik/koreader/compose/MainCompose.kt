@@ -109,7 +109,8 @@ fun MainCompose(
                 startDestination = NavRoutes.MainRoute.name
             ) {
                 mainGraph(drawerState, navController, settingsViewModel, bookReaderViewModel,
-                    bookStatusViewModel, opdsViewModell, libraryViewModel)
+                    bookStatusViewModel, opdsViewModell, libraryViewModel,
+                    onExit = { activity.finish() },)
             }
         }
     }

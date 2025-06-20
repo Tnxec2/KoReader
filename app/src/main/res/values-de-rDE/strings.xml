@@ -220,4 +220,5 @@
     <string name="cancel_selection_mode">Auswahlmodus beenden</string>
     <string name="delete_author">Author löschen</string>
     <string name="marginBottomInfoArea">Abstand unter Infobereich</string>
+    <string name="exit">exit</string>
 </resources>

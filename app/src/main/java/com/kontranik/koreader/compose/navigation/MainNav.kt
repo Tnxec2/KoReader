@@ -48,7 +48,8 @@ fun NavGraphBuilder.mainGraph(
     bookReaderViewModel: BookReaderViewModel,
     bookStatusViewModel: BookStatusViewModel,
     opdsViewModell: OpdsViewModell,
-    libraryViewModel: LibraryViewModel
+    libraryViewModel: LibraryViewModel,
+    onExit: () -> Unit,
 ) {
 
     navigation(
@@ -94,6 +95,9 @@ fun NavGraphBuilder.mainGraph(
                 navigateToSettings = { navController.navigate(NavOptions.Settings.name)},
                 navigateToAuthor = { authorId: Long ->
                     navController.navigate("${LibraryByTitleDestination.route}?authorid=${authorId}&title=${null}")
+                },
+                exit = {
+                    onExit()
                 },
                 bookReaderViewModel = bookReaderViewModel,
                 bookStatusViewModel = bookStatusViewModel,

@@ -17,6 +17,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -26,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +67,7 @@ fun MainMenuScreen(
     navigateToLibrary: () -> Unit,
     navigateToOpdsNetworkLibrary: () -> Unit,
     navigateToSettings: () -> Unit,
+    exit: () -> Unit,
     navigateToAuthor: (authorId: Long) -> Unit,
     bookStatusViewModel: BookStatusViewModel,
     bookReaderViewModel: BookReaderViewModel,
@@ -74,7 +78,7 @@ fun MainMenuScreen(
 
     val bookPath = rememberSaveable { mutableStateOf<String?>(null) }
 
-    var bookInfoPath by remember { mutableStateOf<String?>(null) }
+    var bookInfoPath = rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(key1 = Unit) {
         val prefs = context.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
@@ -104,54 +108,113 @@ fun MainMenuScreen(
         },
         modifier = modifier.fillMaxSize(),
     ) { padding ->
+        MainMenuContent(
+            bookPath = bookPath,
+            bookInfoPath = bookInfoPath,
+            navigateToOpenFile = navigateToOpenFile,
+            navigateToLastOpened = navigateToLastOpened,
+            navigateToBookmarks = navigateToBookmarks,
+            navigateToLibrary = navigateToLibrary,
+            navigateToOpdsNetworkLibrary = navigateToOpdsNetworkLibrary,
+            navigateToSettings = navigateToSettings,
+            exit = exit,
+            modifier = Modifier
+                .padding(padding)
+        )
+        bookInfoPath.value?.let { infoPath ->
+            BookInfoDialog(
+                bookPath = infoPath,
+                navigateBack = { bookInfoPath.value = null },
+                deleteBook = { path ->
+                    coroutineScope.launch {
+                        bookInfoPath.value = null
+                        bookStatusViewModel.deleteByPath(path)
+                        bookReaderViewModel.bookPath.postValue(null)
+                    }
+                },
+                navigateToReader = { path ->
+                    coroutineScope.launch {
+                        bookInfoPath.value = null
+                        navigateBack()
+                    }
+                },
+                navigateToAuthor = { authorId ->
+                    coroutineScope.launch {
+                        bookInfoPath.value = null
+                        navigateToAuthor(authorId)
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun MainMenuContent(
+    bookPath: MutableState<String?>,
+    bookInfoPath: MutableState<String?>,
+    navigateToOpenFile: () -> Unit,
+    navigateToLastOpened: () -> Unit,
+    navigateToBookmarks: (bookPath: String) -> Unit,
+    navigateToLibrary: () -> Unit,
+    navigateToOpdsNetworkLibrary: () -> Unit,
+    navigateToSettings: () -> Unit,
+    exit: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
+        modifier = modifier
+    ) {
         Column(
             Modifier
-                .padding(padding)
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
         ) {
-            Column(
-                Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                MainMenuItem(
-                    painterId = R.drawable.ic_folder_black_24dp,
-                    menuTextId = R.string.openfile,
-                    onClick = { coroutineScope.launch { navigateToOpenFile() } })
-                MainMenuItem(
-                    painterId = R.drawable.ic_iconmonstr_book_time,
-                    menuTextId = R.string.last_opened,
-                    onClick = { coroutineScope.launch { navigateToLastOpened() } })
-                MainMenuItem(
-                    painterId = R.drawable.baseline_local_library_24,
-                    menuTextId = R.string.library,
-                    onClick = { coroutineScope.launch { navigateToLibrary() } })
-                MainMenuItem(
-                    painterId = R.drawable.networking_1,
-                    menuTextId = R.string.opds,
-                    onClick = { coroutineScope.launch { navigateToOpdsNetworkLibrary() } })
-                MainMenuItem(
-                    painterId = R.drawable.ic_baseline_settings_24,
-                    menuTextId = R.string.settings,
-                    onClick = { coroutineScope.launch { navigateToSettings() } })
+            MainMenuItem(
+                painterId = R.drawable.ic_folder_black_24dp,
+                menuTextId = R.string.openfile,
+                onClick = { coroutineScope.launch { navigateToOpenFile() } })
+            MainMenuItem(
+                painterId = R.drawable.ic_iconmonstr_book_time,
+                menuTextId = R.string.last_opened,
+                onClick = { coroutineScope.launch { navigateToLastOpened() } })
+            MainMenuItem(
+                painterId = R.drawable.baseline_local_library_24,
+                menuTextId = R.string.library,
+                onClick = { coroutineScope.launch { navigateToLibrary() } })
+            MainMenuItem(
+                painterId = R.drawable.networking_1,
+                menuTextId = R.string.opds,
+                onClick = { coroutineScope.launch { navigateToOpdsNetworkLibrary() } })
+            MainMenuItem(
+                painterId = R.drawable.ic_baseline_settings_24,
+                menuTextId = R.string.settings,
+                onClick = { coroutineScope.launch { navigateToSettings() } })
 
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = {
+                exit()
+            }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                    contentDescription = stringResource(id = R.string.exit),
+                )
             }
+
             bookPath.value?.let {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                IconButton(onClick = { bookInfoPath.value = it }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_iconmonstr_book_info),
                         contentDescription = stringResource(id = R.string.bookinfo),
-                        modifier = Modifier
-                            .padding(paddingSmall)
-                            .size(32.dp)
-                            .clickable(
-                                onClick = {
-                                    bookInfoPath = it
-                                },
-                                role = Role.Button,
-                            ),
                     )
+                }
+                IconButton(onClick = { coroutineScope.launch { navigateToBookmarks(it) } }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_iconmonstr_bookmark),
                         contentDescription = stringResource(id = R.string.bookmarklist),
@@ -159,41 +222,13 @@ fun MainMenuScreen(
                             .padding(paddingSmall)
                             .size(32.dp)
                             .clickable(
-                                onClick = { coroutineScope.launch { navigateToBookmarks(it) } },
+                                onClick = { },
                                 role = Role.Button,
                             ),
                     )
                 }
             }
-
-            bookInfoPath?.let {
-                BookInfoDialog(
-                    bookPath = it,
-                    navigateBack = { bookInfoPath = null },
-                    deleteBook = { path ->
-                        coroutineScope.launch {
-                            bookInfoPath = null
-                            bookStatusViewModel.deleteByPath(path)
-                            bookReaderViewModel.bookPath.postValue(null)
-                        }
-                    },
-                    navigateToReader = { path ->
-                        coroutineScope.launch {
-                            bookInfoPath = null
-                            navigateBack()
-                        }
-                    },
-                    navigateToAuthor = { authorId ->
-                        coroutineScope.launch {
-                            bookInfoPath = null
-                            navigateToAuthor(authorId)
-                        }
-                    }
-                )
-            }
-
         }
-
     }
 }
 
@@ -225,6 +260,24 @@ fun MainMenuItem(
                 .weight(1f)
                 .padding(start = paddingSmall)
                 .padding(vertical = paddingMedium)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewMainMenuContent() {
+    AppTheme {
+        MainMenuContent(
+            bookPath = remember { mutableStateOf("test") },
+            bookInfoPath = remember { mutableStateOf("test") },
+            navigateToOpenFile = {},
+            navigateToLastOpened = {},
+            navigateToBookmarks = {},
+            navigateToLibrary = {},
+            navigateToOpdsNetworkLibrary = {},
+            navigateToSettings = {},
+            exit = {}
         )
     }
 }
