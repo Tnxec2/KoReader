@@ -188,7 +188,9 @@ data class BookInfoDetails(
     val allAuthors: String = "",
     val filename: String = "",
     val path: String = "",
-    var annotation: String = ""
+    var annotation: String = "",
+    var sequenceName: String = "",
+    var sequenceNumber: String = "",
 )
 
 fun BookInfo.toBookInfoDetails(): BookInfoDetails {
@@ -199,6 +201,8 @@ fun BookInfo.toBookInfoDetails(): BookInfoDetails {
         allAuthors = authorsAsString(),
         filename = filename,
         path = path,
-        annotation = annotation
+        annotation = annotation,
+        sequenceName = sequenceName ?: "",
+        sequenceNumber = sequenceNumber ?: ""
     )
 }

@@ -14,7 +14,9 @@ class BookInfo(
         var authors: MutableList<Author>?,
         val filename: String,
         val path: String,
-        var annotation: String
+        var annotation: String,
+        var sequenceName: String? = null,
+        var sequenceNumber: String? = null,
 ) : Serializable {
     constructor(fileItem: FileItem) : this(title = fileItem.name, cover = null, authors = null, filename = fileItem.name, path = fileItem.path, annotation = "")
 
@@ -44,6 +46,8 @@ fun BookInfo.toBookInfoComposable(): BookInfoComposable {
         authorsAsString = authorsAsString(),
         filename = filename,
         path = path,
-        annotation = annotation
+        annotation = annotation,
+        sequenceName = sequenceName ?: "",
+        sequenceNumber = sequenceNumber ?: "",
     )
 }

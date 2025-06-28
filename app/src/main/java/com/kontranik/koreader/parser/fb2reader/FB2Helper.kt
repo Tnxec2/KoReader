@@ -38,7 +38,9 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
                     authors = getAuthors(fb2Reader.fb2Scheme!!).toMutableList(),
                     path = contentUri,
                     filename = contentUri,
-                    annotation = fb2Reader.fb2Scheme!!.description.titleInfo.annotation.toString()
+                    annotation = fb2Reader.fb2Scheme!!.description.titleInfo.annotation.toString(),
+                    sequenceName = fb2Reader.fb2Scheme!!.description.titleInfo.sequenceName,
+                    sequenceNumber = fb2Reader.fb2Scheme!!.description.titleInfo.sequenceNumber,
                 )
             }
             calculateScheme()
@@ -124,7 +126,9 @@ class FB2Helper(private val context: Context, private val contentUri: String) : 
                 authors = getAuthors(tempScheme).toMutableList(),
                 path = contentUri,
                 filename = contentUri,
-                annotation = tempScheme.description.titleInfo.annotation.toString()
+                annotation = tempScheme.description.titleInfo.annotation.toString(),
+                sequenceNumber = tempScheme.description.titleInfo.sequenceNumber,
+                sequenceName = tempScheme.description.titleInfo.sequenceName,
             )
         } else {
             null

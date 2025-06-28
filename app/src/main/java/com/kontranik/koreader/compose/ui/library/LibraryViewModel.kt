@@ -354,6 +354,8 @@ class LibraryViewModel(
                 with(libraryItemWithAuthors.libraryItem) {
                     title = it.title
                     cover = ImageUtils.getBytes(it.cover)
+                    sequenceName = it.sequenceName
+                    sequenceNumber = it.sequenceNumber
                 }
                 libraryItemRepository.update(libraryItemWithAuthors.libraryItem)
 

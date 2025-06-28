@@ -21,6 +21,7 @@ import java.io.IOException
 import java.nio.charset.Charset
 import java.util.Locale
 import java.util.zip.ZipInputStream
+import javax.xml.namespace.QName
 import kotlin.math.ceil
 
 class EpubHelper(private val context: Context, private val contentUri: String) : EbookHelper {
@@ -144,6 +145,8 @@ class EpubHelper(private val context: Context, private val contentUri: String) :
                 path = contentUri,
                 filename = contentUri,
                 annotation = eb.metadata.descriptions.joinToString(separator = "\n", prefix = "<p>", postfix = "</p>"),
+                sequenceName = eb.metadata.otherProperties?.get(QName("isPartOf")),
+                sequenceNumber = eb.metadata.otherProperties?.get(QName("position")),
         )
     }
 

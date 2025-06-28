@@ -290,6 +290,13 @@ fun BooksItem(
                     Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "show popup")
                 }
             }
+            if (bookInfoComposableState.value.sequenceName.isNotEmpty()) {
+                Text(
+                    text = "${bookInfoComposableState.value.sequenceName} #${bookInfoComposableState.value.sequenceNumber}",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                )
+            }
             if (bookInfoComposableState.value.authorsAsString.isNotEmpty()) Text(
                 text = bookInfoComposableState.value.authorsAsString,
                 style = MaterialTheme.typography.bodyMedium,
@@ -324,6 +331,8 @@ private fun BooksItemPreview() {
                         cover = bitmap,
                         title = "Title",
                         path =  "/path/to/book",
+                        sequenceName = "Series Name",
+                        sequenceNumber = ""
                     ),
                     authors = mocupAuthors
                 ),

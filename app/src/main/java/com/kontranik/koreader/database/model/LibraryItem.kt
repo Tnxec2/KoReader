@@ -20,6 +20,12 @@ class LibraryItem(
     @ColumnInfo(name = LibraryItemHelper.COLUMN_TITLE)
     var title: String? = null,
 
+    @ColumnInfo(name = LibraryItemHelper.SEQUENCE_NAME)
+    var sequenceName: String? = null,
+
+    @ColumnInfo(name = LibraryItemHelper.SEQUENCE_NUMBER)
+    var sequenceNumber: String? = null,
+
     @ColumnInfo(name = LibraryItemHelper.COLUMN_COVER, typeAffinity = ColumnInfo.BLOB)
     var cover: ByteArray? = null
 ) {
@@ -27,14 +33,18 @@ class LibraryItem(
         id = null,
         path = book.fileLocation,
         title = book.ebookHelper?.bookInfo?.title,
-        cover = ImageUtils.getBytes(book.ebookHelper?.bookInfo?.cover)
+        cover = ImageUtils.getBytes(book.ebookHelper?.bookInfo?.cover),
+        sequenceName = book.ebookHelper?.bookInfo?.sequenceName,
+        sequenceNumber = book.ebookHelper?.bookInfo?.sequenceNumber,
     )
 
     constructor(bookInfo: BookInfo) :this(
         id = null,
         path = bookInfo.path,
         title = bookInfo.title,
-        cover = ImageUtils.getBytes(bookInfo.cover)
+        cover = ImageUtils.getBytes(bookInfo.cover),
+        sequenceName = bookInfo.sequenceName,
+        sequenceNumber = bookInfo.sequenceNumber
     )
 
     override fun hashCode(): Int {

@@ -59,6 +59,15 @@ fun BookInfoContent(
                         .fillMaxWidth()
                         .padding(paddingSmall)
                 )
+                if (bookInfoDetails.sequenceName.isNotEmpty()) {
+                    Text(
+                        text = "${bookInfoDetails.sequenceName} #${bookInfoDetails.sequenceNumber}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(paddingSmall)
+                    )
+                }
                 Text(
                     text = bookInfoDetails.authorsAsString,
                     style = MaterialTheme.typography.titleMedium,
@@ -122,6 +131,8 @@ private fun BookInfoContentPreview() {
             ?.let { ImageUtils.drawableToBitmap(it) },
         filename = "filename",
         path = "path",
+        sequenceName = "Book Series",
+        sequenceNumber = "1.0",
         annotation = "<h1>Header Level 1</h1>\n" +
                 "<p><strong>Auf dem letzten Hause eines kleinen Dörfchens</strong> befand sich ein <abbr title=\"Behausung eines langbeinigen Vogels\">Storchnest</abbr>. Die Storchmutter saß im Neste bei ihren vier Jungen, welche den Kopf mit dem kleinen <em>schwarzen Schnabel</em>, denn er war noch nicht rot geworden, hervorstreckten. Ein Stückchen davon stand auf der Dachfirste starr und steif der Storchvater <code>syntax</code>. Man hätte meinen können, er wäre aus Holz gedrechselt, so stille stand er. „Gewiss sieht es recht vornehm aus, dass meine Frau eine Schildwache bei dem Neste hat!“ dachte er. Und er stand unermüdlich auf <a href=\"#nirgendwo\" title=\"Title für einem Bein\">einem Beine</a>.</p>\n" +
                 "\n" +

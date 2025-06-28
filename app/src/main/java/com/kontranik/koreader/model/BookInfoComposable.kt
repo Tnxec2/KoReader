@@ -24,6 +24,8 @@ data class BookInfoComposable(
         val filename: String = "",
         val path: String = "",
         var annotation: String = "",
+        var sequenceName: String = "",
+        var sequenceNumber: String = "",
     val canDelete: Boolean = false,
     val exit: Boolean = false
 ) : Serializable {
@@ -40,7 +42,9 @@ fun BookInfoComposable.toBookInfo(): BookInfo {
         authors = authors,
         filename = filename,
         path = path,
-        annotation = annotation
+        annotation = annotation,
+        sequenceName = sequenceName,
+        sequenceNumber = sequenceNumber,
     )
 }
 
@@ -52,7 +56,9 @@ fun BookStatus.toBookInfoComposable(altCover: ImageBitmap): BookInfoComposable {
         authorsAsString = authors ?: "",
         filename = URLDecoder.decode(path),
         path = path!!,
-        annotation = ""
+        annotation = "",
+        sequenceName = sequenceName ?: "",
+        sequenceNumber = sequenceNumber ?: "",
     )
 }
 
@@ -64,7 +70,9 @@ fun FileItem.toBookInfoComposable(cover: ImageBitmap): BookInfoComposable {
         filename = name,
         path = path,
         annotation = bookInfo?.annotation ?: "",
-        authorsAsString = bookInfo?.authorsAsString() ?: ""
+        authorsAsString = bookInfo?.authorsAsString() ?: "",
+        sequenceName = bookInfo?.sequenceName ?: "",
+        sequenceNumber = bookInfo?.sequenceNumber ?: "",
     )
 }
 
@@ -76,7 +84,9 @@ fun LibraryItemWithAuthors.toBookInfoComposable(cover: Bitmap?, annotation: Stri
         path = libraryItem.path,
         authors = authors.toMutableList(),
         authorsAsString = authors.joinToString("; ", transform = { it.asString() }),
-        annotation = annotation
+        annotation = annotation,
+        sequenceName = libraryItem.sequenceName ?: "",
+        sequenceNumber = libraryItem.sequenceNumber ?: "",
     )
 }
 
@@ -87,7 +97,9 @@ fun LibraryItemWithAuthors.toBookInfoComposableForImageBitmap(cover: ImageBitmap
         path = URLDecoder.decode(libraryItem.path),
         authors = authors.toMutableList(),
         authorsAsString = authors.joinToString("; ", transform = { it.asString() }),
-        annotation = annotation
+        annotation = annotation,
+        sequenceName = libraryItem.sequenceName ?: "",
+        sequenceNumber = libraryItem.sequenceNumber ?: "",
     )
 }
 
@@ -99,6 +111,8 @@ fun LibraryItemWithAuthors.toBookInfoDetails(cover: Bitmap?, annotation: String)
         allAuthors = authors.joinToString("; ", transform = { it.asString() }),
         filename = libraryItem.path,
         path = libraryItem.path,
-        annotation = annotation
+        annotation = annotation,
+        sequenceName = libraryItem.sequenceName ?: "",
+        sequenceNumber = libraryItem.sequenceNumber ?: "",
     )
 }

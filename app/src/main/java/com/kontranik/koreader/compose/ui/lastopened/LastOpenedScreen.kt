@@ -178,6 +178,11 @@ fun LastOpenedItem(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
             )
+            if (bookInfoComposableState.value.sequenceName.isNotEmpty()) Text(
+            text = "${bookInfoComposableState.value.sequenceName} #${bookInfoComposableState.value.sequenceNumber}",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier
+        )
             if (bookInfoComposableState.value.authorsAsString.isNotEmpty()) Text(
                 text = bookInfoComposableState.value.authorsAsString,
                 style = MaterialTheme.typography.bodyMedium,
@@ -188,6 +193,7 @@ fun LastOpenedItem(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
             )
+
         }
     }
 }
@@ -205,6 +211,8 @@ private fun LastOpenedItemPreview() {
                     title = "Title",
                     authors = mocupAuthors.joinToString("; ", transform = {it.asString()}),
                     path =  "/path/to/book%25abc",
+                    sequenceName = "Series Name",
+                    sequenceNumber = "1",
                 ),
                 onClick = {  },
             )

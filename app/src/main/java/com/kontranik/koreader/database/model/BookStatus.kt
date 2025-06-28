@@ -18,6 +18,8 @@ class BookStatus(
     @ColumnInfo(name = BookStatusHelper.COLUMN_PATH) var path: String? = null,
     @ColumnInfo(name = BookStatusHelper.COLUMN_TITLE) var title: String? = null,
     @ColumnInfo(name = BookStatusHelper.COLUMN_AUTHOR) var authors: String? = null,
+    @ColumnInfo(name = BookStatusHelper.SEQUENCE_NAME) var sequenceName: String? = null,
+    @ColumnInfo(name = BookStatusHelper.SEQUENCE_NUMBER) var sequenceNumber: String? = null,
     @ColumnInfo(name = BookStatusHelper.COLUMN_POSITION_PAGE) var position_section: Int = 0,
     @ColumnInfo(name = BookStatusHelper.COLUMN_POSITION_OFFSET) var position_offset: Int = 0,
     @ColumnInfo(name = BookStatusHelper.COLUMN_LAST_OPEN_TIME) var lastOpenTime: Long? = null,
@@ -33,7 +35,9 @@ class BookStatus(
         authors = book.ebookHelper?.bookInfo?.authorsAsString(),
         position_section = curPage.pageStartPosition.section,
         position_offset = curPage.pageStartPosition.offSet,
-        cover = ImageUtils.getBytes(book.ebookHelper?.bookInfo?.cover)
+        cover = ImageUtils.getBytes(book.ebookHelper?.bookInfo?.cover),
+        sequenceName = book.ebookHelper?.bookInfo?.sequenceName,
+        sequenceNumber = book.ebookHelper?.bookInfo?.sequenceNumber
     )
 
     init {

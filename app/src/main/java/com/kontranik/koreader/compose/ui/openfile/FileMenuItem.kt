@@ -86,6 +86,11 @@ fun FileMenuItem(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
             )
+            if (bookInfoComposableState.value.sequenceName.isNotEmpty()) Text(
+                text = "${bookInfoComposableState.value.sequenceName} #${bookInfoComposableState.value.sequenceNumber}",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+            )
             if (bookInfoComposableState.value.authorsAsString.isNotEmpty()) Text(
                 text = bookInfoComposableState.value.authorsAsString,
                 style = MaterialTheme.typography.bodyMedium,
@@ -128,7 +133,9 @@ private fun FileMenuItemPreview() {
                         authors = mocupAuthors,
                         filename = "book",
                         path = "/path/to/book",
-                        annotation = "annotation"
+                        annotation = "annotation",
+                        sequenceName = "Book Series",
+                        sequenceNumber = "1.0"
                     ),
                     isStorage = false
                 ),

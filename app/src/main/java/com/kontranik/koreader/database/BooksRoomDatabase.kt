@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.kontranik.koreader.database.dao.AuthorDao
 import com.kontranik.koreader.database.dao.BookStatusDao
@@ -59,6 +60,7 @@ abstract class BooksRoomDatabase : RoomDatabase() {
                     DATABASE_NAME
                 )
                     .addCallback(BooksRoomDatabaseCallback(scope))
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                 INSTANCE = instance
                 // return instance
@@ -67,6 +69,20 @@ abstract class BooksRoomDatabase : RoomDatabase() {
         }
 
         private const val DATABASE_NAME = "books.db" // db name
-        internal const val SCHEMA = 1 // db version
+        internal const val SCHEMA = 3 // db version
     }
 }
+
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE ${BookStatusHelper.TABLE} ADD COLUMN ${BookStatusHelper.SEQUENCE_NAME} TEXT")
+        database.execSQL("ALTER TABLE ${BookStatusHelper.TABLE} ADD COLUMN ${BookStatusHelper.SEQUENCE_NUMBER} TEXT")
+    }
+}
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE ${LibraryItemHelper.TABLE} ADD COLUMN ${LibraryItemHelper.SEQUENCE_NAME} TEXT")
+        database.execSQL("ALTER TABLE ${LibraryItemHelper.TABLE} ADD COLUMN ${LibraryItemHelper.SEQUENCE_NUMBER} TEXT")
+    }
+}
+
